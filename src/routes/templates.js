@@ -17,44 +17,45 @@ router.get('/', async (req, res) => {
 
     const offset = (Math.max(1, parseInt(page)) - 1) * parseInt(limit);
 
-    let where = 'WHERE Active = 1';
+    let conditionalWhere = '';
     const request = pool.request()
       .input('limit',  sql.Int, parseInt(limit))
       .input('offset', sql.Int, offset);
 
     if (category) {
-      where += ' AND Category = @category';
+      conditionalWhere += ' AND category = @category';
       request.input('category', sql.NVarChar, category);
     }
 
     if (premium !== undefined) {
-      where += ' AND IsPremium = @premium';
-      request.input('premium', sql.Bit, premium === 'true' ? 1 : 0);
+      conditionalWhere += ' AND is_premium = @premium';
+      request.input('premium', sql.Bit, premium === 'true' ? true : false);
     }
 
     if (search) {
-      where += ' AND Name LIKE @search';
+      conditionalWhere += ' AND name ILIKE @search';
       request.input('search', sql.NVarChar, `%${search}%`);
     }
 
     const result = await request.query(`
-      SELECT Id, Name, Slug, Category, IsPremium, PreviewUrl, CreatedAt
-      FROM Templates
-      ${where}
-      ORDER BY IsPremium ASC, SortOrder ASC, Name ASC
-      OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+      SELECT id, name, slug, category, is_premium, preview_url, created_at
+      FROM templates
+      WHERE active = TRUE
+      ${conditionalWhere}
+      ORDER BY is_premium ASC, sort_order ASC, name ASC
+      LIMIT @limit OFFSET @offset
     `);
 
     const countResult = await pool.request()
       .input('cat2',    sql.NVarChar, category || null)
-      .input('prem2',   sql.Bit,      premium !== undefined ? (premium === 'true' ? 1 : 0) : null)
+      .input('prem2',   sql.Bit,      premium !== undefined ? (premium === 'true' ? true : false) : null)
       .input('search2', sql.NVarChar, search ? `%${search}%` : null)
       .query(`
-        SELECT COUNT(*) AS total FROM Templates
-        WHERE Active = 1
-          AND (@cat2    IS NULL OR Category  = @cat2)
-          AND (@prem2   IS NULL OR IsPremium = @prem2)
-          AND (@search2 IS NULL OR Name      LIKE @search2)
+        SELECT COUNT(*) AS total FROM templates
+        WHERE active = TRUE
+          AND (@cat2    IS NULL OR category   = @cat2)
+          AND (@prem2   IS NULL OR is_premium = @prem2)
+          AND (@search2 IS NULL OR name       ILIKE @search2)
       `);
 
     res.json({
@@ -74,24 +75,24 @@ router.get('/', async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     const result = await req.db.request().query(
-      'SELECT DISTINCT Category FROM Templates WHERE Active = 1 AND Category IS NOT NULL ORDER BY Category'
+      'SELECT DISTINCT category FROM templates WHERE active = TRUE AND category IS NOT NULL ORDER BY category'
     );
-    res.json(result.recordset.map(r => r.Category));
+    res.json(result.recordset.map(r => r.Category || r.category));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // ── GET /api/templates/:id ────────────────────────────────────
-// Público — detalhes + PreviewUrl (visualização livre, sem restrição)
+// Público — detalhes + preview_url (visualização livre, sem restrição)
 router.get('/:id', async (req, res) => {
   try {
     const result = await req.db.request()
       .input('id', sql.Int, parseInt(req.params.id))
       .query(`
-        SELECT Id, Name, Slug, Category, IsPremium, PreviewUrl, CreatedAt
-        FROM Templates
-        WHERE Id = @id AND Active = 1
+        SELECT id, name, slug, category, is_premium, preview_url, created_at
+        FROM templates
+        WHERE id = @id AND active = TRUE
       `);
 
     if (!result.recordset.length)
@@ -116,14 +117,14 @@ router.post('/start', auth, async (req, res) => {
 
     const tpl = (await pool.request()
       .input('id', sql.Int, parseInt(templateId))
-      .query('SELECT Id, Name, IsPremium FROM Templates WHERE Id = @id AND Active = 1'))
+      .query('SELECT id, name, is_premium FROM templates WHERE id = @id AND active = TRUE'))
       .recordset[0];
 
     if (!tpl)
       return res.status(404).json({ error: 'Template não encontrado.' });
 
     // Bloquear templates premium para utilizadores free
-    if (tpl.IsPremium && !isPro(req.user)) {
+    if ((tpl.IsPremium || tpl.is_premium) && !isPro(req.user)) {
       return res.status(403).json({
         error:      'Template premium. Faça upgrade para Pro.',
         upgradeUrl: '/checkout/pro',
@@ -131,7 +132,7 @@ router.post('/start', auth, async (req, res) => {
     }
 
     // Criar CV na base de dados (slug único para evitar violação UNIQUE KEY)
-    const cvTitle = title || `Meu CV — ${tpl.Name}`;
+    const cvTitle = title || `Meu CV — ${tpl.Name || tpl.name}`;
     const slug = cvTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') + '-' + Date.now();
     const result = await pool.request()
       .input('userId',     sql.Int,      req.user.id)
@@ -139,12 +140,12 @@ router.post('/start', auth, async (req, res) => {
       .input('title',      sql.NVarChar, cvTitle)
       .input('slug',       sql.NVarChar, slug)
       .query(`
-        INSERT INTO CVs (UserId, TemplateId, Title, Slug, CreatedAt, UpdatedAt)
-        OUTPUT INSERTED.Id
-        VALUES (@userId, @templateId, @title, @slug, GETDATE(), GETDATE())
+        INSERT INTO cvs (user_id, template_id, title, slug, created_at, updated_at)
+        VALUES (@userId, @templateId, @title, @slug, NOW(), NOW())
+        RETURNING id
       `);
 
-    const cvId = result.recordset[0].Id;
+    const cvId = result.recordset[0].Id || result.recordset[0].id;
     res.status(201).json({
       message:    'CV iniciado com sucesso.',
       cvId,

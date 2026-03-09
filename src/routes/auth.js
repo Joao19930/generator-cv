@@ -34,7 +34,7 @@ router.post('/register', authLimiter, async (req, res) => {
     const pool = req.db;
     const exists = await pool.request()
       .input('email', sql.NVarChar, email)
-      .query('SELECT Id FROM Users WHERE Email = @email');
+      .query('SELECT id FROM users WHERE email = @email');
     if (exists.recordset.length)
       return res.status(409).json({ error: 'E-mail já registado' });
 
@@ -43,9 +43,9 @@ router.post('/register', authLimiter, async (req, res) => {
       .input('name',  sql.NVarChar, name)
       .input('email', sql.NVarChar, email)
       .input('hash',  sql.NVarChar, hash)
-      .query(`INSERT INTO Users (Name, Email, PasswordHash, [Plan], Role, CreatedAt)
-              OUTPUT INSERTED.Id, INSERTED.Name, INSERTED.Email, INSERTED.[Plan], INSERTED.Role
-              VALUES (@name, @email, @hash, 'free', 'user', GETDATE())`);
+      .query(`INSERT INTO users (name, email, password_hash, plan, role, created_at)
+              VALUES (@name, @email, @hash, 'free', 'user', NOW())
+              RETURNING id, name, email, plan, role`);
 
     const user  = result.recordset[0];
     const token = signToken(user);
@@ -57,10 +57,8 @@ router.post('/register', authLimiter, async (req, res) => {
       zapierConnector.onNewUser({ email, name }),
       intercomConnector.createUser(email, name, user.Id),
       referralCode ? pool.request().input('code', sql.NVarChar, referralCode).input('newId', sql.Int, user.Id)
-        .query(`DECLARE @refId INT; SELECT @refId = UserId FROM ReferralCodes WHERE Code = @code;
-                IF @refId IS NOT NULL BEGIN
-                  INSERT INTO Referrals (ReferrerId, ReferredId, CreatedAt) VALUES (@refId, @newId, GETDATE());
-                END`) : Promise.resolve()
+        .query(`INSERT INTO referrals (referrer_id, referred_id, created_at)
+                SELECT user_id, @newId, NOW() FROM referral_codes WHERE code = @code`) : Promise.resolve()
     ]);
 
     res.status(201).json({ token, user: { id: user.Id, name: user.Name, email: user.Email, plan: user.Plan } });
@@ -80,7 +78,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const pool = req.db;
     const result = await pool.request()
       .input('email', sql.NVarChar, email)
-      .query('SELECT Id, Name, Email, PasswordHash, [Plan], Role FROM Users WHERE Email = @email AND IsActive = 1');
+      .query('SELECT id, name, email, password_hash, plan, role FROM users WHERE email = @email AND is_active = TRUE');
 
     if (!result.recordset.length)
       return res.status(401).json({ error: 'Credenciais inválidas' });
@@ -90,7 +88,7 @@ router.post('/login', authLimiter, async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
 
     pool.request().input('id', sql.Int, user.Id)
-      .query('UPDATE Users SET LastLogin = GETDATE() WHERE Id = @id');
+      .query('UPDATE users SET last_login = NOW() WHERE id = @id');
 
     const token = signToken(user);
     res.json({ token, user: { id: user.Id, name: user.Name, email: user.Email, plan: user.Plan, role: user.Role } });
@@ -128,7 +126,7 @@ router.get('/google/callback', async (req, res) => {
     const pool = req.db;
     let user = (await pool.request()
       .input('googleId', sql.NVarChar, payload.sub)
-      .query('SELECT Id, Name, Email, [Plan], Role FROM Users WHERE GoogleId = @googleId'))
+      .query('SELECT id, name, email, plan, role FROM users WHERE google_id = @googleId'))
       .recordset[0];
 
     if (!user) {
@@ -137,9 +135,9 @@ router.get('/google/callback', async (req, res) => {
         .input('email',    sql.NVarChar, payload.email)
         .input('googleId', sql.NVarChar, payload.sub)
         .input('avatar',   sql.NVarChar, payload.picture || '')
-        .query(`INSERT INTO Users (Name, Email, GoogleId, AvatarUrl, [Plan], Role, CreatedAt)
-                OUTPUT INSERTED.Id, INSERTED.Name, INSERTED.Email, INSERTED.[Plan], INSERTED.Role
-                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', GETDATE())`);
+        .query(`INSERT INTO users (name, email, google_id, avatar_url, plan, role, created_at)
+                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', NOW())
+                RETURNING id, name, email, plan, role`);
       user = ins.recordset[0];
       zapierConnector.onNewUser({ email: user.Email, name: user.Name, source: 'google' }).catch(() => {});
     }
@@ -166,7 +164,7 @@ router.post('/google', async (req, res) => {
     const payload = await googleConnector.verify(idToken);
     const pool = req.db;
     let user = (await pool.request().input('googleId', sql.NVarChar, payload.sub)
-      .query('SELECT Id, Name, Email, [Plan], Role FROM Users WHERE GoogleId = @googleId')).recordset[0];
+      .query('SELECT id, name, email, plan, role FROM users WHERE google_id = @googleId')).recordset[0];
 
     if (!user) {
       const ins = await pool.request()
@@ -174,9 +172,9 @@ router.post('/google', async (req, res) => {
         .input('email',    sql.NVarChar, payload.email)
         .input('googleId', sql.NVarChar, payload.sub)
         .input('avatar',   sql.NVarChar, payload.picture)
-        .query(`INSERT INTO Users (Name, Email, GoogleId, AvatarUrl, [Plan], Role, CreatedAt)
-                OUTPUT INSERTED.Id, INSERTED.Name, INSERTED.Email, INSERTED.[Plan], INSERTED.Role
-                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', GETDATE())`);
+        .query(`INSERT INTO users (name, email, google_id, avatar_url, plan, role, created_at)
+                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', NOW())
+                RETURNING id, name, email, plan, role`);
       user = ins.recordset[0];
       zapierConnector.onNewUser({ email: user.Email, name: user.Name, source: 'google' });
     }
@@ -233,14 +231,14 @@ router.get('/linkedin/callback', async (req, res) => {
     const pool = req.db;
     let user = (await pool.request()
       .input('linkedinId', sql.NVarChar, linkedinId)
-      .query('SELECT Id, Name, Email, [Plan], Role FROM Users WHERE LinkedInId = @linkedinId'))
+      .query('SELECT id, name, email, plan, role FROM users WHERE linkedin_id = @linkedinId'))
       .recordset[0];
 
     if (!user) {
       // Verificar se já existe conta com esse email
       const byEmail = email ? (await pool.request()
         .input('email', sql.NVarChar, email)
-        .query('SELECT Id, Name, Email, [Plan], Role FROM Users WHERE Email = @email'))
+        .query('SELECT id, name, email, plan, role FROM users WHERE email = @email'))
         .recordset[0] : null;
 
       if (byEmail) {
@@ -248,7 +246,7 @@ router.get('/linkedin/callback', async (req, res) => {
           .input('id',         sql.Int,      byEmail.Id)
           .input('linkedinId', sql.NVarChar, linkedinId)
           .input('avatar',     sql.NVarChar, avatar)
-          .query('UPDATE Users SET LinkedInId = @linkedinId, AvatarUrl = @avatar WHERE Id = @id');
+          .query('UPDATE users SET linkedin_id = @linkedinId, avatar_url = @avatar WHERE id = @id');
         user = byEmail;
       } else {
         const ins = await pool.request()
@@ -256,9 +254,9 @@ router.get('/linkedin/callback', async (req, res) => {
           .input('email',      sql.NVarChar, email)
           .input('linkedinId', sql.NVarChar, linkedinId)
           .input('avatar',     sql.NVarChar, avatar)
-          .query(`INSERT INTO Users (Name, Email, LinkedInId, AvatarUrl, [Plan], Role, CreatedAt)
-                  OUTPUT INSERTED.Id, INSERTED.Name, INSERTED.Email, INSERTED.[Plan], INSERTED.Role
-                  VALUES (@name, @email, @linkedinId, @avatar, 'free', 'user', GETDATE())`);
+          .query(`INSERT INTO users (name, email, linkedin_id, avatar_url, plan, role, created_at)
+                  VALUES (@name, @email, @linkedinId, @avatar, 'free', 'user', NOW())
+                  RETURNING id, name, email, plan, role`);
         user = ins.recordset[0];
         zapierConnector.onNewUser({ email: user.Email, name: user.Name, source: 'linkedin' }).catch(() => {});
       }
@@ -296,7 +294,7 @@ router.get('/me', auth, async (req, res) => {
   try {
     const pool   = req.db;
     const result = await pool.request().input('id', sql.Int, req.user.id)
-      .query('SELECT Id, Name, Email, [Plan], PlanExpiry, Role, AvatarUrl, Phone, CreatedAt FROM Users WHERE Id = @id');
+      .query('SELECT id, name, email, plan, plan_expiry, role, avatar_url, phone, created_at FROM users WHERE id = @id');
     if (!result.recordset.length) return res.status(404).json({ error: 'Utilizador não encontrado' });
     res.json(result.recordset[0]);
   } catch (err) {
@@ -316,10 +314,10 @@ router.put('/me', auth, async (req, res) => {
       .input('id',    sql.Int,      req.user.id)
       .input('name',  sql.NVarChar, name.trim())
       .input('phone', sql.NVarChar, phone || '')
-      .query('UPDATE Users SET Name = @name, Phone = @phone WHERE Id = @id');
+      .query('UPDATE users SET name = @name, phone = @phone WHERE id = @id');
 
     const result = await pool.request().input('id', sql.Int, req.user.id)
-      .query('SELECT Id, Name, Email, [Plan], PlanExpiry, Role, AvatarUrl, Phone, CreatedAt FROM Users WHERE Id = @id');
+      .query('SELECT id, name, email, plan, plan_expiry, role, avatar_url, phone, created_at FROM users WHERE id = @id');
     res.json(result.recordset[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -338,7 +336,7 @@ router.post('/change-password', auth, async (req, res) => {
     const pool = req.db;
     const result = await pool.request()
       .input('id', sql.Int, req.user.id)
-      .query('SELECT PasswordHash FROM Users WHERE Id = @id');
+      .query('SELECT password_hash FROM users WHERE id = @id');
 
     if (!result.recordset.length)
       return res.status(404).json({ error: 'Utilizador não encontrado' });
@@ -354,7 +352,7 @@ router.post('/change-password', auth, async (req, res) => {
     await pool.request()
       .input('id',   sql.Int,      req.user.id)
       .input('hash', sql.NVarChar, hash)
-      .query('UPDATE Users SET PasswordHash = @hash WHERE Id = @id');
+      .query('UPDATE users SET password_hash = @hash WHERE id = @id');
 
     res.json({ message: 'Senha alterada com sucesso' });
   } catch (err) {

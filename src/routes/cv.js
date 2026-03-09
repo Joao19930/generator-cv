@@ -18,8 +18,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 router.get('/', auth, async (req, res) => {
   try {
     const result = await req.db.request().input('userId', sql.Int, req.user.id)
-      .query(`SELECT Id, Title, TemplateName, TemplateId, ContentJson, CreatedAt, UpdatedAt, Downloaded, DownloadCount, IsPublic, Slug, AtsScore
-              FROM CVs WHERE UserId = @userId ORDER BY UpdatedAt DESC`);
+      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, downloaded, download_count, is_public, slug, ats_score
+              FROM cvs WHERE user_id = @userId ORDER BY updated_at DESC`);
     res.json({ cvs: result.recordset });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -30,8 +30,8 @@ router.get('/:id', auth, async (req, res) => {
     const result = await req.db.request()
       .input('id',     sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.id)
-      .query(`SELECT Id, Title, TemplateName, TemplateId, ContentJson, CreatedAt, UpdatedAt, IsPublic, Slug
-              FROM CVs WHERE Id = @id AND UserId = @userId`);
+      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, is_public, slug
+              FROM cvs WHERE id = @id AND user_id = @userId`);
     if (!result.recordset.length) return res.status(404).json({ error: 'CV não encontrado' });
     const cv = result.recordset[0];
     if (cv.ContentJson) {
@@ -55,9 +55,9 @@ router.post('/', auth, async (req, res) => {
       .input('templateName', sql.NVarChar, templateName || 'Clássico')
       .input('content',      sql.NVarChar, JSON.stringify(contentJson || {}))
       .input('slug',         sql.NVarChar, slug)
-      .query(`INSERT INTO CVs (UserId, Title, TemplateId, TemplateName, ContentJson, Slug, CreatedAt, UpdatedAt)
-              OUTPUT INSERTED.Id, INSERTED.Title, INSERTED.Slug
-              VALUES (@userId, @title, @templateId, @templateName, @content, @slug, GETDATE(), GETDATE())`);
+      .query(`INSERT INTO cvs (user_id, title, template_id, template_name, content_json, slug, created_at, updated_at)
+              VALUES (@userId, @title, @templateId, @templateName, @content, @slug, NOW(), NOW())
+              RETURNING id, title, slug`);
 
     const cv = result.recordset[0];
     gaConnector.cvCreated(req.user.id).catch(() => {});
@@ -78,13 +78,13 @@ router.put('/:id', auth, async (req, res) => {
       .input('content',      sql.NVarChar, dataToSave ? JSON.stringify(dataToSave) : null)
       .input('templateName', sql.NVarChar, templateName || null)
       .input('templateId',   sql.Int,      templateId   || null)
-      .query(`UPDATE CVs SET
-              Title        = ISNULL(@title,        Title),
-              ContentJson  = ISNULL(@content,      ContentJson),
-              TemplateName = ISNULL(@templateName, TemplateName),
-              TemplateId   = ISNULL(@templateId,   TemplateId),
-              UpdatedAt    = GETDATE()
-              WHERE Id = @id AND UserId = @userId`);
+      .query(`UPDATE cvs SET
+              title         = COALESCE(@title,        title),
+              content_json  = COALESCE(@content,      content_json),
+              template_name = COALESCE(@templateName, template_name),
+              template_id   = COALESCE(@templateId,   template_id),
+              updated_at    = NOW()
+              WHERE id = @id AND user_id = @userId`);
     res.json({ updated: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -94,7 +94,7 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     await req.db.request()
       .input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
-      .query('DELETE FROM CVs WHERE Id = @id AND UserId = @userId');
+      .query('DELETE FROM cvs WHERE id = @id AND user_id = @userId');
     res.json({ deleted: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -103,7 +103,7 @@ router.delete('/:id', auth, async (req, res) => {
 router.post('/:id/generate-pdf', auth, async (req, res) => {
   try {
     const cv = (await req.db.request().input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
-      .query('SELECT * FROM CVs WHERE Id = @id AND UserId = @userId')).recordset[0];
+      .query('SELECT * FROM cvs WHERE id = @id AND user_id = @userId')).recordset[0];
     if (!cv) return res.status(404).json({ error: 'CV não encontrado' });
 
     // Verificar limite free (max 1 download sem marca d'água)
@@ -111,7 +111,7 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
       return res.status(402).json({ error: 'Limite atingido. Faça upgrade para Premium.', upgrade: `${process.env.APP_URL}/pricing` });
 
     const content = JSON.parse(cv.ContentJson || '{}');
-    const html    = buildCVHtml(content, cv.TemplateName); // função abaixo
+    const html    = buildCVHtml(content, cv.TemplateName);
     const pdfBuf  = await pdfConnector.fromHTML(html);
 
     // Upload para S3
@@ -120,11 +120,11 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
 
     // Actualizar contador
     await req.db.request().input('id', sql.Int, cv.Id).input('key', sql.NVarChar, key)
-      .query('UPDATE CVs SET Downloaded=1, DownloadCount=DownloadCount+1, S3Key=@key WHERE Id=@id');
+      .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1, s3_key=@key WHERE id=@id');
 
     // E-mail com link
     const user = (await req.db.request().input('id', sql.Int, req.user.id)
-      .query('SELECT Name, Email FROM Users WHERE Id = @id')).recordset[0];
+      .query('SELECT name, email FROM users WHERE id = @id')).recordset[0];
     emailConnector.sendCVReady(user.Email, user.Name, url)
       .catch(() => smtpConnector.send(user.Email, 'O seu CV está pronto!', `<p>Olá ${user.Name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`));
 
@@ -165,8 +165,7 @@ router.post('/ats-score', toolLimiter, async (req, res) => {
     // Capturar lead se e-mail fornecido
     if (email) {
       req.db.request().input('email', sql.NVarChar, email).input('score', sql.Int, score.score)
-        .query(`IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = @email)
-                  INSERT INTO Leads (Email, ATSScore, Source, CreatedAt) VALUES (@email, @score, 'ats_tool', GETDATE())`).catch(() => {});
+        .query(`INSERT INTO leads (email, ats_score, source, created_at) VALUES (@email, @score, 'ats_tool', NOW()) ON CONFLICT (email) DO NOTHING`).catch(() => {});
       const { zapierConnector: zap } = require('../connectors');
       zap.onLead(email, score.score);
     }
@@ -178,7 +177,6 @@ router.post('/ats-score', toolLimiter, async (req, res) => {
 router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Ficheiro em falta' });
   try {
-    // Guardar ficheiro temporário
     const fs   = require('fs');
     const path = require('path');
     const tmp  = path.join('/tmp', `${Date.now()}-${req.file.originalname}`);
@@ -188,7 +186,7 @@ router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) 
 
     await req.db.request().input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
       .input('url', sql.NVarChar, result.secure_url)
-      .query(`UPDATE CVs SET ContentJson = JSON_MODIFY(ContentJson, '$.photoUrl', @url) WHERE Id=@id AND UserId=@userId`);
+      .query(`UPDATE cvs SET content_json = jsonb_set(content_json::jsonb, '{photoUrl}', to_json(@url::text)::jsonb)::text WHERE id=@id AND user_id=@userId`);
 
     res.json({ url: result.secure_url });
   } catch (err) { res.status(500).json({ error: err.message }); }

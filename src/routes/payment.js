@@ -14,7 +14,7 @@ router.post('/stripe/checkout', auth, async (req, res) => {
   const { plan = 'monthly' } = req.body;
   try {
     const user    = (await req.db.request().input('id', sql.Int, req.user.id)
-      .query('SELECT Email FROM Users WHERE Id=@id')).recordset[0];
+      .query('SELECT email FROM users WHERE id=@id')).recordset[0];
     const session = await stripeConnector.createCheckoutSession(req.user.id, user.Email, plan);
     res.json({ url: session.url, sessionId: session.id });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -24,7 +24,7 @@ router.post('/stripe/checkout', auth, async (req, res) => {
 router.post('/stripe/one-time', auth, async (req, res) => {
   try {
     const user    = (await req.db.request().input('id', sql.Int, req.user.id)
-      .query('SELECT Email FROM Users WHERE Id=@id')).recordset[0];
+      .query('SELECT email FROM users WHERE id=@id')).recordset[0];
     const session = await stripeConnector.createOneTime(user.Email, Number(process.env.CV_PRICE));
     res.json({ url: session.url });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -54,20 +54,22 @@ router.post('/stripe/webhook', async (req, res) => {
     const amount  = (session.amount_total || 0) / 100;
 
     try {
+      // Split into two separate queries (PostgreSQL doesn't support multi-statement in one query)
       await req.db.request()
-        .input('userId',    sql.Int,      userId)
-        .input('amount',    sql.Decimal,  amount)
-        .input('sessionId', sql.NVarChar, session.id)
-        .query(`
-          UPDATE Users SET [Plan]='premium', PlanExpiry=DATEADD(month,1,GETDATE()) WHERE Id=@userId;
-          INSERT INTO Payments (UserId, Amount, Currency, Status, Method, StripeSessionId, CreatedAt)
-          VALUES (@userId, @amount, 'USD', 'paid', 'stripe', @sessionId, GETDATE())
-        `);
+        .input('userId', sql.Int, userId)
+        .query(`UPDATE users SET plan='premium', plan_expiry=NOW() + INTERVAL '1 month' WHERE id=@userId`);
 
-      socketConnector.toUser(userId, 'plan_upgraded', { plan: 'premium', message: '🎉 Bem-vindo ao Premium!' });
+      await req.db.request()
+        .input('userId',    sql.Int,     userId)
+        .input('amount',    sql.Decimal, amount)
+        .input('sessionId', sql.NVarChar, session.id)
+        .query(`INSERT INTO payments (user_id, amount, currency, status, method, stripe_session_id, created_at)
+                VALUES (@userId, @amount, 'USD', 'paid', 'stripe', @sessionId, NOW())`);
+
+      socketConnector.toUser(userId, 'plan_upgraded', { plan: 'premium', message: 'Bem-vindo ao Premium!' });
 
       const user = (await req.db.request().input('id', sql.Int, userId)
-        .query('SELECT Name, Email FROM Users WHERE Id=@id')).recordset[0];
+        .query('SELECT name, email FROM users WHERE id=@id')).recordset[0];
       if (user) {
         emailConnector.sendWelcome(user.Email, user.Name).catch(() =>
           smtpConnector.send(user.Email, 'Plano Premium activado!', `<p>Olá ${user.Name}, o seu plano Premium foi activado!</p>`));
@@ -84,7 +86,7 @@ router.post('/stripe/webhook', async (req, res) => {
     const userId = Number(sub.metadata?.userId);
     if (userId) {
       await req.db.request().input('id', sql.Int, userId)
-        .query(`UPDATE Users SET [Plan]='free', PlanExpiry=NULL WHERE Id=@id`).catch(() => {});
+        .query(`UPDATE users SET plan='free', plan_expiry=NULL WHERE id=@id`).catch(() => {});
     }
   }
 

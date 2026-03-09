@@ -18,18 +18,18 @@ router.get('/overview', async (req, res) => {
 
     const r = await req.db.request().query(`
       SELECT
-        (SELECT COUNT(*) FROM Users)                                                              AS total_users,
-        (SELECT COUNT(*) FROM Users WHERE CreatedAt >= DATEADD(day,-30,GETDATE()))               AS new_users_30d,
-        (SELECT COUNT(*) FROM Users WHERE [Plan] = 'premium')                                      AS premium_users,
-        (SELECT COUNT(*) FROM Users WHERE CreatedAt >= DATEADD(day,-1,GETDATE()))                AS new_today,
-        (SELECT COUNT(*) FROM CVs)                                                               AS total_cvs,
-        (SELECT COUNT(*) FROM CVs WHERE CreatedAt >= DATEADD(day,-1,GETDATE()))                  AS cvs_today,
-        (SELECT COUNT(*) FROM CVs WHERE CreatedAt >= DATEADD(day,-7,GETDATE()))                  AS cvs_7d,
-        (SELECT ISNULL(SUM(Amount),0) FROM Payments WHERE Status='paid')                         AS total_revenue,
-        (SELECT ISNULL(SUM(Amount),0) FROM Payments WHERE Status='paid' AND CreatedAt >= DATEADD(day,-30,GETDATE())) AS revenue_30d,
-        (SELECT COUNT(*) FROM Payments WHERE Status='paid' AND CreatedAt >= DATEADD(day,-30,GETDATE())) AS paid_30d,
-        (SELECT CAST(COUNT(*) AS FLOAT) / NULLIF((SELECT COUNT(*) FROM Users WHERE CreatedAt >= DATEADD(day,-30,GETDATE())),0)*100
-         FROM Payments WHERE Status='paid' AND CreatedAt >= DATEADD(day,-30,GETDATE()))          AS conversion_rate
+        (SELECT COUNT(*) FROM users) AS total_users,
+        (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days') AS new_users_30d,
+        (SELECT COUNT(*) FROM users WHERE plan = 'premium') AS premium_users,
+        (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '1 day') AS new_today,
+        (SELECT COUNT(*) FROM cvs) AS total_cvs,
+        (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '1 day') AS cvs_today,
+        (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d,
+        (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid') AS total_revenue,
+        (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS revenue_30d,
+        (SELECT COUNT(*) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS paid_30d,
+        (SELECT COUNT(*)::float / NULLIF((SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days'),0)*100
+         FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS conversion_rate
     `);
     const data = r.recordset[0];
     await redisConnector.set('admin:overview', data, 300);
@@ -48,19 +48,19 @@ router.get('/users', async (req, res) => {
       .input('offset', sql.Int, offset)
       .input('limit',  sql.Int, Number(limit))
       .query(`
-        SELECT u.Id, u.Name, u.Email, u.[Plan], u.Role, u.IsActive, u.CreatedAt, u.LastLogin,
-               COUNT(DISTINCT c.Id) AS cv_count,
-               ISNULL(SUM(p.Amount),0) AS total_spent
-        FROM Users u
-        LEFT JOIN CVs c      ON c.UserId = u.Id
-        LEFT JOIN Payments p ON p.UserId = u.Id AND p.Status = 'paid'
-        WHERE (u.Name LIKE @s OR u.Email LIKE @s) AND (@plan='' OR u.[Plan]=@plan)
-        GROUP BY u.Id,u.Name,u.Email,u.[Plan],u.Role,u.IsActive,u.CreatedAt,u.LastLogin
-        ORDER BY u.CreatedAt DESC
-        OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+        SELECT u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login,
+               COUNT(DISTINCT c.id) AS cv_count,
+               COALESCE(SUM(p.amount),0) AS total_spent
+        FROM users u
+        LEFT JOIN cvs c      ON c.user_id = u.id
+        LEFT JOIN payments p ON p.user_id = u.id AND p.status = 'paid'
+        WHERE (u.name ILIKE @s OR u.email ILIKE @s) AND (@plan='' OR u.plan=@plan)
+        GROUP BY u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login
+        ORDER BY u.created_at DESC
+        LIMIT @limit OFFSET @offset
       `);
     const total = (await req.db.request().input('s', sql.NVarChar, `%${search}%`).input('plan', sql.NVarChar, plan)
-      .query(`SELECT COUNT(*) AS n FROM Users WHERE (Name LIKE @s OR Email LIKE @s) AND (@plan='' OR [Plan]=@plan)`)).recordset[0].n;
+      .query(`SELECT COUNT(*) AS n FROM users WHERE (name ILIKE @s OR email ILIKE @s) AND (@plan='' OR plan=@plan)`)).recordset[0].n;
     res.json({ users: r.recordset, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -69,9 +69,9 @@ router.get('/users', async (req, res) => {
 router.get('/revenue/chart', async (req, res) => {
   try {
     const r = await req.db.request().query(`
-      SELECT CAST(CreatedAt AS DATE) AS date, SUM(Amount) AS revenue, COUNT(*) AS tx
-      FROM Payments WHERE Status='paid' AND CreatedAt >= DATEADD(day,-30,GETDATE())
-      GROUP BY CAST(CreatedAt AS DATE) ORDER BY date ASC
+      SELECT created_at::date AS date, SUM(amount) AS revenue, COUNT(*) AS tx
+      FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY created_at::date ORDER BY date ASC
     `);
     res.json(r.recordset);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -81,11 +81,11 @@ router.get('/revenue/chart', async (req, res) => {
 router.get('/growth', async (req, res) => {
   try {
     const r = await req.db.request().query(`
-      SELECT FORMAT(CreatedAt,'yyyy-MM') AS month,
+      SELECT TO_CHAR(created_at, 'YYYY-MM') AS month,
              COUNT(*) AS new_users,
-             COUNT(CASE WHEN [Plan]='premium' THEN 1 END) AS new_premium
-      FROM Users WHERE CreatedAt >= DATEADD(month,-12,GETDATE())
-      GROUP BY FORMAT(CreatedAt,'yyyy-MM') ORDER BY month ASC
+             COUNT(CASE WHEN plan='premium' THEN 1 END) AS new_premium
+      FROM users WHERE created_at >= NOW() - INTERVAL '12 months'
+      GROUP BY TO_CHAR(created_at, 'YYYY-MM') ORDER BY month ASC
     `);
     res.json(r.recordset);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -96,18 +96,18 @@ router.get('/funnel', async (req, res) => {
   try {
     const r = await req.db.request().query(`
       SELECT
-        (SELECT COUNT(*) FROM Users)                                       AS registered,
-        (SELECT COUNT(DISTINCT UserId) FROM CVs)                          AS created_cv,
-        (SELECT COUNT(DISTINCT UserId) FROM CVs WHERE Downloaded=1)       AS downloaded_cv,
-        (SELECT COUNT(DISTINCT UserId) FROM Payments WHERE Status='paid') AS paid
+        (SELECT COUNT(*) FROM users) AS registered,
+        (SELECT COUNT(DISTINCT user_id) FROM cvs) AS created_cv,
+        (SELECT COUNT(DISTINCT user_id) FROM cvs WHERE downloaded=TRUE) AS downloaded_cv,
+        (SELECT COUNT(DISTINCT user_id) FROM payments WHERE status='paid') AS paid
     `);
     const d = r.recordset[0];
     const base = d.registered || 1;
     res.json([
-      { step: '1. Registados',        count: d.registered,   pct: 100 },
-      { step: '2. Criaram CV',        count: d.created_cv,   pct: +((d.created_cv/base)*100).toFixed(1) },
-      { step: '3. Fizeram Download',  count: d.downloaded_cv,pct: +((d.downloaded_cv/base)*100).toFixed(1) },
-      { step: '4. Compraram Premium', count: d.paid,         pct: +((d.paid/base)*100).toFixed(1) }
+      { step: '1. Registados',        count: d.registered,    pct: 100 },
+      { step: '2. Criaram CV',        count: d.created_cv,    pct: +((d.created_cv/base)*100).toFixed(1) },
+      { step: '3. Fizeram Download',  count: d.downloaded_cv, pct: +((d.downloaded_cv/base)*100).toFixed(1) },
+      { step: '4. Compraram Premium', count: d.paid,          pct: +((d.paid/base)*100).toFixed(1) }
     ]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -116,9 +116,9 @@ router.get('/funnel', async (req, res) => {
 router.get('/templates', async (req, res) => {
   try {
     const r = await req.db.request().query(`
-      SELECT TemplateId, TemplateName, COUNT(*) AS uses,
-             COUNT(CASE WHEN CreatedAt >= DATEADD(day,-7,GETDATE()) THEN 1 END) AS uses_7d
-      FROM CVs GROUP BY TemplateId, TemplateName ORDER BY uses DESC
+      SELECT template_id, template_name, COUNT(*) AS uses,
+             COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) AS uses_7d
+      FROM cvs GROUP BY template_id, template_name ORDER BY uses DESC
     `);
     res.json(r.recordset);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -132,10 +132,10 @@ router.get('/payments', async (req, res) => {
     const r = await req.db.request()
       .input('offset', sql.Int, offset).input('limit', sql.Int, Number(limit))
       .query(`
-        SELECT p.Id,p.Amount,p.Currency,p.Status,p.Method,p.CreatedAt,p.StripeSessionId,
-               u.Name AS user_name, u.Email AS user_email
-        FROM Payments p INNER JOIN Users u ON u.Id=p.UserId
-        ORDER BY p.CreatedAt DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+        SELECT p.id, p.amount, p.currency, p.status, p.method, p.created_at, p.stripe_session_id,
+               u.name AS user_name, u.email AS user_email
+        FROM payments p INNER JOIN users u ON u.id=p.user_id
+        ORDER BY p.created_at DESC LIMIT @limit OFFSET @offset
       `);
     res.json(r.recordset);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -145,7 +145,7 @@ router.get('/payments', async (req, res) => {
 router.post('/users/:id/ban', async (req, res) => {
   try {
     await req.db.request().input('id', sql.Int, req.params.id).input('by', sql.Int, req.user.id)
-      .query('UPDATE Users SET IsActive=0, BannedAt=GETDATE(), BannedBy=@by WHERE Id=@id');
+      .query('UPDATE users SET is_active=FALSE, banned_at=NOW(), banned_by=@by WHERE id=@id');
     await redisConnector.del(`admin:overview`);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -157,7 +157,7 @@ router.post('/users/:id/upgrade', async (req, res) => {
   try {
     const expiry = new Date(Date.now() + days * 86400000);
     await req.db.request().input('id', sql.Int, req.params.id).input('plan', sql.NVarChar, plan).input('exp', sql.DateTime, expiry)
-      .query('UPDATE Users SET [Plan]=@plan, PlanExpiry=@exp WHERE Id=@id');
+      .query('UPDATE users SET plan=@plan, plan_expiry=@exp WHERE id=@id');
     await redisConnector.del('admin:overview');
     res.json({ success: true, plan, expiry });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -166,7 +166,7 @@ router.post('/users/:id/upgrade', async (req, res) => {
 // ── COACHES CRUD ─────────────────────────────────────────────
 router.get('/coaches', async (req, res) => {
   try {
-    const r = await req.db.request().query('SELECT * FROM Coaches ORDER BY CreatedAt DESC');
+    const r = await req.db.request().query('SELECT * FROM coaches ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -181,8 +181,8 @@ router.post('/coaches', async (req, res) => {
       .input('skills',   sql.NVarChar, skills||null)
       .input('email',    sql.NVarChar, email||null)
       .input('color',    sql.NVarChar, color||'#6366f1')
-      .query(`INSERT INTO Coaches (Name,Location,Bio,Skills,Email,Color,Active,CreatedAt)
-              OUTPUT INSERTED.Id VALUES (@name,@location,@bio,@skills,@email,@color,1,GETDATE())`);
+      .query(`INSERT INTO coaches (name, location, bio, skills, email, color, active, created_at)
+              VALUES (@name, @location, @bio, @skills, @email, @color, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -197,13 +197,13 @@ router.put('/coaches/:id', async (req, res) => {
       .input('skills',   sql.NVarChar, skills||null)
       .input('email',    sql.NVarChar, email||null)
       .input('color',    sql.NVarChar, color||'#6366f1')
-      .query('UPDATE Coaches SET Name=@name,Location=@location,Bio=@bio,Skills=@skills,Email=@email,Color=@color WHERE Id=@id');
+      .query('UPDATE coaches SET name=@name, location=@location, bio=@bio, skills=@skills, email=@email, color=@color WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.delete('/coaches/:id', async (req, res) => {
   try {
-    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM Coaches WHERE Id=@id');
+    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM coaches WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -211,7 +211,7 @@ router.delete('/coaches/:id', async (req, res) => {
 // ── COURSES CRUD ──────────────────────────────────────────────
 router.get('/courses', async (req, res) => {
   try {
-    const r = await req.db.request().query('SELECT * FROM Courses ORDER BY CreatedAt DESC');
+    const r = await req.db.request().query('SELECT * FROM courses ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -225,8 +225,8 @@ router.post('/courses', async (req, res) => {
       .input('category', sql.NVarChar, category||null)
       .input('rating',   sql.NVarChar, rating||null)
       .input('url',      sql.NVarChar, url||null)
-      .query(`INSERT INTO Courses (Title,Source,Category,Rating,Url,Active,CreatedAt)
-              OUTPUT INSERTED.Id VALUES (@title,@source,@category,@rating,@url,1,GETDATE())`);
+      .query(`INSERT INTO courses (title, source, category, rating, url, active, created_at)
+              VALUES (@title, @source, @category, @rating, @url, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -240,13 +240,13 @@ router.put('/courses/:id', async (req, res) => {
       .input('category', sql.NVarChar, category||null)
       .input('rating',   sql.NVarChar, rating||null)
       .input('url',      sql.NVarChar, url||null)
-      .query('UPDATE Courses SET Title=@title,Source=@source,Category=@category,Rating=@rating,Url=@url WHERE Id=@id');
+      .query('UPDATE courses SET title=@title, source=@source, category=@category, rating=@rating, url=@url WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.delete('/courses/:id', async (req, res) => {
   try {
-    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM Courses WHERE Id=@id');
+    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM courses WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -254,7 +254,7 @@ router.delete('/courses/:id', async (req, res) => {
 // ── JOBS CRUD ─────────────────────────────────────────────────
 router.get('/jobs', async (req, res) => {
   try {
-    const r = await req.db.request().query('SELECT * FROM Jobs ORDER BY CreatedAt DESC');
+    const r = await req.db.request().query('SELECT * FROM jobs ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -271,8 +271,8 @@ router.post('/jobs', async (req, res) => {
       .input('cat',     sql.NVarChar, category||null)
       .input('date',    sql.Date,     d ? new Date(d) : null)
       .input('url',     sql.NVarChar, url||null)
-      .query(`INSERT INTO Jobs (Title,Company,City,Country,Category,JobDate,Url,Active,CreatedAt)
-              OUTPUT INSERTED.Id VALUES (@title,@company,@city,@country,@cat,@date,@url,1,GETDATE())`);
+      .query(`INSERT INTO jobs (title, company, city, country, category, job_date, url, active, created_at)
+              VALUES (@title, @company, @city, @country, @cat, @date, @url, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -289,13 +289,13 @@ router.put('/jobs/:id', async (req, res) => {
       .input('cat',     sql.NVarChar, category||null)
       .input('date',    sql.Date,     d ? new Date(d) : null)
       .input('url',     sql.NVarChar, url||null)
-      .query('UPDATE Jobs SET Title=@title,Company=@company,City=@city,Country=@country,Category=@cat,JobDate=@date,Url=@url WHERE Id=@id');
+      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, job_date=@date, url=@url WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.delete('/jobs/:id', async (req, res) => {
   try {
-    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM Jobs WHERE Id=@id');
+    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM jobs WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -303,7 +303,7 @@ router.delete('/jobs/:id', async (req, res) => {
 // ── TESTIMONIALS CRUD ─────────────────────────────────────────
 router.get('/testimonials', async (req, res) => {
   try {
-    const r = await req.db.request().query('SELECT * FROM Testimonials ORDER BY CreatedAt DESC');
+    const r = await req.db.request().query('SELECT * FROM testimonials ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -316,8 +316,8 @@ router.post('/testimonials', async (req, res) => {
       .input('role',  sql.NVarChar, role||null)
       .input('text',  sql.NVarChar, text||null)
       .input('stars', sql.Int,      parseInt(stars)||5)
-      .query(`INSERT INTO Testimonials (Name,Role,[Text],Stars,Active,CreatedAt)
-              OUTPUT INSERTED.Id VALUES (@name,@role,@text,@stars,1,GETDATE())`);
+      .query(`INSERT INTO testimonials (name, role, text, stars, active, created_at)
+              VALUES (@name, @role, @text, @stars, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -330,13 +330,13 @@ router.put('/testimonials/:id', async (req, res) => {
       .input('role',  sql.NVarChar, role||null)
       .input('text',  sql.NVarChar, text||null)
       .input('stars', sql.Int,      parseInt(stars)||5)
-      .query('UPDATE Testimonials SET Name=@name,Role=@role,[Text]=@text,Stars=@stars WHERE Id=@id');
+      .query('UPDATE testimonials SET name=@name, role=@role, text=@text, stars=@stars WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.delete('/testimonials/:id', async (req, res) => {
   try {
-    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM Testimonials WHERE Id=@id');
+    await req.db.request().input('id', sql.Int, req.params.id).query('DELETE FROM testimonials WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -347,11 +347,11 @@ router.get('/users/:id/profile', async (req, res) => {
     const uid = parseInt(req.params.id);
     const [userRes, cvsRes] = await Promise.all([
       req.db.request().input('id', sql.Int, uid)
-        .query(`SELECT Id, Name, Email, [Plan], [Role], IsActive, CreatedAt, PlanExpiry, GoogleId, LinkedInId
-                FROM Users WHERE Id = @id`),
+        .query(`SELECT id, name, email, plan, role, is_active, created_at, plan_expiry, google_id, linkedin_id
+                FROM users WHERE id = @id`),
       req.db.request().input('uid', sql.Int, uid)
-        .query(`SELECT Id, Title, TemplateName, Slug, DownloadCount, IsPublic, CreatedAt, UpdatedAt
-                FROM CVs WHERE UserId = @uid ORDER BY UpdatedAt DESC`)
+        .query(`SELECT id, title, template_name, slug, download_count, is_public, created_at, updated_at
+                FROM cvs WHERE user_id = @uid ORDER BY updated_at DESC`)
     ]);
     if (!userRes.recordset.length) return res.status(404).json({ error: 'Utilizador não encontrado.' });
     const user = userRes.recordset[0];
@@ -360,10 +360,10 @@ router.get('/users/:id/profile', async (req, res) => {
       user,
       cvs,
       stats: {
-        totalCvs:      cvs.length,
+        totalCvs:       cvs.length,
         totalDownloads: cvs.reduce((s, c) => s + (c.DownloadCount || 0), 0),
-        publicCvs:     cvs.filter(c => c.IsPublic).length,
-        lastActive:    cvs[0]?.UpdatedAt || user.CreatedAt
+        publicCvs:      cvs.filter(c => c.IsPublic).length,
+        lastActive:     cvs[0]?.UpdatedAt || user.CreatedAt
       }
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -373,9 +373,9 @@ router.get('/users/:id/profile', async (req, res) => {
 router.get('/template-items', async (req, res) => {
   try {
     const r = await req.db.request().query(`
-      SELECT Id, Name, Slug, Category, IsPremium, PreviewUrl, Active, SortOrder, CreatedAt
-      FROM Templates
-      ORDER BY Active DESC, IsPremium ASC, SortOrder ASC, Name ASC
+      SELECT id, name, slug, category, is_premium, preview_url, active, sort_order, created_at
+      FROM templates
+      ORDER BY active DESC, is_premium ASC, sort_order ASC, name ASC
     `);
     res.json({ templates: r.recordset, total: r.recordset.length });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -390,9 +390,9 @@ router.post('/template-items', async (req, res) => {
       .input('name', sql.NVarChar, name)
       .input('slug', sql.NVarChar, slug)
       .input('cat',  sql.NVarChar, category || 'Geral')
-      .input('prem', sql.Bit, isPremium ? 1 : 0)
-      .query(`INSERT INTO Templates (Name,Slug,Category,IsPremium,Active,SortOrder,CreatedAt)
-              VALUES (@name,@slug,@cat,@prem,1,0,GETDATE())`);
+      .input('prem', sql.Bit, isPremium ? true : false)
+      .query(`INSERT INTO templates (name, slug, category, is_premium, active, sort_order, created_at)
+              VALUES (@name, @slug, @cat, @prem, TRUE, 0, NOW())`);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -402,7 +402,7 @@ router.patch('/template-items/:id/toggle', async (req, res) => {
   try {
     await req.db.request()
       .input('id', sql.Int, req.params.id)
-      .query('UPDATE Templates SET Active = CASE WHEN Active=1 THEN 0 ELSE 1 END WHERE Id=@id');
+      .query('UPDATE templates SET active = NOT active WHERE id=@id');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -411,8 +411,8 @@ router.patch('/template-items/:id/toggle', async (req, res) => {
 router.post('/template-items/activate-all', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('UPDATE Templates SET Active=1; SELECT @@ROWCOUNT AS updated');
-    res.json({ success: true, updated: r.recordset[0]?.updated });
+      .query('UPDATE templates SET active=TRUE');
+    res.json({ success: true, updated: r.rowsAffected[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -426,7 +426,7 @@ router.post('/template-items/import-bulk', async (req, res) => {
   for (const t of templates) {
     const name = (t.name || t.Name || '').trim();
     const cat  = (t.category || t.Category || 'Geral').trim();
-    const prem = (t.isPremium !== undefined ? t.isPremium : (t.IsPremium || 0));
+    const prem = (t.isPremium !== undefined ? t.isPremium : (t.IsPremium || false));
     const slug = (t.slug || t.Slug || name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-') + '-' + Date.now()).trim();
     const prev = (t.previewUrl || t.PreviewUrl || null);
     if (!name) { skipped++; continue; }
@@ -435,10 +435,10 @@ router.post('/template-items/import-bulk', async (req, res) => {
         .input('name', sql.NVarChar, name)
         .input('slug', sql.NVarChar, slug)
         .input('cat',  sql.NVarChar, cat)
-        .input('prem', sql.Bit, prem ? 1 : 0)
+        .input('prem', sql.Bit, prem ? true : false)
         .input('prev', sql.NVarChar, prev)
-        .query(`INSERT INTO Templates (Name,Slug,Category,IsPremium,PreviewUrl,Active,SortOrder,CreatedAt)
-                VALUES (@name,@slug,@cat,@prem,@prev,1,0,GETDATE())`);
+        .query(`INSERT INTO templates (name, slug, category, is_premium, preview_url, active, sort_order, created_at)
+                VALUES (@name, @slug, @cat, @prem, @prev, TRUE, 0, NOW()) ON CONFLICT (slug) DO NOTHING`);
       imported++;
     } catch (e) {
       skipped++;
@@ -455,11 +455,11 @@ router.post('/template-items/import-sql', async (req, res) => {
       return res.status(404).json({ error: 'Ficheiro more-templates.sql não encontrado.' });
     }
     const raw = fs.readFileSync(sqlFile, 'utf8');
-    // Split on GO (batch separator) and filter out USE/GO/empty lines
+    // Split on semicolons for PostgreSQL (no GO batch separator)
     const batches = raw
-      .split(/\r?\nGO\r?\n/i)
+      .split(/;\s*\n/)
       .map(b => b.trim())
-      .filter(b => b && !/^USE\s/i.test(b) && !/^--/.test(b));
+      .filter(b => b && !/^--/.test(b));
 
     let imported = 0;
     let skipped  = 0;
@@ -469,8 +469,8 @@ router.post('/template-items/import-sql', async (req, res) => {
         await req.db.request().query(batch);
         imported++;
       } catch (e) {
-        // ignore duplicate slugs
-        if (e.number === 2627 || (e.message||'').includes('UNIQUE') || (e.message||'').includes('duplicate')) {
+        // ignore duplicate slugs (PostgreSQL unique violation code)
+        if (e.code === '23505' || (e.message||'').includes('unique') || (e.message||'').includes('duplicate')) {
           skipped++;
         } else {
           skipped++;

@@ -8,7 +8,7 @@ const { sql } = require('../config/database');
 router.get('/coaches', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT Id,Name,Location,Bio,Skills,Email,Color,CreatedAt FROM Coaches WHERE Active=1 ORDER BY CreatedAt DESC');
+      .query('SELECT id, name, location, bio, skills, email, color, created_at FROM coaches WHERE active=TRUE ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -17,7 +17,7 @@ router.get('/coaches', async (req, res) => {
 router.get('/courses', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT Id,Title,Source,Category,Rating,Url,CreatedAt FROM Courses WHERE Active=1 ORDER BY CreatedAt DESC');
+      .query('SELECT id, title, source, category, rating, url, created_at FROM courses WHERE active=TRUE ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -26,7 +26,7 @@ router.get('/courses', async (req, res) => {
 router.get('/jobs', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT Id,Title,Company,City,Country,Category,JobDate,Url,CreatedAt FROM Jobs WHERE Active=1 ORDER BY JobDate DESC, CreatedAt DESC');
+      .query('SELECT id, title, company, city, country, category, job_date, url, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -35,7 +35,7 @@ router.get('/jobs', async (req, res) => {
 router.get('/testimonials', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT Id,Name,Role,[Text],Stars,CreatedAt FROM Testimonials WHERE Active=1 ORDER BY CreatedAt DESC');
+      .query('SELECT id, name, role, text, stars, created_at FROM testimonials WHERE active=TRUE ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

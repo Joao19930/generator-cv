@@ -1,36 +1,84 @@
-﻿const sql = require('mssql');
-const config = {
-  server:   process.env.DB_SERVER,
-  database: process.env.DB_NAME,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  options: {
-    encrypt:                false,
-    trustServerCertificate: true,
-    enableArithAbort:       true,
-    trustedConnection:      false
-  },
-  pool: {
-    max:             20,
-    min:             2,
-    idleTimeoutMillis: 30000
-  },
-  requestTimeout:    30000,
-  connectionTimeout: 15000
-};
-let pool = null;
-const getPool = async () => {
-  if (pool) return pool;
-  pool = await sql.connect(config);
-  console.log('✅  MSSQL ligado -', process.env.DB_NAME);
-  return pool;
-};
-const query = async (queryStr, inputs = {}) => {
-  const p = await getPool();
-  const req = p.request();
-  for (const [key, { type, value }] of Object.entries(inputs)) {
-    req.input(key, type, value);
+// src/config/database.js — PostgreSQL via pg
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+pool.on('error', (err) => console.error('❌ PostgreSQL pool error:', err.message));
+
+// Normalizes pg result rows: adds PascalCase aliases for snake_case columns
+// So result.rows[0].id also gives result.rows[0].Id (for MSSQL compatibility)
+function normalize(rows) {
+  return rows.map(row => {
+    const out = {};
+    for (const [k, v] of Object.entries(row)) {
+      out[k] = v;
+      // snake_case → PascalCase: user_id → UserId, created_at → CreatedAt
+      const pascal = k
+        .replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase())
+        .replace(/^[a-z]/, c => c.toUpperCase());
+      if (pascal !== k) out[pascal] = v;
+    }
+    return out;
+  });
+}
+
+// Mimics mssql's request API so existing route code works unchanged
+class Request {
+  constructor() {
+    this._inputs = {};
+    this._order  = [];
   }
-  return req.query(queryStr);
+
+  input(name, typeOrValue, value) {
+    const val = value !== undefined ? value : typeOrValue;
+    if (!this._order.includes(name)) this._order.push(name);
+    this._inputs[name] = val;
+    return this;
+  }
+
+  async query(sqlStr) {
+    // Convert MSSQL syntax → PostgreSQL
+    let pgSql = sqlStr
+      .replace(/\bGETDATE\s*\(\s*\)/gi, 'NOW()')
+      .replace(/\bISNULL\s*\(/gi, 'COALESCE(')
+      .replace(/\[(\w+)\]/g, '$1')
+      .replace(/\bOUTPUT\s+/gi, 'RETURNING ')
+      .replace(/\bINSERTED\./gi, '');
+
+    // Replace @param → $N (same param reuses same $N)
+    const params = [];
+    const seen = {};
+    let i = 1;
+    pgSql = pgSql.replace(/@(\w+)/g, (_, name) => {
+      if (!(name in seen)) {
+        seen[name] = i++;
+        params.push(Object.prototype.hasOwnProperty.call(this._inputs, name)
+          ? this._inputs[name] : null);
+      }
+      return `$${seen[name]}`;
+    });
+
+    const result = await pool.query(pgSql, params);
+    return { recordset: normalize(result.rows), rowsAffected: [result.rowCount] };
+  }
+}
+
+const dbWrapper = { request: () => new Request() };
+
+const getPool = async () => {
+  await pool.query('SELECT 1');
+  return dbWrapper;
 };
-module.exports = { getPool, query, sql };
+
+module.exports = {
+  getPool,
+  sql: { Int: 'Int', NVarChar: 'NVarChar', VarChar: 'VarChar',
+         Decimal: 'Decimal', DateTime: 'DateTime', Date: 'Date', Bit: 'Bit' },
+  pool,
+};
