@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de CV — CV Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB;--blue-d:#1D4ED8;--blue-l:#EFF6FF;--blue-m:#BFDBFE;
+  --green:#16A34A;--green-l:#DCFCE7;
+  --red:#DC2626;--red-l:#FEF2F2;
+  --purple:#7C3AED;--purple-l:#FAF5FF;
+  --gold:#F59E0B;--gold-l:#FEF3C7;
+  --text:#0F172A;--t2:#334155;--t3:#64748B;--t4:#94A3B8;
+  --border:#E2E8F0;--bg:#F8FAFC;--white:#fff;
+  --r:10px;--rs:7px;--rl:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── TOPBAR ─────────────────────────────────────── */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.04);}
+.tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.tb-logo-icon{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.tb-logo-txt{font-size:14px;font-weight:800;color:var(--text);}
+.tb-sep{width:1px;height:24px;background:var(--border);}
+.tb-cv-name{font-size:13px;font-weight:600;color:var(--t3);}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.tb-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.tb-btn-ghost{background:var(--bg);color:var(--t2);border:1px solid var(--border);}
+.tb-btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+.tb-btn-blue{background:var(--blue);color:#fff;}
+.tb-btn-blue:hover{background:var(--blue-d);}
+.tb-btn-green{background:var(--green);color:#fff;}
+.tb-btn-green:hover{background:#15803D;}
+.tb-ats-score{display:flex;align-items:center;gap:5px;padding:5px 12px;background:var(--green-l);border:1px solid #86efac;border-radius:20px;font-size:11px;font-weight:700;color:var(--green);}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.editor-layout{display:flex;margin-top:56px;min-height:calc(100vh - 56px);}
+
+/* ── LEFT: FORM ─────────────────────────────────── */
+.form-panel{flex:1;padding:28px 28px 80px;max-width:700px;overflow-y:auto;}
+.form-panel h1{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.form-panel .sub{font-size:13px;color:var(--t3);margin-bottom:24px;}
+
+/* ── SECTION ────────────────────────────────────── */
+.f-section{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden;}
+.f-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;transition:background .15s;}
+.f-section-hdr:hover{background:var(--bg);}
+.f-section-hdr-left{display:flex;align-items:center;gap:10px;}
+.f-section-icon{width:32px;height:32px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.f-section-title{font-size:14px;font-weight:700;color:var(--text);}
+.f-section-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+.f-section-chevron{color:var(--t4);transition:transform .2s;}
+.f-section.open .f-section-chevron{transform:rotate(180deg);}
+.f-section-body{padding:0 20px 20px;display:none;}
+.f-section.open .f-section-body{display:block;}
+
+/* ── FORM FIELDS ────────────────────────────────── */
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.f-row.full{grid-template-columns:1fr;}
+.f-row.three{grid-template-columns:1fr 1fr 1fr;}
+.f-group{display:flex;flex-direction:column;gap:5px;}
+.f-group label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;}
+.f-group input,.f-group textarea,.f-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;background:var(--white);}
+.f-group input:focus,.f-group textarea:focus,.f-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.f-group textarea{resize:vertical;min-height:90px;line-height:1.55;}
+.f-hint{font-size:10px;color:var(--t4);margin-top:3px;}
+
+/* ── ITEM CARDS ─────────────────────────────────── */
+.item-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;position:relative;}
+.item-card-label{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.btn-remove{position:absolute;top:12px;right:12px;background:var(--red-l);color:var(--red);border:none;border-radius:var(--rs);padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:'Sora',sans-serif;transition:background .15s;}
+.btn-remove:hover{background:#fecaca;}
+.btn-add{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:var(--blue-l);border:1.5px dashed var(--blue-m);border-radius:var(--rs);color:var(--blue);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;}
+.btn-add:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* ── SKILLS ─────────────────────────────────────── */
+.skills-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;}
+.skill-chip{display:flex;align-items:center;gap:5px;background:var(--blue-l);border:1px solid var(--blue-m);color:var(--blue);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.skill-chip button{background:none;border:none;color:var(--blue);cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:.7;}
+.skill-chip button:hover{opacity:1;}
+.skill-row{display:flex;gap:8px;}
+.skill-row input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:12px;color:var(--text);outline:none;}
+.skill-row input:focus{border-color:var(--blue);}
+.btn-add-skill{padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-add-skill:hover{background:var(--blue-d);}
+
+/* ── PHOTO ──────────────────────────────────────── */
+.photo-row{display:flex;align-items:center;gap:16px;}
+.photo-circle{width:72px;height:72px;border-radius:50%;border:2px dashed var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:26px;}
+.photo-circle img{width:100%;height:100%;object-fit:cover;}
+.btn-upload{padding:8px 16px;border:1.5px solid var(--blue);background:var(--blue-l);color:var(--blue);border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-upload:hover{background:var(--blue);color:#fff;}
+
+/* ── RIGHT: TEMPLATES ───────────────────────────── */
+.tpl-panel{width:360px;min-width:360px;background:var(--white);border-left:1px solid var(--border);position:fixed;top:56px;right:0;bottom:0;display:flex;flex-direction:column;overflow:hidden;}
+.tpl-panel-hdr{padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.tpl-panel-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.tpl-panel-sub{font-size:11px;color:var(--t3);}
+.tpl-search{display:flex;align-items:center;gap:7px;margin-top:10px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);}
+.tpl-search input{border:none;background:transparent;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);outline:none;flex:1;}
+.tpl-cats{display:flex;gap:4px;padding:10px 18px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.tpl-cats::-webkit-scrollbar{display:none;}
+.tpl-cat{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--t3);white-space:nowrap;transition:all .15s;}
+.tpl-cat:hover{border-color:var(--blue);color:var(--blue);}
+.tpl-cat.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.tpl-grid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;}
+.tpl-card{border:2px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.tpl-card:hover{border-color:var(--blue-m);transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,99,235,.1);}
+.tpl-card.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.2);}
+.tpl-card.sel::after{content:'✓';position:absolute;top:5px;right:5px;width:18px;height:18px;background:var(--blue);color:#fff;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.tpl-thumb{height:88px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.tpl-bdg{position:absolute;top:5px;left:5px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.bdg-free{background:var(--green-l);color:var(--green);}
+.bdg-pro{background:#FFF7ED;color:#EA580C;}
+.tpl-name{padding:6px 8px;font-size:10px;font-weight:700;color:var(--text);text-align:center;border-top:1px solid var(--border);background:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tpl-card.sel .tpl-name{color:var(--blue);}
+.tpl-lock{position:absolute;top:5px;right:5px;width:18px;height:18px;background:rgba(0,0,0,.45);border-radius:4px;display:flex;align-items:center;justify-content:center;}
+.tpl-loading{grid-column:1/-1;text-align:center;padding:32px;color:var(--t4);font-size:12px;}
+
+/* ── GENERATE BTN ───────────────────────────────── */
+.generate-bar{position:fixed;bottom:0;left:0;right:360px;padding:14px 28px;background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,.04);}
+.generate-info{font-size:11px;color:var(--t3);}
+.generate-info strong{color:var(--text);}
+.btn-generate{padding:11px 28px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.btn-generate:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,99,235,.3);}
+
+/* ── CV MOCKUP ──────────────────────────────────── */
+.cv-mock{width:100%;height:100%;display:flex;}
+.cv-mock-sidebar{width:35%;height:100%;display:flex;flex-direction:column;padding:8px 6px;gap:4px;}
+.cv-mock-main{flex:1;padding:8px 6px;display:flex;flex-direction:column;gap:4px;}
+.cv-mock-bar{height:6px;border-radius:2px;background:rgba(255,255,255,.9);}
+.cv-mock-line{height:3px;border-radius:1px;background:rgba(0,0,0,.12);}
+.cv-mock-line.w80{width:80%;}
+.cv-mock-line.w60{width:60%;}
+.cv-mock-line.w70{width:70%;}
+.cv-mock-line.w50{width:50%;}
+.cv-mock-line.wh{background:rgba(255,255,255,.5);}
+.cv-mock-avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.8);margin:0 auto 4px;}
+
+/* ── SCROLLBAR ──────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:2px;}
+
+/* ── ATS BANNER ─────────────────────────────────── */
+.ats-banner{background:var(--green-l);border:1px solid #86efac;border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--green);line-height:1.5;}
+.ats-banner strong{display:block;margin-bottom:2px;}
+
+/* ── VER EXEMPLO OVERLAY ─────────────────────────── */
+.tpl-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:inherit;}
+.tpl-card:hover .tpl-overlay{opacity:1;}
+.btn-ver-ex{background:#fff;color:var(--blue);border:none;border-radius:5px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+.btn-ver-ex:hover{background:var(--blue);color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a href="/app" class="tb-logo">
+    <div class="tb-logo-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <span class="tb-logo-txt">CV Premium</span>
+  </a>
+  <div class="tb-sep"></div>
+  <span class="tb-cv-name" id="tbCvName">Editor de CV</span>
+  <div class="tb-right">
+    <div class="tb-ats-score" id="atsScoreBar" style="display:none">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      ATS: <strong id="atsVal">—</strong>
+    </div>
+    <a href="/app" class="tb-btn tb-btn-ghost">← Voltar</a>
+    <button class="tb-btn tb-btn-green" onclick="generateCV()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Gerar CV
+    </button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="editor-layout">
+
+  <!-- ── FORM PANEL ───────────────────────────────── -->
+  <div class="form-panel" style="padding-right:calc(360px + 28px);">
+    <h1>Criar o seu CV</h1>
+    <p class="sub">Preencha os campos abaixo e escolha o modelo à direita</p>
+
+    <!-- DADOS PESSOAIS -->
+    <div class="f-section open">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:var(--blue-l)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="f-section-title">Dados Pessoais</div><div class="f-section-sub">Informação de contacto e resumo</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div class="f-row">
+          <div class="f-group"><label>Nome Completo *</label><input type="text" id="fullName" placeholder="Ex: João Silva"></div>
+          <div class="f-group"><label>Título Profissional *</label><input type="text" id="jobTitle" placeholder="Ex: Gestor Financeiro Sénior"></div>
+        </div>
+        <div class="f-row">
+          <div class="f-group"><label>Email *</label><input type="email" id="email" placeholder="joao@email.com"></div>
+          <div class="f-group"><label>Telefone</label><input type="text" id="phone" placeholder="+244 900 000 000"></div>
+        </div>
+        <div class="f-row">
+          <div class="f-group"><label>Localização</label><input type="text" id="address" placeholder="Ex: Luanda, Angola"></div>
+          <div class="f-group"><label>LinkedIn / Website</label><input type="text" id="linkedin" placeholder="linkedin.com/in/joaosilva"></div>
+        </div>
+        <div class="f-row full">
+          <div class="f-group"><label>Resumo Profissional *</label><textarea id="summary" placeholder="Escreva um resumo sobre si (2-4 frases sobre experiência, competências e objectivos)..."></textarea></div>
+        </div>
+        <div class="f-row full">
+          <div class="f-group">
+            <label>Foto de Perfil <span style="font-weight:400;text-transform:none;letter-spacing:0">(apenas para templates com foto)</span></label>
+            <div class="photo-row">
+              <div class="photo-circle" id="photoPreview">📷</div>
+              <div>
+                <input type="file" id="photoInput" accept="image/*" style="display:none">
+                <button class="btn-upload" onclick="document.getElementById('photoInput').click()">Carregar Foto</button>
+                <div class="f-hint" style="margin-top:6px;">JPG, PNG · Recomendado 300×300px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPERIÊNCIA -->
+    <div class="f-section open">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:#FFF7ED"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div>
+          <div><div class="f-section-title">Experiência Profissional</div><div class="f-section-sub" id="expCount">1 entrada</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div id="experienceContainer">
+          <div class="item-card" id="exp-0">
+            <div class="item-card-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Experiência 1</div>
+            <button class="btn-remove" onclick="removeItem('exp-0')">Remover</button>
+            <div class="f-row">
+              <div class="f-group"><label>Cargo *</label><input type="text" placeholder="Ex: Director Financeiro"></div>
+              <div class="f-group"><label>Empresa *</label><input type="text" placeholder="Ex: Deloitte Angola"></div>
+            </div>
+            <div class="f-row three">
+              <div class="f-group"><label>Data Início</label><input type="text" placeholder="Jan 2020"></div>
+              <div class="f-group"><label>Data Fim</label><input type="text" placeholder="Presente"></div>
+              <div class="f-group"><label>Localização</label><input type="text" placeholder="Luanda"></div>
+            </div>
+            <div class="f-row full">
+              <div class="f-group"><label>Descrição</label><textarea placeholder="Descreva as suas funções, responsabilidades e principais realizações..."></textarea></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addExperience()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar Experiência
+        </button>
+      </div>
+    </div>
+
+    <!-- FORMAÇÃO -->
+    <div class="f-section open">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:var(--purple-l)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+          <div><div class="f-section-title">Formação Académica</div><div class="f-section-sub" id="eduCount">1 entrada</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div id="educationContainer">
+          <div class="item-card" id="edu-0">
+            <div class="item-card-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg> Formação 1</div>
+            <button class="btn-remove" onclick="removeItem('edu-0')">Remover</button>
+            <div class="f-row">
+              <div class="f-group"><label>Grau / Curso *</label><input type="text" placeholder="Ex: MBA Finanças"></div>
+              <div class="f-group"><label>Instituição *</label><input type="text" placeholder="Ex: Universidade Católica"></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label>Ano de Conclusão</label><input type="text" placeholder="2018"></div>
+              <div class="f-group"><label>Classificação</label><input type="text" placeholder="Ex: 18 valores"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addEducation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar Formação
+        </button>
+      </div>
+    </div>
+
+    <!-- COMPETÊNCIAS -->
+    <div class="f-section open">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:var(--green-l)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div><div class="f-section-title">Competências</div><div class="f-section-sub" id="skillCountLabel">0 competências</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div class="skills-wrap" id="skillsContainer"></div>
+        <div class="skill-row">
+          <input type="text" id="skillInput" placeholder="Ex: Excel, Power BI, Liderança..." onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill();}">
+          <button class="btn-add-skill" onclick="addSkill()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDIOMAS -->
+    <div class="f-section">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:#FFF7ED"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+          <div><div class="f-section-title">Idiomas</div><div class="f-section-sub">Línguas que domina</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div id="languagesContainer">
+          <div class="f-row" id="lang-0" style="margin-bottom:8px;">
+            <div class="f-group"><label>Idioma</label><input type="text" placeholder="Ex: Português"></div>
+            <div class="f-group"><label>Nível</label>
+              <select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select>
+            </div>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addLanguage()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar Idioma
+        </button>
+      </div>
+    </div>
+
+    <!-- CERTIFICAÇÕES (opcional) -->
+    <div class="f-section">
+      <div class="f-section-hdr" onclick="toggleSection(this)">
+        <div class="f-section-hdr-left">
+          <div class="f-section-icon" style="background:var(--gold-l)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+          <div><div class="f-section-title">Certificações & Prémios</div><div class="f-section-sub">Opcional</div></div>
+        </div>
+        <svg class="f-section-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="f-section-body">
+        <div id="certsContainer"></div>
+        <button class="btn-add" onclick="addCert()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar Certificação
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /form-panel -->
+
+  <!-- ── TEMPLATES PANEL ───────────────────────────── -->
+  <div class="tpl-panel">
+    <div class="tpl-panel-hdr">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+        <div class="tpl-panel-title">Escolher Modelo</div>
+        <a href="/demo" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:4px;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Ver Exemplo
+        </a>
+      </div>
+      <div class="tpl-panel-sub" id="tplPanelSub">Carregando templates da biblioteca...</div>
+      <div class="tpl-search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Pesquisar modelos..." oninput="filterTemplates(this.value)" id="tplSearchInput">
+      </div>
+    </div>
+    <div class="tpl-cats" id="tplCats">
+      <div class="tpl-cat active" onclick="filterByCategory('',this)">Todos</div>
+    </div>
+    <div class="tpl-grid" id="tplGrid">
+      <div class="tpl-loading">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="2" style="animation:spin .8s linear infinite;margin-bottom:6px;display:block;margin:0 auto 6px"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg>
+        A carregar templates...
+      </div>
+    </div>
+  </div>
+
+</div><!-- /editor-layout -->
+
+<!-- GENERATE BAR -->
+<div class="generate-bar">
+  <div class="generate-info">
+    Modelo: <strong id="selectedTplName">Nenhum seleccionado</strong>
+    &nbsp;·&nbsp; Preencha os dados e gere o seu CV
+  </div>
+  <button class="btn-generate" onclick="generateCV()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Gerar CV Premium
+  </button>
+</div>
+
+<input type="hidden" id="selectedTemplate" value="">
+
+<style>
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+
+<script>
+const API   = '/api';
+const token = localStorage.getItem('cv_token');
+const user  = JSON.parse(localStorage.getItem('cv_user') || '{}');
+const params = new URLSearchParams(window.location.search);
+const cvId   = params.get('cv');
+const tplParam = params.get('template');
+
+if (cvId) document.getElementById('tbCvName').textContent = 'CV #' + cvId;
+
+/* ── PRE-FILL se já há dados do CV ───────────────── */
+if (cvId && token) {
+  fetch(`${API}/cv/${cvId}`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d) return;
+      document.getElementById('tbCvName').textContent = d.Title || ('CV #' + cvId);
+      const rawContent = d.Content || d.ContentJson;
+      if (rawContent) {
+        try {
+          const c = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
+          if (c.fullName)  document.getElementById('fullName').value  = c.fullName;
+          if (c.jobTitle)  document.getElementById('jobTitle').value  = c.jobTitle;
+          if (c.email)     document.getElementById('email').value     = c.email;
+          if (c.phone)     document.getElementById('phone').value     = c.phone;
+          if (c.address)   document.getElementById('address').value   = c.address;
+          if (c.linkedin)  document.getElementById('linkedin').value  = c.linkedin;
+          if (c.summary)   document.getElementById('summary').value   = c.summary;
+          if (c.skills && c.skills.length) { skills = c.skills; renderSkills(); }
+        } catch(_) {}
+      }
+    }).catch(() => {});
+}
+
+/* ── ACCORDION ───────────────────────────────────── */
+function toggleSection(hdr) {
+  const sec = hdr.closest('.f-section');
+  sec.classList.toggle('open');
+}
+
+/* ── PHOTO ───────────────────────────────────────── */
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { document.getElementById('photoPreview').innerHTML = `<img src="${ev.target.result}">`; };
+  reader.readAsDataURL(file);
+});
+
+/* ── EXPERIENCE ──────────────────────────────────── */
+let expCount = 1;
+function addExperience() {
+  const id = 'exp-' + expCount++;
+  const n  = document.querySelectorAll('[id^="exp-"]').length + 1;
+  const html = `<div class="item-card" id="${id}">
+    <div class="item-card-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Experiência ${n}</div>
+    <button class="btn-remove" onclick="removeItem('${id}')">Remover</button>
+    <div class="f-row"><div class="f-group"><label>Cargo *</label><input type="text" placeholder="Cargo"></div><div class="f-group"><label>Empresa *</label><input type="text" placeholder="Empresa"></div></div>
+    <div class="f-row three"><div class="f-group"><label>Início</label><input type="text" placeholder="Jan 2020"></div><div class="f-group"><label>Fim</label><input type="text" placeholder="Presente"></div><div class="f-group"><label>Local</label><input type="text" placeholder="Luanda"></div></div>
+    <div class="f-row full"><div class="f-group"><label>Descrição</label><textarea placeholder="Descrição das funções..."></textarea></div></div>
+  </div>`;
+  document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
+  updateCounts();
+}
+
+/* ── EDUCATION ───────────────────────────────────── */
+let eduCount = 1;
+function addEducation() {
+  const id = 'edu-' + eduCount++;
+  const n  = document.querySelectorAll('[id^="edu-"]').length + 1;
+  const html = `<div class="item-card" id="${id}">
+    <div class="item-card-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg> Formação ${n}</div>
+    <button class="btn-remove" onclick="removeItem('${id}')">Remover</button>
+    <div class="f-row"><div class="f-group"><label>Curso</label><input type="text" placeholder="Licenciatura"></div><div class="f-group"><label>Instituição</label><input type="text" placeholder="UCAN"></div></div>
+    <div class="f-row"><div class="f-group"><label>Ano</label><input type="text" placeholder="2015"></div><div class="f-group"><label>Classificação</label><input type="text" placeholder="Muito Bom"></div></div>
+  </div>`;
+  document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
+  updateCounts();
+}
+
+/* ── CERTS ───────────────────────────────────────── */
+let certCount = 0;
+function addCert() {
+  const id = 'cert-' + certCount++;
+  const html = `<div class="item-card" id="${id}">
+    <button class="btn-remove" onclick="removeItem('${id}')">Remover</button>
+    <div class="f-row"><div class="f-group"><label>Certificação / Prémio</label><input type="text" placeholder="Ex: CFA Level 1"></div><div class="f-group"><label>Entidade Emissora</label><input type="text" placeholder="Ex: CFA Institute"></div></div>
+    <div class="f-row"><div class="f-group"><label>Ano</label><input type="text" placeholder="2022"></div><div class="f-group"></div></div>
+  </div>`;
+  document.getElementById('certsContainer').insertAdjacentHTML('beforeend', html);
+}
+
+function removeItem(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  updateCounts();
+}
+
+function updateCounts() {
+  const expN = document.querySelectorAll('[id^="exp-"]').length;
+  const eduN = document.querySelectorAll('[id^="edu-"]').length;
+  document.getElementById('expCount').textContent = expN + ' entrada' + (expN !== 1 ? 's' : '');
+  document.getElementById('eduCount').textContent = eduN + ' entrada' + (eduN !== 1 ? 's' : '');
+}
+
+/* ── SKILLS ──────────────────────────────────────── */
+let skills = [];
+function addSkill() {
+  const inp   = document.getElementById('skillInput');
+  const skill = inp.value.trim();
+  if (!skill || skills.includes(skill)) { inp.value = ''; return; }
+  skills.push(skill);
+  renderSkills();
+  inp.value = '';
+}
+function removeSkill(i) { skills.splice(i, 1); renderSkills(); }
+function renderSkills() {
+  document.getElementById('skillsContainer').innerHTML =
+    skills.map((s, i) => `<div class="skill-chip">${s}<button onclick="removeSkill(${i})">×</button></div>`).join('');
+  document.getElementById('skillCountLabel').textContent = skills.length + ' competência' + (skills.length !== 1 ? 's' : '');
+}
+
+/* ── LANGUAGES ───────────────────────────────────── */
+let langCount = 1;
+function addLanguage() {
+  const id  = 'lang-' + langCount++;
+  const html = `<div class="f-row" id="${id}" style="margin-top:8px;">
+    <div class="f-group"><label>Idioma</label><input type="text" placeholder="Ex: Inglês"></div>
+    <div class="f-group"><label>Nível</label><select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div>
+  </div>`;
+  document.getElementById('languagesContainer').insertAdjacentHTML('beforeend', html);
+}
+
+/* ── TEMPLATES ───────────────────────────────────── */
+let allTemplates = [];
+let currentCat   = '';
+let selectedTplId = tplParam ? parseInt(tplParam) : null;
+
+// Cores por categoria
+const CAT_THEMES = {
+  'Executivo':  { bg:'linear-gradient(135deg,#1D4ED8 0%,#1E3A5F 100%)', sidebar:'rgba(255,255,255,.15)' },
+  'Moderno':    { bg:'linear-gradient(135deg,#7C3AED,#2563EB)' },
+  'Clássico':   { bg:'linear-gradient(135deg,#374151,#111827)' },
+  'Criativo':   { bg:'linear-gradient(135deg,#DB2777,#7C3AED)' },
+  'Saúde':      { bg:'linear-gradient(135deg,#0D9488,#059669)' },
+  'Academia':   { bg:'linear-gradient(135deg,#6D28D9,#4C1D95)' },
+  'Tecnologia': { bg:'linear-gradient(135deg,#0369A1,#0D9488)' },
+  'Finanças':   { bg:'linear-gradient(135deg,#1D4ED8,#1E40AF)' },
+  'Geral':      { bg:'linear-gradient(135deg,#374151,#1F2937)' },
+};
+
+function tplMockup(t) {
+  const cat   = t.Category || 'Geral';
+  const theme = CAT_THEMES[cat] || CAT_THEMES['Geral'];
+  const hasSidebar = ['Executivo','Moderno','Criativo'].includes(cat);
+  if (hasSidebar) {
+    return `<div style="display:flex;width:100%;height:100%;background:${theme.bg};">
+      <div style="width:36%;background:rgba(0,0,0,.25);padding:6px 4px;display:flex;flex-direction:column;gap:3px;align-items:center;">
+        <div style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.7);margin-bottom:3px;"></div>
+        <div style="height:3px;width:80%;background:rgba(255,255,255,.6);border-radius:2px;"></div>
+        <div style="height:2px;width:60%;background:rgba(255,255,255,.35);border-radius:2px;"></div>
+        <div style="height:1px;width:80%;background:rgba(255,255,255,.15);margin:3px 0;"></div>
+        <div style="height:2px;width:75%;background:rgba(255,255,255,.3);border-radius:2px;"></div>
+        <div style="height:2px;width:65%;background:rgba(255,255,255,.3);border-radius:2px;"></div>
+        <div style="height:2px;width:70%;background:rgba(255,255,255,.3);border-radius:2px;"></div>
+      </div>
+      <div style="flex:1;padding:6px 5px;display:flex;flex-direction:column;gap:3px;">
+        <div style="height:3px;width:85%;background:rgba(255,255,255,.8);border-radius:2px;"></div>
+        <div style="height:2px;width:60%;background:rgba(255,255,255,.4);border-radius:2px;margin-bottom:3px;"></div>
+        <div style="height:2px;width:100%;background:rgba(255,255,255,.15);border-radius:1px;"></div>
+        <div style="height:2px;width:90%;background:rgba(255,255,255,.15);border-radius:1px;"></div>
+        <div style="height:2px;width:95%;background:rgba(255,255,255,.15);border-radius:1px;"></div>
+      </div>
+    </div>`;
+  }
+  // Centrado (ATS / Clássico / Academia)
+  const isAts = cat === 'ATS' || t.Name.toLowerCase().includes('ats');
+  if (isAts) {
+    return `<div style="background:#fff;width:100%;height:100%;padding:8px 10px;display:flex;flex-direction:column;gap:3px;">
+      <div style="height:6px;width:70%;background:#111;border-radius:2px;margin:0 auto 2px;"></div>
+      <div style="height:2px;width:50%;background:#666;border-radius:1px;margin:0 auto 4px;"></div>
+      <div style="height:1px;background:#ccc;margin-bottom:4px;"></div>
+      <div style="height:3px;width:40%;background:#111;border-radius:1px;margin-bottom:3px;"></div>
+      <div style="height:2px;background:#ddd;border-radius:1px;"></div>
+      <div style="height:2px;width:90%;background:#ddd;border-radius:1px;"></div>
+      <div style="height:2px;width:80%;background:#ddd;border-radius:1px;"></div>
+    </div>`;
+  }
+  return `<div style="width:100%;height:100%;background:${theme.bg};display:flex;flex-direction:column;padding:8px 10px;gap:3px;">
+    <div style="height:5px;width:70%;background:rgba(255,255,255,.9);border-radius:2px;"></div>
+    <div style="height:2px;width:50%;background:rgba(255,255,255,.5);border-radius:2px;margin-bottom:4px;"></div>
+    <div style="height:2px;width:100%;background:rgba(255,255,255,.2);border-radius:1px;"></div>
+    <div style="height:2px;width:85%;background:rgba(255,255,255,.15);border-radius:1px;"></div>
+    <div style="height:2px;width:90%;background:rgba(255,255,255,.15);border-radius:1px;"></div>
+    <div style="height:2px;width:80%;background:rgba(255,255,255,.12);border-radius:1px;"></div>
+  </div>`;
+}
+
+async function loadTemplates() {
+  try {
+    const r = await fetch(`${API}/templates?limit=100`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    allTemplates = d.templates || [];
+
+    // Categorias
+    const cats = ['Todos', ...new Set(allTemplates.map(t => t.Category).filter(Boolean))];
+    const catEl = document.getElementById('tplCats');
+    catEl.innerHTML = '';
+    cats.forEach(c => {
+      const btn = document.createElement('div');
+      btn.className = 'tpl-cat' + (c === 'Todos' ? ' active' : '');
+      btn.textContent = c;
+      btn.onclick = () => filterByCategory(c === 'Todos' ? '' : c, btn);
+      catEl.appendChild(btn);
+    });
+
+    document.getElementById('tplPanelSub').textContent =
+      allTemplates.length + ' modelo' + (allTemplates.length !== 1 ? 's' : '') + ' disponíve' + (allTemplates.length !== 1 ? 'is' : 'l');
+
+    renderTemplates(allTemplates);
+
+    // Se veio com template seleccionado, marcar
+    if (selectedTplId) {
+      const t = allTemplates.find(x => x.Id === selectedTplId);
+      if (t) selectTemplate(t);
+    } else if (allTemplates.length) {
+      selectTemplate(allTemplates[0]);
+    }
+  } catch(e) {
+    document.getElementById('tplGrid').innerHTML =
+      `<div class="tpl-loading" style="color:var(--red);">Erro ao carregar templates.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderTemplates(list) {
+  const isPro = user && ['pro','premium'].includes((user.plan||'').toLowerCase());
+  const grid  = document.getElementById('tplGrid');
+  if (!list.length) {
+    grid.innerHTML = '<div class="tpl-loading">Nenhum template encontrado.</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  list.forEach((t, i) => {
+    const locked = t.IsPremium && !isPro;
+    const sel    = selectedTplId === t.Id;
+    const card   = document.createElement('div');
+    card.className = 'tpl-card' + (sel ? ' sel' : '');
+    card.id        = 'tpl-card-' + t.Id;
+    card.innerHTML = `
+      <div class="tpl-thumb">
+        ${tplMockup(t)}
+        <span class="tpl-bdg ${t.IsPremium ? 'bdg-pro' : 'bdg-free'}">${t.IsPremium ? 'PRO' : 'FREE'}</span>
+        ${locked ? `<div class="tpl-lock"><svg width="8" height="8" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" fill="none" stroke="#fff" stroke-width="2"/></svg></div>` : ''}
+        <div class="tpl-overlay">
+          <button class="btn-ver-ex" onclick="event.stopPropagation();window.open('/demo?t=${t.Id}','_blank')">👁 Ver Exemplo</button>
+        </div>
+      </div>
+      <div class="tpl-name">${t.Name}</div>`;
+    card.style.animationDelay = (i * 0.03) + 's';
+    card.onclick = () => {
+      if (locked) { window.location.href = '/checkout/pro'; return; }
+      selectTemplate(t);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(t) {
+  selectedTplId = t.Id;
+  document.getElementById('selectedTemplate').value = t.Id;
+  document.getElementById('selectedTplName').textContent = t.Name;
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('sel'));
+  const card = document.getElementById('tpl-card-' + t.Id);
+  if (card) { card.classList.add('sel'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+function filterByCategory(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.tpl-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = cat ? allTemplates.filter(t => t.Category === cat) : allTemplates;
+  document.getElementById('tplSearchInput').value = '';
+  renderTemplates(filtered);
+}
+
+function filterTemplates(q) {
+  const base = currentCat ? allTemplates.filter(t => t.Category === currentCat) : allTemplates;
+  const filtered = q ? base.filter(t => (t.Name||'').toLowerCase().includes(q.toLowerCase())) : base;
+  renderTemplates(filtered);
+}
+
+/* ── GERAR CV ────────────────────────────────────── */
+function generateCV() {
+  const fullName = document.getElementById('fullName').value.trim();
+  if (!fullName) { alert('Por favor preencha o seu nome completo!'); return; }
+  if (!selectedTplId) { alert('Por favor escolha um modelo de CV à direita.'); return; }
+
+  const expCards = document.querySelectorAll('[id^="exp-"]');
+  const experience = [];
+  expCards.forEach(card => {
+    const inputs   = card.querySelectorAll('input');
+    const textarea = card.querySelector('textarea');
+    if (inputs[0] && inputs[0].value.trim()) {
+      experience.push({
+        title: inputs[0].value, company: inputs[1]?.value || '',
+        start: inputs[2]?.value || '', end: inputs[3]?.value || '',
+        location: inputs[4]?.value || '', description: textarea?.value || ''
+      });
+    }
+  });
+
+  const eduCards = document.querySelectorAll('[id^="edu-"]');
+  const education = [];
+  eduCards.forEach(card => {
+    const inputs = card.querySelectorAll('input');
+    if (inputs[0] && inputs[0].value.trim()) {
+      education.push({ degree: inputs[0].value, school: inputs[1]?.value || '', year: inputs[2]?.value || '', grade: inputs[3]?.value || '' });
+    }
+  });
+
+  const langRows = document.querySelectorAll('[id^="lang-"]');
+  const languages = [];
+  langRows.forEach(row => {
+    const input = row.querySelector('input');
+    const sel   = row.querySelector('select');
+    if (input && input.value.trim()) languages.push({ name: input.value, level: sel?.value || '' });
+  });
+
+  const certCards = document.querySelectorAll('[id^="cert-"]');
+  const certs = [];
+  certCards.forEach(card => {
+    const inputs = card.querySelectorAll('input');
+    if (inputs[0] && inputs[0].value.trim()) certs.push({ name: inputs[0].value, issuer: inputs[1]?.value || '', year: inputs[2]?.value || '' });
+  });
+
+  const photoEl = document.getElementById('photoPreview').querySelector('img');
+  const tpl = allTemplates.find(t => t.Id === selectedTplId);
+
+  const cvData = {
+    fullName,
+    jobTitle:   document.getElementById('jobTitle').value,
+    email:      document.getElementById('email').value,
+    phone:      document.getElementById('phone').value,
+    address:    document.getElementById('address').value,
+    linkedin:   document.getElementById('linkedin').value,
+    summary:    document.getElementById('summary').value,
+    experience, education, skills, languages, certs,
+    photo:      photoEl ? photoEl.src : null,
+    template:   selectedTplId,
+    templateName: tpl ? tpl.Name : '',
+    cvId
+  };
+
+  sessionStorage.setItem('cvData', JSON.stringify(cvData));
+
+  // Guardar no servidor se autenticado
+  if (token && cvId) {
+    fetch(`${API}/cv/${cvId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ title: fullName, contentJson: cvData, templateId: selectedTplId, templateName: cvData.templateName })
+    }).catch(() => {});
+  }
+
+  window.location.href = '/preview?cv=' + cvId;
+}
+
+/* ── INIT ────────────────────────────────────────── */
+loadTemplates();
+</script>
+</body>
+</html>

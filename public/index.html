@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Premium — O builder que consegue entrevistas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#DBEAFE;
+  --green:#16A34A;--green-light:#DCFCE7;
+  --text:#111827;--text-2:#374151;--text-3:#6B7280;--text-4:#9CA3AF;
+  --border:#E5E7EB;--bg:#F9FAFB;--white:#FFFFFF;
+  --radius:12px;--radius-sm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--white);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-text{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.nav-links{display:flex;gap:4px;}
+.nav-links a{padding:8px 14px;color:var(--text-3);font-size:14px;font-weight:500;text-decoration:none;border-radius:var(--radius-sm);transition:all .2s;}
+.nav-links a:hover{color:var(--text);background:var(--bg);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.btn-in{padding:9px 18px;color:var(--text-2);font-size:14px;font-weight:600;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;text-decoration:none;transition:all .2s;}
+.btn-in:hover{background:var(--bg);}
+.btn-start{padding:9px 20px;color:#fff;font-size:14px;font-weight:700;background:var(--blue);border:none;border-radius:var(--radius-sm);cursor:pointer;text-decoration:none;transition:background .2s;}
+.btn-start:hover{background:var(--blue-dark);}
+
+/* HERO */
+.hero{padding:80px 40px 60px;text-align:center;max-width:1100px;margin:0 auto;}
+.badge{display:inline-flex;align-items:center;gap:7px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;margin-bottom:28px;}
+.badge-dot{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(40px,6vw,70px);font-weight:800;line-height:1.08;letter-spacing:-.5px;margin-bottom:20px;}
+h1 .hl{color:var(--blue);}
+.hero-p{font-size:18px;color:var(--text-3);line-height:1.6;max-width:560px;margin:0 auto 36px;}
+.hero-btns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:44px;}
+.btn-big{padding:15px 36px;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;border-radius:var(--radius);cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;}
+.btn-primary{background:var(--blue);color:#fff;border:none;box-shadow:0 4px 14px rgba(37,99,235,.28);}
+.btn-primary:hover{background:var(--blue-dark);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg);}
+.proof-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;}
+.stars{color:#F59E0B;font-size:17px;letter-spacing:1px;}
+.proof-txt{font-size:13px;color:var(--text-3);}
+.proof-txt b{color:var(--text-2);}
+.proof-sep{color:var(--border);font-size:20px;}
+
+/* COUNTER */
+.counter-bar{background:var(--blue);padding:18px 40px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.c-wrap{display:flex;gap:1px;}
+.c-digit{overflow:hidden;height:28px;width:19px;}
+.c-col{display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.c-col span{height:28px;line-height:28px;font-size:22px;font-weight:800;color:#fff;display:block;text-align:center;}
+.c-sep{font-size:22px;font-weight:800;color:#fff;line-height:28px;padding:0 1px;}
+.c-label{font-size:15px;color:rgba(255,255,255,.8);font-weight:500;}
+
+/* BENEFITS */
+.benefits{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.ben{background:#fff;padding:28px 24px;display:flex;gap:14px;border-right:1px solid var(--border);}
+.ben:last-child{border-right:none;}
+.ben-icon{width:40px;height:40px;background:var(--blue-light);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue);}
+.ben-title{font-size:15px;font-weight:700;margin-bottom:3px;}
+.ben-txt{font-size:13px;color:var(--text-3);line-height:1.5;}
+
+/* SECTIONS */
+.sec{padding:88px 40px;max-width:1100px;margin:0 auto;}
+.sec-tag{display:inline-block;background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+.sec-h{font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.15;letter-spacing:-.3px;margin-bottom:14px;}
+.sec-p{font-size:16px;color:var(--text-3);line-height:1.6;max-width:520px;}
+
+/* FEATURES GRID */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px;}
+.feat{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:26px;transition:all .25s;}
+.feat:hover{border-color:var(--blue);box-shadow:0 6px 24px rgba(37,99,235,.09);transform:translateY(-3px);}
+.feat-ai{display:inline-block;background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;margin-bottom:10px;}
+.feat-ico{width:42px;height:42px;background:var(--blue-light);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--blue);margin-bottom:16px;}
+.feat-title{font-size:15px;font-weight:700;margin-bottom:7px;}
+.feat-txt{font-size:13px;color:var(--text-3);line-height:1.6;}
+
+/* ATS */
+.ats-bg{background:var(--bg);padding:88px 40px;}
+.ats-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+.ats-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:0 8px 28px rgba(0,0,0,.05);}
+.ats-ctitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-4);margin-bottom:22px;}
+.ats-row{display:flex;justify-content:space-between;margin-bottom:6px;}
+.ats-label{font-size:13px;color:var(--text-2);}
+.ats-pct{font-size:13px;font-weight:700;color:var(--blue);}
+.ats-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-bottom:14px;}
+.ats-fill{height:100%;background:linear-gradient(90deg,var(--blue),#60A5FA);border-radius:4px;}
+.ats-total{margin-top:20px;background:var(--blue);border-radius:10px;padding:18px;text-align:center;color:#fff;}
+.ats-num{font-size:48px;font-weight:800;line-height:1;}
+.ats-lbl{font-size:12px;opacity:.75;margin-top:4px;}
+.green-pill{display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);font-size:13px;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:18px;}
+
+/* TEMPLATES */
+.tpl-sec{padding:88px 40px;max-width:1100px;margin:0 auto;}
+.tpl-hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;}
+.lnk{color:var(--blue);font-size:14px;font-weight:600;text-decoration:none;}
+.lnk:hover{text-decoration:underline;}
+.tpl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.tpl{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;background:#fff;transition:all .25s;}
+.tpl:hover{border-color:var(--blue);box-shadow:0 6px 24px rgba(37,99,235,.1);transform:translateY(-4px);}
+.tpl-prev{height:200px;background:var(--bg);display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--border);}
+.tpl-paper{width:70%;height:80%;background:#fff;border-radius:3px;box-shadow:0 2px 10px rgba(0,0,0,.1);padding:10px;display:flex;flex-direction:column;gap:4px;}
+.tp-h{height:18px;background:#2563EB;border-radius:2px;margin-bottom:4px;}
+.tp-l{height:4px;background:#E5E7EB;border-radius:2px;}
+.tp-lb{background:#BFDBFE;width:55%;}
+.tp-ls{width:68%;}
+.tpl-bdg{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;}
+.bdg-free{background:var(--green-light);color:var(--green);}
+.bdg-pro{background:var(--blue-light);color:var(--blue);}
+.tpl-info{padding:14px 16px;}
+.tpl-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.tpl-cat{font-size:12px;color:var(--text-4);}
+
+/* LINKEDIN */
+.li-bg{background:var(--bg);padding:88px 40px;}
+.li-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+.steps{margin-top:32px;display:flex;flex-direction:column;}
+.step{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.step-n{width:30px;height:30px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px;}
+.step-title{font-size:15px;font-weight:700;margin-bottom:3px;}
+.step-txt{font-size:13px;color:var(--text-3);line-height:1.5;}
+.li-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.05);}
+.li-hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.li-ico{width:42px;height:42px;background:#0A66C2;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.li-htitle{font-size:15px;font-weight:700;}
+.li-hsub{font-size:12px;color:var(--text-3);}
+.li-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);}
+.li-row:last-of-type{border-bottom:none;margin-bottom:16px;}
+.li-rlabel{font-size:13px;color:var(--text-3);display:flex;align-items:center;gap:8px;}
+.li-check{width:16px;height:16px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.li-rval{font-size:13px;font-weight:600;}
+.btn-li{width:100%;padding:13px;background:#0A66C2;border:none;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;}
+.btn-li:hover{background:#004182;}
+
+/* PRICING */
+.price-sec{padding:88px 40px;max-width:1100px;margin:0 auto;}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px;}
+.plan{border:1px solid var(--border);border-radius:16px;padding:30px;background:#fff;position:relative;}
+.plan.pop{border-color:var(--blue);box-shadow:0 8px 28px rgba(37,99,235,.12);}
+.pop-bdg{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:12px;font-weight:700;padding:4px 18px;border-radius:20px;white-space:nowrap;}
+.plan-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin-bottom:14px;}
+.plan-price{font-size:44px;font-weight:800;letter-spacing:-.5px;margin-bottom:3px;}
+.plan-per{font-size:13px;color:var(--text-4);margin-bottom:24px;}
+.plan-div{height:1px;background:var(--border);margin-bottom:20px;}
+.plan-feats{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.pf{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text-2);}
+.pf.off{color:var(--text-4);}
+.pf-chk{width:17px;height:17px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pf.off .pf-chk{background:var(--bg);}
+.btn-pl{width:100%;padding:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;}
+.btn-pl-out{background:transparent;border:2px solid var(--border);color:var(--text-2);}
+.btn-pl-out:hover{border-color:var(--blue);color:var(--blue);}
+.btn-pl-blu{background:var(--blue);border:none;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.28);}
+.btn-pl-blu:hover{background:var(--blue-dark);}
+
+/* PROOF */
+.proof-bg{background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:52px 40px;}
+.proof-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;}
+.proof-hired{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-4);margin-bottom:16px;}
+.proof-logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;}
+.plg{font-size:15px;font-weight:800;color:var(--text-4);}
+
+/* FAQ */
+.faq-sec{padding:88px 40px;max-width:740px;margin:0 auto;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 0;cursor:pointer;font-size:15px;font-weight:600;gap:12px;}
+.faq-ico{flex-shrink:0;color:var(--text-3);transition:transform .2s;}
+.faq-item.open .faq-ico{transform:rotate(45deg);}
+.faq-a{font-size:14px;color:var(--text-3);line-height:1.7;padding-bottom:18px;display:none;}
+.faq-item.open .faq-a{display:block;}
+
+/* CTA BANNER */
+.cta{background:var(--blue);padding:72px 40px;text-align:center;}
+.cta h2{font-size:clamp(28px,4vw,44px);font-weight:800;color:#fff;margin-bottom:14px;letter-spacing:-.3px;}
+.cta p{font-size:16px;color:rgba(255,255,255,.75);margin-bottom:32px;}
+.btn-white{padding:15px 40px;background:#fff;color:var(--blue);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.18);}
+
+/* FOOTER */
+footer{background:#111827;padding:52px 40px 28px;}
+.ft{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px;}
+.ft-brand{font-size:17px;font-weight:800;color:#fff;margin-bottom:10px;}
+.ft-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;}
+.ft-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff;margin-bottom:14px;}
+.ft-col a{display:block;font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:8px;transition:color .2s;}
+.ft-col a:hover{color:#fff;}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:22px;display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.35);}
+
+/* check icons inline */
+.chk-svg{width:9px;height:9px;stroke:#16A34A;stroke-width:2.5;fill:none;}
+.chk-li-svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none;}
+
+@media(max-width:960px){
+  nav{padding:0 18px;}
+  .hero,.sec,.tpl-sec,.price-sec,.faq-sec{padding:60px 18px;}
+  .ats-bg,.li-bg{padding:60px 18px;}
+  .proof-bg,.cta{padding:52px 18px;}
+  .benefits{grid-template-columns:1fr 1fr;}
+  .ben{border-right:none;border-bottom:1px solid var(--border);}
+  .feat-grid{grid-template-columns:1fr;}
+  .ats-in,.li-in{grid-template-columns:1fr;gap:40px;}
+  .tpl-grid{grid-template-columns:repeat(2,1fr);}
+  .price-grid{grid-template-columns:1fr;}
+  .ft{grid-template-columns:1fr 1fr;}
+  .proof-in{flex-direction:column;}
+  .nav-links{display:none;}
+  footer{padding:40px 18px 24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke="#fff" stroke-width="2"/><line x1="16" y1="17" x2="8" y2="17" stroke="#fff" stroke-width="2"/></svg></div>
+    <span class="logo-text">CV Premium</span>
+  </a>
+  <div class="nav-links">
+    <a href="#templates">Templates</a>
+    <a href="/exemplos">Exemplos</a>
+    <a href="/carta">Carta de Apresentação</a>
+    <a href="#pricing">Preços</a>
+    <a href="/blog">Blog</a>
+  </div>
+  <div class="nav-right">
+    <a href="/login" class="btn-in">Entrar</a>
+    <a href="/register" class="btn-start">Criar CV</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge"><div class="badge-dot"></div>Mais de 2 milhões de CVs criados no CV Premium</div>
+  <h1>O builder que consegue<br><span class="hl">entrevistas de verdade</span></h1>
+  <p class="hero-p">Apenas 2% dos CVs passam na triagem. Com o CVPro, o seu será um deles. IA, templates ATS e score automático.</p>
+  <div class="hero-btns">
+    <a href="/register" class="btn-big btn-primary">Criar o meu CV — Grátis</a>
+    <a href="#templates" class="btn-big btn-ghost">Ver Templates</a>
+  </div>
+  <div class="proof-row">
+    <span class="stars">★★★★★</span>
+    <span class="proof-txt"><b>4.4 / 5</b> · 37.389 avaliações</span>
+    <span class="proof-sep">|</span>
+    <span class="proof-txt"><b>39%</b> mais probabilidade de ser contratado</span>
+  </div>
+</section>
+
+<div class="counter-bar">
+  <div class="c-wrap" id="ctr"></div>
+  <span class="c-label">CVs criados hoje</span>
+</div>
+
+<div class="benefits">
+  <div class="ben"><div class="ben-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="ben-title">Pronto em 10 minutos</div><div class="ben-txt">A IA é 10× mais rápida do que escrever sozinho.</div></div></div>
+  <div class="ben"><div class="ben-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/></svg></div><div><div class="ben-title">Zero erros</div><div class="ben-txt">A IA corrige e melhora automaticamente o texto.</div></div></div>
+  <div class="ben"><div class="ben-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div><div class="ben-title">Templates ATS</div><div class="ben-txt">100% compatível com sistemas de triagem automática.</div></div></div>
+  <div class="ben"><div class="ben-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="ben-title">Salário 7% mais alto</div><div class="ben-txt">Ajudamos a negociar uma melhor proposta salarial.</div></div></div>
+</div>
+
+<section class="sec" id="features">
+  <div class="sec-tag">Funcionalidades</div>
+  <h2 class="sec-h">Tudo o que precisa para ser contratado</h2>
+  <p class="sec-p">Ferramentas de carreira completas — do CV à entrevista.</p>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-ai">IA Avançada</div><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div class="feat-title">IA escreve por si</div><div class="feat-txt">Fale ao microfone e a IA corrige automaticamente. Bloqueado? Clique para adicionar frases profissionais.</div></div>
+    <div class="feat"><div class="feat-ai">IA Avançada</div><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg></div><div class="feat-title">Score ATS automático</div><div class="feat-txt">Analise o CV em tempo real. Veja exactamente o que melhorar para passar nos filtros automáticos.</div></div>
+    <div class="feat"><div class="feat-ai">IA Avançada</div><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="feat-title">Carta de apresentação instantânea</div><div class="feat-txt">Cole um link de oferta e criamos uma carta em 2 minutos, totalmente personalizada ao cargo.</div></div>
+    <div class="feat"><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div><div class="feat-title">Importar do LinkedIn</div><div class="feat-txt">Um clique. Toda a experiência importada e formatada automaticamente no template escolhido.</div></div>
+    <div class="feat"><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="feat-title">Adapte à vaga</div><div class="feat-txt">Cole a descrição da vaga e o sistema adapta o CV com as palavras-chave certas para aquela empresa.</div></div>
+    <div class="feat"><div class="feat-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div class="feat-title">Rede de Recrutadores</div><div class="feat-txt">Recrutadores com vagas em aberto vêm até nós. Corresponda o perfil com até 50 recrutadores por semana.</div></div>
+  </div>
+</section>
+
+<div class="ats-bg">
+  <div class="ats-in">
+    <div>
+      <div class="green-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/></svg>39% mais probabilidade de ser contratado</div>
+      <div class="sec-tag">Análise ATS</div>
+      <h2 class="sec-h">O seu CV passa<br>nos filtros?</h2>
+      <p class="sec-p">92% dos CVs são rejeitados antes de chegarem a um humano. O nosso motor ATS garante que o seu passa.</p>
+      <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text-2);"><div class="pf-chk" style="width:17px;height:17px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Feedback instantâneo em cada secção</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text-2);"><div class="pf-chk" style="width:17px;height:17px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Sugestões de palavras-chave por sector</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text-2);"><div class="pf-chk" style="width:17px;height:17px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Score comparado com o mercado</div>
+      </div>
+    </div>
+    <div class="ats-card">
+      <div class="ats-ctitle">Análise ATS em tempo real</div>
+      <div class="ats-row"><span class="ats-label">Palavras-chave</span><span class="ats-pct">92%</span></div><div class="ats-track"><div class="ats-fill" style="width:92%"></div></div>
+      <div class="ats-row"><span class="ats-label">Formatação</span><span class="ats-pct">88%</span></div><div class="ats-track"><div class="ats-fill" style="width:88%"></div></div>
+      <div class="ats-row"><span class="ats-label">Experiência</span><span class="ats-pct">95%</span></div><div class="ats-track"><div class="ats-fill" style="width:95%"></div></div>
+      <div class="ats-row"><span class="ats-label">Educação</span><span class="ats-pct">100%</span></div><div class="ats-track"><div class="ats-fill" style="width:100%"></div></div>
+      <div class="ats-total"><div class="ats-num">94</div><div class="ats-lbl">ATS Score Total</div></div>
+    </div>
+  </div>
+</div>
+
+<section class="tpl-sec" id="templates">
+  <div class="tpl-hdr">
+    <div><div class="sec-tag">Templates</div><h2 class="sec-h">Testados por recrutadores · +200 templates</h2>
+    <p style="font-size:14px;color:var(--text-3);margin-top:8px;">⚠️ <strong>1 template gratuito</strong> incluído. Os restantes <strong>200+ templates premium</strong> requerem subscrição. Pode visualizar todos livremente — o download e gravação como imagem estão disponíveis apenas para subscritores.</p>
+    </div>
+    <a href="/templates" class="lnk">Ver todos →</a>
+  </div>
+  <div class="tpl-grid">
+    <div class="tpl"><div class="tpl-prev"><div class="tpl-paper"><div class="tp-h"></div><div class="tp-l tp-lb"></div><div style="margin-top:4px;display:flex;flex-direction:column;gap:3px;"><div class="tp-l"></div><div class="tp-l tp-ls"></div><div class="tp-l"></div></div></div><span class="tpl-bdg bdg-free">✓ Grátis</span></div><div class="tpl-info"><div class="tpl-name">Executivo</div><div class="tpl-cat">Profissional · Finanças</div></div></div>
+    <div class="tpl"><div class="tpl-prev" style="background:#F0F4FF;"><div class="tpl-paper" style="border-top:3px solid #2563EB;"><div class="tp-h" style="background:#1E3A8A;height:14px;margin-bottom:6px;"></div><div class="tp-l" style="background:#BFDBFE;width:60%;margin-bottom:6px;"></div><div class="tp-l"></div><div class="tp-l tp-ls"></div></div><span class="tpl-bdg bdg-pro">🔒 Premium</span></div><div class="tpl-info"><div class="tpl-name">Moderno</div><div class="tpl-cat">Tech · Startups</div></div></div>
+    <div class="tpl"><div class="tpl-prev" style="background:#F8FFF8;"><div class="tpl-paper" style="display:grid;grid-template-columns:35% 65%;padding:0;overflow:hidden;border-radius:3px;"><div style="background:#1a3a2a;padding:8px;display:flex;flex-direction:column;gap:4px;align-items:center;"><div style="width:22px;height:22px;background:#16A34A;border-radius:50%;margin-bottom:4px;"></div><div style="height:2px;width:100%;background:rgba(255,255,255,.25);border-radius:1px;"></div><div style="height:2px;width:70%;background:rgba(255,255,255,.12);border-radius:1px;"></div></div><div style="padding:8px;display:flex;flex-direction:column;gap:3px;"><div class="tp-l" style="background:#BBF7D0;width:85%;"></div><div class="tp-l"></div><div class="tp-l tp-ls"></div></div></div><span class="tpl-bdg bdg-pro">🔒 Premium</span></div><div class="tpl-info"><div class="tpl-name">Clássico</div><div class="tpl-cat">Tradicional · RH</div></div></div>
+    <div class="tpl"><div class="tpl-prev" style="background:#FFF7ED;"><div class="tpl-paper" style="border-left:3px solid #F59E0B;"><div class="tp-h" style="background:#92400E;height:13px;margin-bottom:6px;"></div><div class="tp-l" style="background:#FDE68A;width:50%;margin-bottom:5px;"></div><div class="tp-l"></div><div class="tp-l tp-ls"></div></div><span class="tpl-bdg bdg-pro">🔒 Premium</span></div><div class="tpl-info"><div class="tpl-name">Criativo</div><div class="tpl-cat">Design · Marketing</div></div></div>
+  </div>
+</section>
+
+<div class="li-bg" id="linkedin">
+  <div class="li-in">
+    <div>
+      <div class="sec-tag">Integração LinkedIn</div>
+      <h2 class="sec-h">Importe o perfil<br>em 1 clique</h2>
+      <p class="sec-p">Sem copiar e colar. Importamos toda a experiência, educação e competências directamente do LinkedIn.</p>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><div class="step-title">Ligar conta LinkedIn</div><div class="step-txt">Autorize com OAuth seguro. Nunca guardamos a sua senha.</div></div></div>
+        <div class="step"><div class="step-n">2</div><div><div class="step-title">Seleccionar o que importar</div><div class="step-txt">Experiência, educação, competências e certificações.</div></div></div>
+        <div class="step"><div class="step-n">3</div><div><div class="step-title">CV gerado automaticamente</div><div class="step-txt">A IA organiza e optimiza para o template escolhido.</div></div></div>
+      </div>
+    </div>
+    <div class="li-card">
+      <div class="li-hdr"><div class="li-ico"><svg width="22" height="22" fill="#fff" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div><div><div class="li-htitle">LinkedIn Import</div><div class="li-hsub">Sincronize em segundos</div></div></div>
+      <div class="li-row"><div class="li-rlabel"><div class="li-check"><svg class="chk-li-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Experiência profissional</div><div class="li-rval">4 cargos</div></div>
+      <div class="li-row"><div class="li-rlabel"><div class="li-check"><svg class="chk-li-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Educação</div><div class="li-rval">2 graus</div></div>
+      <div class="li-row"><div class="li-rlabel"><div class="li-check"><svg class="chk-li-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Competências</div><div class="li-rval">24 itens</div></div>
+      <div class="li-row"><div class="li-rlabel"><div class="li-check"><svg class="chk-li-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Certificações</div><div class="li-rval">6 certificações</div></div>
+      <button class="btn-li" onclick="location.href='/auth/linkedin'"><svg width="18" height="18" fill="#fff" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>Importar do LinkedIn</button>
+    </div>
+  </div>
+</div>
+
+<section class="price-sec" id="pricing">
+  <div style="text-align:center;max-width:580px;margin:0 auto;">
+    <div class="sec-tag">Preços</div>
+    <h2 class="sec-h">Comece grátis.<br>Faça upgrade quando quiser.</h2>
+  </div>
+  <div class="price-grid">
+    <div class="plan">
+      <div class="plan-name">Gratuito</div>
+      <div class="plan-price">€0</div>
+      <div class="plan-per">para sempre</div>
+      <div class="plan-div"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>2 CVs</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>1 template gratuito incluído</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Score ATS básico</div>
+        <div class="pf off"><div class="pf-chk"><svg class="chk-svg" style="stroke:var(--text-4)" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Export PDF sem marca</div>
+        <div class="pf off"><div class="pf-chk"><svg class="chk-svg" style="stroke:var(--text-4)" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>IA para melhorar</div>
+      </div>
+      <button class="btn-pl btn-pl-out" onclick="location.href='/register'">Começar Grátis</button>
+    </div>
+    <div class="plan pop">
+      <div class="pop-bdg">⚡ Mais Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">Kz 2.000</div>
+      <div class="plan-per">por mês · cancele a qualquer momento</div>
+      <div class="plan-div"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>CVs ilimitados</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>200+ templates premium desbloqueados</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Score ATS completo</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Export PDF sem marca</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>IA + LinkedIn Import</div>
+      </div>
+      <button class="btn-pl btn-pl-blu" onclick="location.href='/checkout/pro'">Começar Pro</button>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price">Kz 5.000</div>
+      <div class="plan-per">por mês</div>
+      <div class="plan-div"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Tudo do Pro</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Dashboard de candidaturas</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Visível a recrutadores</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Carta de apresentação IA</div>
+        <div class="pf"><div class="pf-chk"><svg class="chk-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Coaching de carreira</div>
+      </div>
+      <button class="btn-pl btn-pl-out" onclick="location.href='/checkout/enterprise'">Começar Enterprise</button>
+    </div>
+  </div>
+</section>
+
+<div class="proof-bg">
+  <div class="proof-in">
+    <div>
+      <div class="proof-hired">Os nossos candidatos foram contratados em:</div>
+      <div class="proof-logos">
+        <span class="plg">Google</span><span class="plg">Microsoft</span><span class="plg">Amazon</span><span class="plg">McKinsey</span><span class="plg">Deloitte</span><span class="plg">Goldman Sachs</span>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:40px;font-weight:800;color:var(--text);letter-spacing:-.5px;">98%</div>
+      <div style="font-size:14px;color:var(--text-3);line-height:1.5;">dos clientes de coaching<br>recebem oferta em 12 semanas</div>
+    </div>
+  </div>
+</div>
+
+<section class="faq-sec">
+  <div style="text-align:center;margin-bottom:44px;"><div class="sec-tag">FAQ</div><h2 class="sec-h">Perguntas frequentes</h2></div>
+  <div class="faq-item open"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O CV Premium é realmente grátis?<svg class="faq-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Sim! Pode criar 2 CVs com 1 template gratuito, para sempre. O plano Pro (Kz 2.000/mês) desbloqueia CVs ilimitados, mais de 200 templates premium e as funcionalidades de IA avançada. Pode visualizar todos os templates livremente — o download e a gravação como imagem estão disponíveis apenas para subscritores.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O que é um Score ATS?<svg class="faq-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">ATS são sistemas automáticos usados por empresas para filtrar CVs. O nosso score analisa o CV e indica como melhorá-lo para passar nesses filtros e chegar a um recrutador humano.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Posso cancelar a qualquer momento?<svg class="faq-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Sim. Sem contratos, sem permanência. Cancele nas definições da conta a qualquer altura. Os CVs ficam guardados mesmo após cancelar.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Posso ver os templates sem subscrição?<svg class="faq-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Sim! Pode visualizar todos os 200+ templates livremente antes de subscrever. O download em PDF e a gravação como imagem estão disponíveis apenas para utilizadores Pro e Enterprise. Contacte-nos: 944 524 292.</div></div>
+</section>
+
+<div class="cta">
+  <h2>Junte-se a mais de 2 milhões<br>de profissionais</h2>
+  <p>Comece agora e seja contratado mais rápido.</p>
+  <a href="/register" class="btn-white">Criar o meu CV — Grátis</a>
+</div>
+
+<footer>
+  <div class="ft">
+    <div><div class="ft-brand">CV Premium</div><div class="ft-desc">O builder de CVs que realmente consegue entrevistas. Usado por profissionais em Angola e em todo o mundo.<br><br>📞 <a href="tel:+244944524292" style="color:rgba(255,255,255,.6);text-decoration:none;">+244 944 524 292</a></div></div>
+    <div class="ft-col"><div class="ft-title">CV</div><a href="/builder">Builder de CV</a><a href="/ats">ATS Scorer</a><a href="/exemplos">Exemplos</a><a href="/templates">Templates</a></div>
+    <div class="ft-col"><div class="ft-title">Carreira</div><a href="/carta">Carta de Apresentação</a><a href="/empregos">Pesquisa de Emprego</a><a href="/coaching">Coaching</a><a href="/blog">Blog</a></div>
+    <div class="ft-col"><div class="ft-title">Empresa</div><a href="/sobre">Sobre Nós</a><a href="/pricing">Preços</a><a href="/contacto">Contacto</a><a href="/termos">Termos</a><a href="/privacidade">Privacidade</a></div>
+  </div>
+  <div class="ft-bot"><span>© 2025 CV Premium · Todos os direitos reservados</span><span>📞 +244 944 524 292</span></div>
+</footer>
+
+<script>
+// Animated counter
+function setCounter(n){
+  const s=String(n).padStart(6,'0');
+  const el=document.getElementById('ctr');
+  el.innerHTML='';
+  [...s].forEach((d,i)=>{
+    if(i===3){const sep=document.createElement('span');sep.className='c-sep';sep.textContent=',';el.appendChild(sep);}
+    const wrap=document.createElement('div');wrap.className='c-digit';
+    const col=document.createElement('div');col.className='c-col';
+    for(let k=0;k<10;k++){const sp=document.createElement('span');sp.textContent=k;col.appendChild(sp);}
+    col.style.transform=`translateY(-${+d*28}px)`;
+    wrap.appendChild(col);el.appendChild(wrap);
+  });
+}
+let n=142893;setCounter(n);
+setInterval(()=>{n+=Math.floor(Math.random()*4)+1;setCounter(n);},2500);
+</script>
+</body>
+</html>

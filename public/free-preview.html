@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview CV Grátis - CVPremium</title>
+    <!-- Calibri é fonte nativa do sistema -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init('hP_48MpVt8XwvoWC7');</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Calibri', 'Trebuchet MS', sans-serif; background: #0a0a0a; color: #fff; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: rgba(10,10,10,0.95); border-bottom: 1px solid #222; position: fixed; width: 100%; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: #fff; }
+        .logo span { color: #c9a96e; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-back { background: transparent; border: 1px solid #333; color: #888; padding: 9px 18px; border-radius: 8px; font-size: 13px; text-decoration: none; }
+        .btn-download-free { background: #fff; color: #000; border: none; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .btn-upgrade-nav { background: #c9a96e; color: #000; border: none; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+        .preview-wrapper { padding: 90px 20px 40px; display: flex; gap: 24px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+        .cv-column { display: flex; flex-direction: column; align-items: center; }
+        .preview-frame { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 30px 90px rgba(0,0,0,0.7); position: relative; }
+
+        /* ACTION SIDEBAR */
+        .action-sidebar { width: 280px; position: sticky; top: 100px; display: flex; flex-direction: column; gap: 14px; }
+        .action-card { background: #111; border: 1px solid #222; border-radius: 14px; padding: 22px; }
+        .action-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .action-card p { font-size: 12px; color: #666; margin-bottom: 16px; line-height: 1.6; }
+        .btn-dl-big { background: #fff; color: #000; border: none; padding: 13px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-bottom: 10px; }
+        .btn-dl-big:hover { background: #e0e0e0; }
+        .email-row { display: flex; gap: 7px; }
+        .email-row input { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; padding: 10px 12px; color: #fff; font-size: 12px; outline: none; font-family: 'Calibri', 'Trebuchet MS', sans-serif; min-width: 0; }
+        .email-row input:focus { border-color: #555; }
+        .btn-send { background: #333; color: #fff; border: none; border-radius: 7px; padding: 10px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .email-ok { color: #22c55e; font-size: 11px; margin-top: 6px; display: none; }
+
+        /* UPGRADE CARD */
+        .upgrade-card { background: linear-gradient(135deg, #1a1500, #1a1200); border: 1px solid #c9a96e33; border-radius: 14px; padding: 22px; }
+        .upgrade-card h3 { font-size: 15px; font-weight: 700; color: #c9a96e; margin-bottom: 6px; }
+        .upgrade-card p { font-size: 12px; color: #888; margin-bottom: 14px; line-height: 1.6; }
+        .upgrade-features { margin-bottom: 16px; }
+        .upgrade-features div { font-size: 11px; color: #aaa; padding: 3px 0; display: flex; align-items: center; gap: 6px; }
+        .upgrade-features div::before { content: '✦'; color: #c9a96e; font-size: 9px; }
+        .btn-upgrade-big { background: #c9a96e; color: #000; border: none; padding: 13px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; font-family: 'Calibri', 'Trebuchet MS', sans-serif; text-decoration: none; display: block; text-align: center; }
+        .btn-upgrade-big:hover { background: #e0c080; }
+        .upgrade-price { text-align: center; font-size: 11px; color: #666; margin-top: 6px; }
+
+        /* ===== TEMPLATE A: CLASSIC B&W ===== */
+        .free-a { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #000; background: #fff; }
+        .free-a .cv-header { padding: 40px 50px 24px; border-bottom: 2px solid #000; }
+        .free-a .cv-name { font-size: 28px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .free-a .cv-title { font-size: 13px; color: #444; margin-bottom: 12px; }
+        .free-a .cv-contacts { display: flex; flex-wrap: wrap; gap: 14px; }
+        .free-a .cv-contact-item { font-size: 11px; color: #555; }
+        .free-a .cv-body { padding: 24px 50px 36px; }
+        .free-a .cv-section { margin-bottom: 22px; }
+        .free-a .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #000; border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 12px; }
+        .free-a .summary-text { font-size: 12px; line-height: 1.7; color: #222; }
+        .free-a .exp-item { margin-bottom: 14px; }
+        .free-a .exp-header { display: flex; justify-content: space-between; align-items: baseline; }
+        .free-a .exp-title { font-size: 13px; font-weight: 700; color: #000; }
+        .free-a .exp-dates { font-size: 11px; color: #555; }
+        .free-a .exp-company { font-size: 12px; color: #333; font-style: italic; margin-bottom: 4px; }
+        .free-a .exp-desc { font-size: 12px; line-height: 1.6; color: #333; }
+        .free-a .edu-item { margin-bottom: 10px; }
+        .free-a .edu-header { display: flex; justify-content: space-between; }
+        .free-a .edu-degree { font-size: 13px; font-weight: 700; }
+        .free-a .edu-year { font-size: 11px; color: #555; }
+        .free-a .edu-school { font-size: 12px; color: #444; font-style: italic; }
+        .free-a .skills-row { display: flex; flex-wrap: wrap; gap: 5px; }
+        .free-a .skill-item { font-size: 11px; color: #222; border: 1px solid #ccc; padding: 2px 10px; border-radius: 2px; }
+        .free-a .lang-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; color: #333; }
+
+        /* ===== TEMPLATE B: MODERN B&W ===== */
+        .free-b { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #000; background: #fff; }
+        .free-b .cv-header { background: #111; color: #fff; padding: 38px 50px; }
+        .free-b .cv-name { font-size: 30px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .free-b .cv-title { font-size: 12px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+        .free-b .cv-contacts { display: flex; flex-wrap: wrap; gap: 14px; }
+        .free-b .cv-contact-item { font-size: 11px; color: #888; }
+        .free-b .cv-body { display: grid; grid-template-columns: 1fr 200px; }
+        .free-b .cv-main { padding: 28px 28px 28px 50px; }
+        .free-b .cv-sidebar { background: #f5f5f5; padding: 28px 20px; border-left: 1px solid #e0e0e0; }
+        .free-b .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #111; margin-bottom: 12px; border-bottom: 2px solid #111; padding-bottom: 4px; }
+        .free-b .cv-section { margin-bottom: 24px; }
+        .free-b .summary-text { font-size: 12px; line-height: 1.8; color: #444; }
+        .free-b .exp-item { margin-bottom: 16px; padding-left: 12px; border-left: 2px solid #ccc; }
+        .free-b .exp-title { font-size: 13px; font-weight: 700; color: #000; }
+        .free-b .exp-company { font-size: 11px; color: #555; font-weight: 600; }
+        .free-b .exp-meta { font-size: 10px; color: #999; margin: 2px 0 5px; }
+        .free-b .exp-desc { font-size: 11px; line-height: 1.6; color: #555; }
+        .free-b .edu-item { margin-bottom: 12px; }
+        .free-b .edu-degree { font-size: 12px; font-weight: 700; color: #000; }
+        .free-b .edu-school { font-size: 11px; color: #666; }
+        .free-b .edu-year { font-size: 10px; color: #888; }
+        .free-b .skill-item { display: block; font-size: 11px; padding: 3px 0; border-bottom: 1px solid #e0e0e0; color: #333; }
+        .free-b .skill-item::before { content: '— '; color: #999; }
+        .free-b .lang-item { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px solid #e8e8e8; color: #333; }
+        .free-b .lang-level { color: #888; font-size: 10px; }
+
+        /* UPGRADE WATERMARK for free */
+        .free-watermark { position: absolute; bottom: 20px; right: 20px; background: #111; color: #c9a96e; font-size: 10px; padding: 5px 10px; border-radius: 4px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 600; z-index: 10; }
+
+        @media print {
+            nav, .action-sidebar, .free-watermark { display: none !important; }
+            body { background: white; }
+            .preview-wrapper { padding: 0; }
+            .preview-frame { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="free.html" class="logo">CV<span>Premium</span></a>
+        <div class="nav-actions">
+            <a href="free.html" class="btn-back">← Editar</a>
+            <button class="btn-download-free" onclick="downloadFree()">⬇ Download Grátis</button>
+            <a href="form.html" class="btn-upgrade-nav">✦ Premium $1.99</a>
+        </div>
+    </nav>
+
+    <div class="preview-wrapper">
+        <div class="cv-column">
+            <div class="preview-frame" id="cvFrame">
+                <div class="free-watermark">cvpremium.com</div>
+                <div id="cvContent"></div>
+            </div>
+        </div>
+
+        <div class="action-sidebar">
+            <!-- DOWNLOAD FREE -->
+            <div class="action-card">
+                <h3>⬇ Download Grátis</h3>
+                <p>Faz o download do teu CV ou recebe por email.</p>
+                <button class="btn-dl-big" onclick="downloadFree()">Download PDF</button>
+                <div class="email-row">
+                    <input type="email" id="emailInput" placeholder="teu@email.com">
+                    <button class="btn-send" onclick="sendEmailFree()">Enviar</button>
+                </div>
+                <div class="email-ok" id="emailOk">✓ Email enviado!</div>
+            </div>
+
+            <!-- UPGRADE -->
+            <div class="upgrade-card">
+                <h3>✦ Quer melhor?</h3>
+                <p>Faz upgrade para o CV Premium e impressiona qualquer recrutador.</p>
+                <div class="upgrade-features">
+                    <div>13 templates profissionais</div>
+                    <div>Templates com foto</div>
+                    <div>ATS optimizado</div>
+                    <div>Cores e design premium</div>
+                    <div>Sem marca de água</div>
+                    <div>Suporte prioritário</div>
+                </div>
+                <a href="form.html" class="btn-upgrade-big">✦ Upgrade para Premium</a>
+                <div class="upgrade-price">Apenas $1.99 · Pagamento único</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var data = {};
+
+        function loadCV() {
+            var raw = sessionStorage.getItem('freeCvData');
+            if (!raw) {
+                document.getElementById('cvContent').innerHTML = '<div style="padding:60px;text-align:center;color:#999;font-family:sans-serif"><h3>Nenhum dado encontrado</h3><p style="margin-top:10px">Por favor <a href="free.html" style="color:#c9a96e">preenche o formulário</a> primeiro.</p></div>';
+                return;
+            }
+            data = JSON.parse(raw);
+            if (data.email) document.getElementById('emailInput').value = data.email;
+            if (data.template === 'B') renderB();
+            else renderA();
+        }
+
+        function esc(s) {
+            return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function contacts(cls) {
+            var items = [];
+            if (data.email) items.push('<a href="mailto:' + esc(data.email) + '" style="color:inherit;text-decoration:none;">' + esc(data.email) + '</a>');
+            if (data.phone) items.push(esc(data.phone));
+            if (data.address) items.push(esc(data.address));
+            if (data.linkedin) {
+                var url = data.linkedin.trim();
+                if (!url.match(/^https?:\/\//)) url = 'https://' + url;
+                var label = url.replace(/^https?:\/\/(www\.)?linkedin\.com\//i, 'linkedin.com/');
+                if (label.length > 35) label = label.substring(0, 35) + '…';
+                items.push('<a href="' + url + '" target="_blank" style="color:inherit;text-decoration:underline;">' + label + '</a>');
+            }
+            return items.map(function(i) { return '<div class="' + cls + '">' + i + '</div>'; }).join('');
+        }
+
+        /* ===== TEMPLATE A ===== */
+        function renderA() {
+            var expHTML = '';
+            if (data.experience && data.experience.length) {
+                data.experience.forEach(function(e) {
+                    var dates = [e.start, e.end].filter(Boolean).join(' – ');
+                    expHTML += '<div class="exp-item">' +
+                        '<div class="exp-header"><div class="exp-title">' + esc(e.title) + '</div><div class="exp-dates">' + esc(dates) + '</div></div>' +
+                        '<div class="exp-company">' + esc(e.company) + (e.location ? ' · ' + esc(e.location) : '') + '</div>' +
+                        (e.description ? '<div class="exp-desc">' + esc(e.description) + '</div>' : '') + '</div>';
+                });
+            }
+
+            var eduHTML = '';
+            if (data.education && data.education.length) {
+                data.education.forEach(function(e) {
+                    eduHTML += '<div class="edu-item">' +
+                        '<div class="edu-header"><div class="edu-degree">' + esc(e.degree) + '</div><div class="edu-year">' + esc(e.year) + '</div></div>' +
+                        '<div class="edu-school">' + esc(e.school) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
+                });
+            }
+
+            var skillsHTML = data.skills && data.skills.length
+                ? '<div class="skills-row">' + data.skills.map(function(s) { return '<span class="skill-item">' + esc(s) + '</span>'; }).join('') + '</div>' : '';
+
+            var langsHTML = data.languages && data.languages.length
+                ? data.languages.map(function(l) { return '<div class="lang-row"><span>' + esc(l.name) + '</span><span>' + esc(l.level) + '</span></div>'; }).join('') : '';
+
+            document.getElementById('cvContent').innerHTML =
+                '<div class="free-a">' +
+                '<div class="cv-header">' +
+                '<div class="cv-name">' + esc(data.fullName) + '</div>' +
+                '<div class="cv-title">' + esc(data.jobTitle) + '</div>' +
+                '<div class="cv-contacts">' + contacts('cv-contact-item') + '</div></div>' +
+                '<div class="cv-body">' +
+                (data.summary ? '<div class="cv-section"><div class="section-title">Resumo Profissional</div><div class="summary-text">' + esc(data.summary) + '</div></div>' : '') +
+                (expHTML ? '<div class="cv-section"><div class="section-title">Experiência Profissional</div>' + expHTML + '</div>' : '') +
+                (eduHTML ? '<div class="cv-section"><div class="section-title">Formação Académica</div>' + eduHTML + '</div>' : '') +
+                (skillsHTML ? '<div class="cv-section"><div class="section-title">Competências</div>' + skillsHTML + '</div>' : '') +
+                (langsHTML ? '<div class="cv-section"><div class="section-title">Idiomas</div>' + langsHTML + '</div>' : '') +
+                '</div></div>';
+        }
+
+        /* ===== TEMPLATE B ===== */
+        function renderB() {
+            var expHTML = '';
+            if (data.experience && data.experience.length) {
+                data.experience.forEach(function(e) {
+                    var meta = [e.start, e.end].filter(Boolean).join(' — ');
+                    if (e.location) meta += ' · ' + e.location;
+                    expHTML += '<div class="exp-item">' +
+                        '<div class="exp-title">' + esc(e.title) + '</div>' +
+                        '<div class="exp-company">' + esc(e.company) + '</div>' +
+                        '<div class="exp-meta">' + esc(meta) + '</div>' +
+                        (e.description ? '<div class="exp-desc">' + esc(e.description) + '</div>' : '') + '</div>';
+                });
+            }
+
+            var eduHTML = '';
+            if (data.education && data.education.length) {
+                data.education.forEach(function(e) {
+                    eduHTML += '<div class="edu-item">' +
+                        '<div class="edu-degree">' + esc(e.degree) + '</div>' +
+                        '<div class="edu-school">' + esc(e.school) + '</div>' +
+                        '<div class="edu-year">' + esc(e.year) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
+                });
+            }
+
+            var skillsHTML = data.skills && data.skills.length
+                ? data.skills.map(function(s) { return '<span class="skill-item">' + esc(s) + '</span>'; }).join('') : '';
+
+            var langsHTML = data.languages && data.languages.length
+                ? data.languages.map(function(l) { return '<div class="lang-item"><span>' + esc(l.name) + '</span><span class="lang-level">' + esc(l.level) + '</span></div>'; }).join('') : '';
+
+            document.getElementById('cvContent').innerHTML =
+                '<div class="free-b">' +
+                '<div class="cv-header">' +
+                '<div class="cv-name">' + esc(data.fullName) + '</div>' +
+                '<div class="cv-title">' + esc(data.jobTitle) + '</div>' +
+                '<div class="cv-contacts">' + contacts('cv-contact-item') + '</div></div>' +
+                '<div class="cv-body"><div class="cv-main">' +
+                (data.summary ? '<div class="cv-section"><div class="section-title">Perfil</div><div class="summary-text">' + esc(data.summary) + '</div></div>' : '') +
+                (expHTML ? '<div class="cv-section"><div class="section-title">Experiência</div>' + expHTML + '</div>' : '') +
+                (eduHTML ? '<div class="cv-section"><div class="section-title">Formação</div>' + eduHTML + '</div>' : '') +
+                '</div><div class="cv-sidebar">' +
+                (skillsHTML ? '<div class="cv-section"><div class="section-title">Competências</div>' + skillsHTML + '</div>' : '') +
+                (langsHTML ? '<div class="cv-section"><div class="section-title">Idiomas</div>' + langsHTML + '</div>' : '') +
+                '</div></div></div>';
+        }
+
+        function downloadFree() {
+            var wm = document.querySelector('.free-watermark');
+            var nav = document.querySelector('nav');
+            var sidebar = document.querySelector('.action-sidebar');
+            if (nav) nav.style.display = 'none';
+            if (sidebar) sidebar.style.display = 'none';
+            setTimeout(function() {
+                window.print();
+                setTimeout(function() {
+                    if (nav) nav.style.display = 'flex';
+                    if (sidebar) sidebar.style.display = 'flex';
+                }, 1000);
+            }, 200);
+        }
+
+        function sendEmailFree() {
+            var email = document.getElementById('emailInput').value.trim();
+            if (!email || !email.includes('@')) { alert('Por favor introduz um email válido.'); return; }
+
+            var btn = document.querySelector('.btn-send');
+            btn.textContent = 'A enviar...';
+            btn.disabled = true;
+
+            emailjs.send('service_27lnkz5', 'template_g4lir0a', {
+                to_email: email,
+                cv_name: data.fullName || 'Cliente',
+                job_title: data.jobTitle || '',
+                reply_to: email
+            }).then(function() {
+                document.getElementById('emailOk').style.display = 'block';
+                btn.textContent = '✓ Enviado';
+                setTimeout(function() {
+                    document.getElementById('emailOk').style.display = 'none';
+                    btn.textContent = 'Enviar';
+                    btn.disabled = false;
+                }, 4000);
+            }, function(err) {
+                alert('Erro ao enviar. Tenta novamente.');
+                btn.textContent = 'Enviar';
+                btn.disabled = false;
+            });
+        }
+
+        loadCV();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Premium — Painel Administrador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1a56db;--blue-d:#1345b7;--blue-l:#eff6ff;
+  --navy:#1e1b4b;--green:#16a34a;--green-l:#dcfce7;
+  --orange:#f97316;--red:#dc2626;--red-l:#fef2f2;
+  --purple:#7c3aed;--yellow:#f59e0b;
+  --text:#111827;--t2:#374151;--t3:#6b7280;--t4:#9ca3af;
+  --border:#e5e7eb;--bg:#f3f4f6;--white:#fff;
+  --sw:220px;--th:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--navy);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:50;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;}
+.sb-logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.sb-logo-text{font-size:14px;font-weight:800;color:#fff;}
+.sb-logo-badge{font-size:9px;font-weight:700;background:var(--orange);color:#fff;padding:2px 6px;border-radius:5px;margin-left:2px;}
+.sb-admin-info{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:8px;}
+.sb-av{width:34px;height:34px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-aname{font-size:12px;font-weight:600;color:#fff;}
+.sb-arole{font-size:10px;color:rgba(255,255,255,.5);}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0;}
+.sb-section{padding:8px 16px 4px;font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;}
+.si{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:12px;font-weight:500;color:rgba(255,255,255,.6);cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
+.si:hover{background:rgba(255,255,255,.07);color:#fff;}
+.si.active{background:rgba(26,86,219,.3);color:#fff;border-left-color:var(--blue);}
+.si svg{flex-shrink:0;opacity:.7;}
+.si.active svg{opacity:1;}
+.si-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;}
+.si-badge.green{background:var(--green);}
+.sb-bot{padding:12px 16px;border-top:1px solid rgba(255,255,255,.08);}
+.btn-site{display:flex;align-items:center;gap:7px;padding:8px 12px;background:rgba(255,255,255,.08);border-radius:8px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;text-decoration:none;transition:all .2s;}
+.btn-site:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* TOPBAR */
+.tb{position:fixed;top:0;left:var(--sw);right:0;height:var(--th);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:40;}
+.tb-title{font-size:16px;font-weight:800;color:var(--text);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-search{display:flex;align-items:center;gap:7px;padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;width:220px;}
+.tb-search input{border:none;background:transparent;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);outline:none;flex:1;}
+.tb-ico{width:34px;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);position:relative;}
+.tb-notif{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff;}
+
+/* USER DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:stretch;}
+.drawer-overlay.open{display:flex;}
+.drawer{position:fixed;top:0;right:0;width:480px;height:100vh;background:var(--white);box-shadow:-4px 0 32px rgba(0,0,0,.12);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.drawer-overlay.open .drawer{transform:translateX(0);}
+.drawer-hdr{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.drawer-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t3);}
+.drawer-close:hover{background:var(--border);}
+.drawer-body{flex:1;overflow-y:auto;padding:20px;}
+.drawer-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+.ud-hero{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:16px;background:var(--bg);border-radius:10px;}
+.ud-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;}
+.ud-name{font-size:16px;font-weight:800;color:var(--text);}
+.ud-email{font-size:12px;color:var(--t3);margin-top:2px;}
+.ud-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.ud-stat{background:var(--bg);border-radius:8px;padding:12px;text-align:center;}
+.ud-stat-v{font-size:22px;font-weight:800;color:var(--text);}
+.ud-stat-l{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+.ud-section{font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.ud-cv-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border .15s;}
+.ud-cv-card:hover{border-color:var(--blue);}
+.ud-cv-thumb{width:36px;height:46px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;color:#6366f1;}
+.ud-cv-title{font-size:13px;font-weight:600;}
+.ud-cv-meta{font-size:11px;color:var(--t4);margin-top:1px;}
+.ud-info-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg);font-size:13px;}
+.ud-info-row:last-child{border-bottom:none;}
+.ud-info-label{color:var(--t3);}
+.ud-info-val{font-weight:600;}
+
+/* MAIN */
+.main{margin-left:var(--sw);margin-top:var(--th);flex:1;overflow-y:auto;height:calc(100vh - var(--th));}
+.panel{display:none;padding:24px;}
+.panel.active{display:block;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.panel-title{font-size:18px;font-weight:800;letter-spacing:-.3px;}
+.panel-sub{font-size:13px;color:var(--t3);margin-top:2px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue-d);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red-l);color:var(--red);border:1px solid #fecaca;}
+.btn-ghost{background:var(--white);color:var(--t2);border:1.5px solid var(--border);}.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-xs{padding:3px 9px;font-size:10px;border-radius:5px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:3px;}
+.stat-lbl{font-size:12px;color:var(--t3);}
+.stat-change{font-size:11px;font-weight:600;margin-top:6px;}
+.stat-change.up{color:var(--green);}
+.stat-change.down{color:var(--red);}
+
+/* TABLE */
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.table-search{display:flex;align-items:center;gap:7px;padding:7px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;}
+.table-search input{border:none;background:transparent;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);outline:none;width:200px;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:#fafafa;}
+tbody td{padding:12px 16px;font-size:13px;border-bottom:1px solid #f9fafb;vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafafa;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-green{background:var(--green-l);color:var(--green);}
+.badge-blue{background:var(--blue-l);color:var(--blue);}
+.badge-orange{background:#fff7ed;color:var(--orange);}
+.badge-red{background:var(--red-l);color:var(--red);}
+.badge-gray{background:var(--bg);color:var(--t3);}
+.badge-purple{background:#faf5ff;color:var(--purple);}
+.action-btns{display:flex;gap:5px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:800;}
+.modal-close{width:30px;height:30px;border:none;background:var(--bg);border-radius:7px;cursor:pointer;font-size:16px;color:var(--t3);display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--red-l);color:var(--red);}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;}
+
+/* FORM */
+.f-field{margin-bottom:14px;}
+.f-field label{display:block;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.f-field input,.f-field select,.f-field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;background:var(--white);}
+.f-field input:focus,.f-field select:focus,.f-field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.08);}
+.f-field textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.f-hint{font-size:11px;color:var(--t4);margin-top:3px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab:hover{color:var(--t2);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+/* TOGGLE */
+.toggle{width:38px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;border:none;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{transform:translateX(16px);}
+
+/* CHART */
+.chart-area{background:var(--bg);border-radius:10px;height:180px;display:flex;align-items:flex-end;justify-content:space-around;padding:16px;gap:8px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.chart-bar{width:100%;background:var(--blue);border-radius:4px 4px 0 0;transition:height .5s;}
+.chart-lbl{font-size:9px;color:var(--t4);font-weight:600;}
+
+/* COLOR PICKER */
+.color-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.color-opt.sel,.color-opt:hover{border-color:var(--text);}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:12px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.alert-green{background:var(--green-l);color:var(--green);border:1px solid #bbf7d0;}
+.alert-red{background:var(--red-l);color:var(--red);border:1px solid #fecaca;}
+.alert-blue{background:var(--blue-l);color:var(--blue);border:1px solid #bfdbfe;}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);font-size:12px;color:var(--t3);}
+.pg-btns{display:flex;gap:4px;}
+.pg-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--white);border-radius:6px;font-family:'Sora',sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pg-btn:hover,.pg-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
+
+/* ── PREVIEW PANEL ───────────────────────────────────── */
+.panel-preview{padding:0!important;display:none;flex-direction:column;height:calc(100vh - var(--th));}
+.panel-preview.active{display:flex;}
+.preview-toolbar{background:#fff;border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;}
+.preview-info{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--t2);}
+.preview-live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.preview-controls{display:flex;align-items:center;gap:8px;}
+.preview-device-btns{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.dev-btn{padding:6px 9px;border:none;background:transparent;cursor:pointer;color:var(--t3);transition:all .15s;display:flex;align-items:center;}
+.dev-btn:hover{background:var(--border);color:var(--t2);}
+.dev-btn.active{background:var(--blue);color:#fff;}
+.prev-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;text-decoration:none;transition:all .15s;}
+.prev-btn:hover{border-color:var(--blue);color:var(--blue);}
+.preview-stage{flex:1;background:#e2e8f0;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:0;transition:all .3s;}
+.preview-stage.tablet{padding:20px;background:#cbd5e1;}
+.preview-stage.mobile{padding:20px;background:#cbd5e1;}
+#previewFrame{width:100%;height:100%;border:none;display:block;}
+.preview-stage.tablet #previewFrame{width:768px;height:calc(100vh - var(--th) - 120px);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.preview-stage.mobile #previewFrame{width:390px;height:calc(100vh - var(--th) - 100px);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <span class="sb-logo-text">CV Premium</span>
+    <span class="sb-logo-badge">ADMIN</span>
+  </div>
+  <div class="sb-admin-info">
+    <div class="sb-av" id="adminAvatar">A</div>
+    <div>
+      <div class="sb-aname" id="adminName">Administrador</div>
+      <div class="sb-arole">Super Admin</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Geral</div>
+    <div class="si active" onclick="showPanel('overview',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Visão Geral</div>
+    <div class="si" onclick="showPanel('users',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Utilizadores<span class="si-badge" id="newUserBadge" style="display:none">!</span></div>
+    <div class="si" onclick="showPanel('cvs',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CVs Criados</div>
+    <div class="sb-section">Conteúdo</div>
+    <div class="si" onclick="showPanel('jobs',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Vagas de Emprego</div>
+    <div class="si" onclick="showPanel('courses',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Cursos</div>
+    <div class="si" onclick="showPanel('coaches',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Coaches</div>
+    <div class="si" onclick="showPanel('testimonials',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Testemunhos</div>
+    <div class="sb-section">Plataforma</div>
+    <div class="si" onclick="showPanel('plans',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Planos & Preços</div>
+    <div class="si" onclick="showPanel('templates',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Templates de CV</div>
+    <div class="si" onclick="showPanel('distribution',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Distribuição</div>
+    <div class="si" onclick="showPanel('settings',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Definições</div>
+    <div class="sb-section">Visualizar</div>
+    <div class="si" onclick="showPanel('user-preview',this)" style="border-left:3px solid transparent;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Dashboard Utilizador
+      <span class="si-badge green">LIVE</span>
+    </div>
+  </nav>
+  <div class="sb-bot">
+    <a href="/app" target="_blank" class="btn-site">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Ver Dashboard
+    </a>
+  </div>
+</aside>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════ -->
+<header class="tb">
+  <div class="tb-title" id="tbTitle">Visão Geral</div>
+  <div class="tb-right">
+    <div class="tb-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar..." id="globalSearch"></div>
+    <div class="tb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg><div class="tb-notif"></div></div>
+    <div class="tb-ico" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ══ OVERVIEW ══════════════════════════════════════════ -->
+<div id="panel-overview" class="panel active">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Visão Geral</div><div class="panel-sub">Bem-vindo ao painel de administração do CV Premium</div></div>
+    <div style="font-size:12px;color:var(--t3);" id="lastUpdate">Actualizado agora</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon" style="background:#EFF6FF;color:var(--blue)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-val" id="statUsers">0</div><div class="stat-lbl">Total Utilizadores</div><div class="stat-change up" id="statUsersChange">A carregar...</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#F0FDF4;color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-val" id="statRevenue">€ 0</div><div class="stat-lbl">Receita Mensal</div><div class="stat-change up" id="statRevenueChange">+0%</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#FAF5FF;color:var(--purple)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div><div class="stat-val" id="statCVs">0</div><div class="stat-lbl">CVs Criados</div><div class="stat-change up">A carregar...</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#FFF7ED;color:var(--orange)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-val" id="statPro">0</div><div class="stat-lbl">Utilizadores Pro</div><div class="stat-change up">A carregar...</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:18px;">
+    <div class="table-card" style="padding:18px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Registos recentes (últimos 30 dias)</div>
+      <div class="chart-area" id="chartArea">
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:20px"></div><div class="chart-lbl">Sem 1</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:40px"></div><div class="chart-lbl">Sem 2</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:25px"></div><div class="chart-lbl">Sem 3</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:55px"></div><div class="chart-lbl">Sem 4</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:35px"></div><div class="chart-lbl">Sem 5</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:70px"></div><div class="chart-lbl">Sem 6</div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="height:90px;background:var(--orange)"></div><div class="chart-lbl">Hoje</div></div>
+      </div>
+    </div>
+    <div class="table-card" style="padding:18px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Planos activos</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:8px;"><div><div style="font-size:12px;font-weight:700;">Gratuito</div><div style="font-size:11px;color:var(--t3)">Grátis</div></div><div style="font-size:18px;font-weight:800;" id="planFree">0</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--blue-l);border-radius:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--blue)">Pro</div><div style="font-size:11px;color:var(--t3)">Pago</div></div><div style="font-size:18px;font-weight:800;color:var(--blue)" id="planPro">0</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#faf5ff;border-radius:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--purple)">Premium</div><div style="font-size:11px;color:var(--t3)">Pago</div></div><div style="font-size:18px;font-weight:800;color:var(--purple)" id="planPrem">0</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="table-card" style="margin-top:18px;">
+    <div class="table-toolbar"><span style="font-size:14px;font-weight:700;">Últimos utilizadores registados</span><button class="btn btn-blue btn-sm" onclick="showPanel('users',document.querySelector('.si:nth-child(2)'))">Ver todos →</button></div>
+    <table><thead><tr><th>Utilizador</th><th>Email</th><th>Plano</th><th>Registado</th><th>Acções</th></tr></thead>
+    <tbody id="recentUsers"><tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">A carregar...</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ══ USERS ═════════════════════════════════════════════ -->
+<div id="panel-users" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Utilizadores</div><div class="panel-sub">Gerir todos os utilizadores da plataforma</div></div>
+    <button class="btn btn-blue" onclick="openModal('userModal');state.editId=null;document.getElementById('userModalTitle').textContent='Novo Utilizador';"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo Utilizador</button>
+  </div>
+  <div id="alertUsers"></div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar utilizadores..." oninput="filterUsers(this.value)"></div>
+      <div style="display:flex;gap:6px;">
+        <select style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;outline:none;" onchange="filterUsersPlan(this.value)"><option value="">Todos os planos</option><option>free</option><option>pro</option><option>premium</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="exportUsers()">⬇ Exportar CSV</button>
+      </div>
+    </div>
+    <table><thead><tr><th>Nome</th><th>Email</th><th>Plano</th><th>CVs</th><th>Estado</th><th>Registado</th><th>Acções</th></tr></thead>
+    <tbody id="usersTable"><tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px;">A carregar utilizadores...</td></tr></tbody></table>
+    <div class="pagination"><span id="usersPagInfo">0 utilizadores</span><div class="pg-btns" id="usersPag"></div></div>
+  </div>
+</div>
+
+<!-- ══ CVs ════════════════════════════════════════════════ -->
+<div id="panel-cvs" class="panel">
+  <div class="panel-hdr"><div><div class="panel-title">CVs Criados</div><div class="panel-sub">Todos os currículos criados na plataforma</div></div></div>
+  <div class="table-card">
+    <div class="table-toolbar"><div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar CVs..." oninput="filterCVs(this.value)"></div></div>
+    <table><thead><tr><th>Título</th><th>Utilizador</th><th>Template</th><th>Criado</th><th>Acções</th></tr></thead>
+    <tbody id="cvsTable"><tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">A carregar CVs...</td></tr></tbody></table>
+    <div class="pagination"><span id="cvsPagInfo">0 CVs</span></div>
+  </div>
+</div>
+
+<!-- ══ JOBS ══════════════════════════════════════════════ -->
+<div id="panel-jobs" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Vagas de Emprego</div><div class="panel-sub">Gerir vagas exibidas no dashboard dos utilizadores</div></div>
+    <button class="btn btn-blue" onclick="openModal('jobModal');state.editId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Vaga</button>
+  </div>
+  <div id="alertJobs"></div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar vagas..." oninput="filterJobs(this.value)"></div>
+    </div>
+    <table><thead><tr><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th>Acções</th></tr></thead>
+    <tbody id="jobsTable"></tbody></table>
+    <div class="pagination"><span id="jobsPagInfo">0 vagas</span></div>
+  </div>
+</div>
+
+<!-- ══ COURSES ════════════════════════════════════════════ -->
+<div id="panel-courses" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Cursos</div><div class="panel-sub">Gerir cursos recomendados nos dashboards</div></div>
+    <button class="btn btn-blue" onclick="openModal('courseModal');state.editId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Curso</button>
+  </div>
+  <div id="alertCourses"></div>
+  <div class="table-card">
+    <table><thead><tr><th>Título</th><th>Fonte</th><th>Categoria</th><th>Avaliação</th><th>Activo</th><th>Acções</th></tr></thead>
+    <tbody id="coursesTable"></tbody></table>
+  </div>
+</div>
+
+<!-- ══ COACHES ════════════════════════════════════════════ -->
+<div id="panel-coaches" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Coaches</div><div class="panel-sub">Gerir os coaches da plataforma</div></div>
+    <button class="btn btn-blue" onclick="openModal('coachModal');state.editId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Coach</button>
+  </div>
+  <div id="alertCoaches"></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;" id="coachesGrid"></div>
+</div>
+
+<!-- ══ TESTIMONIALS ═══════════════════════════════════════ -->
+<div id="panel-testimonials" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Testemunhos</div><div class="panel-sub">Gerir depoimentos exibidos no Coaching</div></div>
+    <button class="btn btn-blue" onclick="openModal('testiModal');state.editId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Testemunho</button>
+  </div>
+  <div id="alertTestis"></div>
+  <div class="table-card">
+    <table><thead><tr><th>Autor</th><th>Cargo</th><th>Testemunho</th><th>Activo</th><th>Acções</th></tr></thead>
+    <tbody id="testisTable"></tbody></table>
+  </div>
+</div>
+
+<!-- ══ PLANS ══════════════════════════════════════════════ -->
+<div id="panel-plans" class="panel">
+  <div class="panel-hdr"><div><div class="panel-title">Planos & Preços</div><div class="panel-sub">Editar os planos da plataforma</div></div></div>
+  <div id="alertPlans"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;" id="plansGrid"></div>
+</div>
+
+<!-- ══ TEMPLATES ══════════════════════════════════════════ -->
+<div id="panel-templates" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Templates de CV</div><div class="panel-sub">Gerir os templates disponíveis na base de dados</div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="activateAllTemplates()">✓ Activar Todos</button>
+      <button class="btn btn-ghost" onclick="openImportModal()" style="color:var(--blue);border-color:var(--blue);">⬇ Importar Ficheiro</button>
+      <button class="btn btn-blue" onclick="openModal('templateModal');state.editId=null;">+ Adicionar</button>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-toolbar"><div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar templates..." oninput="filterTemplates(this.value)"></div></div>
+    <table><thead><tr><th>Nome</th><th>Categoria</th><th>Tipo</th><th>Estado</th><th>Acções</th></tr></thead>
+    <tbody id="templatesTable"></tbody></table>
+    <div class="pagination"><span id="templatesPagInfo">0 templates</span></div>
+  </div>
+</div>
+
+<!-- ══ DISTRIBUTION ═══════════════════════════════════════ -->
+<div id="panel-distribution" class="panel">
+  <div class="panel-hdr"><div><div class="panel-title">Distribuição de CV</div><div class="panel-sub">Pedidos de distribuição dos utilizadores</div></div></div>
+  <div class="table-card">
+    <table><thead><tr><th>Utilizador</th><th>CV</th><th>País</th><th>Indústria</th><th>Estado</th><th>Data</th><th>Acções</th></tr></thead>
+    <tbody id="distTable"><tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px;">Nenhum pedido ainda.</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ═══════════════════════════════════════════ -->
+<div id="panel-settings" class="panel">
+  <div class="panel-hdr"><div><div class="panel-title">Definições</div><div class="panel-sub">Configurar a plataforma CV Premium</div></div></div>
+  <div id="alertSettings"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div class="table-card" style="padding:22px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;">Informações do Site</div>
+      <div class="f-field"><label>Nome da Plataforma</label><input type="text" id="setName" value="CV Premium"></div>
+      <div class="f-field"><label>Email de Suporte</label><input type="text" id="setEmail" value="suporte@cvpremium.pt"></div>
+      <div class="f-field"><label>País Padrão</label><input type="text" id="setCountry" value="Portugal"></div>
+      <div class="f-field"><label>Moeda</label><select id="setCurrency"><option>EUR (€)</option><option>USD ($)</option></select></div>
+      <button class="btn btn-blue" onclick="saveSettings()">Guardar Definições</button>
+    </div>
+    <div class="table-card" style="padding:22px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;">Funcionalidades</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;font-weight:600;">Distribuição de CV</div><div style="font-size:11px;color:var(--t3)">Permitir que utilizadores distribuam CVs</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;font-weight:600;">Coaching</div><div style="font-size:11px;color:var(--t3)">Mostrar secção de coaching</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;font-weight:600;">Registo com Google</div><div style="font-size:11px;color:var(--t3)">OAuth Google activo</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;font-weight:600;">Registo com LinkedIn</div><div style="font-size:11px;color:var(--t3)">OAuth LinkedIn activo</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;font-weight:600;">Modo Manutenção</div><div style="font-size:11px;color:var(--t3)">Bloqueia acesso ao site</div></div><button class="toggle" onclick="if(confirm('Activar modo de manutenção?'))this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <div class="table-card" style="padding:22px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;">Alterar Password Admin</div>
+      <div class="f-field"><label>Password Actual</label><input type="password" id="setPwdCurr" placeholder="••••••••"></div>
+      <div class="f-field"><label>Nova Password</label><input type="password" id="setPwdNew" placeholder="••••••••"></div>
+      <div class="f-field"><label>Confirmar Nova Password</label><input type="password" id="setPwdConf" placeholder="••••••••"></div>
+      <button class="btn btn-blue" onclick="changePassword()">Actualizar Password</button>
+    </div>
+    <div class="table-card" style="padding:22px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;">API & Integrações</div>
+      <div class="f-field"><label>Google Client ID</label><input type="password" id="setGoogle" placeholder="Insira a Client ID"></div>
+      <div class="f-field"><label>LinkedIn Client ID</label><input type="password" id="setLinkedIn" placeholder="Insira a Client ID"></div>
+      <div class="f-field"><label>Stripe Secret Key</label><input type="password" id="setStripe" placeholder="sk_live_..."></div>
+      <div class="f-field"><label>SendGrid API Key</label><input type="password" id="setSendgrid" placeholder="SG.xxx..."></div>
+      <button class="btn btn-blue" onclick="saveAPIKeys()">Guardar Chaves</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ USER DASHBOARD PREVIEW ═══════════════════════════ -->
+<div id="panel-user-preview" class="panel panel-preview">
+  <div class="preview-toolbar">
+    <div class="preview-info">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Preview do Dashboard — vista exacta do utilizador</span>
+      <span class="preview-live-dot"></span>
+      <span style="font-size:10px;color:var(--green);font-weight:700;">AO VIVO</span>
+    </div>
+    <div class="preview-controls">
+      <div class="preview-device-btns">
+        <button class="dev-btn active" onclick="setPreviewDevice('desktop',this)" title="Desktop">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+        <button class="dev-btn" onclick="setPreviewDevice('tablet',this)" title="Tablet">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        </button>
+        <button class="dev-btn" onclick="setPreviewDevice('mobile',this)" title="Mobile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        </button>
+      </div>
+      <button class="prev-btn" onclick="document.getElementById('previewFrame').src='/app'" title="Recarregar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Recarregar
+      </button>
+      <a href="/app" target="_blank" class="prev-btn" title="Abrir em nova aba">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Abrir separado
+      </a>
+    </div>
+  </div>
+  <div class="preview-stage" id="previewStage">
+    <iframe id="previewFrame" src="about:blank" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+</main>
+
+<!-- ══ MODALS ══════════════════════════════════════════════ -->
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="userModalTitle">Novo Utilizador</div><button class="modal-close" onclick="closeModal('userModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome</label><input type="text" id="uName" placeholder="Nome completo"></div>
+        <div class="f-field"><label>Email</label><input type="email" id="uEmail" placeholder="email@exemplo.com"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Password</label><input type="password" id="uPwd" placeholder="••••••••"><div class="f-hint">Deixe em branco para não alterar</div></div>
+        <div class="f-field"><label>Plano</label><select id="uPlan"><option value="free">Gratuito</option><option value="pro">Pro</option><option value="premium">Premium</option></select></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Papel</label><select id="uRole"><option value="user">Utilizador</option><option value="admin">Administrador</option></select></div>
+        <div class="f-field"><label>Estado</label><select id="uStatus"><option value="active">Activo</option><option value="inactive">Inactivo</option><option value="blocked">Bloqueado</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('userModal')">Cancelar</button><button class="btn btn-blue" onclick="saveUser()" id="saveUserBtn">Criar Utilizador</button></div>
+  </div>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="jobModalTitle">Adicionar Vaga</div><button class="modal-close" onclick="closeModal('jobModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Cargo</label><input type="text" id="jTitle" placeholder="ex: Engenheiro de Software"></div>
+        <div class="f-field"><label>Empresa</label><input type="text" id="jCompany" placeholder="ex: Microsoft"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Cidade</label><input type="text" id="jCity" placeholder="Lisboa"></div>
+        <div class="f-field"><label>País</label><input type="text" id="jCountry" value="Portugal"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Categoria</label><select id="jCat"><option>TI & Tecnologia</option><option>Finanças</option><option>RH</option><option>Saúde</option><option>Engenharia</option><option>Marketing</option><option>Educação</option><option>Outro</option></select></div>
+        <div class="f-field"><label>Data de Publicação</label><input type="date" id="jDate"></div>
+      </div>
+      <div class="f-field"><label>Descrição</label><textarea id="jDesc" rows="3" placeholder="Descreva os requisitos e responsabilidades..."></textarea></div>
+      <div class="f-row">
+        <div class="f-field"><label>Salário (opcional)</label><input type="text" id="jSalary" placeholder="ex: 1.500–2.500€/mês"></div>
+        <div class="f-field"><label>URL de Candidatura</label><input type="url" id="jUrl" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancelar</button><button class="btn btn-blue" onclick="saveJob()">Publicar Vaga</button></div>
+  </div>
+</div>
+
+<!-- COURSE MODAL -->
+<div class="modal-overlay" id="courseModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Adicionar Curso</div><button class="modal-close" onclick="closeModal('courseModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-field"><label>Título do Curso</label><input type="text" id="cTitle" placeholder="ex: Introdução ao Python"></div>
+      <div class="f-row">
+        <div class="f-field"><label>Fonte / Plataforma</label><input type="text" id="cSource" placeholder="ex: Coursera"></div>
+        <div class="f-field"><label>Categoria</label><select id="cCat"><option>TI & Informática</option><option>Gestão & Negócios</option><option>Cibersegurança</option><option>Finanças</option><option>Marketing</option><option>Design</option></select></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Avaliação (0-5)</label><input type="number" id="cRating" min="0" max="5" step="0.1" placeholder="4.5"></div>
+        <div class="f-field"><label>URL do Curso</label><input type="url" id="cUrl" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('courseModal')">Cancelar</button><button class="btn btn-blue" onclick="saveCourse()">Adicionar Curso</button></div>
+  </div>
+</div>
+
+<!-- COACH MODAL -->
+<div class="modal-overlay" id="coachModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Adicionar Coach</div><button class="modal-close" onclick="closeModal('coachModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome</label><input type="text" id="chName" placeholder="Nome do coach"></div>
+        <div class="f-field"><label>Localização</label><input type="text" id="chLocation" placeholder="ex: Lisboa, Portugal"></div>
+      </div>
+      <div class="f-field"><label>Biografia</label><textarea id="chBio" rows="3" placeholder="Breve descrição do coach..."></textarea></div>
+      <div class="f-field"><label>Especialidades (separadas por vírgula)</label><input type="text" id="chSkills" placeholder="Marca Pessoal, Entrevista, Salário"></div>
+      <div class="f-row">
+        <div class="f-field"><label>Cor do Avatar</label>
+          <div class="color-opts" id="chColorOpts">
+            <div class="color-opt sel" style="background:#6366f1" onclick="selectColor(this,'#6366f1','chColor')"></div>
+            <div class="color-opt" style="background:#0ea5e9" onclick="selectColor(this,'#0ea5e9','chColor')"></div>
+            <div class="color-opt" style="background:#16a34a" onclick="selectColor(this,'#16a34a','chColor')"></div>
+            <div class="color-opt" style="background:#f97316" onclick="selectColor(this,'#f97316','chColor')"></div>
+            <div class="color-opt" style="background:#dc2626" onclick="selectColor(this,'#dc2626','chColor')"></div>
+            <div class="color-opt" style="background:#7c3aed" onclick="selectColor(this,'#7c3aed','chColor')"></div>
+          </div>
+          <input type="hidden" id="chColor" value="#6366f1">
+        </div>
+        <div class="f-field"><label>Email de Contacto</label><input type="email" id="chEmail" placeholder="coach@email.com"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('coachModal')">Cancelar</button><button class="btn btn-blue" onclick="saveCoach()">Adicionar Coach</button></div>
+  </div>
+</div>
+
+<!-- TESTIMONIAL MODAL -->
+<div class="modal-overlay" id="testiModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Adicionar Testemunho</div><button class="modal-close" onclick="closeModal('testiModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome do Autor</label><input type="text" id="tName" placeholder="ex: João Silva"></div>
+        <div class="f-field"><label>Cargo</label><input type="text" id="tRole" placeholder="ex: Engenheiro Sénior"></div>
+      </div>
+      <div class="f-field"><label>Testemunho</label><textarea id="tText" rows="4" placeholder="Escreva o testemunho aqui..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('testiModal')">Cancelar</button><button class="btn btn-blue" onclick="saveTesti()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- PLAN MODAL -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="planModalTitle">Editar Plano</div><button class="modal-close" onclick="closeModal('planModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome do Plano</label><input type="text" id="pName"></div>
+        <div class="f-field"><label>Preço (€/mês)</label><input type="number" id="pPrice"></div>
+      </div>
+      <div class="f-field"><label>Funcionalidades (uma por linha)</label><textarea id="pFeatures" rows="6"></textarea></div>
+      <div class="f-row">
+        <div class="f-field"><label>Max CVs</label><input type="number" id="pMaxCvs"></div>
+        <div class="f-field"><label>Max Templates</label><input type="number" id="pMaxTpls"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('planModal')">Cancelar</button><button class="btn btn-blue" onclick="savePlan()">Guardar Plano</button></div>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Adicionar Template</div><button class="modal-close" onclick="closeModal('templateModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome</label><input type="text" id="tmName" placeholder="ex: Executivo Azul"></div>
+        <div class="f-field"><label>Categoria</label><select id="tmCat"><option>Geral</option><option>Bancário & Finanças</option><option>Engenharia & TI</option><option>Saúde</option><option>Gestão & RH</option><option>Jurídico</option><option>Marketing</option><option>Educação</option></select></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Slug (URL)</label><input type="text" id="tmSlug" placeholder="ex: executivo-azul"></div>
+        <div class="f-field"><label>Premium?</label><select id="tmPremium"><option value="1">Sim (Premium)</option><option value="0">Não (Grátis)</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('templateModal')">Cancelar</button><button class="btn btn-blue" onclick="saveTemplate()">Adicionar Template</button></div>
+  </div>
+</div>
+
+<!-- USER DASHBOARD DRAWER -->
+<div class="drawer-overlay" id="userDrawer" onclick="closeDrawer(event)">
+  <div class="drawer">
+    <div class="drawer-hdr">
+      <div>
+        <div style="font-size:14px;font-weight:800;" id="drawerTitle">Perfil do Utilizador</div>
+        <div style="font-size:11px;color:var(--t4);" id="drawerSub">Dashboard do utilizador</div>
+      </div>
+      <button class="drawer-close" onclick="document.getElementById('userDrawer').classList.remove('open')">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <div style="text-align:center;padding:40px;color:var(--t4);">A carregar...</div>
+    </div>
+    <div class="drawer-footer" id="drawerFooter"></div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-title">Importar Templates do Computador</div>
+      <button class="modal-close" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--t3);margin-bottom:14px;">Carregue um ficheiro <strong>.json</strong> ou <strong>.csv</strong> com os templates a importar. Os duplicados são ignorados automaticamente.</p>
+
+      <!-- Formato JSON -->
+      <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--t2);">Formato JSON esperado:</div>
+        <code style="font-size:10px;color:var(--t3);line-height:1.6;">
+          [{"name":"Médico","category":"Saúde","isPremium":1,"slug":"medico"},...]
+        </code>
+        <div style="font-weight:700;margin:8px 0 4px;color:var(--t2);">Formato CSV (separado por ;):</div>
+        <code style="font-size:10px;color:var(--t3);">name;category;isPremium;slug</code>
+      </div>
+
+      <label style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;border:2px dashed var(--border);border-radius:10px;padding:28px;cursor:pointer;transition:border .2s;" onmouseenter="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--t3);">Clique para seleccionar ficheiro</span>
+        <span style="font-size:11px;color:var(--t4);">JSON ou CSV · máx. 5MB</span>
+        <input type="file" id="importFileInput" accept=".json,.csv" style="display:none;" onchange="handleImportFile(this)">
+      </label>
+
+      <div id="importPreview" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('importModal')">Cancelar</button>
+      <button class="btn btn-blue" id="btnConfirmImport" style="display:none;" onclick="confirmImport()">Importar Agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE PREVIEW MODAL -->
+<div class="modal-overlay" id="templatePreviewModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-hdr">
+      <div class="modal-title" id="previewModalTitle">Detalhes do Template</div>
+      <button class="modal-close" onclick="closeModal('templatePreviewModal')">✕</button>
+    </div>
+    <div class="modal-body" id="previewModalBody" style="padding:0;">
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let TOKEN = localStorage.getItem('cv_token');
+
+// ── STATE ──────────────────────────────────────────────────
+let state = {
+  users: [],
+  cvs: [],
+  jobs:     [],
+  courses:  [],
+  coaches:  [],
+  testis:   [],
+  plans:    JSON.parse(localStorage.getItem('admin_plans')   || JSON.stringify([
+    {id:1,name:'Gratuito',price:0,color:'#6b7280',maxCvs:2,maxTpls:1,features:['2 CVs','1 template gratuito','Score ATS básico']},
+    {id:2,name:'Pro',price:9,color:'#1a56db',maxCvs:999,maxTpls:999,features:['CVs ilimitados','200+ templates premium','PDF sem marca','IA integrada','LinkedIn Import']},
+    {id:3,name:'Premium',price:19,color:'#7c3aed',maxCvs:999,maxTpls:999,features:['Tudo do Pro','Dashboard candidaturas','Visível a recrutadores','Coaching incluído','Suporte prioritário']}
+  ])),
+  templates: [],
+  editId: null,
+  usersFilter: '',
+  usersPlanFilter: ''
+};
+
+// ── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lastUpdate').textContent = 'Actualizado em ' + new Date().toLocaleTimeString('pt-PT');
+  renderPlans();
+  loadFromAPI();
+});
+
+// ── API LOAD ────────────────────────────────────────────────
+async function loadFromAPI() {
+  if (!TOKEN) return;
+  const h = { headers: { Authorization: 'Bearer ' + TOKEN } };
+  try {
+    const [statsRes, usersRes, cvsRes, templatesRes, coachesRes, coursesRes, jobsRes, testisRes] = await Promise.all([
+      fetch(API + '/api/admin/overview',       h),
+      fetch(API + '/api/admin/users',          h),
+      fetch(API + '/api/cv',                   h),
+      fetch(API + '/api/admin/template-items', h),
+      fetch(API + '/api/admin/coaches',        h),
+      fetch(API + '/api/admin/courses',        h),
+      fetch(API + '/api/admin/jobs',           h),
+      fetch(API + '/api/admin/testimonials',   h)
+    ]);
+
+    if (statsRes.ok)     { const d = await statsRes.json();     applyStats(d); }
+    if (usersRes.ok)     { const d = await usersRes.json();     state.users = d.users || (Array.isArray(d) ? d : []); renderUsers(); renderRecentUsers(); updatePlanCounts(); }
+    if (cvsRes.ok)       { const d = await cvsRes.json();       state.cvs   = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); }
+    if (templatesRes.ok) { const d = await templatesRes.json(); state.templates = d.templates || (Array.isArray(d) ? d : []); renderTemplates(); }
+    if (coachesRes.ok)   { state.coaches = await coachesRes.json();   renderCoaches(); }
+    if (coursesRes.ok)   { state.courses = await coursesRes.json();   renderCourses(); }
+    if (jobsRes.ok)      { state.jobs    = await jobsRes.json();      renderJobs(); }
+    if (testisRes.ok)    { state.testis  = await testisRes.json();    renderTestis(); }
+  } catch(e) {
+    console.error('API load error:', e);
+  }
+}
+
+function applyStats(d) {
+  if (d.totalUsers !== undefined)  document.getElementById('statUsers').textContent = d.totalUsers;
+  if (d.totalCVs !== undefined)    document.getElementById('statCVs').textContent   = d.totalCVs;
+  if (d.revenue !== undefined)     document.getElementById('statRevenue').textContent = '€ ' + d.revenue;
+  if (d.proPlan !== undefined)     document.getElementById('statPro').textContent    = d.proPlan;
+}
+
+function updatePlanCounts() {
+  const free = state.users.filter(u => !u.Plan || u.Plan === 'free').length;
+  const pro  = state.users.filter(u => u.Plan === 'pro').length;
+  const prem = state.users.filter(u => u.Plan === 'premium').length;
+  document.getElementById('statUsers').textContent = state.users.length;
+  document.getElementById('statPro').textContent = pro + prem;
+  document.getElementById('planFree').textContent = free;
+  document.getElementById('planPro').textContent  = pro;
+  document.getElementById('planPrem').textContent = prem;
+  const revenue = pro * 9 + prem * 19;
+  document.getElementById('statRevenue').textContent = '€ ' + revenue;
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────
+const PANEL_TITLES = {
+  overview:'Visão Geral', users:'Utilizadores', cvs:'CVs Criados',
+  jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Coaches',
+  testimonials:'Testemunhos', plans:'Planos & Preços', templates:'Templates de CV',
+  distribution:'Distribuição de CV', settings:'Definições',
+  'user-preview':'Dashboard do Utilizador'
+};
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.si').forEach(i => i.classList.remove('active'));
+  const p = document.getElementById('panel-' + id);
+  if (p) p.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('tbTitle').textContent = PANEL_TITLES[id] || id;
+  // Carregar iframe ao abrir o preview (lazy load)
+  if (id === 'user-preview') {
+    const frame = document.getElementById('previewFrame');
+    if (frame && frame.src === 'about:blank') frame.src = '/app';
+  }
+}
+
+function setPreviewDevice(device, btn) {
+  document.querySelectorAll('.dev-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const stage = document.getElementById('previewStage');
+  stage.className = 'preview-stage' + (device !== 'desktop' ? ' ' + device : '');
+}
+
+// ── SAVE ────────────────────────────────────────────────────
+function save(key) { localStorage.setItem('admin_' + key, JSON.stringify(state[key])); }
+
+// ── RENDER USERS ────────────────────────────────────────────
+function renderUsers() {
+  const search = (state.usersFilter || '').toLowerCase();
+  const plan   = state.usersPlanFilter || '';
+  let filtered = state.users.filter(u => {
+    const name  = (u.Name || u.name || '').toLowerCase();
+    const email = (u.Email || u.email || '').toLowerCase();
+    const uPlan = (u.Plan || u.plan || 'free').toLowerCase();
+    return (!search || name.includes(search) || email.includes(search))
+        && (!plan   || uPlan === plan);
+  });
+
+  document.getElementById('usersPagInfo').textContent = filtered.length + ' utilizadores';
+  const tbody = document.getElementById('usersTable');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px;">Nenhum utilizador encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(u => {
+    const name  = u.Name  || u.name  || 'Sem nome';
+    const email = u.Email || u.email || '';
+    const plan  = u.Plan  || u.plan  || 'free';
+    const role  = u.Role  || u.role  || 'user';
+    const date  = u.CreatedAt ? new Date(u.CreatedAt).toLocaleDateString('pt-PT') : '—';
+    const planBadge = plan === 'pro' ? 'badge-blue' : plan === 'premium' ? 'badge-purple' : plan === 'admin' ? 'badge-orange' : 'badge-gray';
+    const init = name[0].toUpperCase();
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">${init}</div><div><div style="font-size:13px;font-weight:600;">${name}</div><div style="font-size:11px;color:var(--t3);">${role}</div></div></div></td>
+      <td>${email}</td>
+      <td><span class="badge ${planBadge}">${plan}</span></td>
+      <td>—</td>
+      <td><span class="badge badge-green">Activo</span></td>
+      <td>${date}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-blue btn-xs" onclick="openUserDrawer('${u.Id||u.id}')">Dashboard</button>
+        <button class="btn btn-ghost btn-xs" onclick="editUser('${u.Id||u.id}')">Editar</button>
+        <button class="btn btn-red btn-xs" onclick="deleteUser('${u.Id||u.id}')">Remover</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRecentUsers() {
+  const recent = [...state.users].slice(-5).reverse();
+  const tbody  = document.getElementById('recentUsers');
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">Sem utilizadores.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recent.map(u => {
+    const name  = u.Name || u.name || 'Sem nome';
+    const email = u.Email || u.email || '';
+    const plan  = u.Plan  || u.plan  || 'free';
+    const date  = u.CreatedAt ? new Date(u.CreatedAt).toLocaleDateString('pt-PT') : '—';
+    const planBadge = plan === 'pro' ? 'badge-blue' : plan === 'premium' ? 'badge-purple' : 'badge-gray';
+    const init = name[0].toUpperCase();
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">${init}</div><span>${name}</span></div></td>
+      <td>${email}</td>
+      <td><span class="badge ${planBadge}">${plan}</span></td>
+      <td>${date}</td>
+      <td><button class="btn btn-blue btn-xs" onclick="openUserDrawer('${u.Id||u.id}')">Dashboard</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(v)     { state.usersFilter = v;     renderUsers(); }
+function filterUsersPlan(v) { state.usersPlanFilter = v; renderUsers(); }
+
+function exportUsers() {
+  const rows = [['Nome','Email','Plano','Registado']];
+  state.users.forEach(u => rows.push([u.Name||u.name||'', u.Email||u.email||'', u.Plan||u.plan||'free', u.CreatedAt||'']));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'utilizadores.csv';
+  a.click();
+}
+
+async function editUser(id) {
+  state.editId = id;
+  const u = state.users.find(x => String(x.Id||x.id) === String(id));
+  if (!u) return;
+  document.getElementById('userModalTitle').textContent = 'Editar Utilizador';
+  document.getElementById('uName').value   = u.Name  || u.name  || '';
+  document.getElementById('uEmail').value  = u.Email || u.email || '';
+  document.getElementById('uPlan').value   = u.Plan  || u.plan  || 'free';
+  document.getElementById('uRole').value   = u.Role  || u.role  || 'user';
+  document.getElementById('uStatus').value = 'active';
+  openModal('userModal');
+}
+
+async function deleteUser(id) {
+  if (!confirm('Remover este utilizador?')) return;
+  try {
+    const res = await fetch(API + '/api/admin/users/' + id, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (res.ok) {
+      state.users = state.users.filter(u => String(u.Id||u.id) !== String(id));
+      renderUsers(); renderRecentUsers(); updatePlanCounts();
+      showAlert('alertUsers', 'Utilizador removido.', 'green');
+    } else {
+      showAlert('alertUsers', 'Erro ao remover utilizador.', 'red');
+    }
+  } catch(e) {
+    showAlert('alertUsers', 'Erro de ligação.', 'red');
+  }
+}
+
+async function saveUser() {
+  const name   = document.getElementById('uName').value.trim();
+  const email  = document.getElementById('uEmail').value.trim();
+  const pwd    = document.getElementById('uPwd').value;
+  const plan   = document.getElementById('uPlan').value;
+  const role   = document.getElementById('uRole').value;
+  if (!name || !email) { showAlert('alertUsers','Preencha nome e email.','red'); return; }
+  try {
+    let res;
+    if (state.editId) {
+      res = await fetch(API + '/api/admin/users/' + state.editId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+        body: JSON.stringify({ name, email, plan, role, ...(pwd ? { password: pwd } : {}) })
+      });
+    } else {
+      res = await fetch(API + '/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+        body: JSON.stringify({ name, email, password: pwd, plan, role })
+      });
+    }
+    const d = await res.json();
+    if (!res.ok) { showAlert('alertUsers', d.error || 'Erro.', 'red'); return; }
+    closeModal('userModal');
+    showAlert('alertUsers', state.editId ? 'Utilizador actualizado.' : 'Utilizador criado.', 'green');
+    await loadFromAPI();
+  } catch(e) {
+    showAlert('alertUsers', 'Erro de ligação.', 'red');
+  }
+}
+
+// ── RENDER CVs ───────────────────────────────────────────────
+function renderCVs() {
+  document.getElementById('cvsPagInfo').textContent = state.cvs.length + ' CVs';
+  const tbody = document.getElementById('cvsTable');
+  if (!state.cvs.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">Nenhum CV.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.cvs.map(cv => {
+    const date = cv.CreatedAt ? new Date(cv.CreatedAt).toLocaleDateString('pt-PT') : '—';
+    return `<tr>
+      <td><span style="font-weight:600;">${cv.Title||'Sem título'}</span></td>
+      <td>${cv.UserName||cv.UserId||'—'}</td>
+      <td>${cv.TemplateName||'—'}</td>
+      <td>${date}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="alert('CV ID: ${cv.Id}')">Ver</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterCVs(v) {
+  const filtered = state.cvs.filter(cv => (cv.Title||'').toLowerCase().includes(v.toLowerCase()));
+  document.getElementById('cvsPagInfo').textContent = filtered.length + ' CVs';
+}
+
+// ── RENDER JOBS ──────────────────────────────────────────────
+function renderJobs() {
+  document.getElementById('jobsPagInfo').textContent = state.jobs.length + ' vagas';
+  const tbody = document.getElementById('jobsTable');
+  if (!state.jobs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px;">Nenhuma vaga.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.jobs.map(j => {
+    const id      = j.Id       || j.id;
+    const title   = j.Title    || j.title   || '—';
+    const company = j.Company  || j.company || '—';
+    const city    = j.City     || j.city    || '';
+    const country = j.Country  || j.country || '';
+    const cat     = j.Category || j.category|| '—';
+    const date    = j.JobDate  || j.date    || '—';
+    return `<tr>
+      <td><span style="font-weight:600;">${title}</span></td>
+      <td>${company}</td>
+      <td>${city}${city && country ? ', ' : ''}${country}</td>
+      <td><span class="badge badge-blue">${cat}</span></td>
+      <td><span class="badge badge-green">Activo</span></td>
+      <td>${date && date !== '—' ? String(date).substring(0,10) : '—'}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-ghost btn-xs" onclick="editJob(${id})">Editar</button>
+        <button class="btn btn-red btn-xs" onclick="deleteJob(${id})">Remover</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterJobs(v) {
+  const f = state.jobs.filter(j => ((j.Title||j.title||'')+(j.Company||j.company||'')).toLowerCase().includes(v.toLowerCase()));
+  document.getElementById('jobsPagInfo').textContent = f.length + ' vagas';
+}
+
+async function saveJob() {
+  const j = {
+    title:    document.getElementById('jTitle').value.trim(),
+    company:  document.getElementById('jCompany').value.trim(),
+    city:     document.getElementById('jCity').value.trim(),
+    country:  document.getElementById('jCountry').value.trim(),
+    category: document.getElementById('jCat').value,
+    jobDate:  document.getElementById('jDate').value || null,
+    url:      document.getElementById('jUrl').value.trim()
+  };
+  if (!j.title || !j.company) { alert('Preencha cargo e empresa.'); return; }
+  try {
+    const method = state.editId ? 'PUT' : 'POST';
+    const url    = API + '/api/admin/jobs' + (state.editId ? '/' + state.editId : '');
+    const res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, body: JSON.stringify(j) });
+    if (!res.ok) { const d = await res.json(); alert('Erro: ' + (d.error||'falha')); return; }
+    closeModal('jobModal');
+    await loadFromAPI();
+    showAlert('alertJobs', 'Vaga guardada com sucesso.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+function editJob(id) {
+  state.editId = id;
+  const j = state.jobs.find(x => (x.Id||x.id) === id);
+  if (!j) return;
+  document.getElementById('jTitle').value   = j.Title    || j.title   || '';
+  document.getElementById('jCompany').value = j.Company  || j.company || '';
+  document.getElementById('jCity').value    = j.City     || j.city    || '';
+  document.getElementById('jCountry').value = j.Country  || j.country || '';
+  document.getElementById('jCat').value     = j.Category || j.category|| '';
+  const d = j.JobDate || j.date || '';
+  document.getElementById('jDate').value    = d ? String(d).substring(0,10) : '';
+  document.getElementById('jUrl').value     = j.Url      || j.url     || '';
+  document.getElementById('jobModalTitle').textContent = 'Editar Vaga';
+  openModal('jobModal');
+}
+
+async function deleteJob(id) {
+  if (!confirm('Remover esta vaga?')) return;
+  try {
+    await fetch(API + '/api/admin/jobs/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } });
+    await loadFromAPI();
+    showAlert('alertJobs', 'Vaga removida.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── RENDER COURSES ───────────────────────────────────────────
+function renderCourses() {
+  const tbody = document.getElementById('coursesTable');
+  if (!state.courses.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t4);padding:24px;">Nenhum curso.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.courses.map(c => {
+    const id     = c.Id       || c.id;
+    const title  = c.Title    || c.title    || '—';
+    const source = c.Source   || c.source   || '—';
+    const cat    = c.Category || c.category || '—';
+    const rating = c.Rating   || c.rating   || '—';
+    return `<tr>
+      <td><span style="font-weight:600;">${title}</span></td>
+      <td>${source}</td>
+      <td><span class="badge badge-blue">${cat}</span></td>
+      <td>⭐ ${rating}</td>
+      <td><span class="badge badge-green">Activo</span></td>
+      <td><div class="action-btns">
+        <button class="btn btn-ghost btn-xs" onclick="editCourse(${id})">Editar</button>
+        <button class="btn btn-red btn-xs" onclick="deleteCourse(${id})">Remover</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveCourse() {
+  const c = {
+    title:    document.getElementById('cTitle').value.trim(),
+    source:   document.getElementById('cSource').value.trim(),
+    category: document.getElementById('cCat').value,
+    rating:   document.getElementById('cRating').value || '4.0',
+    url:      document.getElementById('cUrl').value.trim()
+  };
+  if (!c.title) { alert('Preencha o título.'); return; }
+  try {
+    const method = state.editId ? 'PUT' : 'POST';
+    const url    = API + '/api/admin/courses' + (state.editId ? '/' + state.editId : '');
+    const res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, body: JSON.stringify(c) });
+    if (!res.ok) { const d = await res.json(); alert('Erro: ' + (d.error||'falha')); return; }
+    closeModal('courseModal');
+    await loadFromAPI();
+    showAlert('alertCourses', 'Curso guardado.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+function editCourse(id) {
+  state.editId = id;
+  const c = state.courses.find(x => (x.Id||x.id) === id);
+  if (!c) return;
+  document.getElementById('cTitle').value  = c.Title    || c.title    || '';
+  document.getElementById('cSource').value = c.Source   || c.source   || '';
+  document.getElementById('cCat').value    = c.Category || c.category || '';
+  document.getElementById('cRating').value = c.Rating   || c.rating   || '4.0';
+  document.getElementById('cUrl').value    = c.Url      || c.url      || '';
+  openModal('courseModal');
+}
+
+async function deleteCourse(id) {
+  if (!confirm('Remover este curso?')) return;
+  try {
+    await fetch(API + '/api/admin/courses/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } });
+    await loadFromAPI();
+    showAlert('alertCourses', 'Curso removido.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── RENDER COACHES ───────────────────────────────────────────
+function renderCoaches() {
+  const grid = document.getElementById('coachesGrid');
+  if (!state.coaches.length) { grid.innerHTML = '<p style="color:var(--t3);font-size:13px;">Nenhum coach adicionado ainda.</p>'; return; }
+  grid.innerHTML = state.coaches.map(c => {
+    const name     = c.Name     || c.name     || 'Coach';
+    const location = c.Location || c.location || '';
+    const bio      = c.Bio      || c.bio      || '';
+    const skills   = c.Skills   || c.skills   || '';
+    const color    = c.Color    || c.color    || '#6366f1';
+    const id       = c.Id       || c.id;
+    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="height:60px;background:${color};display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:800;">${name[0].toUpperCase()}</div>
+      <div style="padding:14px;">
+        <div style="font-size:14px;font-weight:700;">${name}</div>
+        <div style="font-size:11px;color:var(--t3);margin:2px 0 6px;">${location}</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.4;margin-bottom:8px;">${bio.substring(0,80)}${bio.length>80?'...':''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${skills.split(',').filter(Boolean).map(s=>`<span style="font-size:10px;padding:2px 7px;background:var(--bg);border-radius:5px;color:var(--t3);">${s.trim()}</span>`).join('')}</div>
+        <div style="display:flex;gap:5px;"><button class="btn btn-ghost btn-xs" onclick="editCoach(${id})">Editar</button><button class="btn btn-red btn-xs" onclick="deleteCoach(${id})">Remover</button></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveCoach() {
+  const c = {
+    name:     document.getElementById('chName').value.trim(),
+    location: document.getElementById('chLocation').value.trim(),
+    bio:      document.getElementById('chBio').value.trim(),
+    skills:   document.getElementById('chSkills').value.trim(),
+    color:    document.getElementById('chColor').value,
+    email:    document.getElementById('chEmail').value.trim()
+  };
+  if (!c.name) { alert('Preencha o nome.'); return; }
+  try {
+    const method = state.editId ? 'PUT' : 'POST';
+    const url    = API + '/api/admin/coaches' + (state.editId ? '/' + state.editId : '');
+    const res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, body: JSON.stringify(c) });
+    if (!res.ok) { alert('Erro ao guardar coach.'); return; }
+    closeModal('coachModal');
+    await loadFromAPI();
+    showAlert('alertCoaches', 'Coach guardado.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+function editCoach(id) {
+  state.editId = id;
+  const c = state.coaches.find(x => x.Id === id || x.id === id);
+  if (!c) return;
+  document.getElementById('chName').value     = c.Name     || c.name     || '';
+  document.getElementById('chLocation').value = c.Location || c.location || '';
+  document.getElementById('chBio').value      = c.Bio      || c.bio      || '';
+  document.getElementById('chSkills').value   = c.Skills   || c.skills   || '';
+  document.getElementById('chEmail').value    = c.Email    || c.email    || '';
+  document.getElementById('chColor').value    = c.Color    || c.color    || '#6366f1';
+  openModal('coachModal');
+}
+
+async function deleteCoach(id) {
+  if (!confirm('Remover este coach?')) return;
+  try {
+    await fetch(API + '/api/admin/coaches/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } });
+    await loadFromAPI();
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── RENDER TESTIMONIALS ──────────────────────────────────────
+function renderTestis() {
+  const tbody = document.getElementById('testisTable');
+  if (!state.testis.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">Nenhum testemunho.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.testis.map(t => {
+    const id   = t.Id   || t.id;
+    const name = t.Name || t.name || '—';
+    const role = t.Role || t.role || '—';
+    const text = t.Text || t.text || '';
+    return `<tr>
+      <td><span style="font-weight:600;">${name}</span></td>
+      <td>${role}</td>
+      <td style="max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${text}</td>
+      <td><span class="badge badge-green">Activo</span></td>
+      <td><div class="action-btns">
+        <button class="btn btn-ghost btn-xs" onclick="editTesti(${id})">Editar</button>
+        <button class="btn btn-red btn-xs" onclick="deleteTesti(${id})">Remover</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveTesti() {
+  const t = {
+    name:  document.getElementById('tName').value.trim(),
+    role:  document.getElementById('tRole').value.trim(),
+    text:  document.getElementById('tText').value.trim(),
+    stars: 5
+  };
+  if (!t.name || !t.text) { alert('Preencha nome e testemunho.'); return; }
+  try {
+    const method = state.editId ? 'PUT' : 'POST';
+    const url    = API + '/api/admin/testimonials' + (state.editId ? '/' + state.editId : '');
+    const res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, body: JSON.stringify(t) });
+    if (!res.ok) { const d = await res.json(); alert('Erro: ' + (d.error||'falha')); return; }
+    closeModal('testiModal');
+    await loadFromAPI();
+    showAlert('alertTestis', 'Testemunho guardado.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+function editTesti(id) {
+  state.editId = id;
+  const t = state.testis.find(x => (x.Id||x.id) === id);
+  if (!t) return;
+  document.getElementById('tName').value = t.Name || t.name || '';
+  document.getElementById('tRole').value = t.Role || t.role || '';
+  document.getElementById('tText').value = t.Text || t.text || '';
+  openModal('testiModal');
+}
+
+async function deleteTesti(id) {
+  if (!confirm('Remover este testemunho?')) return;
+  try {
+    await fetch(API + '/api/admin/testimonials/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } });
+    await loadFromAPI();
+    showAlert('alertTestis', 'Testemunho removido.', 'green');
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── RENDER PLANS ─────────────────────────────────────────────
+function renderPlans() {
+  document.getElementById('plansGrid').innerHTML = state.plans.map((p,i) => `
+    <div style="background:var(--white);border:2px solid ${p.color};border-radius:14px;padding:22px;position:relative;">
+      <div style="font-size:12px;font-weight:700;color:${p.color};text-transform:uppercase;margin-bottom:6px;">${p.name}</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:4px;">${p.price === 0 ? 'Grátis' : '€' + p.price + '<span style="font-size:14px;font-weight:400;">/mês</span>'}</div>
+      <div style="margin:14px 0;display:flex;flex-direction:column;gap:6px;">
+        ${(p.features||[]).map(f=>`<div style="font-size:12px;display:flex;align-items:center;gap:6px;"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="editPlan(${i})">Editar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editPlan(i) {
+  state.editId = i;
+  const p = state.plans[i];
+  document.getElementById('planModalTitle').textContent = 'Editar: ' + p.name;
+  document.getElementById('pName').value     = p.name;
+  document.getElementById('pPrice').value    = p.price;
+  document.getElementById('pFeatures').value = (p.features||[]).join('\n');
+  document.getElementById('pMaxCvs').value   = p.maxCvs;
+  document.getElementById('pMaxTpls').value  = p.maxTpls;
+  openModal('planModal');
+}
+
+function savePlan() {
+  if (state.editId === null) return;
+  const p = state.plans[state.editId];
+  p.name     = document.getElementById('pName').value.trim();
+  p.price    = parseInt(document.getElementById('pPrice').value) || 0;
+  p.features = document.getElementById('pFeatures').value.split('\n').filter(Boolean);
+  p.maxCvs   = parseInt(document.getElementById('pMaxCvs').value) || 999;
+  p.maxTpls  = parseInt(document.getElementById('pMaxTpls').value) || 999;
+  save('plans'); closeModal('planModal'); renderPlans();
+  showAlert('alertPlans', 'Plano actualizado.', 'green');
+}
+
+// ── RENDER TEMPLATES ─────────────────────────────────────────
+function renderTemplates() {
+  document.getElementById('templatesPagInfo').textContent = state.templates.length + ' templates';
+  const tbody = document.getElementById('templatesTable');
+  if (!state.templates.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">A carregar templates da base de dados...</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.templates.map(t => `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:32px;height:40px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700;color:#6366f1;">CV</div>
+        <div>
+          <div style="font-weight:600;font-size:13px;">${t.Name}</div>
+          <div style="font-size:11px;color:var(--t4);">${t.Slug||''}</div>
+        </div>
+      </div>
+    </td>
+    <td style="font-size:12px;">${t.Category||'—'}</td>
+    <td>${t.IsPremium ? '<span class="badge badge-orange">Premium</span>' : '<span class="badge badge-green">Grátis</span>'}</td>
+    <td>${t.Active ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
+    <td><div class="action-btns">
+      <button class="btn btn-ghost btn-xs" onclick="viewTemplate(${t.Id})">Ver</button>
+      <button class="btn btn-ghost btn-xs" onclick="toggleTemplate(${t.Id},${t.Active})">${t.Active ? 'Desactivar' : 'Activar'}</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function filterTemplates(v) {
+  const filtered = state.templates.filter(t => (t.Name||'').toLowerCase().includes(v.toLowerCase()));
+  document.getElementById('templatesPagInfo').textContent = filtered.length + ' templates';
+}
+
+async function saveTemplate() {
+  const name    = document.getElementById('tmName').value.trim();
+  const cat     = document.getElementById('tmCat').value;
+  const slug    = document.getElementById('tmSlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');
+  const premium = document.getElementById('tmPremium').value;
+  if (!name) { alert('Preencha o nome.'); return; }
+  try {
+    const res = await fetch(API + '/api/admin/template-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ name, slug, category: cat, isPremium: parseInt(premium) })
+    });
+    if (res.ok) {
+      closeModal('templateModal');
+      await loadFromAPI();
+    } else {
+      const d = await res.json();
+      alert(d.error || 'Erro ao adicionar template.');
+    }
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── USER DASHBOARD DRAWER ────────────────────────────────────
+function closeDrawer(e) {
+  if (e && e.target !== document.getElementById('userDrawer')) return;
+  document.getElementById('userDrawer').classList.remove('open');
+}
+
+async function openUserDrawer(id) {
+  const drawer = document.getElementById('userDrawer');
+  const body   = document.getElementById('drawerBody');
+  const footer = document.getElementById('drawerFooter');
+  document.getElementById('drawerTitle').textContent = 'Perfil do Utilizador';
+  document.getElementById('drawerSub').textContent   = 'A carregar dados...';
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t4);">A carregar...</div>';
+  footer.innerHTML = '';
+  drawer.classList.add('open');
+
+  try {
+    const res = await fetch(API + '/api/admin/users/' + id + '/profile', {
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (!res.ok) throw new Error('Erro ' + res.status);
+    const { user, cvs, stats } = await res.json();
+
+    const name   = user.Name  || 'Sem nome';
+    const email  = user.Email || '';
+    const plan   = user.Plan  || 'free';
+    const role   = user.Role  || 'user';
+    const init   = name[0].toUpperCase();
+    const planColor = plan === 'premium' ? '#7c3aed' : plan === 'pro' ? '#1a56db' : '#6b7280';
+    const since  = user.CreatedAt ? new Date(user.CreatedAt).toLocaleDateString('pt-PT') : '—';
+    const expiry = user.PlanExpiry ? new Date(user.PlanExpiry).toLocaleDateString('pt-PT') : '—';
+    const lastAct = stats.lastActive ? new Date(stats.lastActive).toLocaleDateString('pt-PT') : '—';
+    const authType = user.GoogleId ? '🔵 Google' : user.LinkedInId ? '🔗 LinkedIn' : '📧 Email';
+
+    document.getElementById('drawerTitle').textContent = name;
+    document.getElementById('drawerSub').textContent   = email;
+
+    body.innerHTML = `
+      <div class="ud-hero">
+        <div class="ud-av">${init}</div>
+        <div>
+          <div class="ud-name">${name}</div>
+          <div class="ud-email">${email}</div>
+          <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="badge" style="background:${planColor}20;color:${planColor};border:1px solid ${planColor}40;">${plan.toUpperCase()}</span>
+            <span class="badge badge-gray">${role}</span>
+            <span class="badge badge-gray">${authType}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ud-stats">
+        <div class="ud-stat"><div class="ud-stat-v">${stats.totalCvs}</div><div class="ud-stat-l">CVs criados</div></div>
+        <div class="ud-stat"><div class="ud-stat-v">${stats.totalDownloads}</div><div class="ud-stat-l">Downloads</div></div>
+        <div class="ud-stat"><div class="ud-stat-v">${stats.publicCvs}</div><div class="ud-stat-l">CVs públicos</div></div>
+      </div>
+
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:20px;">
+        <div class="ud-info-row"><span class="ud-info-label">Registado em</span><span class="ud-info-val">${since}</span></div>
+        <div class="ud-info-row"><span class="ud-info-label">Última actividade</span><span class="ud-info-val">${lastAct}</span></div>
+        <div class="ud-info-row"><span class="ud-info-label">Plano expira</span><span class="ud-info-val">${expiry}</span></div>
+        <div class="ud-info-row"><span class="ud-info-label">Método de login</span><span class="ud-info-val">${authType}</span></div>
+      </div>
+
+      <div class="ud-section">CVs criados (${cvs.length})</div>
+      ${cvs.length === 0
+        ? `<div style="text-align:center;padding:24px;color:var(--t4);font-size:13px;background:var(--bg);border-radius:8px;">Nenhum CV criado ainda.</div>`
+        : cvs.map(cv => `
+          <div class="ud-cv-card">
+            <div class="ud-cv-thumb">CV</div>
+            <div style="flex:1;min-width:0;">
+              <div class="ud-cv-title">${cv.Title || 'CV sem título'}</div>
+              <div class="ud-cv-meta">${cv.TemplateName || ''} · ${cv.IsPublic ? '🌐 Público' : '🔒 Privado'} · ${cv.DownloadCount || 0} downloads</div>
+            </div>
+            <div style="font-size:11px;color:var(--t4);">${cv.UpdatedAt ? new Date(cv.UpdatedAt).toLocaleDateString('pt-PT') : ''}</div>
+          </div>`).join('')
+      }
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('userDrawer').classList.remove('open')">Fechar</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="editUser('${user.Id}');document.getElementById('userDrawer').classList.remove('open')">Editar</button>
+      <button class="btn btn-blue" style="flex:1;" onclick="upgradeUserFromDrawer('${user.Id}','${plan}')">Gerir Plano</button>
+    `;
+  } catch(e) {
+    body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);">Erro ao carregar perfil: ${e.message}</div>`;
+  }
+}
+
+async function upgradeUserFromDrawer(id, currentPlan) {
+  const plans = ['free','pro','premium'];
+  const next  = plans[(plans.indexOf(currentPlan) + 1) % plans.length];
+  if (!confirm(`Alterar plano para "${next}"?`)) return;
+  try {
+    await fetch(API + '/api/admin/users/' + id + '/upgrade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ plan: next, days: 365 })
+    });
+    await loadFromAPI();
+    openUserDrawer(id);
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+// ── Cores por categoria ───────────────────────────────────────
+function templateAccent(t) {
+  const cat = (t.Category||'').toLowerCase();
+  const name = (t.Name||'').toLowerCase();
+  if (cat.includes('saúde') || cat.includes('saude') || name.includes('médic') || name.includes('enfer')) return { bg:'#0d9488', light:'#ccfbf1', text:'#fff' };
+  if (cat.includes('jurídic') || cat.includes('advog') || name.includes('advo') || name.includes('juríd')) return { bg:'#374151', light:'#f3f4f6', text:'#fff' };
+  if (cat.includes('market') || cat.includes('design') || name.includes('criativ') || name.includes('design')) return { bg:'#7c3aed', light:'#ede9fe', text:'#fff' };
+  if (cat.includes('tecn') || cat.includes('engenharia') || name.includes('software') || name.includes('progr')) return { bg:'#0284c7', light:'#e0f2fe', text:'#fff' };
+  if (cat.includes('finanç') || cat.includes('bancár') || name.includes('financ') || name.includes('banc')) return { bg:'#1e3a5f', light:'#dbeafe', text:'#fff' };
+  if (cat.includes('educa') || name.includes('profes') || name.includes('acad')) return { bg:'#b45309', light:'#fef3c7', text:'#fff' };
+  if (cat.includes('turism') || cat.includes('hotelari') || name.includes('hotel') || name.includes('turis')) return { bg:'#be123c', light:'#ffe4e6', text:'#fff' };
+  if (cat.includes('logíst') || cat.includes('transport') || name.includes('motor') || name.includes('logíst')) return { bg:'#92400e', light:'#fef3c7', text:'#fff' };
+  return { bg:'#1a56db', light:'#eff6ff', text:'#fff' };
+}
+
+// ── CV Mockup visual ──────────────────────────────────────────
+function cvMockup(t) {
+  const ac = templateAccent(t);
+  const sidebar = t.IsPremium || (t.Category||'').toLowerCase().includes('execut') || (t.Name||'').toLowerCase().includes('execut');
+  if (sidebar) {
+    return `<div style="display:flex;height:100%;font-size:0;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);">
+      <div style="width:38%;background:${ac.bg};padding:16px 12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.25);margin:0 auto 8px;"></div>
+        <div style="height:8px;background:rgba(255,255,255,.7);border-radius:4px;width:80%;margin:0 auto;"></div>
+        <div style="height:5px;background:rgba(255,255,255,.4);border-radius:3px;width:60%;margin:0 auto 10px;"></div>
+        ${['Contactos','Competências','Idiomas'].map(s=>`<div style="margin-top:6px;"><div style="font-size:7px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">${s}</div>${[70,85,55,40].map(w=>`<div style="height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-bottom:3px;"><div style="height:100%;width:${w}%;background:rgba(255,255,255,.7);border-radius:2px;"></div></div>`).join('')}</div>`).join('')}
+      </div>
+      <div style="flex:1;background:#fff;padding:14px 12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="height:6px;background:#e5e7eb;border-radius:3px;width:75%;"></div>
+        <div style="height:4px;background:#e5e7eb;border-radius:2px;width:50%;margin-bottom:6px;"></div>
+        ${['Experiência Profissional','Formação Académica','Certificações'].map(s=>`<div style="margin-top:4px;"><div style="font-size:7px;font-weight:700;color:${ac.bg};text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid ${ac.bg};padding-bottom:2px;margin-bottom:5px;">${s}</div>${[100,85,95].map(w=>`<div style="height:3px;background:#f3f4f6;border-radius:2px;margin-bottom:3px;width:${w}%;"></div>`).join('')}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+  return `<div style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);display:flex;flex-direction:column;height:100%;">
+    <div style="background:${ac.bg};padding:18px 16px;text-align:center;">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.25);margin:0 auto 8px;"></div>
+      <div style="height:7px;background:rgba(255,255,255,.8);border-radius:4px;width:55%;margin:0 auto 5px;"></div>
+      <div style="height:4px;background:rgba(255,255,255,.45);border-radius:3px;width:38%;margin:0 auto;"></div>
+    </div>
+    <div style="padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:7px;">
+      ${['Experiência','Formação','Competências','Contactos'].map(s=>`<div><div style="font-size:6px;font-weight:700;color:${ac.bg};text-transform:uppercase;letter-spacing:1px;border-bottom:1.5px solid ${ac.bg};padding-bottom:2px;margin-bottom:4px;">${s}</div>${[100,85,95,70].map(w=>`<div style="height:3px;background:#f3f4f6;border-radius:2px;margin-bottom:2px;width:${w}%;"></div>`).join('')}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function viewTemplate(id) {
+  const t = state.templates.find(x => x.Id === id);
+  if (!t) return;
+  const ac = templateAccent(t);
+  document.getElementById('previewModalTitle').textContent = t.Name;
+  const hasImg = t.PreviewUrl && t.PreviewUrl.trim();
+  document.getElementById('previewModalBody').innerHTML = `
+    <div style="display:flex;gap:0;flex-direction:column;">
+      <div style="background:${ac.light};border-bottom:1px solid var(--border);padding:24px;display:flex;align-items:center;justify-content:center;min-height:260px;">
+        ${hasImg
+          ? `<img src="${t.PreviewUrl}" alt="Preview" style="max-height:240px;object-fit:contain;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.15);" onerror="this.parentElement.innerHTML=cvMockupFallback(${t.Id})">`
+          : `<div style="width:160px;height:210px;">${cvMockup(t)}</div>`
+        }
+      </div>
+      <div style="padding:18px 22px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px;">
+          <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Categoria</div><div style="font-size:13px;font-weight:600;">${t.Category||'—'}</div></div>
+          <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Tipo</div><div>${t.IsPremium ? '<span class="badge badge-orange">Premium</span>' : '<span class="badge badge-green">Grátis</span>'}</div></div>
+          <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Estado</div><div>${t.Active ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</div></div>
+          <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Slug</div><code style="font-size:11px;background:var(--bg);padding:3px 7px;border-radius:5px;">${t.Slug||'—'}</code></div>
+        </div>
+        <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border);">
+          <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('templatePreviewModal')">Fechar</button>
+          <button class="btn ${t.Active ? 'btn-ghost' : 'btn-blue'}" style="flex:1;" onclick="toggleTemplate(${t.Id},${t.Active});closeModal('templatePreviewModal');">${t.Active ? 'Desactivar' : 'Activar para Utilizadores'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+  openModal('templatePreviewModal');
+}
+
+// ── IMPORTAR DO COMPUTADOR ────────────────────────────────────
+function openImportModal() {
+  document.getElementById('importFileInput').value = '';
+  document.getElementById('importPreview').innerHTML = '';
+  document.getElementById('importPreview').style.display = 'none';
+  document.getElementById('btnConfirmImport').style.display = 'none';
+  window._importData = null;
+  openModal('importModal');
+}
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let rows = [];
+    try {
+      if (ext === 'json') {
+        const parsed = JSON.parse(e.target.result);
+        rows = Array.isArray(parsed) ? parsed : (parsed.templates || []);
+      } else if (ext === 'csv') {
+        const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+        const headers = lines[0].split(';').map(h => h.trim().replace(/^"|"$/g,''));
+        rows = lines.slice(1).map(line => {
+          const vals = line.split(';').map(v => v.trim().replace(/^"|"$/g,''));
+          const obj = {};
+          headers.forEach((h,i) => obj[h] = vals[i]||'');
+          return obj;
+        }).filter(r => r.name || r.Name);
+      } else {
+        alert('Formato não suportado. Use .json ou .csv');
+        return;
+      }
+    } catch(err) {
+      alert('Erro ao ler ficheiro: ' + err.message);
+      return;
+    }
+    if (!rows.length) { alert('Ficheiro sem dados válidos.'); return; }
+    window._importData = rows;
+    const preview = document.getElementById('importPreview');
+    const sample = rows.slice(0,5);
+    preview.style.display = 'block';
+    preview.innerHTML = `
+      <div style="background:var(--bg);border-radius:8px;padding:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">✓ ${rows.length} template(s) encontrados — pré-visualização:</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse;">
+          <thead><tr style="color:var(--t4);">
+            <th style="text-align:left;padding:4px 6px;">Nome</th>
+            <th style="text-align:left;padding:4px 6px;">Categoria</th>
+            <th style="text-align:left;padding:4px 6px;">Tipo</th>
+          </tr></thead>
+          <tbody>${sample.map(r=>`<tr style="border-top:1px solid var(--border);">
+            <td style="padding:4px 6px;font-weight:600;">${r.name||r.Name||'—'}</td>
+            <td style="padding:4px 6px;color:var(--t3);">${r.category||r.Category||'Geral'}</td>
+            <td style="padding:4px 6px;">${(r.isPremium||r.IsPremium) ? '<span class="badge badge-orange">Premium</span>' : '<span class="badge badge-green">Grátis</span>'}</td>
+          </tr>`).join('')}
+          ${rows.length > 5 ? `<tr><td colspan="3" style="padding:4px 6px;color:var(--t4);font-size:10px;">... e mais ${rows.length-5} templates</td></tr>` : ''}
+        </tbody></table>
+      </div>`;
+    document.getElementById('btnConfirmImport').style.display = 'block';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+async function confirmImport() {
+  const data = window._importData;
+  if (!data || !data.length) return;
+  const btn = document.getElementById('btnConfirmImport');
+  btn.disabled = true;
+  btn.textContent = 'A importar…';
+  try {
+    const res = await fetch(API + '/api/admin/template-items/import-bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ templates: data })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      closeModal('importModal');
+      alert(`✓ Importação concluída!\nImportados: ${d.imported}  |  Duplicados ignorados: ${d.skipped}`);
+      await loadFromAPI();
+    } else {
+      alert('Erro: ' + (d.error || 'Falha na importação.'));
+    }
+  } catch(e) { alert('Erro de ligação.'); }
+  btn.disabled = false;
+  btn.textContent = 'Importar Agora';
+}
+
+async function toggleTemplate(id, currentActive) {
+  try {
+    const res = await fetch(API + '/api/admin/template-items/' + id + '/toggle', {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (res.ok) {
+      const t = state.templates.find(x => x.Id === id);
+      if (t) t.Active = currentActive ? 0 : 1;
+      renderTemplates();
+    } else {
+      alert('Erro ao actualizar template.');
+    }
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+async function activateAllTemplates() {
+  if (!confirm('Activar todos os templates?')) return;
+  try {
+    const res = await fetch(API + '/api/admin/template-items/activate-all', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + TOKEN }
+    });
+    if (res.ok) {
+      state.templates.forEach(t => t.Active = 1);
+      renderTemplates();
+    } else {
+      alert('Erro ao activar templates.');
+    }
+  } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── DEFAULT DATA ─────────────────────────────────────────────
+function loadDefaultJobs() {
+  state.jobs = [
+    { title:'Engenheiro de Software', company:'Farfetch', city:'Lisboa', country:'Portugal', category:'TI & Tecnologia', date:new Date().toISOString().split('T')[0] },
+    { title:'Data Analyst', company:'Feedzai', city:'Porto', country:'Portugal', category:'TI & Tecnologia', date:new Date().toISOString().split('T')[0] },
+    { title:'UX/UI Designer', company:'Volkswagen Digital', city:'Lisboa', country:'Portugal', category:'TI & Tecnologia', date:new Date().toISOString().split('T')[0] }
+  ];
+  save('jobs');
+}
+
+function loadDefaultCourses() {
+  state.courses = [
+    { title:'Como criar um CV que passa nos filtros ATS', source:'CV Premium', category:'Gestão & Negócios', rating:'4.8', url:'' },
+    { title:'Método STAR para entrevistas', source:'CV Premium', category:'Gestão & Negócios', rating:'4.9', url:'' },
+    { title:'Negociação salarial avançada', source:'CV Premium', category:'Gestão & Negócios', rating:'4.7', url:'' }
+  ];
+  save('courses');
+}
+
+function loadDefaultCoaches() {
+  state.coaches = [
+    { name:'Ana Silva', location:'Lisboa, Portugal', bio:'Coach de carreira com 10+ anos a ajudar profissionais a alcançar os seus objectivos.', skills:'CV, LinkedIn, Entrevistas', color:'#6366f1', email:'' },
+    { name:'João Santos', location:'Porto, Portugal', bio:'Especialista em transição de carreira e negociação salarial para engenheiros.', skills:'Tech, Salário, Marca Pessoal', color:'#0ea5e9', email:'' }
+  ];
+  save('coaches');
+}
+
+function loadDefaultTestis() {
+  state.testis = [
+    { name:'Maria Costa', role:'Engenheira de Software', text:'O CV Premium mudou a minha vida profissional! Consegui 3 entrevistas na primeira semana.' },
+    { name:'Pedro Alves', role:'Analista Financeiro', text:'A ferramenta de IA ajudou-me a optimizar o meu CV e recebi uma proposta 30% acima do esperado.' }
+  ];
+  save('testis');
+}
+
+// ── MODALS ────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open');    state.editId = null; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); state.editId = null; }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// ── HELPERS ───────────────────────────────────────────────────
+function selectColor(el, color, inputId) {
+  el.closest('.color-opts').querySelectorAll('.color-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById(inputId).value = color;
+}
+
+function showAlert(containerId, msg, type) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${type === 'green' ? '✓' : '✕'} ${msg}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────
+function saveSettings() {
+  showAlert('alertSettings', 'Definições guardadas com sucesso.', 'green');
+}
+
+function changePassword() {
+  const curr = document.getElementById('setPwdCurr').value;
+  const newp = document.getElementById('setPwdNew').value;
+  const conf = document.getElementById('setPwdConf').value;
+  if (!curr || !newp) { showAlert('alertSettings', 'Preencha todos os campos.', 'red'); return; }
+  if (newp !== conf)  { showAlert('alertSettings', 'As passwords não coincidem.', 'red'); return; }
+  showAlert('alertSettings', 'Password actualizada com sucesso.', 'green');
+}
+
+function saveAPIKeys() {
+  showAlert('alertSettings', 'Chaves de API guardadas (requer reinício do servidor).', 'green');
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────
+function logout() {
+  localStorage.removeItem('cv_token');
+  localStorage.removeItem('cv_user');
+  location.href = '/admin-login';
+}
+</script>
+</body>
+</html>

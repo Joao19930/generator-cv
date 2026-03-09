@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Premium — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1a56db;--blue-dark:#1345b7;--blue-light:#eff6ff;--blue-mid:#bfdbfe;
+  --navy:#1e1b4b;--navy-2:#312e81;
+  --green:#16a34a;--green-light:#dcfce7;
+  --orange:#ea580c;--orange-light:#fff7ed;
+  --text:#111827;--text-2:#374151;--text-3:#6b7280;--text-4:#9ca3af;
+  --border:#e5e7eb;--bg:#f9fafb;--white:#fff;
+  --sidebar-w:230px;
+  --radius:10px;--radius-sm:7px;--radius-lg:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══════════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--white);border-right:1px solid var(--border);
+  height:100vh;position:fixed;left:0;top:0;
+  display:flex;flex-direction:column;overflow-y:auto;z-index:50;
+}
+.sb-profile{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;}
+.sb-avatar-wrap{position:relative;flex-shrink:0;}
+.sb-avatar{width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;}
+.sb-pct{position:absolute;bottom:-2px;right:-4px;background:var(--orange);color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:8px;border:1px solid #fff;}
+.sb-pname{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+.sb-prole{font-size:11px;color:var(--blue);font-weight:500;margin-top:1px;}
+
+.sb-nav{flex:1;padding:8px 0;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;text-decoration:none;border-left:3px solid transparent;transition:all .15s;position:relative;}
+.sb-item:hover{background:#f3f4f6;color:var(--text-2);}
+.sb-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);font-weight:600;}
+.sb-ico{width:16px;height:16px;flex-shrink:0;}
+.sb-arrow{margin-left:auto;color:var(--text-4);}
+.sb-new{background:var(--blue);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;margin-left:auto;}
+.sb-divider{height:1px;background:var(--border);margin:6px 12px;}
+
+.sb-bottom{padding:12px 10px;border-top:1px solid var(--border);}
+.sb-ext{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--blue-light);border-radius:var(--radius-sm);cursor:pointer;text-decoration:none;}
+.sb-ext-text{font-size:12px;font-weight:600;color:var(--blue);}
+
+/* ══ TOPBAR ═══════════════════════════════════════════ */
+.topbar{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:56px;
+  background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:0 24px;gap:10px;z-index:40;
+}
+.btn-upgrade{display:flex;align-items:center;gap:7px;padding:9px 20px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:background .2s;}
+.btn-upgrade:hover{background:var(--navy-2);}
+.btn-learning{display:flex;align-items:center;gap:7px;padding:9px 18px;background:var(--white);color:var(--text-2);border:1.5px solid var(--border);border-radius:20px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;}
+.btn-learning:hover{border-color:var(--blue);color:var(--blue);}
+.topbar-ico{width:34px;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-3);}
+
+/* ══ MAIN ═════════════════════════════════════════════ */
+.main{margin-left:var(--sidebar-w);margin-top:56px;flex:1;padding:28px 28px 40px;}
+
+/* ══ HERO GREETING ════════════════════════════════════ */
+.hero{text-align:center;padding:10px 0 32px;}
+.hero-hi{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:4px;}
+.hero-sub{font-size:14px;color:var(--text-3);}
+
+/* GOAL STEPS */
+.goal-steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:32px;}
+.goal-step{display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;transition:all .2s;border:1.5px solid transparent;white-space:nowrap;}
+.goal-step.active{background:var(--blue-light);color:var(--blue);border-color:var(--blue-mid);}
+.goal-step:hover:not(.active){color:var(--text-2);}
+.goal-connector{width:40px;height:1px;background:var(--border);}
+
+/* ══ GRID LAYOUT ══════════════════════════════════════ */
+.grid{display:grid;grid-template-columns:320px 1fr;gap:20px;max-width:1100px;margin:0 auto;}
+
+/* ══ PROGRESS CARD ════════════════════════════════════ */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);}
+.progress-card{padding:22px;}
+.progress-title{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-4);margin-bottom:18px;}
+.prog-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg);}
+.prog-item:last-child{border-bottom:none;}
+.prog-ico{width:36px;height:36px;background:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-3);}
+.prog-label{font-size:13px;font-weight:600;color:var(--text-2);flex:1;}
+.prog-val{font-size:13px;font-weight:700;color:var(--text-4);}
+.prog-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin-top:4px;}
+.prog-bar{height:100%;background:var(--blue);border-radius:2px;transition:width .6s;}
+
+/* ══ RESUME BUILDING CARD ═════════════════════════════ */
+.main-card{padding:24px;display:flex;flex-direction:column;gap:20px;}
+.card-tag{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-light);padding:3px 10px;border-radius:6px;display:inline-block;margin-bottom:6px;}
+.card-h{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:6px;}
+.card-sub{font-size:13px;color:var(--text-3);line-height:1.6;margin-bottom:16px;}
+.btn-quick{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:background .2s;}
+.btn-quick:hover{background:var(--blue-dark);}
+
+/* CV PREVIEW */
+.cv-preview-wrap{display:flex;align-items:center;gap:16px;}
+.cv-mini{width:90px;height:127px;background:var(--white);border:1px solid var(--border);border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.1);padding:8px;flex-shrink:0;display:flex;flex-direction:column;gap:3px;}
+.cm-hdr{height:16px;background:#1a56db;border-radius:2px;margin-bottom:4px;}
+.cm-l{height:3px;background:#E5E7EB;border-radius:1px;}
+.cm-l.s{width:55%;}
+.cm-l.m{width:75%;}
+.cm-sec{height:2px;background:#D1D5DB;border-radius:1px;margin:4px 0 2px;width:35%;}
+.cv-add-btn{width:32px;height:32px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(26,86,219,.3);}
+
+/* ══ JOB MATCHES ══════════════════════════════════════ */
+.jobs-section{margin-top:20px;}
+.jobs-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.jobs-title{font-size:14px;font-weight:700;color:var(--text);}
+.jobs-link{font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none;}
+.job-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.job-card:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(26,86,219,.08);}
+.job-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.job-company{font-size:12px;color:var(--text-3);}
+.job-meta{font-size:11px;color:var(--text-4);margin-top:3px;}
+
+/* ══ BOTTOM GRID ══════════════════════════════════════ */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px;max-width:1100px;margin-left:auto;margin-right:auto;}
+.mini-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all .2s;text-decoration:none;display:block;}
+.mini-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,.08);transform:translateY(-2px);}
+.mini-card-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.mini-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.mini-card-sub{font-size:12px;color:var(--text-3);line-height:1.5;}
+
+/* BOOST CARD */
+.boost-card{background:linear-gradient(135deg,#1a56db 0%,#312e81 100%);border:none;border-radius:var(--radius-lg);padding:22px;cursor:pointer;transition:transform .2s;color:#fff;grid-column:span 2;}
+.boost-card:hover{transform:translateY(-2px);}
+.boost-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:6px;}
+.boost-sub{font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:14px;}
+.btn-boost{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:var(--radius-sm);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(4px);}
+
+/* EXPERT CARD */
+.expert-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+.expert-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.expert-sub{font-size:12px;color:var(--text-3);line-height:1.5;margin-bottom:12px;}
+.expert-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.etag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--bg);color:var(--text-3);}
+
+/* TARGET ROLE */
+.target-card{background:var(--white);border:1.5px dashed var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;}
+.target-ico{width:40px;height:40px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--blue);}
+.target-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.target-sub{font-size:12px;color:var(--text-3);margin-bottom:12px;line-height:1.5;}
+.btn-target{padding:9px 18px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+
+/* ══ DOCUMENTS TAB CONTENT ════════════════════════════ */
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px;margin:0 auto;}
+.doc-new{border:2px dashed var(--border);border-radius:var(--radius-lg);aspect-ratio:.707;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;text-decoration:none;background:var(--white);}
+.doc-new:hover{border-color:var(--blue);background:var(--blue-light);}
+.doc-new:hover .doc-new-ico{background:var(--blue);color:#fff;}
+.doc-new-ico{width:38px;height:38px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .2s;}
+.doc-new-text{font-size:12px;font-weight:600;color:var(--text-3);}
+.doc-new:hover .doc-new-text{color:var(--blue);}
+
+/* ══ HIDDEN PANELS ════════════════════════════════════ */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* ══ SCROLLBAR ════════════════════════════════════════ */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sb-profile" onclick="location.href='/definicoes'">
+    <div class="sb-avatar-wrap">
+      <div class="sb-avatar" id="sbAvatar">U</div>
+      <div class="sb-pct" id="sbPct">0%</div>
+    </div>
+    <div>
+      <div class="sb-pname" id="sbName">A carregar...</div>
+      <div class="sb-prole" id="sbRole">Definir cargo alvo</div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <a class="sb-item active" onclick="showPanel('dashboard',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="sb-item" onclick="showPanel('documents',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Documentos
+      <svg class="sb-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="sb-item" onclick="showPanel('jobs',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+      Empregos
+    </a>
+    <a class="sb-item" onclick="showPanel('tracker',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Rastreador de Empregos
+    </a>
+    <a class="sb-item" onclick="showPanel('interview',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Preparação Entrevista
+    </a>
+    <a class="sb-item" onclick="showPanel('salary',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Análise Salarial
+    </a>
+    <a class="sb-item">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.21 1.23 2 2 0 012.22 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l.66-.66a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Distribuição de CV
+    </a>
+    <a class="sb-item">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Aprendizagem
+      <span class="sb-new">NOVO</span>
+    </a>
+    <div class="sb-divider"></div>
+    <a class="sb-item">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Método de Pesquisa
+      <svg class="sb-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="sb-item" onclick="showPanel('coaching',this)">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Coaching
+    </a>
+    <a class="sb-item" onclick="logout()">
+      <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair
+    </a>
+  </nav>
+
+  <div class="sb-bottom">
+    <a href="/checkout/pro" class="sb-ext">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span class="sb-ext-text">Instalar Extensão Auto-Apply</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ══ TOPBAR ═══════════════════════════════════════════ -->
+<header class="topbar">
+  <a href="/admin-panel" id="adminPanelBtn" style="display:none;align-items:center;gap:6px;padding:8px 16px;background:#1e1b4b;color:#fff;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;margin-right:4px;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Painel Admin
+  </a>
+  <a href="/checkout/pro" class="btn-upgrade">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    Upgrade Agora
+  </a>
+  <a href="/learning" class="btn-learning">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    Aprendizagem Ilimitada
+  </a>
+  <div class="topbar-ico" onclick="location.href='/definicoes'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+  </div>
+</header>
+
+<!-- ══ MAIN ══════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ─── DASHBOARD PANEL ─────────────────────────────── -->
+  <div id="panel-dashboard" class="panel active">
+
+    <div class="hero">
+      <div class="hero-hi" id="heroGreeting">Olá!</div>
+      <div class="hero-sub">Qual é o seu objectivo hoje?</div>
+    </div>
+
+    <!-- GOAL STEPS -->
+    <div class="goal-steps">
+      <div class="goal-step active" onclick="setGoal(0,this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Criar CV
+      </div>
+      <div class="goal-connector"></div>
+      <div class="goal-step" onclick="setGoal(1,this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Pesquisa de Emprego
+      </div>
+      <div class="goal-connector"></div>
+      <div class="goal-step" onclick="setGoal(2,this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Preparar Entrevista
+      </div>
+      <div class="goal-connector"></div>
+      <div class="goal-step" onclick="setGoal(3,this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Aprender
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid">
+      <!-- LEFT: PROGRESS -->
+      <div class="card progress-card">
+        <div class="progress-title">Progresso</div>
+        <div class="prog-item">
+          <div class="prog-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div style="flex:1">
+            <div class="prog-label">Criar CV</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%" id="pb1"></div></div>
+          </div>
+          <div class="prog-val" id="pv1">0%</div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div style="flex:1">
+            <div class="prog-label">Personalização de CV</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%" id="pb2"></div></div>
+          </div>
+          <div class="prog-val" id="pv2">0</div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg></div>
+          <div style="flex:1">
+            <div class="prog-label">Distribuição de CV</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%" id="pb3"></div></div>
+          </div>
+          <div class="prog-val" id="pv3">0</div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div style="flex:1">
+            <div class="prog-label">Carta de Apresentação</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%" id="pb4"></div></div>
+          </div>
+          <div class="prog-val" id="pv4">0</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: RESUME BUILDING -->
+      <div class="card main-card">
+        <div>
+          <span class="card-tag">Criar CV</span>
+          <div class="card-h">Crie um novo CV em 20 minutos</div>
+          <div class="card-sub">Construa rapidamente um CV que funciona. É fácil com IA e mais de 200 templates profissionais.</div>
+          <a href="/editor" class="btn-quick">
+            Criar o meu CV rapidamente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="cv-preview-wrap">
+          <div class="cv-mini">
+            <div class="cm-hdr"></div>
+            <div class="cm-l s"></div><div class="cm-l m"></div>
+            <div class="cm-sec"></div>
+            <div class="cm-l"></div><div class="cm-l s"></div><div class="cm-l m"></div>
+            <div class="cm-sec"></div>
+            <div class="cm-l s"></div><div class="cm-l"></div>
+          </div>
+          <div class="cv-mini" style="margin-left:-20px;opacity:.6;transform:scale(.95)">
+            <div class="cm-hdr" style="background:#312e81"></div>
+            <div class="cm-l s"></div><div class="cm-l m"></div>
+            <div class="cm-sec"></div>
+            <div class="cm-l"></div><div class="cm-l s"></div>
+          </div>
+          <div class="cv-add-btn" onclick="location.href='/editor'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB MATCHES -->
+    <div class="jobs-section" style="max-width:1100px;margin:20px auto 0;">
+      <div class="jobs-hdr">
+        <span class="jobs-title">As suas vagas correspondentes</span>
+        <a href="/jobs" class="jobs-link">Ver todas →</a>
+      </div>
+      <div id="jobsList">
+        <div class="job-card"><div class="job-title">Engenheiro de Software</div><div class="job-company">Tech Angola · Luanda, Angola</div><div class="job-meta">Publicado há 2 dias</div></div>
+        <div class="job-card"><div class="job-title">Analista Financeiro</div><div class="job-company">BAI · Luanda, Angola</div><div class="job-meta">Publicado há 3 dias</div></div>
+        <div class="job-card"><div class="job-title">Gestor de Projectos</div><div class="job-company">Sonangol · Luanda, Angola</div><div class="job-meta">Publicado há 5 dias</div></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM CARDS -->
+    <div class="bottom-grid">
+      <div class="boost-card">
+        <div class="boost-title">Pronto para impulsionar a sua pesquisa de emprego?</div>
+        <div class="boost-sub">Escolha o seu CV e enviamo-lo para centenas de recrutadores na sua área com apenas alguns cliques.</div>
+        <button class="btn-boost">Distribuir o meu CV →</button>
+      </div>
+      <div class="expert-card">
+        <div class="expert-title">Dificuldade em criar o seu CV?</div>
+        <div class="expert-sub">O seu CV é a chave do sucesso. Deixe os nossos especialistas ajudá-lo a criar uma história de carreira envolvente.</div>
+        <div class="expert-tags">
+          <span class="etag">CV moderno</span><span class="etag">Suporte 1:1</span><span class="etag">Passa ATS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TARGET ROLE -->
+    <div style="max-width:1100px;margin:20px auto 0;" id="targetCard">
+      <div class="target-card">
+        <div class="target-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <div class="target-title">Qual cargo está a procurar?</div>
+        <div class="target-sub">Se nos disser o seu destino, mostramos-lhe como chegar lá com cursos e vagas personalizadas.</div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <input id="roleInput" type="text" placeholder="ex: Engenheiro de Software, Médico, Advogado..."
+            style="padding:9px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;width:280px;"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter')setTargetRole(this.value)">
+          <button onclick="setTargetRole(document.getElementById('roleInput').value)"
+            style="padding:9px 18px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DOCUMENTS PANEL ──────────────────────────────── -->
+  <div id="panel-documents" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;">Os meus documentos</h2>
+        <button onclick="location.href='/editor'" style="display:flex;align-items:center;gap:7px;padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo CV
+        </button>
+      </div>
+      <div class="docs-grid" id="docsGrid">
+        <a href="/editor" class="doc-new">
+          <div class="doc-new-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          <span class="doc-new-text">Criar novo CV</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── JOBS PANEL ───────────────────────────────────── -->
+  <div id="panel-jobs" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:20px;">Pesquisa de Emprego</h2>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;color:var(--text-3);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5" style="margin:0 auto 12px;display:block"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        <div style="font-size:15px;font-weight:700;color:var(--text-2);margin-bottom:6px;">Defina o seu cargo alvo</div>
+        <div style="font-size:13px;">Configure o seu perfil para ver vagas personalizadas.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TRACKER PANEL ────────────────────────────────── -->
+  <div id="panel-tracker" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:20px;">Rastreador de Candidaturas</h2>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;">
+        <div style="font-size:13px;color:var(--text-3);">Nenhuma candidatura ainda. Comece a candidatar-se a empregos e acompanhe aqui o progresso.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── INTERVIEW PANEL ──────────────────────────────── -->
+  <div id="panel-interview" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:20px;">Preparação para Entrevista</h2>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;">
+        <div style="font-size:13px;color:var(--text-3);">Ferramentas de preparação para entrevista em breve.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── COACHING PANEL ──────────────────────────────── -->
+  <div id="panel-coaching" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="margin-bottom:24px;">
+        <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;">Coaching de Carreira</h2>
+        <p style="font-size:13px;color:var(--text-3);margin-top:4px;">Coaches profissionais disponíveis para ajudar na sua carreira</p>
+      </div>
+      <div id="coachesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+        <div style="text-align:center;padding:40px;color:var(--text-3);grid-column:1/-1;">A carregar coaches...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SALARY PANEL ─────────────────────────────────── -->
+  <div id="panel-salary" class="panel">
+    <div style="max-width:1100px;margin:0 auto;">
+      <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:20px;">Análise Salarial</h2>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;">
+        <div style="font-size:13px;color:var(--text-3);">Análise de salários por profissão em Angola em breve.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const TOKEN = localStorage.getItem('cv_token');
+const API   = '/api';
+
+// ── AUTH ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (!TOKEN) return location.href = '/login';
+  try {
+    const p    = JSON.parse(atob(TOKEN.split('.')[1]));
+    const name = p.name || p.email?.split('@')[0] || 'Utilizador';
+    document.getElementById('sbAvatar').textContent     = name[0].toUpperCase();
+    document.getElementById('sbName').textContent       = name;
+    document.getElementById('heroGreeting').textContent = 'Olá, ' + name.split(' ')[0] + '!';
+    if ((p.role || '').toLowerCase() === 'admin') {
+      document.getElementById('adminPanelBtn').style.display = 'flex';
+    }
+    const role = localStorage.getItem('cv_target_role');
+    if (role) {
+      document.getElementById('sbRole').textContent  = role;
+      document.getElementById('roleInput').value     = role;
+      document.getElementById('targetCard').style.display = 'none';
+    }
+    loadCvs();
+  } catch(e) { localStorage.clear(); location.href = '/login'; }
+});
+
+async function loadCvs() {
+  try {
+    const res = await fetch(API + '/cv', { headers: { Authorization: 'Bearer ' + TOKEN } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const cvs  = Array.isArray(data) ? data : (data.cvs || []);
+    if (cvs.length > 0) {
+      const pct = Math.min(cvs.length * 25, 100);
+      document.getElementById('pb1').style.width   = pct + '%';
+      document.getElementById('pv1').textContent   = pct + '%';
+      document.getElementById('sbPct').textContent = pct + '%';
+      renderDocs(cvs);
+    }
+  } catch(_) {}
+}
+
+function renderDocs(cvs) {
+  const g = document.getElementById('docsGrid');
+  g.innerHTML = `<a href="/editor" class="doc-new">
+    <div class="doc-new-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    <span class="doc-new-text">Criar novo CV</span></a>`;
+  cvs.forEach(cv => {
+    g.insertAdjacentHTML('beforeend', `
+      <div onclick="location.href='/editor?cv=${cv.Id}'"
+        style="border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--white);overflow:hidden;cursor:pointer;transition:all .2s;"
+        onmouseover="this.style.borderColor='var(--blue)';this.style.boxShadow='0 4px 16px rgba(26,86,219,.1)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+        <div style="aspect-ratio:.707;background:#EFF6FF;display:flex;align-items:center;justify-content:center;">
+          <div style="width:70%;height:80%;background:#fff;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,.1);padding:9px;display:flex;flex-direction:column;gap:3px;">
+            <div style="height:13px;background:#1a56db;border-radius:2px;margin-bottom:4px;"></div>
+            <div style="height:3px;background:#E5E7EB;border-radius:1px;width:60%;"></div>
+            <div style="height:3px;background:#E5E7EB;border-radius:1px;"></div>
+            <div style="height:2px;background:#D1D5DB;border-radius:1px;width:35%;margin:4px 0 2px;"></div>
+            <div style="height:3px;background:#E5E7EB;border-radius:1px;width:80%;"></div>
+            <div style="height:3px;background:#E5E7EB;border-radius:1px;width:55%;"></div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cv.Title || 'CV sem título'}</div>
+          <div style="font-size:11px;color:var(--text-4);margin-top:2px;">${cv.TemplateName || ''}</div>
+        </div>
+      </div>`);
+  });
+}
+
+// ── COACHES ──────────────────────────────────────────────
+async function loadCoaches() {
+  try {
+    const res = await fetch(API + '/content/coaches');
+    if (!res.ok) return;
+    const coaches = await res.json();
+    renderCoachCards(coaches);
+  } catch(_) {}
+}
+
+function renderCoachCards(coaches) {
+  const grid = document.getElementById('coachesGrid');
+  if (!coaches.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-3);grid-column:1/-1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div style="font-size:14px;font-weight:600;">Nenhum coach disponível</div><div style="font-size:12px;margin-top:4px;">Em breve haverá coaches disponíveis nesta plataforma.</div></div>';
+    return;
+  }
+  grid.innerHTML = coaches.map(c => {
+    const name     = c.Name     || 'Coach';
+    const location = c.Location || '';
+    const bio      = c.Bio      || '';
+    const skills   = c.Skills   || '';
+    const email    = c.Email    || '';
+    const color    = c.Color    || '#6366f1';
+    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
+      <div style="height:72px;background:${color};display:flex;align-items:center;justify-content:center;">
+        <div style="width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;">${name[0].toUpperCase()}</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">${name}</div>
+        ${location ? `<div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">📍 ${location}</div>` : ''}
+        ${bio ? `<div style="font-size:12px;color:var(--text-2);line-height:1.5;margin-bottom:10px;">${bio.length>100?bio.substring(0,100)+'...':bio}</div>` : ''}
+        ${skills ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">${skills.split(',').filter(Boolean).map(s=>`<span style="font-size:10px;padding:3px 8px;background:var(--blue-light);color:var(--blue);border-radius:20px;font-weight:600;">${s.trim()}</span>`).join('')}</div>` : ''}
+        ${email ? `<a href="mailto:${email}" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;background:var(--blue);color:#fff;border-radius:var(--radius-sm);font-size:13px;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='var(--blue-dark)'" onmouseout="this.style.background='var(--blue)'">Contactar Coach</a>` : `<div style="text-align:center;padding:9px;background:var(--bg);border-radius:var(--radius-sm);font-size:12px;color:var(--text-3);">Contacto em breve</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── NAVIGATION ───────────────────────────────────────────
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'coaching') loadCoaches();
+}
+
+// ── GOAL STEPS ───────────────────────────────────────────
+function setGoal(idx, el) {
+  document.querySelectorAll('.goal-step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── TARGET ROLE ──────────────────────────────────────────
+function setTargetRole(role) {
+  if (!role.trim()) return;
+  localStorage.setItem('cv_target_role', role.trim());
+  document.getElementById('sbRole').textContent = role.trim();
+  document.getElementById('targetCard').style.display = 'none';
+}
+
+// ── LOGOUT ───────────────────────────────────────────────
+function logout() {
+  fetch(API + '/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + TOKEN } }).catch(()=>{});
+  localStorage.clear();
+  location.href = '/login';
+}
+</script>
+</body>
+</html>

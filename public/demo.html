@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exemplo de CV Real — CV Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:#0f172a;color:#fff;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── TOP NAV ── */
+.demo-nav{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(15,23,42,.97);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100;backdrop-filter:blur(10px);}
+.demo-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.6);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid rgba(255,255,255,.12);border-radius:7px;transition:all .2s;white-space:nowrap;}
+.demo-back:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+.demo-brand{display:flex;align-items:center;gap:10px;margin-left:4px;}
+.demo-brand-icon{width:28px;height:28px;background:#2563EB;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.demo-brand-txt{font-size:14px;font-weight:800;color:#fff;}
+.demo-badge{background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.5px;margin-left:4px;}
+.demo-sep{flex:1;}
+.demo-label{font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap;}
+.demo-cta{display:inline-flex;align-items:center;gap:6px;background:#2563EB;color:#fff;text-decoration:none;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;transition:background .2s;white-space:nowrap;}
+.demo-cta:hover{background:#1D4ED8;}
+
+/* ── TEMPLATE SWITCHER ── */
+.tpl-bar{position:fixed;top:60px;left:0;right:0;height:52px;background:rgba(15,23,42,.95);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 16px;gap:6px;z-index:99;overflow-x:auto;scrollbar-width:none;}
+.tpl-bar::-webkit-scrollbar{display:none;}
+.tpl-bar-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;margin-right:4px;}
+.tpl-tab{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:5px 12px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.tpl-tab:hover{background:rgba(255,255,255,.1);color:#fff;}
+.tpl-tab.active{background:#2563EB;color:#fff;border-color:#2563EB;}
+
+/* ── MAIN AREA ── */
+.demo-main{margin-top:112px;flex:1;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
+
+/* ── PROFILE CARD (above CV) ── */
+.profile-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;max-width:900px;width:100%;}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;}
+.profile-info{flex:1;}
+.profile-name{font-size:15px;font-weight:800;color:#fff;}
+.profile-role{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;}
+.profile-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.profile-tag{background:rgba(37,99,235,.2);color:#93C5FD;border:1px solid rgba(37,99,235,.3);border-radius:20px;font-size:10px;font-weight:600;padding:2px 9px;}
+.profile-tag.green{background:rgba(22,163,74,.2);color:#86EFAC;border-color:rgba(22,163,74,.3);}
+.profile-tag.purple{background:rgba(124,58,237,.2);color:#C4B5FD;border-color:rgba(124,58,237,.3);}
+.ai-badge{display:flex;align-items:center;gap:6px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:8px;padding:8px 14px;font-size:11px;color:#C4B5FD;white-space:nowrap;flex-shrink:0;}
+
+/* ── CV FRAME ── */
+.cv-wrapper{width:100%;max-width:900px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6);position:relative;}
+.cv-iframe{width:100%;border:none;display:block;min-height:1400px;}
+
+/* ── BOTTOM CTA ── */
+.bottom-cta{margin-top:40px;text-align:center;padding:40px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(124,58,237,.15));border:1px solid rgba(255,255,255,.08);border-radius:16px;max-width:900px;width:100%;}
+.bottom-cta h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;}
+.bottom-cta p{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.6;}
+.bottom-cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-start{display:inline-flex;align-items:center;gap:8px;background:#2563EB;color:#fff;text-decoration:none;padding:13px 28px;border-radius:10px;font-size:14px;font-weight:700;transition:background .2s;}
+.btn-start:hover{background:#1D4ED8;}
+.btn-start-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.15);padding:13px 24px;border-radius:10px;font-size:13px;font-weight:600;transition:all .2s;}
+.btn-start-ghost:hover{background:rgba(255,255,255,.14);}
+
+@media(max-width:600px){
+  .demo-nav{padding:0 12px;gap:8px;}
+  .demo-label{display:none;}
+  .profile-card{flex-wrap:wrap;}
+  .ai-badge{order:-1;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<div class="demo-nav">
+  <a href="/" class="demo-back">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Início
+  </a>
+  <div class="demo-brand">
+    <div class="demo-brand-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <span class="demo-brand-txt">CV Premium</span>
+    <span class="demo-badge">EXEMPLO REAL</span>
+  </div>
+  <div class="demo-sep"></div>
+  <span class="demo-label">Veja como fica o CV final →</span>
+  <a href="/editor" class="demo-cta">
+    Criar o Meu CV
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</div>
+
+<!-- ── TEMPLATE SWITCHER ── -->
+<div class="tpl-bar">
+  <span class="tpl-bar-label">Template:</span>
+  <div id="tplTabs" style="display:flex;gap:6px;"></div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="demo-main">
+
+  <!-- Profile overview -->
+  <div class="profile-card">
+    <div class="profile-avatar">C</div>
+    <div class="profile-info">
+      <div class="profile-name">Carlos António Mendes</div>
+      <div class="profile-role">Engenheiro de Software Sénior · Luanda, Angola</div>
+      <div class="profile-tags">
+        <span class="profile-tag">8 anos exp.</span>
+        <span class="profile-tag green">3 empregos</span>
+        <span class="profile-tag">10 competências</span>
+        <span class="profile-tag purple">3 idiomas</span>
+      </div>
+    </div>
+    <div class="ai-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Gerado por IA
+    </div>
+  </div>
+
+  <!-- CV iframe -->
+  <div class="cv-wrapper">
+    <iframe id="cvFrame" class="cv-iframe" src="" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <h2>Crie o Seu CV em Menos de 5 Minutos</h2>
+    <p>Preencha os seus dados, escolha um dos 13 templates profissionais<br>e gere um CV que se destaca perante os recrutadores.</p>
+    <div class="bottom-cta-btns">
+      <a href="/editor" class="btn-start">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Criar o Meu CV Agora
+      </a>
+      <a href="/login" class="btn-start-ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Entrar na Minha Conta
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEMPLATES = [
+  {id:1,  name:'Executivo Clássico'},
+  {id:2,  name:'Criativo Moderno'},
+  {id:3,  name:'Tech Minimal'},
+  {id:4,  name:'Finance Pro'},
+  {id:5,  name:'Medical Elite'},
+  {id:6,  name:'Legal Expert'},
+  {id:7,  name:'Executivo Sans'},
+  {id:8,  name:'Academia'},
+  {id:9,  name:'Timeline'},
+  {id:10, name:'Classic Blue'},
+  {id:11, name:'Corporate'},
+  {id:12, name:'Premium Gold'},
+  {id:13, name:'ATS Optimizado'},
+];
+
+const SAMPLE_CV = {
+  fullName:  'Carlos António Mendes',
+  jobTitle:  'Engenheiro de Software Sénior',
+  email:     'carlos.mendes@example.com',
+  phone:     '+244 923 456 789',
+  address:   'Luanda, Angola',
+  linkedin:  'linkedin.com/in/carlos-mendes',
+  summary:   'Engenheiro de Software com 8 anos de experiência em desenvolvimento de aplicações web e mobile de alta performance. Especialista em arquitecturas de microserviços, cloud computing e liderança de equipas técnicas. Apaixonado por criar soluções inovadoras que transformam negócios e melhoram a vida das pessoas.',
+  experience: [
+    {
+      title:       'Engenheiro de Software Sénior',
+      company:     'Angola Telecom Digital',
+      start:       'Jan 2021',
+      end:         'Presente',
+      location:    'Luanda, Angola',
+      description: 'Liderei uma equipa de 8 engenheiros no desenvolvimento da plataforma de serviços digitais. Reduzi o tempo de resposta da API em 60% através de cache Redis e optimização de queries. Arquitectei a migração para microserviços, elevando a disponibilidade do sistema para 99,9%.'
+    },
+    {
+      title:       'Engenheiro de Software',
+      company:     'Fintech Angola Lda.',
+      start:       'Mar 2018',
+      end:         'Dez 2020',
+      location:    'Luanda, Angola',
+      description: 'Desenvolvi sistema de pagamentos digitais que processa +50.000 transacções diárias. Integrei 12 bancos angolanos via APIs RESTful seguras. Criei módulo de detecção de fraude com machine learning, reduzindo incidentes em 35%.'
+    },
+    {
+      title:       'Desenvolvedor Web Júnior',
+      company:     'Nexus Tech Solutions',
+      start:       'Jun 2016',
+      end:         'Fev 2018',
+      location:    'Luanda, Angola',
+      description: 'Desenvolvi 15+ websites corporativos e uma plataforma de e-commerce com integração Multicaixa Express. Colaborei com equipas remotas em Portugal e Brasil em projectos de transformação digital.'
+    }
+  ],
+  education: [
+    {
+      degree: 'Licenciatura em Engenharia Informática',
+      school: 'Universidade Agostinho Neto',
+      year:   '2016',
+      grade:  'Muito Bom (18/20)'
+    },
+    {
+      degree: 'AWS Certified Solutions Architect',
+      school: 'Amazon Web Services',
+      year:   '2022',
+      grade:  'Score: 890/1000'
+    }
+  ],
+  skills:    ['Node.js', 'React', 'Python', 'AWS', 'Docker', 'SQL Server', 'Redis', 'TypeScript', 'MongoDB', 'Git'],
+  languages: [
+    { name: 'Português', level: 'Nativo'  },
+    { name: 'Inglês',    level: 'Fluente' },
+    { name: 'Francês',   level: 'Básico'  }
+  ],
+  certs: [],
+  photo: null,
+  cvId:  null
+};
+
+let currentTpl = parseInt(new URLSearchParams(window.location.search).get('t')) || 1;
+
+function loadTemplate(id) {
+  currentTpl = id;
+  const tpl = TEMPLATES.find(t => t.id === id) || TEMPLATES[0];
+  const cvData = Object.assign({}, SAMPLE_CV, { template: id, templateName: tpl.name });
+  sessionStorage.setItem('cvData', JSON.stringify(cvData));
+
+  const frame = document.getElementById('cvFrame');
+  frame.src = '/preview?demo=true&t=' + id + '&v=' + Date.now();
+
+  document.querySelectorAll('.tpl-tab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + id);
+  if (tab) {
+    tab.classList.add('active');
+    tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  // Update URL without reload
+  const url = new URL(window.location);
+  url.searchParams.set('t', id);
+  window.history.replaceState({}, '', url);
+}
+
+// Build template tabs
+const tabContainer = document.getElementById('tplTabs');
+TEMPLATES.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'tpl-tab' + (t.id === currentTpl ? ' active' : '');
+  btn.id = 'tab-' + t.id;
+  btn.textContent = t.id + '. ' + t.name;
+  btn.onclick = () => loadTemplate(t.id);
+  tabContainer.appendChild(btn);
+});
+
+// Auto-resize iframe
+document.getElementById('cvFrame').addEventListener('load', function() {
+  try {
+    const h = this.contentDocument.body.scrollHeight;
+    if (h > 200) this.style.height = (h + 40) + 'px';
+  } catch(_) {
+    this.style.height = '1600px';
+  }
+});
+
+// Initial load
+loadTemplate(currentTpl);
+</script>
+</body>
+</html>

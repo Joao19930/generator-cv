@@ -1,0 +1,231 @@
+// src/routes/cv.js
+// ─────────────────────────────────────────────────────────────
+// CRUD de CVs + geração PDF + score ATS + melhoria com IA
+// ─────────────────────────────────────────────────────────────
+const express  = require('express');
+const router   = express.Router();
+const { sql }  = require('../config/database');
+const multer   = require('multer');
+const { openaiConnector, pdfConnector, s3Connector,
+        cloudinaryConnector, emailConnector, smtpConnector,
+        gaConnector, mixpanelConnector } = require('../connectors');
+const { auth, premiumOnly } = require('../middleware/auth');
+const { toolLimiter }       = require('../middleware/rateLimiter');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+// ── GET /api/cv — Listar CVs do utilizador ───────────────────
+router.get('/', auth, async (req, res) => {
+  try {
+    const result = await req.db.request().input('userId', sql.Int, req.user.id)
+      .query(`SELECT Id, Title, TemplateName, TemplateId, ContentJson, CreatedAt, UpdatedAt, Downloaded, DownloadCount, IsPublic, Slug, AtsScore
+              FROM CVs WHERE UserId = @userId ORDER BY UpdatedAt DESC`);
+    res.json({ cvs: result.recordset });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/cv/:id — Obter CV por ID ────────────────────────
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const result = await req.db.request()
+      .input('id',     sql.Int, req.params.id)
+      .input('userId', sql.Int, req.user.id)
+      .query(`SELECT Id, Title, TemplateName, TemplateId, ContentJson, CreatedAt, UpdatedAt, IsPublic, Slug
+              FROM CVs WHERE Id = @id AND UserId = @userId`);
+    if (!result.recordset.length) return res.status(404).json({ error: 'CV não encontrado' });
+    const cv = result.recordset[0];
+    if (cv.ContentJson) {
+      try { cv.Content = JSON.parse(cv.ContentJson); } catch(_) { cv.Content = {}; }
+    }
+    res.json(cv);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv — Criar novo CV ─────────────────────────────
+router.post('/', auth, async (req, res) => {
+  const { title, templateId, templateName, contentJson } = req.body;
+  if (!title) return res.status(400).json({ error: 'Título é obrigatório' });
+
+  try {
+    const slug   = `${title.toLowerCase().replace(/[^a-z0-9]/g,'-')}-${Date.now()}`;
+    const result = await req.db.request()
+      .input('userId',       sql.Int,      req.user.id)
+      .input('title',        sql.NVarChar, title)
+      .input('templateId',   sql.Int,      templateId || 1)
+      .input('templateName', sql.NVarChar, templateName || 'Clássico')
+      .input('content',      sql.NVarChar, JSON.stringify(contentJson || {}))
+      .input('slug',         sql.NVarChar, slug)
+      .query(`INSERT INTO CVs (UserId, Title, TemplateId, TemplateName, ContentJson, Slug, CreatedAt, UpdatedAt)
+              OUTPUT INSERTED.Id, INSERTED.Title, INSERTED.Slug
+              VALUES (@userId, @title, @templateId, @templateName, @content, @slug, GETDATE(), GETDATE())`);
+
+    const cv = result.recordset[0];
+    gaConnector.cvCreated(req.user.id).catch(() => {});
+    mixpanelConnector.track('cv_created', req.user.id, { template: templateName });
+    res.status(201).json(cv);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PUT /api/cv/:id — Actualizar CV ─────────────────────────
+router.put('/:id', auth, async (req, res) => {
+  const { title, contentJson, content, templateName, templateId } = req.body;
+  const dataToSave = contentJson || content;
+  try {
+    await req.db.request()
+      .input('id',           sql.Int,      req.params.id)
+      .input('userId',       sql.Int,      req.user.id)
+      .input('title',        sql.NVarChar, title || null)
+      .input('content',      sql.NVarChar, dataToSave ? JSON.stringify(dataToSave) : null)
+      .input('templateName', sql.NVarChar, templateName || null)
+      .input('templateId',   sql.Int,      templateId   || null)
+      .query(`UPDATE CVs SET
+              Title        = ISNULL(@title,        Title),
+              ContentJson  = ISNULL(@content,      ContentJson),
+              TemplateName = ISNULL(@templateName, TemplateName),
+              TemplateId   = ISNULL(@templateId,   TemplateId),
+              UpdatedAt    = GETDATE()
+              WHERE Id = @id AND UserId = @userId`);
+    res.json({ updated: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── DELETE /api/cv/:id ───────────────────────────────────────
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    await req.db.request()
+      .input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
+      .query('DELETE FROM CVs WHERE Id = @id AND UserId = @userId');
+    res.json({ deleted: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv/:id/generate-pdf — Gerar PDF ───────────────
+router.post('/:id/generate-pdf', auth, async (req, res) => {
+  try {
+    const cv = (await req.db.request().input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
+      .query('SELECT * FROM CVs WHERE Id = @id AND UserId = @userId')).recordset[0];
+    if (!cv) return res.status(404).json({ error: 'CV não encontrado' });
+
+    // Verificar limite free (max 1 download sem marca d'água)
+    if (req.user.plan === 'free' && cv.DownloadCount >= 1)
+      return res.status(402).json({ error: 'Limite atingido. Faça upgrade para Premium.', upgrade: `${process.env.APP_URL}/pricing` });
+
+    const content = JSON.parse(cv.ContentJson || '{}');
+    const html    = buildCVHtml(content, cv.TemplateName); // função abaixo
+    const pdfBuf  = await pdfConnector.fromHTML(html);
+
+    // Upload para S3
+    const key = await s3Connector.upload(pdfBuf, `${cv.Slug}.pdf`, req.user.id);
+    const url  = await s3Connector.getUrl(key, 3600);
+
+    // Actualizar contador
+    await req.db.request().input('id', sql.Int, cv.Id).input('key', sql.NVarChar, key)
+      .query('UPDATE CVs SET Downloaded=1, DownloadCount=DownloadCount+1, S3Key=@key WHERE Id=@id');
+
+    // E-mail com link
+    const user = (await req.db.request().input('id', sql.Int, req.user.id)
+      .query('SELECT Name, Email FROM Users WHERE Id = @id')).recordset[0];
+    emailConnector.sendCVReady(user.Email, user.Name, url)
+      .catch(() => smtpConnector.send(user.Email, 'O seu CV está pronto!', `<p>Olá ${user.Name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`));
+
+    gaConnector.track(req.user.id, 'cv_downloaded');
+    res.json({ url, expires_in: 3600 });
+  } catch (err) {
+    console.error('generate-pdf:', err.message);
+    res.status(500).json({ error: 'Erro ao gerar PDF' });
+  }
+});
+
+// ── POST /api/cv/improve-text — IA: melhorar texto ──────────
+router.post('/improve-text', auth, toolLimiter, async (req, res) => {
+  const { text, jobTitle } = req.body;
+  if (!text || !jobTitle) return res.status(400).json({ error: 'text e jobTitle são obrigatórios' });
+  try {
+    const improved = await openaiConnector.improveText(text, jobTitle);
+    res.json({ improved });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv/generate-summary — IA: gerar resumo ────────
+router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
+  const { name, jobTitle, experiences } = req.body;
+  try {
+    const summary = await openaiConnector.generateSummary(name, jobTitle, experiences);
+    res.json({ summary });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv/ats-score — Score ATS público ──────────────
+router.post('/ats-score', toolLimiter, async (req, res) => {
+  const { cvText, jobDescription, email } = req.body;
+  if (!cvText || !jobDescription)
+    return res.status(400).json({ error: 'cvText e jobDescription são obrigatórios' });
+  try {
+    const score = await openaiConnector.atsScore(cvText, jobDescription);
+    // Capturar lead se e-mail fornecido
+    if (email) {
+      req.db.request().input('email', sql.NVarChar, email).input('score', sql.Int, score.score)
+        .query(`IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = @email)
+                  INSERT INTO Leads (Email, ATSScore, Source, CreatedAt) VALUES (@email, @score, 'ats_tool', GETDATE())`).catch(() => {});
+      const { zapierConnector: zap } = require('../connectors');
+      zap.onLead(email, score.score);
+    }
+    res.json(score);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv/:id/upload-photo — Foto de perfil ──────────
+router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Ficheiro em falta' });
+  try {
+    // Guardar ficheiro temporário
+    const fs   = require('fs');
+    const path = require('path');
+    const tmp  = path.join('/tmp', `${Date.now()}-${req.file.originalname}`);
+    fs.writeFileSync(tmp, req.file.buffer);
+    const result = await cloudinaryConnector.uploadPhoto(tmp, req.user.id);
+    fs.unlinkSync(tmp);
+
+    await req.db.request().input('id', sql.Int, req.params.id).input('userId', sql.Int, req.user.id)
+      .input('url', sql.NVarChar, result.secure_url)
+      .query(`UPDATE CVs SET ContentJson = JSON_MODIFY(ContentJson, '$.photoUrl', @url) WHERE Id=@id AND UserId=@userId`);
+
+    res.json({ url: result.secure_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Helper: construir HTML do CV ─────────────────────────────
+function buildCVHtml(content, templateName) {
+  const { name='', jobTitle='', summary='', email='', phone='', address='',
+          experiences=[], education=[], skills=[], languages=[], photoUrl='' } = content;
+
+  const expHtml = experiences.map(e =>
+    `<div class="exp"><h4>${e.title} — ${e.company}</h4><span>${e.startDate} – ${e.endDate || 'Presente'}</span><p>${e.description}</p></div>`).join('');
+  const eduHtml = education.map(e =>
+    `<div class="edu"><h4>${e.degree} — ${e.institution}</h4><span>${e.year}</span></div>`).join('');
+  const skillHtml = skills.map(s => `<span class="tag">${s}</span>`).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:20px}
+    h1{font-size:22px;margin:0} h2{font-size:14px;border-bottom:2px solid #2563eb;padding-bottom:4px;color:#2563eb}
+    h3{font-size:13px;margin:0;color:#555} h4{margin:0 0 2px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+    .photo{width:80px;height:80px;border-radius:50%;object-fit:cover}
+    .contact{font-size:11px;color:#555} .tag{background:#e0e7ff;padding:2px 8px;border-radius:12px;margin:2px;font-size:11px;display:inline-block}
+    .exp,.edu{margin-bottom:10px} span{font-size:11px;color:#777}
+    section{margin-bottom:14px}
+  </style></head><body>
+  <div class="header">
+    ${photoUrl ? `<img class="photo" src="${photoUrl}" />` : ''}
+    <div><h1>${name}</h1><h3>${jobTitle}</h3>
+    <div class="contact">${email} ${phone ? '| '+phone : ''} ${address ? '| '+address : ''}</div></div>
+  </div>
+  ${summary ? `<section><h2>Resumo</h2><p>${summary}</p></section>` : ''}
+  ${experiences.length ? `<section><h2>Experiência</h2>${expHtml}</section>` : ''}
+  ${education.length   ? `<section><h2>Educação</h2>${eduHtml}</section>`   : ''}
+  ${skills.length      ? `<section><h2>Competências</h2>${skillHtml}</section>` : ''}
+  </body></html>`;
+}
+
+module.exports = router;

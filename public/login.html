@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Premium — Entrar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;
+  --green:#16A34A;--text:#111827;--text-2:#374151;--text-3:#6B7280;--text-4:#9CA3AF;
+  --border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--radius:12px;--radius-sm:8px;
+  --red:#DC2626;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid var(--border);padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.logo-icon{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.logo-text{font-size:17px;font-weight:800;color:var(--text);}
+.nav-link{font-size:13px;color:var(--text-3);text-decoration:none;}
+.nav-link:hover{color:var(--text);}
+
+/* MAIN */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.06);}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg);border-radius:var(--radius-sm);padding:4px;margin-bottom:28px;}
+.tab{flex:1;padding:9px;text-align:center;font-size:14px;font-weight:600;color:var(--text-3);cursor:pointer;border-radius:6px;transition:all .2s;}
+.tab.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+.card-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.card-sub{font-size:14px;color:var(--text-3);margin-bottom:28px;line-height:1.5;}
+
+/* OAUTH BUTTONS */
+.btn-oauth{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;text-decoration:none;margin-bottom:10px;}
+.btn-oauth:hover{border-color:#aaa;background:var(--bg);}
+.btn-linkedin{border-color:#0A66C2;color:#0A66C2;}
+.btn-linkedin:hover{background:#EFF6FF;}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.divider-line{flex:1;height:1px;background:var(--border);}
+.divider-text{font-size:12px;color:var(--text-4);font-weight:500;white-space:nowrap;}
+
+/* FORM */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px;}
+.field input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;background:#fff;}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field input.error{border-color:var(--red);}
+.field-error{font-size:12px;color:var(--red);margin-top:4px;display:none;}
+.field-error.show{display:block;}
+.password-wrap{position:relative;}
+.password-wrap input{padding-right:44px;}
+.toggle-pwd{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-4);padding:4px;}
+.forgot{font-size:13px;color:var(--blue);text-decoration:none;font-weight:500;}
+.forgot:hover{text-decoration:underline;}
+.field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+
+/* SUBMIT */
+.btn-submit{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s;margin-top:4px;}
+.btn-submit:hover{background:var(--blue-dark);}
+.btn-submit:disabled{background:#93C5FD;cursor:not-allowed;}
+
+/* TERMS */
+.terms{font-size:12px;color:var(--text-4);text-align:center;margin-top:16px;line-height:1.5;}
+.terms a{color:var(--blue);text-decoration:none;}
+
+/* ALERT */
+.alert{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin-bottom:16px;display:none;}
+.alert.show{display:block;}
+.alert-error{background:#FEF2F2;color:var(--red);border:1px solid #FECACA;}
+.alert-success{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0;}
+
+/* LOADER */
+.loader{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-submit.loading .loader{display:inline-block;}
+.btn-submit.loading .btn-text{display:none;}
+
+/* REDIRECT NOTE */
+.redirect-note{background:var(--blue-light);border:1px solid #BFDBFE;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--blue);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+
+/* FOOTER */
+footer{padding:20px 40px;text-align:center;font-size:12px;color:var(--text-4);}
+footer a{color:var(--text-3);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/></svg></div>
+    <span class="logo-text">CV Premium</span>
+  </a>
+  <a href="/" class="nav-link">← Voltar ao início</a>
+</nav>
+
+<main class="main">
+  <div class="card">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="tab" onclick="switchTab('register')">Criar Conta</div>
+    </div>
+
+    <!-- REDIRECT NOTE -->
+    <div class="redirect-note" id="redirectNote" style="display:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Para criar o seu CV, precisa de iniciar sessão primeiro.
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert" id="alertBox"></div>
+
+    <!-- ── LOGIN FORM ── -->
+    <div id="loginPanel">
+      <div class="card-title">Bem-vindo de volta</div>
+      <p class="card-sub">Entre na sua conta para continuar a criar o seu CV.</p>
+
+      <!-- OAuth -->
+      <a href="/auth/google" class="btn-oauth btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuar com Google
+      </a>
+      <a href="/auth/linkedin" class="btn-oauth btn-linkedin">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Continuar com LinkedIn
+      </a>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">ou entre com email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="o-seu@email.com" required>
+          <div class="field-error" id="loginEmailErr">Email inválido</div>
+        </div>
+        <div class="field">
+          <div class="field-row">
+            <label>Senha</label>
+            <a href="/forgot-password" class="forgot">Esqueceu a senha?</a>
+          </div>
+          <div class="password-wrap">
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+            <button type="button" class="toggle-pwd" onclick="togglePwd('loginPassword',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="loginPwdErr">Senha incorrecta</div>
+        </div>
+        <button type="submit" class="btn-submit" id="loginBtn">
+          <div class="loader"></div>
+          <span class="btn-text">Entrar na minha conta</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ── REGISTER FORM ── -->
+    <div id="registerPanel" style="display:none;">
+      <div class="card-title">Criar conta gratuita</div>
+      <p class="card-sub">Crie a sua conta e comece a construir o seu CV profissional agora.</p>
+
+      <a href="/auth/google" class="btn-oauth btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Registar com Google
+      </a>
+      <a href="/auth/linkedin" class="btn-oauth btn-linkedin">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        Registar com LinkedIn
+      </a>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">ou crie com email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <form onsubmit="handleRegister(event)">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" id="regName" placeholder="João da Silva" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="o-seu@email.com" required>
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="password-wrap">
+            <input type="password" id="regPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
+            <button type="button" class="toggle-pwd" onclick="togglePwd('regPassword',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="regPwdErr">Mínimo 8 caracteres</div>
+        </div>
+        <button type="submit" class="btn-submit" id="registerBtn">
+          <div class="loader"></div>
+          <span class="btn-text">Criar conta gratuita</span>
+        </button>
+      </form>
+      <div class="terms">
+        Ao criar conta, aceita os <a href="/termos">Termos de Serviço</a> e a <a href="/privacidade">Política de Privacidade</a> do CV Premium.
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  © 2025 CV Premium · 📞 +244 944 524 292 · <a href="/termos">Termos</a> · <a href="/privacidade">Privacidade</a>
+</footer>
+
+<script>
+const API = '/api';
+
+// Mostrar nota de redirect se vier de /editor
+const params = new URLSearchParams(window.location.search);
+if (params.get('redirect') === 'editor') {
+  document.getElementById('redirectNote').style.display = 'flex';
+}
+
+// Mostrar erro de OAuth (Google/LinkedIn)
+const oauthErr = params.get('error');
+const oauthDetail = params.get('detail');
+if (oauthErr === 'google_failed' || oauthErr === 'google_denied') {
+  const msg = oauthErr === 'google_denied'
+    ? 'Login com Google cancelado.'
+    : 'Falha no login com Google' + (oauthDetail ? ': ' + decodeURIComponent(oauthDetail) : '.');
+  showAlert(msg, 'error');
+}
+if (oauthErr === 'linkedin_failed' || oauthErr === 'linkedin_denied') {
+  const msg = oauthErr === 'linkedin_denied'
+    ? 'Login com LinkedIn cancelado.'
+    : 'Falha no login com LinkedIn' + (oauthDetail ? ': ' + decodeURIComponent(oauthDetail) : '.');
+  showAlert(msg, 'error');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('loginPanel').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('registerPanel').style.display = tab === 'register' ? 'block' : 'none';
+  hideAlert();
+}
+
+function showAlert(msg, type='error') {
+  const el = document.getElementById('alertBox');
+  el.textContent = msg;
+  el.className = `alert alert-${type} show`;
+}
+function hideAlert() {
+  document.getElementById('alertBox').className = 'alert';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ── LOGIN ──
+async function handleLogin(e) {
+  e.preventDefault();
+  hideAlert();
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return showAlert('Preencha todos os campos.');
+  setLoading('loginBtn', true);
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Email ou senha incorrectos.');
+    localStorage.setItem('cv_token', data.token);
+    localStorage.setItem('cv_user',  JSON.stringify(data.user));
+    showAlert('Login com sucesso! A redirecionar...', 'success');
+    const redirect = params.get('redirect');
+    const user = data.user || {};
+    const dest = redirect === 'editor' ? '/editor' : (user.role === 'admin' ? '/admin-panel' : '/app');
+    setTimeout(() => { window.location.href = dest; }, 800);
+  } catch (err) {
+    showAlert(err.message);
+  } finally {
+    setLoading('loginBtn', false);
+  }
+}
+
+// ── REGISTER ──
+async function handleRegister(e) {
+  e.preventDefault();
+  hideAlert();
+  const name     = document.getElementById('regName').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (password.length < 8) {
+    document.getElementById('regPwdErr').classList.add('show');
+    return;
+  }
+  document.getElementById('regPwdErr').classList.remove('show');
+  setLoading('registerBtn', true);
+  try {
+    const res  = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao criar conta.');
+    localStorage.setItem('cv_token', data.token);
+    localStorage.setItem('cv_user',  JSON.stringify(data.user));
+    showAlert('Conta criada! A redirecionar...', 'success');
+    setTimeout(() => { window.location.href = '/app'; }, 800);
+  } catch (err) {
+    showAlert(err.message);
+  } finally {
+    setLoading('registerBtn', false);
+  }
+}
+
+// ── VERIFICAR SE JÁ ESTÁ LOGADO ──
+const token = localStorage.getItem('cv_token');
+if (token) {
+  const redirect = params.get('redirect');
+  try {
+    const u = JSON.parse(localStorage.getItem('cv_user') || '{}');
+    window.location.href = redirect === 'editor' ? '/editor' : (u.role === 'admin' ? '/admin-panel' : '/app');
+  } catch { window.location.href = '/app'; }
+}
+</script>
+</body>
+</html>

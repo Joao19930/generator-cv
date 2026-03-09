@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso Administrador — CV Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:#0f0e1a;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+
+.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(26,86,219,.25) 0%,transparent 70%);pointer-events:none;}
+
+.card{background:#1a1830;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:44px 40px;width:100%;max-width:420px;position:relative;z-index:1;}
+
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center;}
+.logo-icon{width:40px;height:40px;background:#1a56db;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{color:#fff;}
+.logo-text{font-size:18px;font-weight:800;color:#fff;}
+.logo-badge{font-size:9px;font-weight:700;background:#f97316;color:#fff;padding:2px 6px;border-radius:5px;}
+
+.admin-badge{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(26,86,219,.15);border:1px solid rgba(26,86,219,.3);border-radius:8px;padding:8px 16px;margin-bottom:28px;}
+.admin-badge svg{color:#6b8de8;}
+.admin-badge span{font-size:12px;font-weight:600;color:#6b8de8;}
+
+h1{font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:6px;}
+.sub{font-size:13px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:28px;}
+
+.field{margin-bottom:16px;}
+label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+input{width:100%;padding:11px 14px;background:#0f0e1a;border:1px solid rgba(255,255,255,.1);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;color:#fff;outline:none;transition:border .2s;}
+input:focus{border-color:#1a56db;}
+input::placeholder{color:rgba(255,255,255,.25);}
+
+.btn{width:100%;padding:13px;background:#1a56db;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:background .2s;margin-top:8px;}
+.btn:hover{background:#1345b7;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.err{display:none;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#f87171;}
+.err.show{display:block;}
+
+.back{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:20px;font-size:12px;color:rgba(255,255,255,.3);}
+.back a{color:rgba(255,255,255,.5);text-decoration:none;font-weight:600;}
+.back a:hover{color:#fff;}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+    </div>
+    <span class="logo-text">CV Premium</span>
+    <span class="logo-badge">ADMIN</span>
+  </div>
+
+  <div class="admin-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Acesso Restrito — Administradores</span>
+  </div>
+
+  <h1>Entrar no Painel</h1>
+  <p class="sub">Credenciais de administrador necessárias</p>
+
+  <div class="err" id="errMsg"></div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="admin@exemplo.com" autocomplete="username">
+  </div>
+  <div class="field">
+    <label>Palavra-passe</label>
+    <input type="password" id="pass" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn" id="btnLogin" onclick="doLogin()">Entrar no Painel</button>
+
+  <div class="back">
+    <span>← Voltar ao</span>
+    <a href="/">site principal</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('pass').value;
+  const errEl = document.getElementById('errMsg');
+  const btn   = document.getElementById('btnLogin');
+
+  errEl.classList.remove('show');
+
+  if (!email || !pass) {
+    errEl.textContent = 'Preencha o email e a palavra-passe.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'A entrar…';
+
+  try {
+    const res  = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Credenciais inválidas.');
+    }
+
+    const user = data.user || data;
+    if (user.role !== 'admin') {
+      throw new Error('Esta conta não tem permissões de administrador.');
+    }
+
+    localStorage.setItem('cv_token', data.token);
+    localStorage.setItem('cv_user', JSON.stringify(user));
+    location.href = '/admin-panel';
+
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Entrar no Painel';
+  }
+}
+</script>
+</body>
+</html>

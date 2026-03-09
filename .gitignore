@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+*.env
+package-lock.json
+mnt/
+vercel.json/
+*.log
+dist/
+.DS_Store
+Thumbs.db

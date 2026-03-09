@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Grátis - CVPremium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: rgba(10,10,10,0.95); border-bottom: 1px solid #222; position: fixed; width: 100%; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: #fff; }
+        .logo span { color: #c9a96e; }
+        .nav-links { display: flex; gap: 16px; align-items: center; }
+        .nav-free { color: #aaa; font-size: 14px; text-decoration: none; padding: 8px 16px; border-radius: 8px; border: 1px solid #333; }
+        .nav-premium { background: #c9a96e; color: #000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 8px 18px; border-radius: 8px; }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 110px 20px 60px; }
+
+        /* FREE BADGE */
+        .free-banner { background: linear-gradient(135deg, #1a1a1a, #111); border: 1px solid #333; border-radius: 16px; padding: 28px 36px; margin-bottom: 36px; display: flex; justify-content: space-between; align-items: center; }
+        .free-banner-left h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+        .free-banner-left h1 span { color: #c9a96e; }
+        .free-banner-left p { color: #666; font-size: 14px; }
+        .free-tag { background: #22c55e; color: #000; font-size: 22px; font-weight: 800; padding: 10px 22px; border-radius: 10px; }
+        .upgrade-bar { background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.2); border-radius: 10px; padding: 14px 20px; margin-bottom: 36px; display: flex; justify-content: space-between; align-items: center; }
+        .upgrade-bar span { font-size: 13px; color: #888; }
+        .upgrade-bar span strong { color: #c9a96e; }
+        .btn-upgrade { background: #c9a96e; color: #000; font-size: 13px; font-weight: 700; padding: 8px 18px; border-radius: 7px; text-decoration: none; white-space: nowrap; }
+
+        .form-section { background: #111; border: 1px solid #222; border-radius: 14px; padding: 32px; margin-bottom: 20px; }
+        .form-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .form-row.full { grid-template-columns: 1fr; }
+        .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group label { font-size: 12px; color: #aaa; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; padding: 10px 14px; color: #fff; font-size: 13px; font-family: 'Inter', sans-serif; outline: none; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #444; }
+        .form-group textarea { resize: vertical; min-height: 90px; }
+        .form-group select option { background: #1a1a1a; }
+        .item-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 9px; padding: 18px; margin-bottom: 14px; position: relative; }
+        .btn-remove { position: absolute; top: 14px; right: 14px; background: rgba(255,50,50,0.12); color: #ff5555; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 11px; }
+        .btn-add { background: rgba(255,255,255,0.04); border: 1px dashed #333; color: #666; border-radius: 7px; padding: 10px; width: 100%; cursor: pointer; font-size: 13px; font-family: 'Inter', sans-serif; margin-top: 6px; }
+        .btn-add:hover { border-color: #555; color: #aaa; }
+        .skills-container { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+        .skill-tag { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 5px 12px; border-radius: 50px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+        .skill-tag button { background: none; border: none; color: #666; cursor: pointer; font-size: 14px; }
+        .skills-input-row { display: flex; gap: 8px; }
+        .skills-input-row input { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; padding: 9px 14px; color: #fff; font-size: 13px; outline: none; }
+        .btn-add-skill { background: #333; color: #fff; border: none; border-radius: 7px; padding: 9px 16px; cursor: pointer; font-size: 13px; }
+
+        /* TEMPLATES */
+        .templates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .tmpl { border: 2px solid #222; border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+        .tmpl:hover, .tmpl.selected { border-color: #fff; }
+        .tmpl-preview { height: 120px; display: flex; align-items: center; justify-content: center; }
+        .tmpl-name { background: #1a1a1a; padding: 10px; font-size: 12px; text-align: center; color: #555; font-weight: 600; }
+        .tmpl.selected .tmpl-name { color: #fff; }
+        .free-label { background: #22c55e; color: #000; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 700; margin-left: 5px; }
+
+        .submit-section { text-align: center; padding: 36px 0 0; }
+        .btn-generate { background: #fff; color: #000; border: none; padding: 16px 52px; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-generate:hover { background: #e0e0e0; }
+        .submit-note { color: #444; font-size: 12px; margin-top: 10px; }
+        .or-divider { display: flex; align-items: center; gap: 14px; margin: 28px 0 20px; }
+        .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: #1a1a1a; }
+        .or-divider span { color: #444; font-size: 12px; }
+        .btn-go-premium { background: linear-gradient(135deg, #c9a96e, #e0c080); color: #000; border: none; padding: 16px 52px; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">CV<span>Premium</span></a>
+        <div class="nav-links">
+            <a href="free.html" class="nav-free">CV Grátis</a>
+            <a href="form.html" class="nav-premium">✦ CV Premium — $1.99</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="free-banner">
+            <div class="free-banner-left">
+                <h1>Cria o teu <span>CV Grátis</span></h1>
+                <p>Dois templates profissionais · Download imediato · Sem cartão</p>
+            </div>
+            <div class="free-tag">GRÁTIS</div>
+        </div>
+
+        <div class="upgrade-bar">
+            <span>Quer um CV <strong>mais profissional com foto e 13 templates</strong>?</span>
+            <a href="form.html" class="btn-upgrade">✦ Upgrade para Premium — $1.99</a>
+        </div>
+
+        <!-- DADOS PESSOAIS -->
+        <div class="form-section">
+            <h3>Dados Pessoais</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Nome Completo *</label><input type="text" id="fullName" placeholder="Ex: João Silva"></div>
+                <div class="form-group"><label>Título Profissional</label><input type="text" id="jobTitle" placeholder="Ex: Gestor Financeiro"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="joao@email.com"></div>
+                <div class="form-group"><label>Telefone</label><input type="text" id="phone" placeholder="+244 900 000 000"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Localização</label><input type="text" id="address" placeholder="Luanda, Angola"></div>
+                <div class="form-group"><label>LinkedIn</label><input type="text" id="linkedin" placeholder="linkedin.com/in/joao"></div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group"><label>Resumo Profissional</label><textarea id="summary" placeholder="Breve descrição sobre ti..."></textarea></div>
+            </div>
+        </div>
+
+        <!-- EXPERIÊNCIA -->
+        <div class="form-section">
+            <h3>Experiência Profissional</h3>
+            <div id="experienceContainer">
+                <div class="item-card" id="exp-0">
+                    <button class="btn-remove" onclick="removeItem('exp-0')">Remover</button>
+                    <div class="form-row">
+                        <div class="form-group"><label>Cargo</label><input type="text" placeholder="Ex: Analista Financeiro"></div>
+                        <div class="form-group"><label>Empresa</label><input type="text" placeholder="Ex: Banco BIC"></div>
+                    </div>
+                    <div class="form-row three">
+                        <div class="form-group"><label>Início</label><input type="text" placeholder="Jan 2020"></div>
+                        <div class="form-group"><label>Fim</label><input type="text" placeholder="Presente"></div>
+                        <div class="form-group"><label>Local</label><input type="text" placeholder="Luanda"></div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group"><label>Descrição</label><textarea placeholder="Principais funções e conquistas..."></textarea></div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addExperience()">+ Adicionar Experiência</button>
+        </div>
+
+        <!-- FORMAÇÃO -->
+        <div class="form-section">
+            <h3>Formação Académica</h3>
+            <div id="educationContainer">
+                <div class="item-card" id="edu-0">
+                    <button class="btn-remove" onclick="removeItem('edu-0')">Remover</button>
+                    <div class="form-row">
+                        <div class="form-group"><label>Curso</label><input type="text" placeholder="Ex: Licenciatura em Gestão"></div>
+                        <div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ano</label><input type="text" placeholder="2018"></div>
+                        <div class="form-group"><label>Classificação</label><input type="text" placeholder="Bom"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addEducation()">+ Adicionar Formação</button>
+        </div>
+
+        <!-- COMPETÊNCIAS -->
+        <div class="form-section">
+            <h3>Competências</h3>
+            <div class="skills-container" id="skillsContainer"></div>
+            <div class="skills-input-row">
+                <input type="text" id="skillInput" placeholder="Ex: Excel, Word, Liderança..." onkeydown="if(event.key==='Enter')addSkill()">
+                <button class="btn-add-skill" onclick="addSkill()">+ Adicionar</button>
+            </div>
+        </div>
+
+        <!-- IDIOMAS -->
+        <div class="form-section">
+            <h3>Idiomas</h3>
+            <div id="languagesContainer">
+                <div class="form-row" id="lang-0">
+                    <div class="form-group"><label>Idioma</label><input type="text" placeholder="Ex: Português"></div>
+                    <div class="form-group"><label>Nível</label>
+                        <select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addLanguage()">+ Adicionar Idioma</button>
+        </div>
+
+        <!-- TEMPLATES GRÁTIS -->
+        <div class="form-section">
+            <h3>Escolhe o Template <span class="free-label">GRÁTIS</span></h3>
+            <p style="color:#555;font-size:12px;margin-bottom:18px">Dois templates clássicos a preto e branco. Para templates premium com foto e cores, <a href="form.html" style="color:#c9a96e">faz upgrade por $1.99</a>.</p>
+            <div class="templates-grid">
+                <div class="tmpl selected" onclick="selectTemplate(this, 'A')">
+                    <div class="tmpl-preview" style="background:#fff;border:1px solid #ddd">
+                        <div style="padding:12px;width:100%">
+                            <div style="width:80px;height:7px;background:#111;border-radius:1px;margin-bottom:5px"></div>
+                            <div style="width:55px;height:3px;background:#555;border-radius:1px;margin-bottom:10px"></div>
+                            <div style="height:1px;background:#ccc;margin-bottom:8px"></div>
+                            <div style="width:45px;height:5px;background:#111;border-radius:1px;margin-bottom:5px"></div>
+                            <div style="height:2px;background:#ddd;margin-bottom:3px;border-radius:1px"></div>
+                            <div style="height:2px;background:#ddd;border-radius:1px;width:80%"></div>
+                        </div>
+                    </div>
+                    <div class="tmpl-name">Classic B&W <span class="free-label">FREE</span></div>
+                </div>
+                <div class="tmpl" onclick="selectTemplate(this, 'B')">
+                    <div class="tmpl-preview" style="background:#fff;border:1px solid #ddd">
+                        <div style="padding:12px;width:100%">
+                            <div style="background:#111;padding:10px;margin:-12px -12px 10px;text-align:center">
+                                <div style="width:70px;height:6px;background:#fff;border-radius:1px;margin:0 auto 4px;opacity:0.8"></div>
+                                <div style="width:45px;height:2px;background:#fff;border-radius:1px;margin:0 auto;opacity:0.4"></div>
+                            </div>
+                            <div style="width:45px;height:5px;background:#111;border-radius:1px;margin-bottom:5px"></div>
+                            <div style="height:2px;background:#ddd;margin-bottom:3px;border-radius:1px"></div>
+                            <div style="height:2px;background:#ddd;border-radius:1px;width:75%"></div>
+                        </div>
+                    </div>
+                    <div class="tmpl-name">Modern B&W <span class="free-label">FREE</span></div>
+                </div>
+            </div>
+            <input type="hidden" id="selectedTemplate" value="A">
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="submit-section">
+            <button class="btn-generate" onclick="generateFreeCV()">Gerar CV Grátis</button>
+            <p class="submit-note">100% gratuito · Sem registo · Download imediato</p>
+            <div class="or-divider"><span>ou</span></div>
+            <a href="form.html" class="btn-go-premium">✦ Criar CV Premium por $1.99</a>
+            <p style="color:#555;font-size:12px;margin-top:10px">13 templates · Com foto · ATS optimizado · PayPal</p>
+        </div>
+    </div>
+
+    <script>
+        var skills = [];
+        var expCount = 1;
+        var eduCount = 1;
+        var langCount = 1;
+
+        function selectTemplate(el, id) {
+            document.querySelectorAll('.tmpl').forEach(function(t) { t.classList.remove('selected'); });
+            el.classList.add('selected');
+            document.getElementById('selectedTemplate').value = id;
+        }
+
+        function addExperience() {
+            var id = 'exp-' + expCount++;
+            var html = '<div class="item-card" id="' + id + '">' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
+                '<div class="form-row"><div class="form-group"><label>Cargo</label><input type="text" placeholder="Cargo"></div>' +
+                '<div class="form-group"><label>Empresa</label><input type="text" placeholder="Empresa"></div></div>' +
+                '<div class="form-row three"><div class="form-group"><label>Início</label><input type="text" placeholder="Jan 2020"></div>' +
+                '<div class="form-group"><label>Fim</label><input type="text" placeholder="Presente"></div>' +
+                '<div class="form-group"><label>Local</label><input type="text" placeholder="Luanda"></div></div>' +
+                '<div class="form-row full"><div class="form-group"><label>Descrição</label><textarea placeholder="Descrição..."></textarea></div></div></div>';
+            document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        function addEducation() {
+            var id = 'edu-' + eduCount++;
+            var html = '<div class="item-card" id="' + id + '">' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
+                '<div class="form-row"><div class="form-group"><label>Curso</label><input type="text" placeholder="Licenciatura"></div>' +
+                '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Universidade"></div></div>' +
+                '<div class="form-row"><div class="form-group"><label>Ano</label><input type="text" placeholder="2015"></div>' +
+                '<div class="form-group"><label>Classificação</label><input type="text" placeholder="Bom"></div></div></div>';
+            document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeItem(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+        function addSkill() {
+            var input = document.getElementById('skillInput');
+            var skill = input.value.trim();
+            if (!skill) return;
+            skills.push(skill);
+            renderSkills();
+            input.value = '';
+        }
+
+        function removeSkill(i) { skills.splice(i, 1); renderSkills(); }
+
+        function renderSkills() {
+            var html = '';
+            skills.forEach(function(s, i) {
+                html += '<div class="skill-tag">' + s + '<button onclick="removeSkill(' + i + ')">×</button></div>';
+            });
+            document.getElementById('skillsContainer').innerHTML = html;
+        }
+
+        function addLanguage() {
+            var id = 'lang-' + langCount++;
+            var html = '<div class="form-row" id="' + id + '" style="margin-top:10px">' +
+                '<div class="form-group"><input type="text" placeholder="Ex: Inglês"></div>' +
+                '<div class="form-group"><select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div></div>';
+            document.getElementById('languagesContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        function generateFreeCV() {
+            var fullName = document.getElementById('fullName').value.trim();
+            if (!fullName) { alert('Por favor preenche o teu nome!'); return; }
+
+            var expCards = document.querySelectorAll('[id^="exp-"]');
+            var experience = [];
+            expCards.forEach(function(card) {
+                var inputs = card.querySelectorAll('input');
+                var textarea = card.querySelector('textarea');
+                if (inputs[0] && inputs[0].value.trim()) {
+                    experience.push({
+                        title: inputs[0].value, company: inputs[1] ? inputs[1].value : '',
+                        start: inputs[2] ? inputs[2].value : '', end: inputs[3] ? inputs[3].value : '',
+                        location: inputs[4] ? inputs[4].value : '', description: textarea ? textarea.value : ''
+                    });
+                }
+            });
+
+            var eduCards = document.querySelectorAll('[id^="edu-"]');
+            var education = [];
+            eduCards.forEach(function(card) {
+                var inputs = card.querySelectorAll('input');
+                if (inputs[0] && inputs[0].value.trim()) {
+                    education.push({ degree: inputs[0].value, school: inputs[1] ? inputs[1].value : '', year: inputs[2] ? inputs[2].value : '', grade: inputs[3] ? inputs[3].value : '' });
+                }
+            });
+
+            var langRows = document.querySelectorAll('[id^="lang-"]');
+            var languages = [];
+            langRows.forEach(function(row) {
+                var input = row.querySelector('input');
+                var select = row.querySelector('select');
+                if (input && input.value.trim()) languages.push({ name: input.value, level: select ? select.value : '' });
+            });
+
+            var cvData = {
+                fullName: fullName,
+                jobTitle: document.getElementById('jobTitle').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                linkedin: document.getElementById('linkedin').value,
+                summary: document.getElementById('summary').value,
+                experience: experience, education: education,
+                skills: skills, languages: languages,
+                template: document.getElementById('selectedTemplate').value
+            };
+
+            sessionStorage.setItem('freeCvData', JSON.stringify(cvData));
+            window.location.href = 'free-preview.html';
+        }
+    </script>
+</body>
+</html>
