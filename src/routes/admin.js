@@ -171,7 +171,7 @@ router.get('/coaches', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/coaches', async (req, res) => {
-  const { name, location, bio, skills, email, color } = req.body;
+  const { name, location, bio, skills, email, color, photoUrl } = req.body;
   if (!name) return res.status(400).json({ error: 'Nome obrigatório.' });
   try {
     const r = await req.db.request()
@@ -181,13 +181,14 @@ router.post('/coaches', async (req, res) => {
       .input('skills',   sql.NVarChar, skills||null)
       .input('email',    sql.NVarChar, email||null)
       .input('color',    sql.NVarChar, color||'#6366f1')
-      .query(`INSERT INTO coaches (name, location, bio, skills, email, color, active, created_at)
-              VALUES (@name, @location, @bio, @skills, @email, @color, TRUE, NOW()) RETURNING id`);
+      .input('photo',    sql.NVarChar, photoUrl||null)
+      .query(`INSERT INTO coaches (name, location, bio, skills, email, color, photo_url, active, created_at)
+              VALUES (@name, @location, @bio, @skills, @email, @color, @photo, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/coaches/:id', async (req, res) => {
-  const { name, location, bio, skills, email, color } = req.body;
+  const { name, location, bio, skills, email, color, photoUrl } = req.body;
   try {
     await req.db.request()
       .input('id',       sql.Int,      req.params.id)
@@ -197,7 +198,8 @@ router.put('/coaches/:id', async (req, res) => {
       .input('skills',   sql.NVarChar, skills||null)
       .input('email',    sql.NVarChar, email||null)
       .input('color',    sql.NVarChar, color||'#6366f1')
-      .query('UPDATE coaches SET name=@name, location=@location, bio=@bio, skills=@skills, email=@email, color=@color WHERE id=@id');
+      .input('photo',    sql.NVarChar, photoUrl||null)
+      .query('UPDATE coaches SET name=@name, location=@location, bio=@bio, skills=@skills, email=@email, color=@color, photo_url=@photo WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -259,37 +261,39 @@ router.get('/jobs', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/jobs', async (req, res) => {
-  const { title, company, city, country, category, date, jobDate, url } = req.body;
+  const { title, company, city, country, category, date, jobDate, url, contactType } = req.body;
   if (!title) return res.status(400).json({ error: 'Título obrigatório.' });
   const d = jobDate || date || null;
   try {
     const r = await req.db.request()
-      .input('title',   sql.NVarChar, title)
-      .input('company', sql.NVarChar, company||null)
-      .input('city',    sql.NVarChar, city||null)
-      .input('country', sql.NVarChar, country||null)
-      .input('cat',     sql.NVarChar, category||null)
-      .input('date',    sql.Date,     d ? new Date(d) : null)
-      .input('url',     sql.NVarChar, url||null)
-      .query(`INSERT INTO jobs (title, company, city, country, category, job_date, url, active, created_at)
-              VALUES (@title, @company, @city, @country, @cat, @date, @url, TRUE, NOW()) RETURNING id`);
+      .input('title',       sql.NVarChar, title)
+      .input('company',     sql.NVarChar, company||null)
+      .input('city',        sql.NVarChar, city||null)
+      .input('country',     sql.NVarChar, country||null)
+      .input('cat',         sql.NVarChar, category||null)
+      .input('date',        sql.Date,     d ? new Date(d) : null)
+      .input('url',         sql.NVarChar, url||null)
+      .input('contactType', sql.NVarChar, contactType||'url')
+      .query(`INSERT INTO jobs (title, company, city, country, category, job_date, url, contact_type, active, created_at)
+              VALUES (@title, @company, @city, @country, @cat, @date, @url, @contactType, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/jobs/:id', async (req, res) => {
-  const { title, company, city, country, category, date, jobDate, url } = req.body;
+  const { title, company, city, country, category, date, jobDate, url, contactType } = req.body;
   const d = jobDate || date || null;
   try {
     await req.db.request()
-      .input('id',      sql.Int,      req.params.id)
-      .input('title',   sql.NVarChar, title)
-      .input('company', sql.NVarChar, company||null)
-      .input('city',    sql.NVarChar, city||null)
-      .input('country', sql.NVarChar, country||null)
-      .input('cat',     sql.NVarChar, category||null)
-      .input('date',    sql.Date,     d ? new Date(d) : null)
-      .input('url',     sql.NVarChar, url||null)
-      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, job_date=@date, url=@url WHERE id=@id');
+      .input('id',          sql.Int,      req.params.id)
+      .input('title',       sql.NVarChar, title)
+      .input('company',     sql.NVarChar, company||null)
+      .input('city',        sql.NVarChar, city||null)
+      .input('country',     sql.NVarChar, country||null)
+      .input('cat',         sql.NVarChar, category||null)
+      .input('date',        sql.Date,     d ? new Date(d) : null)
+      .input('url',         sql.NVarChar, url||null)
+      .input('contactType', sql.NVarChar, contactType||'url')
+      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, job_date=@date, url=@url, contact_type=@contactType WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

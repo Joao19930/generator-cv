@@ -547,8 +547,16 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-field"><label>Descrição</label><textarea id="jDesc" rows="3" placeholder="Descreva os requisitos e responsabilidades..."></textarea></div>
       <div class="f-row">
         <div class="f-field"><label>Salário (opcional)</label><input type="text" id="jSalary" placeholder="ex: 1.500–2.500€/mês"></div>
-        <div class="f-field"><label>URL de Candidatura</label><input type="url" id="jUrl" placeholder="https://..."></div>
+        <div class="f-field">
+          <label>Tipo de Contacto</label>
+          <select id="jContactType" onchange="updateContactPlaceholder()">
+            <option value="url">Link / URL</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </div>
       </div>
+      <div class="f-field"><label id="jUrlLabel">URL de Candidatura</label><input type="text" id="jUrl" placeholder="https://..."></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancelar</button><button class="btn btn-blue" onclick="saveJob()">Publicar Vaga</button></div>
   </div>
@@ -581,6 +589,7 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-row">
         <div class="f-field"><label>Nome</label><input type="text" id="chName" placeholder="Nome do coach"></div>
         <div class="f-field"><label>Localização</label><input type="text" id="chLocation" placeholder="ex: Lisboa, Portugal"></div>
+        <div class="f-field" style="grid-column:1/-1"><label>Foto (URL da imagem)</label><input type="url" id="chPhoto" placeholder="https://exemplo.com/foto.jpg"></div>
       </div>
       <div class="f-field"><label>Biografia</label><textarea id="chBio" rows="3" placeholder="Breve descrição do coach..."></textarea></div>
       <div class="f-field"><label>Especialidades (separadas por vírgula)</label><input type="text" id="chSkills" placeholder="Marca Pessoal, Entrevista, Salário"></div>
@@ -1036,15 +1045,25 @@ function filterJobs(v) {
   document.getElementById('jobsPagInfo').textContent = f.length + ' vagas';
 }
 
+function updateContactPlaceholder() {
+  const type = document.getElementById('jContactType').value;
+  const label = document.getElementById('jUrlLabel');
+  const input = document.getElementById('jUrl');
+  if (type === 'email') { label.textContent = 'Email de Candidatura'; input.placeholder = 'exemplo@empresa.com'; input.type = 'email'; }
+  else if (type === 'whatsapp') { label.textContent = 'Número WhatsApp'; input.placeholder = '+244 9xx xxx xxx'; input.type = 'text'; }
+  else { label.textContent = 'URL de Candidatura'; input.placeholder = 'https://...'; input.type = 'text'; }
+}
+
 async function saveJob() {
   const j = {
-    title:    document.getElementById('jTitle').value.trim(),
-    company:  document.getElementById('jCompany').value.trim(),
-    city:     document.getElementById('jCity').value.trim(),
-    country:  document.getElementById('jCountry').value.trim(),
-    category: document.getElementById('jCat').value,
-    jobDate:  document.getElementById('jDate').value || null,
-    url:      document.getElementById('jUrl').value.trim()
+    title:       document.getElementById('jTitle').value.trim(),
+    company:     document.getElementById('jCompany').value.trim(),
+    city:        document.getElementById('jCity').value.trim(),
+    country:     document.getElementById('jCountry').value.trim(),
+    category:    document.getElementById('jCat').value,
+    jobDate:     document.getElementById('jDate').value || null,
+    url:         document.getElementById('jUrl').value.trim(),
+    contactType: document.getElementById('jContactType').value
   };
   if (!j.title || !j.company) { alert('Preencha cargo e empresa.'); return; }
   try {
@@ -1068,8 +1087,10 @@ function editJob(id) {
   document.getElementById('jCountry').value = j.Country  || j.country || '';
   document.getElementById('jCat').value     = j.Category || j.category|| '';
   const d = j.JobDate || j.date || '';
-  document.getElementById('jDate').value    = d ? String(d).substring(0,10) : '';
-  document.getElementById('jUrl').value     = j.Url      || j.url     || '';
+  document.getElementById('jDate').value        = d ? String(d).substring(0,10) : '';
+  document.getElementById('jUrl').value         = j.Url         || j.url          || '';
+  document.getElementById('jContactType').value = j.ContactType || j.contact_type || 'url';
+  updateContactPlaceholder();
   document.getElementById('jobModalTitle').textContent = 'Editar Vaga';
   openModal('jobModal');
 }
@@ -1161,9 +1182,14 @@ function renderCoaches() {
     const bio      = c.Bio      || c.bio      || '';
     const skills   = c.Skills   || c.skills   || '';
     const color    = c.Color    || c.color    || '#6366f1';
+    const photo    = c.PhotoUrl || c.photo_url || '';
     const id       = c.Id       || c.id;
+    const avatar   = photo
+      ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+        + `<span style="display:none;font-size:28px;font-weight:800;color:#fff;align-items:center;justify-content:center;width:100%;height:100%;">${name[0].toUpperCase()}</span>`
+      : `<span style="font-size:28px;font-weight:800;color:#fff;">${name[0].toUpperCase()}</span>`;
     return `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-      <div style="height:60px;background:${color};display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:800;">${name[0].toUpperCase()}</div>
+      <div style="height:60px;background:${color};display:flex;align-items:center;justify-content:center;">${avatar}</div>
       <div style="padding:14px;">
         <div style="font-size:14px;font-weight:700;">${name}</div>
         <div style="font-size:11px;color:var(--t3);margin:2px 0 6px;">${location}</div>
@@ -1182,7 +1208,8 @@ async function saveCoach() {
     bio:      document.getElementById('chBio').value.trim(),
     skills:   document.getElementById('chSkills').value.trim(),
     color:    document.getElementById('chColor').value,
-    email:    document.getElementById('chEmail').value.trim()
+    email:    document.getElementById('chEmail').value.trim(),
+    photoUrl: document.getElementById('chPhoto').value.trim()
   };
   if (!c.name) { alert('Preencha o nome.'); return; }
   try {
@@ -1206,6 +1233,7 @@ function editCoach(id) {
   document.getElementById('chSkills').value   = c.Skills   || c.skills   || '';
   document.getElementById('chEmail').value    = c.Email    || c.email    || '';
   document.getElementById('chColor').value    = c.Color    || c.color    || '#6366f1';
+  document.getElementById('chPhoto').value    = c.PhotoUrl || c.photo_url || '';
   openModal('coachModal');
 }
 

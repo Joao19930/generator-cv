@@ -8,7 +8,7 @@ const { sql } = require('../config/database');
 router.get('/coaches', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, name, location, bio, skills, email, color, created_at FROM coaches WHERE active=TRUE ORDER BY created_at DESC');
+      .query('SELECT id, name, location, bio, skills, email, color, photo_url, created_at FROM coaches WHERE active=TRUE ORDER BY created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -26,7 +26,7 @@ router.get('/courses', async (req, res) => {
 router.get('/jobs', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, title, company, city, country, category, job_date, url, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
+      .query('SELECT id, title, company, city, country, category, job_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
