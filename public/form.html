@@ -145,6 +145,44 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:2px;}
 
+/* ── MOBILE TEMPLATE DRAWER ─────────────────────── */
+.tpl-drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:190;backdrop-filter:blur(2px);}
+.tpl-drawer-overlay.open{display:block;}
+.fab-templates{display:none;position:fixed;bottom:80px;right:16px;z-index:180;background:var(--blue);color:#fff;border:none;border-radius:50px;padding:12px 18px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4);align-items:center;gap:6px;}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media(max-width:768px){
+  .tb-sep,.tb-cv-name,.tb-ats-score{display:none;}
+  .topbar{padding:0 14px;gap:10px;}
+  .tb-btn-ghost{padding:6px 10px;font-size:11px;}
+  .tb-btn-green{padding:6px 12px;font-size:11px;}
+
+  .editor-layout{flex-direction:column;}
+  .form-panel{padding:16px 14px 100px !important;max-width:100% !important;}
+  .form-panel h1{font-size:17px;}
+
+  .f-row{grid-template-columns:1fr;}
+  .f-row.three{grid-template-columns:1fr 1fr;}
+
+  .tpl-panel{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100% !important;min-width:0 !important;
+    height:72vh;border-left:none;border-top:1px solid var(--border);
+    border-radius:18px 18px 0 0;z-index:200;
+    transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .tpl-panel.open{transform:translateY(0);}
+  .tpl-panel::before{content:'';display:block;width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0;}
+
+  .generate-bar{right:0 !important;padding:10px 14px;}
+  .generate-info{display:none;}
+  .btn-generate{width:100%;justify-content:center;font-size:13px;}
+
+  .fab-templates{display:flex;}
+  .item-card{padding:12px;}
+  .f-section-body{padding:0 14px 16px;}
+}
+
 /* ── ATS BANNER ─────────────────────────────────── */
 .ats-banner{background:var(--green-l);border:1px solid #86efac;border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--green);line-height:1.5;}
 .ats-banner strong{display:block;margin-bottom:2px;}
@@ -178,6 +216,15 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
     </button>
   </div>
 </header>
+
+<!-- MOBILE OVERLAY -->
+<div class="tpl-drawer-overlay" id="tplOverlay" onclick="closeTplDrawer()"></div>
+
+<!-- FAB TEMPLATES (mobile) -->
+<button class="fab-templates" onclick="openTplDrawer()">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  Templates
+</button>
 
 <!-- LAYOUT -->
 <div class="editor-layout">
@@ -822,6 +869,22 @@ document.addEventListener('click', e => {
       });
     }, 50);
   }
+});
+
+/* ── MOBILE TEMPLATE DRAWER ──────────────────────── */
+function openTplDrawer() {
+  document.querySelector('.tpl-panel').classList.add('open');
+  document.getElementById('tplOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTplDrawer() {
+  document.querySelector('.tpl-panel').classList.remove('open');
+  document.getElementById('tplOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Fechar drawer ao seleccionar template no mobile
+document.querySelector('.tpl-grid')?.addEventListener('click', () => {
+  if (window.innerWidth <= 768) setTimeout(closeTplDrawer, 300);
 });
 
 /* ── INIT ────────────────────────────────────────── */
