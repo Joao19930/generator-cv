@@ -38,10 +38,10 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 .tb-ats-score{display:flex;align-items:center;gap:5px;padding:5px 12px;background:var(--green-l);border:1px solid #86efac;border-radius:20px;font-size:11px;font-weight:700;color:var(--green);}
 
 /* ── LAYOUT ─────────────────────────────────────── */
-.editor-layout{display:flex;margin-top:56px;min-height:calc(100vh - 56px);}
+.editor-layout{display:flex;margin-top:56px;min-height:calc(100vh - 56px);padding-right:320px;}
 
 /* ── LEFT: FORM ─────────────────────────────────── */
-.form-panel{flex:1;padding:28px 40px 80px;max-width:900px;overflow-y:auto;}
+.form-panel{flex:0 0 auto;width:min(640px,55%);padding:28px 36px 80px;overflow-y:auto;}
 .form-panel h1{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;}
 .form-panel .sub{font-size:13px;color:var(--t3);margin-bottom:24px;}
 
@@ -157,8 +157,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
   .tb-btn-ghost{padding:6px 10px;font-size:11px;}
   .tb-btn-green{padding:6px 12px;font-size:11px;}
 
-  .editor-layout{flex-direction:column;}
-  .form-panel{padding:16px 14px 100px !important;max-width:100% !important;}
+  .editor-layout{flex-direction:column;padding-right:0;}
+  .form-panel{padding:16px 14px 100px !important;width:100% !important;}
   .form-panel h1{font-size:17px;}
 
   .f-row{grid-template-columns:1fr;}
@@ -181,6 +181,55 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
   .fab-templates{display:flex;}
   .item-card{padding:12px;}
   .f-section-body{padding:0 14px 16px;}
+}
+
+/* ── AI ASSISTANT PANEL ──────────────────────────── */
+.ai-panel{
+  flex:1;min-width:0;
+  padding:20px 16px 80px;
+  overflow-y:auto;
+  display:flex;flex-direction:column;gap:14px;
+  scrollbar-width:none;
+}
+.ai-panel::-webkit-scrollbar{display:none;}
+.ai-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;flex-shrink:0;}
+.ai-card-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ai-card-hdr-icon{width:28px;height:28px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ai-card-title{font-size:12px;font-weight:800;color:var(--text);}
+.ai-card-body{padding:14px;}
+
+/* score gauge */
+.score-gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;}
+.score-ring-svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:#E2E8F0;stroke-width:6;}
+.score-ring-val{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .6s ease,stroke .4s;}
+.score-pct{font-size:26px;font-weight:800;color:var(--text);line-height:1;}
+.score-lbl{font-size:10px;color:var(--t3);font-weight:600;}
+.score-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px;}
+.score-field{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3);}
+.score-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* job suggestions */
+.ai-job{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.ai-job:last-child{border-bottom:none;}
+.ai-job:hover{background:var(--bg);}
+.ai-job-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ai-job-meta{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.ai-job-tag{font-size:9px;font-weight:600;padding:1px 7px;border-radius:10px;background:var(--blue-l);color:var(--blue);}
+
+/* tips */
+.ai-tip{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);}
+.ai-tip:last-child{border-bottom:none;}
+.ai-tip-num{width:20px;height:20px;border-radius:50%;background:var(--blue-l);color:var(--blue);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ai-tip-text{font-size:11px;color:var(--t2);line-height:1.55;}
+
+/* empty state */
+.ai-jobs-empty{text-align:center;padding:20px;font-size:11px;color:var(--t4);}
+
+@media(max-width:1180px){
+  .ai-panel{display:none;}
+  .form-panel{width:100%;}
+  .editor-layout{padding-right:320px;}
 }
 
 /* ── ATS BANNER ─────────────────────────────────── */
@@ -230,7 +279,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 <div class="editor-layout">
 
   <!-- ── FORM PANEL ───────────────────────────────── -->
-  <div class="form-panel" style="padding-right:calc(360px + 28px);">
+  <div class="form-panel">
     <h1>Criar o seu CV</h1>
     <p class="sub">Preencha os campos abaixo e escolha o modelo à direita</p>
 
@@ -403,6 +452,65 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
     </div>
 
   </div><!-- /form-panel -->
+
+  <!-- ── AI ASSISTANT PANEL ───────────────────────── -->
+  <aside class="ai-panel" id="aiPanel">
+
+    <!-- SCORE DE PREENCHIMENTO -->
+    <div class="ai-card">
+      <div class="ai-card-hdr">
+        <div class="ai-card-hdr-icon" style="background:#EFF6FF;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="ai-card-title">Completude do CV</span>
+      </div>
+      <div class="ai-card-body">
+        <div class="score-gauge-wrap">
+          <svg width="100" height="100" class="score-ring-svg">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-val" id="scoreRing" cx="50" cy="50" r="42"
+              stroke="#2563EB"
+              stroke-dasharray="263.9"
+              stroke-dashoffset="263.9"/>
+          </svg>
+          <div style="margin-top:-8px;text-align:center;">
+            <div class="score-pct" id="scorePct">0%</div>
+            <div class="score-lbl">CV preenchido</div>
+          </div>
+        </div>
+        <div class="score-fields" id="scoreFields"></div>
+      </div>
+    </div>
+
+    <!-- VAGAS RECOMENDADAS -->
+    <div class="ai-card">
+      <div class="ai-card-hdr">
+        <div class="ai-card-hdr-icon" style="background:#DCFCE7;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        </div>
+        <span class="ai-card-title">Vagas para si</span>
+      </div>
+      <div id="aiJobsList">
+        <div class="ai-jobs-empty">Preencha o seu título profissional para ver vagas recomendadas</div>
+      </div>
+    </div>
+
+    <!-- DICAS POR SECÇÃO -->
+    <div class="ai-card">
+      <div class="ai-card-hdr">
+        <div class="ai-card-hdr-icon" style="background:#FAF5FF;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <span class="ai-card-title" id="aiTipTitle">Dicas do Editor</span>
+      </div>
+      <div class="ai-card-body" id="aiTipBody">
+        <div class="ai-tip"><div class="ai-tip-num">1</div><div class="ai-tip-text">Use um título profissional específico — ex: "Engenheiro de Software Sénior" em vez de "Engenheiro".</div></div>
+        <div class="ai-tip"><div class="ai-tip-num">2</div><div class="ai-tip-text">O resumo profissional deve ter 2-4 frases a descrever o seu valor único e principais competências.</div></div>
+        <div class="ai-tip"><div class="ai-tip-num">3</div><div class="ai-tip-text">Inclua palavras-chave da vaga a que se candidata para melhorar o score ATS.</div></div>
+      </div>
+    </div>
+
+  </aside>
 
   <!-- ── TEMPLATES PANEL ───────────────────────────── -->
   <div class="tpl-panel">
@@ -889,6 +997,216 @@ document.querySelector('.tpl-grid')?.addEventListener('click', () => {
 
 /* ── INIT ────────────────────────────────────────── */
 loadTemplates();
+
+/* ══════════════════════════════════════════════════
+   AI ASSISTANT PANEL
+   ══════════════════════════════════════════════════ */
+const CIRCUMFERENCE = 2 * Math.PI * 42; // ~263.9
+
+const SECTION_TIPS = {
+  pessoais: {
+    title: 'Dados Pessoais',
+    tips: [
+      'Use um email profissional (ex: joao.silva@gmail.com), evite apelidos informais.',
+      'O título profissional é o campo mais lido pelos recrutadores — seja específico.',
+      'Inclua o LinkedIn para dar credibilidade e facilitar contacto.',
+    ]
+  },
+  experiencia: {
+    title: 'Experiência',
+    tips: [
+      'Comece cada descrição com um verbo de acção: "Desenvolvi", "Liderei", "Aumentei".',
+      'Quantifique resultados: "Reduzi custos em 20%" tem mais impacto do que texto genérico.',
+      'Liste experiências do mais recente para o mais antigo.',
+    ]
+  },
+  formacao: {
+    title: 'Formação',
+    tips: [
+      'Inclua a média/classificação se for superior a 14 valores.',
+      'Mencione projectos académicos relevantes para a vaga.',
+      'Para recém-licenciados, a formação deve vir antes da experiência.',
+    ]
+  },
+  competencias: {
+    title: 'Competências',
+    tips: [
+      'Inclua competências técnicas (hard skills) e interpessoais (soft skills).',
+      'Use as mesmas palavras que aparecem na descrição das vagas.',
+      'Evite competências óbvias como "Microsoft Word" — foque-se no que o diferencia.',
+    ]
+  },
+  idiomas: {
+    title: 'Idiomas',
+    tips: [
+      'Use níveis padronizados: A1/A2, B1/B2, C1/C2 ou Básico/Intermédio/Fluente/Nativo.',
+      'Um segundo idioma pode ser um factor decisivo em empresas internacionais.',
+      'Certificações de idioma (IELTS, DELF, etc.) aumentam a credibilidade.',
+    ]
+  },
+  cert: {
+    title: 'Certificações',
+    tips: [
+      'Certificações recentes (< 3 anos) têm mais peso — mencione o ano.',
+      'Plataformas reconhecidas: Coursera, Udemy, LinkedIn Learning, Google, AWS.',
+      'Prémios e reconhecimentos profissionais diferenciam o seu perfil.',
+    ]
+  }
+};
+
+let _jobsCache = null;
+let _jobFetchTimer = null;
+
+// Calcular completude do CV
+function calcScore() {
+  const fields = [
+    { key: 'name',    label: 'Nome',         val: () => (document.getElementById('fullName')?.value||'').trim().length > 2 },
+    { key: 'title',   label: 'Título',        val: () => (document.getElementById('jobTitle')?.value||'').trim().length > 2 },
+    { key: 'email',   label: 'Email',         val: () => (document.getElementById('email')?.value||'').includes('@') },
+    { key: 'phone',   label: 'Telefone',      val: () => (document.getElementById('phone')?.value||'').trim().length > 5 },
+    { key: 'summary', label: 'Resumo',        val: () => (document.getElementById('summary')?.value||'').trim().length > 30 },
+    { key: 'exp',     label: 'Experiência',   val: () => document.querySelector('[id^="exp-"]') !== null },
+    { key: 'edu',     label: 'Formação',      val: () => document.querySelector('[id^="edu-"]') !== null },
+    { key: 'skills',  label: 'Competências',  val: () => (typeof skills !== 'undefined' && skills.length > 0) },
+    { key: 'lang',    label: 'Idiomas',       val: () => document.querySelector('[id^="lang-"]') !== null },
+    { key: 'tpl',     label: 'Template',      val: () => (typeof selectedTplId !== 'undefined' && selectedTplId) },
+  ];
+
+  let filled = 0;
+  const html = fields.map(f => {
+    const ok = f.val();
+    if (ok) filled++;
+    return `<div class="score-field">
+      <div class="score-dot" style="background:${ok?'var(--green)':'var(--border)'}"></div>
+      <span style="color:${ok?'var(--t2)':'var(--t4)'}">${f.label}</span>
+    </div>`;
+  }).join('');
+
+  const pct = Math.round((filled / fields.length) * 100);
+  const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
+  const color = pct >= 80 ? '#16A34A' : pct >= 50 ? '#F59E0B' : '#2563EB';
+
+  const ring = document.getElementById('scoreRing');
+  const pctEl = document.getElementById('scorePct');
+  const fieldsEl = document.getElementById('scoreFields');
+  if (ring) { ring.style.strokeDashoffset = offset; ring.style.stroke = color; }
+  if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = color; }
+  if (fieldsEl) fieldsEl.innerHTML = html;
+
+  // Update topbar ATS score
+  const atsBar = document.getElementById('atsScoreBar');
+  const atsVal = document.getElementById('atsVal');
+  if (atsBar && pct >= 30) {
+    atsBar.style.display = 'flex';
+    if (atsVal) atsVal.textContent = pct + '%';
+  }
+}
+
+// Buscar vagas baseadas no título
+async function fetchJobSuggestions(titleVal) {
+  const list = document.getElementById('aiJobsList');
+  if (!list) return;
+  if (!titleVal || titleVal.length < 3) {
+    list.innerHTML = '<div class="ai-jobs-empty">Preencha o seu título profissional para ver vagas recomendadas</div>';
+    return;
+  }
+
+  // Use cache
+  if (!_jobsCache) {
+    try {
+      const r = await fetch('/api/content/jobs');
+      _jobsCache = r.ok ? await r.json() : [];
+    } catch(_) { _jobsCache = []; }
+  }
+
+  const q = titleVal.toLowerCase();
+  const words = q.split(/\s+/).filter(w => w.length > 2);
+  const matches = (_jobsCache || []).filter(j => {
+    const haystack = ((j.title||'') + ' ' + (j.company||'') + ' ' + (j.category||'')).toLowerCase();
+    return words.some(w => haystack.includes(w));
+  }).slice(0, 4);
+
+  if (!matches.length) {
+    list.innerHTML = '<div class="ai-jobs-empty">Nenhuma vaga encontrada para este perfil. <a onclick="nav(\'jobs\',null)" style="color:var(--blue);cursor:pointer;font-weight:700;">Ver todas</a></div>';
+    return;
+  }
+
+  list.innerHTML = matches.map(j => {
+    const applyUrl = j.contact_type === 'email' ? `mailto:${j.url||''}` :
+                     j.contact_type === 'whatsapp' ? `https://wa.me/${(j.url||'').replace(/\D/g,'')}` :
+                     j.url || '#';
+    return `<div class="ai-job" onclick="window.open('${applyUrl}','_blank')">
+      <div class="ai-job-title">${j.title||'—'}</div>
+      <div class="ai-job-meta">
+        <span>${j.company||''}</span>
+        ${j.city ? `<span>· ${j.city}</span>` : ''}
+        ${j.category ? `<span class="ai-job-tag">${j.category}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Actualizar dicas baseadas na secção aberta
+function updateTips(sectionKey) {
+  const data = SECTION_TIPS[sectionKey];
+  if (!data) return;
+  const titleEl = document.getElementById('aiTipTitle');
+  const bodyEl = document.getElementById('aiTipBody');
+  if (titleEl) titleEl.textContent = 'Dicas — ' + data.title;
+  if (bodyEl) bodyEl.innerHTML = data.tips.map((t, i) =>
+    `<div class="ai-tip"><div class="ai-tip-num">${i+1}</div><div class="ai-tip-text">${t}</div></div>`
+  ).join('');
+}
+
+// Debounce helper
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+// Ouvir mudanças nos inputs do formulário
+function initAIPanel() {
+  // Score ao mudar qualquer input
+  document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
+    el.addEventListener('input', debounce(calcScore, 400));
+  });
+
+  // Vagas ao mudar o título
+  const titleInput = document.getElementById('jobTitle');
+  if (titleInput) {
+    titleInput.addEventListener('input', debounce(() => {
+      fetchJobSuggestions(titleInput.value);
+    }, 700));
+  }
+
+  // Dicas ao abrir secção
+  document.querySelectorAll('.f-section-hdr').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const title = hdr.querySelector('.f-section-title')?.textContent || '';
+      if (title.includes('Pessoal')) updateTips('pessoais');
+      else if (title.includes('Experi')) updateTips('experiencia');
+      else if (title.includes('Form')) updateTips('formacao');
+      else if (title.includes('Comp')) updateTips('competencias');
+      else if (title.includes('Idioma')) updateTips('idiomas');
+      else if (title.includes('Cert')) updateTips('cert');
+    });
+  });
+
+  // Score inicial (após preload do CV)
+  setTimeout(calcScore, 800);
+  setTimeout(() => {
+    const titleInput = document.getElementById('jobTitle');
+    if (titleInput?.value) fetchJobSuggestions(titleInput.value);
+  }, 1000);
+
+  // Observer para novos cards adicionados dinamicamente
+  const observer = new MutationObserver(debounce(calcScore, 500));
+  const formPanel = document.querySelector('.form-panel');
+  if (formPanel) observer.observe(formPanel, { childList: true, subtree: true });
+}
+
+// Iniciar após carregar CV
+const _origLoadCv = window.onload;
+setTimeout(initAIPanel, 500);
 </script>
 </body>
 </html>
