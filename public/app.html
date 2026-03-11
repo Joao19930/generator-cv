@@ -987,14 +987,6 @@ function paper(color, small, tpl) {
     `<span style="display:inline-block;background:${c}18;color:${c};font-size:${3.5*s}px;font-weight:600;padding:${1.5*s}px ${4*s}px;border-radius:${3*s}px;margin:${1.5*s}px ${1.5*s}px 0 0;">${txt}</span>`;
   const AVT = (sz=22, bg2=c) =>
     `<div style="width:${sz*s}px;height:${sz*s}px;border-radius:50%;background:${bg2};display:flex;align-items:center;justify-content:center;font-size:${sz*0.42*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>`;
-  let inner = '';
-  const line  = (w, h=2, clr='#E2E8F0', r=1) =>
-    `<div style="height:${h*s}px;background:${clr};border-radius:${r}px;width:${w};margin-bottom:${1.5*s}px;"></div>`;
-  const sec   = (txt, clr) =>
-    `<div style="font-size:${4.5*s}px;font-weight:700;color:${clr};text-transform:uppercase;letter-spacing:.5px;margin:${4*s}px 0 ${2*s}px;">${txt}</div>`;
-  const dot   = (n=3) => Array(n).fill(`<span style="display:inline-block;width:${3*s}px;height:${3*s}px;border-radius:50%;background:#CBD5E1;margin-right:${2*s}px;"></span>`).join('');
-
-  let inner = '';
 
   if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
     inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
