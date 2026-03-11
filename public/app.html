@@ -122,9 +122,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .cv-ats{display:inline-flex;align-items:center;gap:3px;background:var(--green-l);color:var(--green);font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;margin-top:3px;}
 
 /* ── TEMPLATE CARDS ──────────────────────────────── */
-.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
 .tpl-card{border:1.5px solid var(--border);border-radius:var(--rl);background:#fff;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
-.tpl-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(37,99,235,.1);transform:translateY(-2px);}
+.tpl-card:hover{border-color:var(--blue);box-shadow:0 8px 28px rgba(37,99,235,.15);transform:translateY(-4px);}
 .tpl-thumb{aspect-ratio:.707;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .tpl-bdg{position:absolute;top:6px;left:6px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;}
 .bdg-free{background:var(--green-l);color:var(--green);}
@@ -362,7 +362,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
   .stat-v{font-size:18px;}
   .stat-icon{width:34px;height:34px;}
   .cvs-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
-  .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+  .tpl-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .cards-grid{grid-template-columns:1fr;}
   .jobs-grid{grid-template-columns:1fr;}
   .testi-grid{grid-template-columns:1fr;}
@@ -974,8 +974,20 @@ function paper(color, small, tpl) {
   const raw = tpl ? (tpl.name || '') : '';
   const parts = raw.split(' — ');
   const prof  = parts[0] || 'Profissional';
+  const nm    = prof.split(' ').slice(0,2).join(' ');
   const style = (parts[1] || 'moderno').toLowerCase();
-  const s = small ? 0.55 : 1;
+  const s = small ? 0.62 : 1;
+  const L = (w='80%', h=2, clr='#CBD5E1') =>
+    `<div style="height:${h*s}px;background:${clr};border-radius:1px;width:${w};margin-bottom:${2*s}px;flex-shrink:0;"></div>`;
+  const SEC = (txt) =>
+    `<div style="font-size:${4.5*s}px;font-weight:700;color:${c};text-transform:uppercase;letter-spacing:.8px;margin:${5*s}px 0 ${2.5*s}px;border-left:${2*s}px solid ${c};padding-left:${3*s}px;">${txt}</div>`;
+  const BAR = (pct, bc=c) =>
+    `<div style="height:${2.5*s}px;background:#E2E8F0;border-radius:2px;margin-bottom:${2.5*s}px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${bc};border-radius:2px;"></div></div>`;
+  const TAG = (txt) =>
+    `<span style="display:inline-block;background:${c}18;color:${c};font-size:${3.5*s}px;font-weight:600;padding:${1.5*s}px ${4*s}px;border-radius:${3*s}px;margin:${1.5*s}px ${1.5*s}px 0 0;">${txt}</span>`;
+  const AVT = (sz=22, bg2=c) =>
+    `<div style="width:${sz*s}px;height:${sz*s}px;border-radius:50%;background:${bg2};display:flex;align-items:center;justify-content:center;font-size:${sz*0.42*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>`;
+  let inner = '';
   const line  = (w, h=2, clr='#E2E8F0', r=1) =>
     `<div style="height:${h*s}px;background:${clr};border-radius:${r}px;width:${w};margin-bottom:${1.5*s}px;"></div>`;
   const sec   = (txt, clr) =>
@@ -984,78 +996,140 @@ function paper(color, small, tpl) {
 
   let inner = '';
 
-  if (style === 'minimalista' || style === 'clean') {
-    inner = `
-      <div style="border-top:${2*s}px solid ${c};padding-top:${4*s}px;margin-bottom:${3*s}px;">
-        <div style="font-size:${6*s}px;font-weight:800;color:#1e293b;">${prof.split(' ').slice(0,2).join(' ')}</div>
-        <div style="font-size:${4*s}px;color:${c};margin-top:${1*s}px;">${prof}</div>
+  if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
+    inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
+      <div style="width:33%;background:${c};padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
+        ${AVT(20,'rgba(255,255,255,.25)')}
+        <div style="height:${2.5*s}px;background:rgba(255,255,255,.8);border-radius:1px;width:80%;margin:${4*s}px 0 ${1.5*s}px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.45);border-radius:1px;width:60%;margin-bottom:${5*s}px;"></div>
+        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin-bottom:${4*s}px;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">SKILLS</div>
+        ${BAR(85,'rgba(255,255,255,.8)')}${BAR(70,'rgba(255,255,255,.7)')}${BAR(60,'rgba(255,255,255,.6)')}${BAR(80,'rgba(255,255,255,.75)')}
+        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin:${3*s}px 0;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
+        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
       </div>
-      <div style="font-size:${3.5*s}px;color:#94a3b8;margin-bottom:${4*s}px;">${dot(4)}</div>
-      ${sec('Experiência','#94a3b8')}${line('85%',2.5,'#334155')}${line('65%')}${line('75%')}${line('55%')}
-      ${sec('Formação','#94a3b8')}${line('70%',2.5,'#334155')}${line('50%')}
-      ${sec('Competências','#94a3b8')}
-      <div style="display:flex;flex-wrap:wrap;gap:${2*s}px;">${['','','',''].map((_,i)=>`<span style="background:${bg};border-radius:2px;padding:${1*s}px ${3*s}px;font-size:${3*s}px;color:${c};">skill</span>`).join('')}</div>`;
+      <div style="flex:1;padding:${7*s}px ${5*s}px;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.5*s}px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-bottom:${4*s}px;">${prof}</div>
+        <div style="height:${1*s}px;background:#E2E8F0;margin-bottom:${2*s}px;"></div>
+        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
+        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}
+        ${SEC('CERTIFICAÇÕES')}${L('65%')}${L('50%')}
+      </div></div>`;
 
-  } else if (style === 'executivo' || style === 'bold') {
-    inner = `
-      <div style="background:${c};margin:${-6*s}px ${-6*s}px ${4*s}px;padding:${6*s}px;height:${28*s}px;display:flex;flex-direction:column;justify-content:flex-end;">
-        <div style="font-size:${6*s}px;font-weight:800;color:#fff;">${prof.split(' ').slice(0,2).join(' ')}</div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.8);margin-top:${1*s}px;">${prof}</div>
-        <div style="font-size:${3*s}px;color:rgba(255,255,255,.6);margin-top:${2*s}px;">${dot(3)}</div>
+  } else if (['executivo','bold'].includes(style)) {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${6*s}px;overflow:hidden;">
+      <div style="background:${c};padding:${8*s}px ${7*s}px ${6*s}px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:${5*s}px;">
+          ${AVT(22,'rgba(255,255,255,.2)')}
+          <div><div style="font-size:${8.5*s}px;font-weight:800;color:#fff;line-height:1.1;">${nm}</div>
+          <div style="font-size:${4.5*s}px;color:rgba(255,255,255,.75);margin-top:${1.5*s}px;">${prof}</div></div>
+        </div>
+        <div style="display:flex;gap:${5*s}px;margin-top:${4*s}px;">
+          <div style="height:${1.5*s}px;background:rgba(255,255,255,.4);flex:1;border-radius:1px;"></div>
+          <div style="height:${1.5*s}px;background:rgba(255,255,255,.25);flex:1;border-radius:1px;"></div>
+          <div style="height:${1.5*s}px;background:rgba(255,255,255,.15);flex:1;border-radius:1px;"></div>
+        </div>
       </div>
-      ${sec('Experiência',c)}${line('90%',2.5,'#334155')}${line('70%')}${line('80%')}
-      ${sec('Formação',c)}${line('65%',2.5,'#334155')}${line('50%')}
-      ${sec('Competências',c)}${line('45%')}${line('60%')}`;
+      <div style="flex:1;padding:${5*s}px ${7*s}px;display:flex;gap:${6*s}px;overflow:hidden;">
+        <div style="flex:3;">${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('60%')}
+        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}</div>
+        <div style="flex:2;">${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(60)}${BAR(85)}
+        ${SEC('IDIOMAS')}${L('80%',1.5,'#334155')}${L('65%')}${L('50%')}</div>
+      </div></div>`;
+
+  } else if (['minimalista','clean'].includes(style)) {
+    inner = `<div style="display:flex;flex-direction:column;padding:${7*s}px;overflow:hidden;">
+      <div style="border-bottom:${2*s}px solid ${c};padding-bottom:${5*s}px;margin-bottom:${4*s}px;">
+        <div style="font-size:${9*s}px;font-weight:800;color:#0f172a;line-height:1.1;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-top:${2*s}px;">${prof}</div>
+        <div style="display:flex;gap:${4*s}px;margin-top:${3*s}px;">
+          ${L(`${18*s}px`,1.5,'#94a3b8')}${L(`${14*s}px`,1.5,'#94a3b8')}${L(`${16*s}px`,1.5,'#94a3b8')}
+        </div>
+      </div>
+      <div style="display:flex;gap:${6*s}px;">
+        <div style="flex:3;">${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}${L('75%')}
+        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}${L('70%')}</div>
+        <div style="flex:2;">${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(85)}${BAR(60)}${BAR(70)}
+        ${SEC('IDIOMAS')}<div>${TAG('PT')}${TAG('EN')}${TAG('FR')}</div></div>
+      </div></div>`;
 
   } else if (style === 'criativo') {
-    inner = `
-      <div style="display:flex;gap:${3*s}px;margin-bottom:${3*s}px;">
-        <div style="width:${18*s}px;height:${18*s}px;border-radius:50%;background:${c};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:${7*s}px;color:#fff;font-weight:800;">${(prof[0]||'P').toUpperCase()}</div>
-        <div style="flex:1;">
-          <div style="font-size:${5.5*s}px;font-weight:800;color:#1e293b;">${prof.split(' ').slice(0,2).join(' ')}</div>
-          <div style="font-size:${3.5*s}px;color:${c};">${prof}</div>
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${6*s}px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,${c},${c}bb);padding:${7*s}px;display:flex;align-items:center;gap:${5*s}px;flex-shrink:0;">
+        <div style="width:${26*s}px;height:${26*s}px;border-radius:50%;border:${2*s}px solid rgba(255,255,255,.6);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:${10*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>
+        <div><div style="font-size:${7.5*s}px;font-weight:800;color:#fff;">${nm}</div>
+        <div style="font-size:${4*s}px;color:rgba(255,255,255,.8);margin-top:${1*s}px;">${prof}</div></div>
+      </div>
+      <div style="flex:1;padding:${5*s}px ${6*s}px;display:grid;grid-template-columns:1fr 1fr;gap:${5*s}px;overflow:hidden;">
+        <div>${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
+        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}</div>
+        <div>${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(60)}${BAR(80)}
+        ${SEC('IDIOMAS')}${L('75%',1.5,'#334155')}${L('60%')}${L('50%')}</div>
+      </div></div>`;
+
+  } else if (style === 'elegante') {
+    inner = `<div style="display:flex;flex-direction:column;padding:${6*s}px ${7*s}px;overflow:hidden;">
+      <div style="text-align:center;margin-bottom:${4*s}px;padding-bottom:${4*s}px;border-bottom:1px solid #E2E8F0;">
+        <div style="width:${20*s}px;height:${2.5*s}px;background:${c};border-radius:1px;margin:0 auto ${3*s}px;"></div>
+        <div style="font-size:${8.5*s}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-top:${1.5*s}px;">${prof}</div>
+        <div style="display:flex;justify-content:center;gap:${4*s}px;margin-top:${2.5*s}px;">
+          ${L(`${15*s}px`,1.5,'#94a3b8')}${L(`${12*s}px`,1.5,'#94a3b8')}${L(`${15*s}px`,1.5,'#94a3b8')}
         </div>
       </div>
-      <div style="height:${1.5*s}px;background:linear-gradient(90deg,${c},transparent);margin-bottom:${4*s}px;"></div>
-      ${sec('Experiência',c)}${line('80%',2.5,'#334155')}${line('65%')}${line('70%')}
-      ${sec('Competências',c)}
-      <div style="display:flex;flex-wrap:wrap;gap:${2*s}px;">${['','',''].map(()=>`<span style="background:${c}22;border-radius:10px;padding:${1*s}px ${4*s}px;font-size:${3*s}px;color:${c};">skill</span>`).join('')}</div>`;
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:${6*s}px;">
+        <div>${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
+        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}</div>
+        <div>${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(85)}${BAR(60)}
+        ${SEC('IDIOMAS')}${L('80%',1.5,'#334155')}${L('65%')}${L('50%')}</div>
+      </div></div>`;
 
-  } else if (style === 'elegante' || style === 'compacto') {
-    inner = `
-      <div style="text-align:center;border-bottom:${1*s}px solid ${c};padding-bottom:${3*s}px;margin-bottom:${3*s}px;">
-        <div style="font-size:${6*s}px;font-weight:800;color:#1e293b;">${prof.split(' ').slice(0,2).join(' ')}</div>
-        <div style="font-size:${3.5*s}px;color:${c};margin-top:${1*s}px;letter-spacing:.5px;">${prof.toUpperCase()}</div>
-        <div style="font-size:${3*s}px;color:#94a3b8;margin-top:${2*s}px;">${dot(4)}</div>
+  } else if (style === 'compacto') {
+    inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
+      <div style="width:38%;background:#1e293b;padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
+        ${AVT(22,c)}
+        <div style="height:${2.5*s}px;background:rgba(255,255,255,.7);width:85%;margin:${4*s}px 0 ${1.5*s}px;border-radius:1px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.4);width:65%;margin-bottom:${4*s}px;border-radius:1px;"></div>
+        <div style="height:${1.5*s}px;background:${c};width:100%;margin-bottom:${3*s}px;border-radius:1px;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">COMPETÊNCIAS</div>
+        ${BAR(90,c)}${BAR(75,c)}${BAR(60,c)}${BAR(80,c)}${BAR(50,c)}
+        <div style="height:${1.5*s}px;background:${c};width:100%;margin:${3*s}px 0;border-radius:1px;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
+        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:${3*s}px;">
-        <div>${sec('Exp.',c)}${line('90%',2,'#334155')}${line('75%')}${line('80%')}${line('60%')}</div>
-        <div>${sec('Skills',c)}${line('85%',2,'#334155')}${line('70%')}${line('75%')}${line('55%')}</div>
-      </div>`;
+      <div style="flex:1;padding:${7*s}px ${5*s}px;">
+        <div style="font-size:${7.5*s}px;font-weight:800;color:#0f172a;line-height:1.1;">${nm}</div>
+        <div style="font-size:${4*s}px;color:${c};font-weight:600;margin:${1.5*s}px 0 ${4*s}px;">${prof}</div>
+        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('60%')}
+        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('55%')}
+        ${SEC('REFERÊNCIAS')}${L('70%')}${L('55%')}
+      </div></div>`;
 
   } else {
-    // Moderno / Profissional / Clássico (default) — sidebar layout
-    inner = `
-      <div style="display:flex;gap:0;height:100%;margin:${-6*s}px;">
-        <div style="width:30%;background:${c};padding:${5*s}px ${3*s}px;display:flex;flex-direction:column;gap:${2*s}px;">
-          <div style="width:${14*s}px;height:${14*s}px;border-radius:50%;background:rgba(255,255,255,.3);margin:0 auto ${3*s}px;"></div>
-          ${line('90%',2,'rgba(255,255,255,.5)')}${line('70%',1.5,'rgba(255,255,255,.3)')}
-          <div style="height:${1*s}px;background:rgba(255,255,255,.2);margin:${2*s}px 0;"></div>
-          ${line('80%',2,'rgba(255,255,255,.5)')}${line('60%',1.5,'rgba(255,255,255,.3)')}${line('70%',1.5,'rgba(255,255,255,.3)')}
-          <div style="height:${1*s}px;background:rgba(255,255,255,.2);margin:${2*s}px 0;"></div>
-          ${line('75%',2,'rgba(255,255,255,.5)')}${line('55%',1.5,'rgba(255,255,255,.3)')}
-        </div>
-        <div style="flex:1;padding:${5*s}px ${4*s}px;">
-          <div style="font-size:${5.5*s}px;font-weight:800;color:#1e293b;margin-bottom:${1*s}px;">${prof.split(' ').slice(0,2).join(' ')}</div>
-          <div style="font-size:${3.5*s}px;color:${c};margin-bottom:${3*s}px;">${prof}</div>
-          ${sec('Experiência',c)}${line('90%',2.5,'#334155')}${line('75%')}${line('85%')}${line('60%')}
-          ${sec('Formação',c)}${line('80%',2.5,'#334155')}${line('55%')}
-        </div>
-      </div>`;
+    inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
+      <div style="width:33%;background:${c};padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
+        ${AVT(20,'rgba(255,255,255,.25)')}
+        <div style="height:${2*s}px;background:rgba(255,255,255,.8);width:80%;margin:${4*s}px 0 ${1.5*s}px;border-radius:1px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.45);width:60%;margin-bottom:${5*s}px;border-radius:1px;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;align-self:flex-start;margin-bottom:${2*s}px;">SKILLS</div>
+        ${BAR(85,'rgba(255,255,255,.8)')}${BAR(70,'rgba(255,255,255,.7)')}${BAR(60,'rgba(255,255,255,.6)')}
+        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin:${3*s}px 0;"></div>
+        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
+        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
+      </div>
+      <div style="flex:1;padding:${7*s}px ${5*s}px;overflow:hidden;">
+        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.5*s}px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-bottom:${4*s}px;">${prof}</div>
+        <div style="height:${1*s}px;background:#E2E8F0;margin-bottom:${2*s}px;"></div>
+        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
+        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}
+      </div></div>`;
   }
 
   return `<div style="background:${bg};width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-    <div style="width:${small?72:76}%;height:${small?82:86}%;background:#fff;border-radius:3px;box-shadow:0 2px 12px rgba(0,0,0,.12);overflow:hidden;padding:${6*s}px;box-sizing:border-box;position:relative;">
+    <div style="width:88%;height:90%;background:#fff;border-radius:2px;box-shadow:0 4px 20px rgba(0,0,0,.14);overflow:hidden;padding:${6*s}px;box-sizing:border-box;position:relative;">
       ${inner}
     </div></div>`;
 }
