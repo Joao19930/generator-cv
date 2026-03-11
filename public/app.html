@@ -213,6 +213,16 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .jb-apply-email:hover{background:#4f46e5;}
 .jb-dates{display:flex;flex-direction:column;gap:3px;}
 .jb-deadline{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;}
+.jb-desc{font-size:11.5px;color:var(--t3);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.jb-actions{display:flex;align-items:center;gap:6px;}
+.jb-share-wrap{position:relative;}
+.jb-share-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);transition:all .2s;flex-shrink:0;}
+.jb-share-btn:hover{border-color:var(--blue-m);color:var(--blue);background:#EFF6FF;}
+.jb-share-menu{display:none;position:absolute;bottom:38px;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);padding:6px;min-width:170px;z-index:200;}
+.jb-share-menu.open{display:block;}
+.jb-share-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:background .15s;text-decoration:none;}
+.jb-share-item:hover{background:var(--bg);}
+.jb-share-item svg{flex-shrink:0;}
 .jb-deadline.active{color:var(--green);}
 .jb-deadline.soon{color:#F59E0B;}
 .jb-deadline.expired{color:var(--red);}
@@ -1382,6 +1392,7 @@ function renderJobs(list) {
         </div>
       </div>
       <div class="jb-tags">${catTag}${locTag}${onlineTag}</div>
+      ${j.Description||j.description ? `<div class="jb-desc">${(j.Description||j.description||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
       <div class="jb-foot">
         <div class="jb-dates">
           <div class="jb-date">
@@ -1410,7 +1421,37 @@ function renderJobs(list) {
             return html;
           })()}
         </div>
-        ${applyBtn}
+        <div class="jb-actions">
+          ${applyBtn}
+          <div class="jb-share-wrap">
+            <button class="jb-share-btn" title="Partilhar vaga" onclick="event.stopPropagation();toggleShareMenu(this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+            <div class="jb-share-menu">
+              <a class="jb-share-item" onclick="event.stopPropagation();shareJobTo('wa','${encodeURIComponent(j.Title+' — '+(j.Company||''))}','${encodeURIComponent(j.Url||window.location.href)}')" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg>
+                WhatsApp
+              </a>
+              <a class="jb-share-item" onclick="event.stopPropagation();shareJobTo('linkedin','${encodeURIComponent(j.Title+' — '+(j.Company||''))}','${encodeURIComponent(j.Url||window.location.href)}')" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn
+              </a>
+              <a class="jb-share-item" onclick="event.stopPropagation();shareJobTo('fb','${encodeURIComponent(j.Title+' — '+(j.Company||''))}','${encodeURIComponent(j.Url||window.location.href)}')" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                Facebook
+              </a>
+              <a class="jb-share-item" onclick="event.stopPropagation();shareJobTo('x','${encodeURIComponent(j.Title+' — '+(j.Company||''))}','${encodeURIComponent(j.Url||window.location.href)}')" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.727-8.836L1.254 2.25H8.08l4.258 5.63 5.906-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X (Twitter)
+              </a>
+              <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+              <a class="jb-share-item" onclick="event.stopPropagation();shareJobTo('copy','${encodeURIComponent(j.Title+' — '+(j.Company||''))}','${encodeURIComponent(j.Url||window.location.href)}')" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copiar link
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1433,6 +1474,41 @@ function sortJobs(by) {
   if (by === 'company') list.sort((a,b) => (a.Company||'').localeCompare(b.Company||''));
   if (by === 'date')    list.sort((a,b) => new Date(b.JobDate||0) - new Date(a.JobDate||0));
   renderJobs(list);
+}
+
+function toggleShareMenu(btn) {
+  const menu = btn.nextElementSibling;
+  const isOpen = menu.classList.contains('open');
+  // close all open menus
+  document.querySelectorAll('.jb-share-menu.open').forEach(m => m.classList.remove('open'));
+  if (!isOpen) menu.classList.add('open');
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.jb-share-menu.open').forEach(m => m.classList.remove('open'));
+});
+
+function shareJobTo(platform, title, url) {
+  const t = decodeURIComponent(title);
+  const u = decodeURIComponent(url);
+  const text = `${t}\n${u}`;
+  const urls = {
+    wa:       `https://wa.me/?text=${encodeURIComponent(text)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}`,
+    fb:       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`,
+    x:        `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`
+  };
+  if (platform === 'copy') {
+    navigator.clipboard.writeText(u).then(() => {
+      const t = document.createElement('div');
+      t.textContent = '✓ Link copiado!';
+      Object.assign(t.style, {position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',background:'#1e293b',color:'#fff',padding:'8px 18px',borderRadius:'20px',fontSize:'13px',fontWeight:'600',zIndex:'9999',opacity:'1',transition:'opacity .4s'});
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 400); }, 2000);
+    });
+  } else {
+    window.open(urls[platform], '_blank', 'width=600,height=500');
+  }
+  document.querySelectorAll('.jb-share-menu.open').forEach(m => m.classList.remove('open'));
 }
 
 function renderOverviewJobs() {
