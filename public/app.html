@@ -987,151 +987,312 @@ function paper(color, small, tpl) {
   const nm    = prof.split(' ').slice(0,2).join(' ');
   const style = (parts[1] || 'moderno').toLowerCase();
   const s = small ? 0.62 : 1;
-  const L = (w='80%', h=2, clr='#CBD5E1') =>
-    `<div style="height:${h*s}px;background:${clr};border-radius:1px;width:${w};margin-bottom:${2*s}px;flex-shrink:0;"></div>`;
-  const SEC = (txt) =>
-    `<div style="font-size:${4.5*s}px;font-weight:700;color:${c};text-transform:uppercase;letter-spacing:.8px;margin:${5*s}px 0 ${2.5*s}px;border-left:${2*s}px solid ${c};padding-left:${3*s}px;">${txt}</div>`;
-  const BAR = (pct, bc=c) =>
-    `<div style="height:${2.5*s}px;background:#E2E8F0;border-radius:2px;margin-bottom:${2.5*s}px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${bc};border-radius:2px;"></div></div>`;
+
+  /* ── base helpers ── */
+  const L = (w='80%', h=1.8, clr='#CBD5E1') =>
+    `<div style="height:${h*s}px;background:${clr};border-radius:1px;width:${w};margin-bottom:${1.8*s}px;flex-shrink:0;"></div>`;
+  const LW = (w='80%', h=1.8, clr='#CBD5E1') =>  /* white-bg variant */
+    `<div style="height:${h*s}px;background:${clr};border-radius:1px;width:${w};margin-bottom:${1.8*s}px;flex-shrink:0;"></div>`;
+  const BAR = (pct, bc=c, bg2='#E2E8F0') =>
+    `<div style="height:${2.5*s}px;background:${bg2};border-radius:2px;margin-bottom:${2.5*s}px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${bc};border-radius:2px;"></div></div>`;
   const TAG = (txt) =>
-    `<span style="display:inline-block;background:${c}18;color:${c};font-size:${3.5*s}px;font-weight:600;padding:${1.5*s}px ${4*s}px;border-radius:${3*s}px;margin:${1.5*s}px ${1.5*s}px 0 0;">${txt}</span>`;
+    `<span style="display:inline-block;background:${c}22;color:${c};font-size:${3.2*s}px;font-weight:700;padding:${1.2*s}px ${3.5*s}px;border-radius:${3*s}px;margin:${1*s}px ${1*s}px 0 0;">${txt}</span>`;
   const AVT = (sz=22, bg2=c) =>
     `<div style="width:${sz*s}px;height:${sz*s}px;border-radius:50%;background:${bg2};display:flex;align-items:center;justify-content:center;font-size:${sz*0.42*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>`;
+  const SEC = (txt, tc=c, brd=true) =>
+    `<div style="font-size:${4*s}px;font-weight:800;color:${tc};text-transform:uppercase;letter-spacing:.9px;margin:${5*s}px 0 ${2.5*s}px;${brd?`border-left:${2*s}px solid ${tc};padding-left:${3*s}px`:''}">${txt}</div>`;
+  const SEC_LINE = (txt, tc=c) =>
+    `<div style="display:flex;align-items:center;gap:${3*s}px;margin:${5*s}px 0 ${2.5*s}px;"><div style="font-size:${4*s}px;font-weight:800;color:${tc};text-transform:uppercase;letter-spacing:.9px;white-space:nowrap;">${txt}</div><div style="flex:1;height:1px;background:${tc}33;"></div></div>`;
+  const SEC_CTR = (txt, tc=c) =>
+    `<div style="font-size:${4*s}px;font-weight:800;color:${tc};text-transform:uppercase;letter-spacing:1px;text-align:center;margin:${5*s}px 0 ${2.5*s}px;">${txt}</div>`;
+  /* job entry: bold title + subtitle + 2-3 description lines */
+  const ENTRY = (tw='85%', sw='58%', d1='88%', d2='72%', d3='') =>
+    `<div style="margin-bottom:${4*s}px;">`+
+    `<div style="height:${2.2*s}px;background:#1e293b;border-radius:1px;width:${tw};margin-bottom:${1.5*s}px;"></div>`+
+    `<div style="height:${1.6*s}px;background:#94a3b8;border-radius:1px;width:${sw};margin-bottom:${1.8*s}px;"></div>`+
+    `<div style="height:${1.5*s}px;background:#cbd5e1;border-radius:1px;width:${d1};margin-bottom:${1.5*s}px;"></div>`+
+    `<div style="height:${1.5*s}px;background:#cbd5e1;border-radius:1px;width:${d2};margin-bottom:${1.5*s}px;"></div>`+
+    (d3 ? `<div style="height:${1.5*s}px;background:#cbd5e1;border-radius:1px;width:${d3};margin-bottom:${1.5*s}px;"></div>` : '')+
+    `</div>`;
+  /* skill row with label (light bg) */
+  const SKLB = (pct, bc=c) =>
+    `<div style="margin-bottom:${2.8*s}px;">`+
+    `<div style="display:flex;justify-content:space-between;margin-bottom:${1*s}px;">`+
+    `<div style="height:${1.5*s}px;background:#64748b;border-radius:1px;width:${30+Math.random()*20|0}%;"></div>`+
+    `<div style="height:${1.5*s}px;background:#cbd5e1;border-radius:1px;width:15%;"></div></div>`+
+    `<div style="height:${2*s}px;background:#E2E8F0;border-radius:2px;overflow:hidden;">`+
+    `<div style="height:100%;width:${pct}%;background:${bc};border-radius:2px;"></div></div></div>`;
+  /* skill row on dark/colored sidebar */
+  const SKLS = (pct, bc='rgba(255,255,255,.8)') =>
+    `<div style="margin-bottom:${2.8*s}px;">`+
+    `<div style="display:flex;justify-content:space-between;margin-bottom:${1*s}px;">`+
+    `<div style="height:${1.5*s}px;background:rgba(255,255,255,.65);border-radius:1px;width:${30+Math.random()*20|0}%;"></div>`+
+    `<div style="height:${1.5*s}px;background:rgba(255,255,255,.25);border-radius:1px;width:15%;"></div></div>`+
+    `<div style="height:${2*s}px;background:rgba(255,255,255,.18);border-radius:2px;overflow:hidden;">`+
+    `<div style="height:100%;width:${pct}%;background:${bc};border-radius:2px;"></div></div></div>`;
+  /* contact icon row */
+  const CONTACT = (clr='rgba(255,255,255,.55)', w='78%') =>
+    `<div style="display:flex;align-items:center;gap:${2.5*s}px;margin-bottom:${2*s}px;">`+
+    `<div style="width:${4*s}px;height:${4*s}px;border-radius:50%;background:${clr};flex-shrink:0;"></div>`+
+    `<div style="height:${1.5*s}px;background:${clr};border-radius:1px;width:${w};"></div></div>`;
 
+  let inner = '';
+
+  /* ══ 1. MODERNO / PROFISSIONAL / CLÁSSICO ══ */
   if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
     inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
-      <div style="width:33%;background:${c};padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
+      <!-- sidebar -->
+      <div style="width:32%;background:${c};padding:${6*s}px ${4*s}px ${6*s}px;display:flex;flex-direction:column;align-items:center;overflow:hidden;flex-shrink:0;">
         ${AVT(20,'rgba(255,255,255,.25)')}
-        <div style="height:${2.5*s}px;background:rgba(255,255,255,.8);border-radius:1px;width:80%;margin:${4*s}px 0 ${1.5*s}px;"></div>
-        <div style="height:${1.5*s}px;background:rgba(255,255,255,.45);border-radius:1px;width:60%;margin-bottom:${5*s}px;"></div>
-        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin-bottom:${4*s}px;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">SKILLS</div>
-        ${BAR(85,'rgba(255,255,255,.8)')}${BAR(70,'rgba(255,255,255,.7)')}${BAR(60,'rgba(255,255,255,.6)')}${BAR(80,'rgba(255,255,255,.75)')}
-        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin:${3*s}px 0;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
-        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
+        <div style="height:${2.2*s}px;background:rgba(255,255,255,.85);border-radius:1px;width:80%;margin:${3*s}px 0 ${1.2*s}px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.5);border-radius:1px;width:62%;margin-bottom:${3.5*s}px;"></div>
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin-bottom:${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2*s}px;font-weight:700;">CONTACTO</div>
+        ${CONTACT()}${CONTACT('rgba(255,255,255,.5)','65%')}${CONTACT('rgba(255,255,255,.45)','72%')}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${2.5*s}px 0 ${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">COMPETÊNCIAS</div>
+        ${SKLS(88)}${SKLS(76)}${SKLS(70)}${SKLS(82)}${SKLS(64)}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${2*s}px 0 ${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">IDIOMAS</div>
+        ${SKLS(100)}${SKLS(82)}${SKLS(48)}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${2*s}px 0 ${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">INTERESSES</div>
+        ${['75%','60%','68%'].map(w=>`<div style="height:${1.5*s}px;background:rgba(255,255,255,.35);border-radius:1px;width:${w};margin-bottom:${2*s}px;"></div>`).join('')}
       </div>
-      <div style="flex:1;padding:${7*s}px ${5*s}px;display:flex;flex-direction:column;overflow:hidden;">
-        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.5*s}px;">${nm}</div>
-        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-bottom:${4*s}px;">${prof}</div>
-        <div style="height:${1*s}px;background:#E2E8F0;margin-bottom:${2*s}px;"></div>
-        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
-        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}
-        ${SEC('CERTIFICAÇÕES')}${L('65%')}${L('50%')}
-      </div></div>`;
+      <!-- main -->
+      <div style="flex:1;padding:${6*s}px ${5*s}px;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.2*s}px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:700;margin-bottom:${3*s}px;">${prof}</div>
+        <!-- perfil -->
+        <div style="margin-bottom:${2*s}px;">${['95%','88%','80%','60%'].map(w=>L(w,1.4,'#64748b')).join('')}</div>
+        <div style="height:1px;background:#E2E8F0;margin-bottom:${1*s}px;"></div>
+        ${SEC('EXPERIÊNCIA')}
+        ${ENTRY('82%','55%','90%','74%','62%')}
+        ${ENTRY('76%','52%','86%','70%','58%')}
+        ${ENTRY('70%','50%','82%','66%')}
+        ${SEC('FORMAÇÃO')}
+        ${ENTRY('78%','58%','65%')}
+        ${ENTRY('70%','54%')}
+        ${SEC('CERTIFICAÇÕES')}
+        ${L('68%',1.8,'#334155')}${L('74%',1.8,'#334155')}${L('56%',1.8,'#334155')}
+      </div>
+    </div>`;
 
+  /* ══ 2. EXECUTIVO / BOLD ══ */
   } else if (['executivo','bold'].includes(style)) {
     inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${6*s}px;overflow:hidden;">
-      <div style="background:${c};padding:${8*s}px ${7*s}px ${6*s}px;flex-shrink:0;">
+      <!-- header -->
+      <div style="background:${c};padding:${7*s}px ${7*s}px ${5*s}px;flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:${5*s}px;">
           ${AVT(22,'rgba(255,255,255,.2)')}
-          <div><div style="font-size:${8.5*s}px;font-weight:800;color:#fff;line-height:1.1;">${nm}</div>
-          <div style="font-size:${4.5*s}px;color:rgba(255,255,255,.75);margin-top:${1.5*s}px;">${prof}</div></div>
+          <div style="flex:1;">
+            <div style="font-size:${8.5*s}px;font-weight:800;color:#fff;line-height:1.1;">${nm}</div>
+            <div style="font-size:${4.5*s}px;color:rgba(255,255,255,.8);margin-top:${1.5*s}px;">${prof}</div>
+          </div>
         </div>
-        <div style="display:flex;gap:${5*s}px;margin-top:${4*s}px;">
-          <div style="height:${1.5*s}px;background:rgba(255,255,255,.4);flex:1;border-radius:1px;"></div>
-          <div style="height:${1.5*s}px;background:rgba(255,255,255,.25);flex:1;border-radius:1px;"></div>
-          <div style="height:${1.5*s}px;background:rgba(255,255,255,.15);flex:1;border-radius:1px;"></div>
+        <div style="display:flex;gap:${6*s}px;margin-top:${4*s}px;">
+          ${CONTACT('rgba(255,255,255,.65)','55%')}${CONTACT('rgba(255,255,255,.5)','50%')}${CONTACT('rgba(255,255,255,.5)','52%')}
+        </div>
+        <!-- summary lines in header -->
+        <div style="margin-top:${2*s}px;">${['92%','80%','65%'].map(w=>`<div style="height:${1.4*s}px;background:rgba(255,255,255,.4);border-radius:1px;width:${w};margin-bottom:${1.5*s}px;"></div>`).join('')}</div>
+      </div>
+      <!-- body 2-col -->
+      <div style="flex:1;padding:${4*s}px ${6*s}px;display:flex;gap:${6*s}px;overflow:hidden;">
+        <div style="flex:3;overflow:hidden;">
+          ${SEC('EXPERIÊNCIA')}
+          ${ENTRY('88%','58%','92%','76%','64%')}
+          ${ENTRY('80%','54%','86%','72%','60%')}
+          ${ENTRY('74%','50%','82%','68%')}
+          ${SEC('FORMAÇÃO')}
+          ${ENTRY('80%','58%','66%')}
+          ${ENTRY('72%','54%')}
+        </div>
+        <div style="flex:2;overflow:hidden;">
+          ${SEC('COMPETÊNCIAS')}
+          ${SKLB(90)}${SKLB(78)}${SKLB(72)}${SKLB(85)}${SKLB(65)}
+          ${SEC('IDIOMAS')}
+          ${SKLB(100)}${SKLB(84)}${SKLB(52)}
+          ${SEC('CERTIFICAÇÕES')}
+          ${L('72%',1.8,'#334155')}${L('62%',1.8,'#334155')}${L('80%',1.8,'#334155')}
         </div>
       </div>
-      <div style="flex:1;padding:${5*s}px ${7*s}px;display:flex;gap:${6*s}px;overflow:hidden;">
-        <div style="flex:3;">${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('60%')}
-        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}</div>
-        <div style="flex:2;">${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(60)}${BAR(85)}
-        ${SEC('IDIOMAS')}${L('80%',1.5,'#334155')}${L('65%')}${L('50%')}</div>
-      </div></div>`;
+    </div>`;
 
+  /* ══ 3. MINIMALISTA / CLEAN ══ */
   } else if (['minimalista','clean'].includes(style)) {
-    inner = `<div style="display:flex;flex-direction:column;padding:${7*s}px;overflow:hidden;">
-      <div style="border-bottom:${2*s}px solid ${c};padding-bottom:${5*s}px;margin-bottom:${4*s}px;">
-        <div style="font-size:${9*s}px;font-weight:800;color:#0f172a;line-height:1.1;">${nm}</div>
-        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-top:${2*s}px;">${prof}</div>
-        <div style="display:flex;gap:${4*s}px;margin-top:${3*s}px;">
-          ${L(`${18*s}px`,1.5,'#94a3b8')}${L(`${14*s}px`,1.5,'#94a3b8')}${L(`${16*s}px`,1.5,'#94a3b8')}
+    inner = `<div style="display:flex;flex-direction:column;height:100%;padding:${6*s}px;box-sizing:border-box;overflow:hidden;">
+      <!-- header limpo -->
+      <div style="padding-bottom:${4*s}px;margin-bottom:${3*s}px;border-bottom:${2*s}px solid ${c};">
+        <div style="font-size:${9*s}px;font-weight:800;color:#0f172a;letter-spacing:-.5px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:700;margin-top:${1.5*s}px;margin-bottom:${2.5*s}px;">${prof}</div>
+        <div style="display:flex;gap:${5*s}px;">${CONTACT('#64748b','55%')}${CONTACT('#94a3b8','50%')}${CONTACT('#94a3b8','52%')}</div>
+      </div>
+      <!-- summary -->
+      <div style="margin-bottom:${3*s}px;">${['96%','88%','74%'].map(w=>L(w,1.5,'#64748b')).join('')}</div>
+      <!-- 2-col body -->
+      <div style="display:flex;gap:${7*s}px;flex:1;overflow:hidden;">
+        <div style="flex:3;overflow:hidden;">
+          ${SEC_LINE('EXPERIÊNCIA')}
+          ${ENTRY('84%','56%','90%','74%','62%')}
+          ${ENTRY('78%','52%','86%','70%','58%')}
+          ${ENTRY('72%','50%','80%','66%')}
+          ${SEC_LINE('FORMAÇÃO')}
+          ${ENTRY('80%','56%','66%')}
+          ${ENTRY('72%','52%')}
+        </div>
+        <div style="flex:2;overflow:hidden;">
+          ${SEC_LINE('COMPETÊNCIAS')}
+          ${SKLB(90)}${SKLB(76)}${SKLB(82)}${SKLB(68)}${SKLB(72)}
+          ${SEC_LINE('IDIOMAS')}
+          ${SKLB(100)}${SKLB(84)}${SKLB(50)}
+          ${SEC_LINE('CERTIFICAÇÕES')}
+          ${L('80%',1.8,'#334155')}${L('68%',1.8,'#334155')}${L('74%',1.8,'#334155')}
         </div>
       </div>
-      <div style="display:flex;gap:${6*s}px;">
-        <div style="flex:3;">${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}${L('75%')}
-        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}${L('70%')}</div>
-        <div style="flex:2;">${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(85)}${BAR(60)}${BAR(70)}
-        ${SEC('IDIOMAS')}<div>${TAG('PT')}${TAG('EN')}${TAG('FR')}</div></div>
-      </div></div>`;
+    </div>`;
 
+  /* ══ 4. CRIATIVO ══ */
   } else if (style === 'criativo') {
     inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${6*s}px;overflow:hidden;">
-      <div style="background:linear-gradient(135deg,${c},${c}bb);padding:${7*s}px;display:flex;align-items:center;gap:${5*s}px;flex-shrink:0;">
-        <div style="width:${26*s}px;height:${26*s}px;border-radius:50%;border:${2*s}px solid rgba(255,255,255,.6);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:${10*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>
-        <div><div style="font-size:${7.5*s}px;font-weight:800;color:#fff;">${nm}</div>
-        <div style="font-size:${4*s}px;color:rgba(255,255,255,.8);margin-top:${1*s}px;">${prof}</div></div>
+      <!-- gradient header -->
+      <div style="background:linear-gradient(135deg,${c} 0%,${c}cc 100%);padding:${6*s}px ${6*s}px ${5*s}px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:${5*s}px;margin-bottom:${3*s}px;">
+          <div style="width:${26*s}px;height:${26*s}px;border-radius:50%;border:${2*s}px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:${10*s}px;font-weight:800;color:#fff;flex-shrink:0;">${(nm[0]||'P').toUpperCase()}</div>
+          <div>
+            <div style="font-size:${7.5*s}px;font-weight:800;color:#fff;line-height:1.1;">${nm}</div>
+            <div style="font-size:${4*s}px;color:rgba(255,255,255,.8);margin-top:${1*s}px;">${prof}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:${5*s}px;">${CONTACT()}${CONTACT('rgba(255,255,255,.5)','52%')}${CONTACT('rgba(255,255,255,.45)','46%')}</div>
+        <div style="margin-top:${2*s}px;">${['90%','78%','60%'].map(w=>`<div style="height:${1.4*s}px;background:rgba(255,255,255,.38);border-radius:1px;width:${w};margin-bottom:${1.5*s}px;"></div>`).join('')}</div>
       </div>
-      <div style="flex:1;padding:${5*s}px ${6*s}px;display:grid;grid-template-columns:1fr 1fr;gap:${5*s}px;overflow:hidden;">
-        <div>${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
-        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}</div>
-        <div>${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(60)}${BAR(80)}
-        ${SEC('IDIOMAS')}${L('75%',1.5,'#334155')}${L('60%')}${L('50%')}</div>
-      </div></div>`;
-
-  } else if (style === 'elegante') {
-    inner = `<div style="display:flex;flex-direction:column;padding:${6*s}px ${7*s}px;overflow:hidden;">
-      <div style="text-align:center;margin-bottom:${4*s}px;padding-bottom:${4*s}px;border-bottom:1px solid #E2E8F0;">
-        <div style="width:${20*s}px;height:${2.5*s}px;background:${c};border-radius:1px;margin:0 auto ${3*s}px;"></div>
-        <div style="font-size:${8.5*s}px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">${nm}</div>
-        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-top:${1.5*s}px;">${prof}</div>
-        <div style="display:flex;justify-content:center;gap:${4*s}px;margin-top:${2.5*s}px;">
-          ${L(`${15*s}px`,1.5,'#94a3b8')}${L(`${12*s}px`,1.5,'#94a3b8')}${L(`${15*s}px`,1.5,'#94a3b8')}
+      <!-- body 2-col -->
+      <div style="flex:1;padding:${4*s}px ${6*s}px;display:grid;grid-template-columns:3fr 2fr;gap:${6*s}px;overflow:hidden;">
+        <div style="overflow:hidden;">
+          ${SEC('EXPERIÊNCIA')}
+          ${ENTRY('84%','56%','90%','74%','62%')}
+          ${ENTRY('78%','52%','84%','70%','56%')}
+          ${ENTRY('72%','50%','80%','66%')}
+          ${SEC('FORMAÇÃO')}
+          ${ENTRY('78%','56%','64%')}
+          ${ENTRY('70%','52%')}
+        </div>
+        <div style="overflow:hidden;">
+          ${SEC('SKILLS')}
+          ${SKLB(90)}${SKLB(76)}${SKLB(82)}${SKLB(68)}${SKLB(72)}
+          ${SEC('IDIOMAS')}
+          ${SKLB(100)}${SKLB(84)}${SKLB(50)}
+          ${SEC('INTERESSES')}
+          <div>${TAG('Design')}${TAG('Tech')}${TAG('Arte')}</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:${6*s}px;">
-        <div>${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
-        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('60%')}</div>
-        <div>${SEC('SKILLS')}${BAR(90)}${BAR(75)}${BAR(85)}${BAR(60)}
-        ${SEC('IDIOMAS')}${L('80%',1.5,'#334155')}${L('65%')}${L('50%')}</div>
-      </div></div>`;
+    </div>`;
 
+  /* ══ 5. ELEGANTE ══ */
+  } else if (style === 'elegante') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;padding:${6*s}px ${6*s}px;box-sizing:border-box;overflow:hidden;">
+      <!-- centered header -->
+      <div style="text-align:center;padding-bottom:${4*s}px;margin-bottom:${3*s}px;border-bottom:1px solid #E2E8F0;">
+        <div style="width:${16*s}px;height:${2*s}px;background:${c};border-radius:1px;margin:0 auto ${3*s}px;"></div>
+        <div style="font-size:${8.5*s}px;font-weight:800;color:#0f172a;letter-spacing:-.5px;margin-bottom:${1.5*s}px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:700;margin-bottom:${2.5*s}px;">${prof}</div>
+        <div style="display:flex;justify-content:center;gap:${5*s}px;">${CONTACT('#94a3b8','48%')}${CONTACT('#94a3b8','44%')}${CONTACT('#94a3b8','48%')}</div>
+        <div style="margin-top:${2*s}px;text-align:left;">${['92%','84%','70%'].map(w=>L(w,1.4,'#64748b')).join('')}</div>
+      </div>
+      <!-- 2-col body -->
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:${6*s}px;flex:1;overflow:hidden;">
+        <div style="overflow:hidden;">
+          ${SEC_CTR('EXPERIÊNCIA')}
+          ${ENTRY('86%','56%','90%','74%','62%')}
+          ${ENTRY('78%','52%','84%','70%','56%')}
+          ${ENTRY('74%','50%','80%','66%')}
+          ${SEC_CTR('FORMAÇÃO')}
+          ${ENTRY('80%','56%','66%')}
+          ${ENTRY('72%','52%')}
+        </div>
+        <div style="overflow:hidden;border-left:1px solid #E2E8F0;padding-left:${5*s}px;">
+          ${SEC_CTR('COMPETÊNCIAS')}
+          ${SKLB(90)}${SKLB(78)}${SKLB(72)}${SKLB(84)}${SKLB(66)}
+          ${SEC_CTR('IDIOMAS')}
+          ${SKLB(100)}${SKLB(82)}${SKLB(50)}
+          ${SEC_CTR('CERTIFICAÇÕES')}
+          ${L('78%',1.8,'#334155')}${L('66%',1.8,'#334155')}${L('72%',1.8,'#334155')}
+        </div>
+      </div>
+    </div>`;
+
+  /* ══ 6. COMPACTO (dark sidebar) ══ */
   } else if (style === 'compacto') {
     inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
-      <div style="width:38%;background:#1e293b;padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
-        ${AVT(22,c)}
-        <div style="height:${2.5*s}px;background:rgba(255,255,255,.7);width:85%;margin:${4*s}px 0 ${1.5*s}px;border-radius:1px;"></div>
-        <div style="height:${1.5*s}px;background:rgba(255,255,255,.4);width:65%;margin-bottom:${4*s}px;border-radius:1px;"></div>
-        <div style="height:${1.5*s}px;background:${c};width:100%;margin-bottom:${3*s}px;border-radius:1px;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">COMPETÊNCIAS</div>
-        ${BAR(90,c)}${BAR(75,c)}${BAR(60,c)}${BAR(80,c)}${BAR(50,c)}
-        <div style="height:${1.5*s}px;background:${c};width:100%;margin:${3*s}px 0;border-radius:1px;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
-        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
+      <!-- dark sidebar -->
+      <div style="width:35%;background:#1e293b;padding:${6*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;overflow:hidden;flex-shrink:0;">
+        ${AVT(20,c)}
+        <div style="height:${2.2*s}px;background:rgba(255,255,255,.75);border-radius:1px;width:80%;margin:${3*s}px 0 ${1.2*s}px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.45);border-radius:1px;width:64%;margin-bottom:${3.5*s}px;"></div>
+        <div style="height:${2*s}px;background:${c};border-radius:1px;width:100%;margin-bottom:${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">CONTACTO</div>
+        ${CONTACT('rgba(255,255,255,.4)')}${CONTACT('rgba(255,255,255,.35)','65%')}${CONTACT('rgba(255,255,255,.35)','72%')}
+        <div style="height:${1.5*s}px;background:${c};border-radius:1px;width:100%;margin:${3*s}px 0;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">COMPETÊNCIAS</div>
+        ${SKLS(90,c)}${SKLS(76,c)}${SKLS(68,c)}${SKLS(84,c)}${SKLS(60,c)}
+        <div style="height:${1.5*s}px;background:${c};border-radius:1px;width:100%;margin:${2*s}px 0;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">IDIOMAS</div>
+        ${SKLS(100,c)}${SKLS(82,c)}${SKLS(50,c)}
+        <div style="height:${1.5*s}px;background:${c};border-radius:1px;width:100%;margin:${2*s}px 0;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">INTERESSES</div>
+        ${['72%','60%','66%'].map(w=>`<div style="height:${1.5*s}px;background:rgba(255,255,255,.3);border-radius:1px;width:${w};margin-bottom:${2*s}px;"></div>`).join('')}
       </div>
-      <div style="flex:1;padding:${7*s}px ${5*s}px;">
-        <div style="font-size:${7.5*s}px;font-weight:800;color:#0f172a;line-height:1.1;">${nm}</div>
-        <div style="font-size:${4*s}px;color:${c};font-weight:600;margin:${1.5*s}px 0 ${4*s}px;">${prof}</div>
-        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('60%')}
-        ${SEC('FORMAÇÃO')}${L('80%',2.5,'#334155')}${L('55%')}
-        ${SEC('REFERÊNCIAS')}${L('70%')}${L('55%')}
-      </div></div>`;
+      <!-- main -->
+      <div style="flex:1;padding:${6*s}px ${5*s}px;overflow:hidden;">
+        <div style="font-size:${7.5*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.2*s}px;">${nm}</div>
+        <div style="font-size:${4*s}px;color:${c};font-weight:700;margin-bottom:${2.5*s}px;">${prof}</div>
+        <div style="margin-bottom:${2*s}px;">${['92%','84%','70%'].map(w=>L(w,1.4,'#64748b')).join('')}</div>
+        <div style="height:1px;background:#E2E8F0;margin-bottom:${1*s}px;"></div>
+        ${SEC('EXPERIÊNCIA')}
+        ${ENTRY('82%','54%','88%','72%','60%')}
+        ${ENTRY('76%','52%','84%','70%','56%')}
+        ${ENTRY('70%','50%','80%','66%')}
+        ${SEC('FORMAÇÃO')}
+        ${ENTRY('78%','56%','64%')}
+        ${ENTRY('70%','52%')}
+        ${SEC('CERTIFICAÇÕES')}
+        ${L('68%',1.8,'#334155')}${L('74%',1.8,'#334155')}${L('56%',1.8,'#334155')}
+      </div>
+    </div>`;
 
   } else {
+    /* fallback = moderno */
     inner = `<div style="display:flex;height:100%;margin:-${6*s}px;overflow:hidden;">
-      <div style="width:33%;background:${c};padding:${7*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;">
+      <div style="width:32%;background:${c};padding:${6*s}px ${4*s}px;display:flex;flex-direction:column;align-items:center;overflow:hidden;flex-shrink:0;">
         ${AVT(20,'rgba(255,255,255,.25)')}
-        <div style="height:${2*s}px;background:rgba(255,255,255,.8);width:80%;margin:${4*s}px 0 ${1.5*s}px;border-radius:1px;"></div>
-        <div style="height:${1.5*s}px;background:rgba(255,255,255,.45);width:60%;margin-bottom:${5*s}px;border-radius:1px;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;align-self:flex-start;margin-bottom:${2*s}px;">SKILLS</div>
-        ${BAR(85,'rgba(255,255,255,.8)')}${BAR(70,'rgba(255,255,255,.7)')}${BAR(60,'rgba(255,255,255,.6)')}
-        <div style="height:${1*s}px;background:rgba(255,255,255,.2);width:100%;margin:${3*s}px 0;"></div>
-        <div style="font-size:${3.5*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;align-self:flex-start;margin-bottom:${2*s}px;">IDIOMAS</div>
-        ${L('80%',1.5,'rgba(255,255,255,.5)')}${L('65%',1.5,'rgba(255,255,255,.35)')}
+        <div style="height:${2.2*s}px;background:rgba(255,255,255,.85);border-radius:1px;width:80%;margin:${3*s}px 0 ${1.2*s}px;"></div>
+        <div style="height:${1.5*s}px;background:rgba(255,255,255,.5);border-radius:1px;width:62%;margin-bottom:${3*s}px;"></div>
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin-bottom:${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">COMPETÊNCIAS</div>
+        ${SKLS(88)}${SKLS(76)}${SKLS(70)}${SKLS(82)}${SKLS(64)}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${2.5*s}px 0 ${3*s}px;"></div>
+        <div style="font-size:${3.2*s}px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.9px;align-self:flex-start;margin-bottom:${2.5*s}px;font-weight:700;">IDIOMAS</div>
+        ${SKLS(100)}${SKLS(82)}${SKLS(48)}
       </div>
-      <div style="flex:1;padding:${7*s}px ${5*s}px;overflow:hidden;">
-        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.5*s}px;">${nm}</div>
-        <div style="font-size:${4.5*s}px;color:${c};font-weight:600;margin-bottom:${4*s}px;">${prof}</div>
-        <div style="height:${1*s}px;background:#E2E8F0;margin-bottom:${2*s}px;"></div>
-        ${SEC('EXPERIÊNCIA')}${L('90%',2.5,'#334155')}${L('70%')}${L('80%')}${L('55%')}
-        ${SEC('FORMAÇÃO')}${L('75%',2.5,'#334155')}${L('55%')}
-      </div></div>`;
+      <div style="flex:1;padding:${6*s}px ${5*s}px;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="font-size:${8*s}px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:${1.2*s}px;">${nm}</div>
+        <div style="font-size:${4.5*s}px;color:${c};font-weight:700;margin-bottom:${2.5*s}px;">${prof}</div>
+        <div style="margin-bottom:${2*s}px;">${['95%','86%','72%'].map(w=>L(w,1.4,'#64748b')).join('')}</div>
+        <div style="height:1px;background:#E2E8F0;margin-bottom:${1*s}px;"></div>
+        ${SEC('EXPERIÊNCIA')}
+        ${ENTRY('82%','54%','90%','74%','62%')}
+        ${ENTRY('76%','52%','84%','70%')}
+        ${SEC('FORMAÇÃO')}
+        ${ENTRY('78%','56%','65%')}
+        ${ENTRY('70%','52%')}
+        ${SEC('CERTIFICAÇÕES')}
+        ${L('68%',1.8,'#334155')}${L('74%',1.8,'#334155')}
+      </div>
+    </div>`;
   }
 
   return `<div style="background:${bg};width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-    <div style="width:88%;height:90%;background:#fff;border-radius:2px;box-shadow:0 4px 20px rgba(0,0,0,.14);overflow:hidden;padding:${6*s}px;box-sizing:border-box;position:relative;">
+    <div style="width:92%;height:96%;background:#fff;border-radius:2px;box-shadow:0 4px 20px rgba(0,0,0,.14);overflow:hidden;padding:${6*s}px;box-sizing:border-box;position:relative;">
       ${inner}
     </div></div>`;
 }
