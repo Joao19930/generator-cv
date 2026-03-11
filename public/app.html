@@ -994,7 +994,7 @@ function paper(color, small, tpl) {
   const parts = raw.split(' — ');
   const prof  = parts[0] || 'Gestor de Projecto';
   const style = (parts[1] || 'moderno').toLowerCase();
-  const s = small ? 0.52 : 1;
+  const s = small ? 0.52 : 1.22;
 
   /* helpers */
   const f = n => `${(n*s).toFixed(1)}px`;
@@ -1051,12 +1051,12 @@ function paper(color, small, tpl) {
   /* section header for coloured sidebar */
   const SECSB = (txt) =>
     `<div style="font-size:${f(5)};font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.9px;margin:${f(6)} 0 ${f(3)};">${txt}</div>`;
-  /* job/edu entry */
-  const JOB = (title, co, period, lines=3) =>
-    `<div style="margin-bottom:${f(5)};">
-      <div style="font-size:${f(6)};font-weight:700;color:#1e293b;margin-bottom:${f(1.5)};">${title}</div>
-      <div style="font-size:${f(5)};color:#64748b;margin-bottom:${f(3)};">${co} · ${period}</div>
-      ${Array(lines).fill(0).map((_,i)=>L([`92%`,`76%`,`60%`][i]||'70%','#CBD5E1')).join('')}
+  /* job/edu entry — descs is array of strings */
+  const JOB = (title, co, period, descs=[]) =>
+    `<div style="margin-bottom:${f(6)};">
+      <div style="font-size:${f(6.5)};font-weight:700;color:#1e293b;margin-bottom:${f(1.5)};">${title}</div>
+      <div style="font-size:${f(5.5)};color:#64748b;font-style:italic;margin-bottom:${f(3)};">${co} · ${period}</div>
+      ${descs.map(d=>`<div style="font-size:${f(5.5)};color:#475569;line-height:1.55;margin-bottom:${f(2.5)};display:flex;gap:${f(4)};"><span style="color:${c};flex-shrink:0;font-weight:700;">·</span><span>${d}</span></div>`).join('')}
     </div>`;
   /* contact row */
   const CT = (txt, clr='rgba(255,255,255,.65)') =>
@@ -1095,14 +1095,14 @@ function paper(color, small, tpl) {
         <div style="font-size:${f(5)};color:#64748b;line-height:1.6;margin-bottom:${f(3)};">Profissional com 8 anos de experiência, especializado em soluções inovadoras e liderança de equipas.</div>
         <div style="height:1px;background:#E2E8F0;margin-bottom:${f(1)};"></div>
         ${SEC('EXPERIÊNCIA')}
-        ${JOB('Engenheiro Sénior','TechCorp','2021 – Presente',3)}
-        ${JOB('Desenvolvedor Full-Stack','StartupHub','2018 – 2021',3)}
-        ${JOB('Desenvolvedor Junior','Agência Digital','2015 – 2018',2)}
+        ${JOB('Engenheiro Sénior','TechCorp Angola','2021 – Presente',['Arquitectura de sistemas distribuídos de alta disponibilidade','Liderança de equipa de 6 engenheiros e 2 designers','Redução de 40% no tempo de resposta das APIs'])}
+        ${JOB('Desenvolvedor Full-Stack','StartupHub','2018 – 2021',['Criação de plataforma SaaS com mais de 50k utilizadores','Integração de pagamentos Stripe, PayPal e M-Pesa','Implementação de microserviços com Docker e Kubernetes'])}
+        ${JOB('Desenvolvedor Junior','Agência Digital Creative','2015 – 2018',['Desenvolvimento de 15+ websites responsivos para clientes','Optimização de queries SQL com melhoria de 35% na performance'])}
         ${SEC('FORMAÇÃO')}
-        ${JOB('Lic. Engenharia Informática','Univ. Agostinho Neto','2015',1)}
-        ${JOB('MBA Gestão de Projectos','ISTM Luanda','2018',1)}
+        ${JOB('Lic. Engenharia Informática','Univ. Agostinho Neto','2011 – 2015',['Tese: Sistemas Distribuídos em Tempo Real — 18 valores'])}
+        ${JOB('MBA Gestão de Projectos','ISTM Luanda','2016 – 2018',['Especialização em metodologias ágeis e gestão de risco'])}
         ${SEC('CERTIFICAÇÕES')}
-        ${['AWS Solutions Architect','Google Cloud Professional','Scrum Master'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+        ${['AWS Solutions Architect Professional','Google Cloud Professional Developer','Scrum Master Certified (CSM)'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
       </div>
     </div>`;
 
@@ -1125,12 +1125,12 @@ function paper(color, small, tpl) {
       <div style="flex:1;padding:${f(5)} ${f(7)};display:flex;gap:${f(7)};overflow:hidden;">
         <div style="flex:3;overflow:hidden;">
           ${SECL('EXPERIÊNCIA')}
-          ${JOB('Director de Operações','MegaCorp Angola','2020 – Presente',3)}
-          ${JOB('Gestor de Projectos','Construtora Sul','2017 – 2020',3)}
-          ${JOB('Coordenador','TechGroup','2014 – 2017',2)}
+          ${JOB('Director de Operações','MegaCorp Angola','2020 – Presente',['Gestão de orçamento anual de 5M USD e equipa de 40 pessoas','Implementação de estratégia que aumentou receita em 28%','Negociação de contratos com parceiros internacionais'])}
+          ${JOB('Gestor de Projectos Sénior','Construtora Sul','2017 – 2020',['Coordenação de 12 projectos simultâneos no valor de 15M USD','Entrega de 95% dos projectos dentro do prazo e orçamento','Gestão de equipas multidisciplinares de até 25 pessoas'])}
+          ${JOB('Coordenador de Operações','TechGroup','2014 – 2017',['Optimização de processos operacionais com redução de 20% de custos','Implementação de sistema ERP em 3 departamentos'])}
           ${SECL('FORMAÇÃO')}
-          ${JOB('MBA Executivo','ISCTE Business School','2017',1)}
-          ${JOB('Lic. Gestão Empresarial','UAN','2014',1)}
+          ${JOB('MBA Executivo — Gestão Estratégica','ISCTE Business School','2015 – 2017',['Especialização em Finanças Corporativas e Estratégia Global'])}
+          ${JOB('Lic. Gestão Empresarial','Universidade Agostinho Neto','2010 – 2014',['Tese: Estratégias de Expansão em Mercados Emergentes — 17 valores'])}
         </div>
         <div style="flex:2;overflow:hidden;">
           ${SECL('COMPETÊNCIAS')}
@@ -1138,7 +1138,7 @@ function paper(color, small, tpl) {
           ${SECL('IDIOMAS')}
           ${SKILL('Português',100)}${SKILL('Inglês',88)}${SKILL('Espanhol',60)}
           ${SECL('CERTIFICAÇÕES')}
-          ${['PMP Certified','PRINCE2','Lean Six Sigma'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+          ${['PMP Certified — Project Management Professional','PRINCE2 Practitioner','Lean Six Sigma Black Belt'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
         </div>
       </div>
     </div>`;
@@ -1159,12 +1159,12 @@ function paper(color, small, tpl) {
       <div style="display:flex;gap:${f(8)};flex:1;overflow:hidden;">
         <div style="flex:3;overflow:hidden;">
           ${SECL('EXPERIÊNCIA')}
-          ${JOB('Especialista Sénior','DataTech Angola','2021 – Presente',3)}
-          ${JOB('Analista Pleno','Consultoria ABC','2018 – 2021',3)}
-          ${JOB('Técnico Especialista','Empresa XYZ','2015 – 2018',2)}
+          ${JOB('Especialista de Dados Sénior','DataTech Angola','2021 – Presente',['Desenvolvimento de dashboards em Power BI para 200+ utilizadores','Modelação preditiva com Python reduzindo custos em 18%','Liderança técnica na migração para data warehouse na cloud'])}
+          ${JOB('Analista de Business Intelligence','Consultoria ABC','2018 – 2021',['Criação de relatórios executivos semanais para C-Suite','Automatização de 30+ processos manuais via scripts Python','Integração de fontes de dados heterogéneas (SQL, API, Excel)'])}
+          ${JOB('Técnico de Sistemas','Empresa XYZ','2015 – 2018',['Suporte a sistemas ERP em ambiente de 500 utilizadores','Desenvolvimento de queries SQL complexas para relatórios'])}
           ${SECL('FORMAÇÃO')}
-          ${JOB('Lic. em Informática','UAN','2015',1)}
-          ${JOB('Pós-Graduação','ISCTE','2018',1)}
+          ${JOB('Lic. Engenharia Informática','Univ. Agostinho Neto','2011 – 2015',['Especialização em Sistemas de Informação e Bases de Dados'])}
+          ${JOB('Pós-Graduação em Data Science','ISCTE Lisboa','2016 – 2018',['Machine Learning, Estatística Avançada e Big Data Analytics'])}
         </div>
         <div style="flex:2;overflow:hidden;">
           ${SECL('COMPETÊNCIAS')}
@@ -1172,7 +1172,7 @@ function paper(color, small, tpl) {
           ${SECL('IDIOMAS')}
           ${SKILL('Português',100)}${SKILL('Inglês',82)}${SKILL('Francês',50)}
           ${SECL('CERTIFICAÇÕES')}
-          ${['Data Analyst Pro','Microsoft Azure','Tableau Desktop'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+          ${['Google Data Analytics Professional','Microsoft Azure Data Engineer','Tableau Desktop Specialist'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
         </div>
       </div>
     </div>`;
@@ -1196,12 +1196,12 @@ function paper(color, small, tpl) {
       <div style="flex:1;padding:${f(5)} ${f(6)};display:grid;grid-template-columns:3fr 2fr;gap:${f(6)};overflow:hidden;">
         <div style="overflow:hidden;">
           ${SEC('EXPERIÊNCIA')}
-          ${JOB('Designer Sénior','Creative Studio','2021 – Presente',3)}
-          ${JOB('UX/UI Designer','Agency Plus','2018 – 2021',3)}
-          ${JOB('Designer Junior','Marca&Cor','2015 – 2018',2)}
+          ${JOB('Designer Criativo Sénior','Creative Studio Angola','2021 – Presente',['Direcção de arte em 50+ campanhas de impacto nacional','Criação de identidades visuais para marcas Fortune 500','Gestão de equipa de 4 designers e 2 motion designers'])}
+          ${JOB('UX/UI Designer','Agency Plus Digital','2018 – 2021',['Design de interfaces para apps com 100k+ downloads na Play Store','Condução de 20+ testes de usabilidade com utilizadores reais','Redução de 45% no abandono de carrinho via redesign de checkout'])}
+          ${JOB('Designer Gráfico Junior','Marca&Cor Studio','2015 – 2018',['Criação de materiais gráficos para print e digital','Colaboração em rebranding de 8 empresas locais'])}
           ${SEC('FORMAÇÃO')}
-          ${JOB('Design de Comunicação','EFAPB','2015',1)}
-          ${JOB('Pós em UX Design','IED','2018',1)}
+          ${JOB('Licenciatura em Design de Comunicação','Escola de Artes EFAPB','2011 – 2015',['Especialização em Tipografia e Identidade Visual — 18 valores'])}
+          ${JOB('Pós-Graduação em UX Design','IED Barcelona','2016 – 2018',['Human-Centered Design, Prototipagem e Design Systems'])}
         </div>
         <div style="overflow:hidden;">
           ${SEC('SKILLS')}
@@ -1209,7 +1209,7 @@ function paper(color, small, tpl) {
           ${SEC('IDIOMAS')}
           ${SKILL('Português',100)}${SKILL('Inglês',85)}${SKILL('Espanhol',55)}
           ${SEC('INTERESSES')}
-          ${['Motion Design','Branding','UI Research'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+          ${['Motion Design & Animation','Branding e Identidade Visual','UX Research e Testes de Usabilidade'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
         </div>
       </div>
     </div>`;
@@ -1231,12 +1231,12 @@ function paper(color, small, tpl) {
       <div style="display:grid;grid-template-columns:3fr 2fr;gap:${f(7)};flex:1;overflow:hidden;">
         <div style="overflow:hidden;">
           ${SECC('EXPERIÊNCIA')}
-          ${JOB('Consultor Sénior','Elite Consulting','2021 – Presente',3)}
-          ${JOB('Gestor de Contas','Premier Corp','2018 – 2021',3)}
-          ${JOB('Analista','Global Finance','2015 – 2018',2)}
+          ${JOB('Consultor Financeiro Sénior','Elite Consulting Partners','2021 – Presente',['Assessoria a 15+ clientes corporativos com activos acima de 50M USD','Estruturação de operações de M&A no valor total de 120M USD','Elaboração de modelos financeiros para decisões de investimento'])}
+          ${JOB('Gestor de Contas Corporativas','Premier Corp','2018 – 2021',['Gestão de carteira de 25 clientes institucionais premium','Crescimento da receita da carteira em 35% em 3 anos','Negociação de contratos de longo prazo acima de 2M USD'])}
+          ${JOB('Analista Financeiro','Global Finance Angola','2015 – 2018',['Análise de viabilidade de investimentos e due diligence','Elaboração de relatórios financeiros mensais para board'])}
           ${SECC('FORMAÇÃO')}
-          ${JOB('Lic. Economia','UAN','2015',1)}
-          ${JOB('MBA Finanças','Nova SBE','2018',1)}
+          ${JOB('Licenciatura em Economia e Gestão','Universidade Agostinho Neto','2011 – 2015',['Prémio Excelência Académica — Melhor aluno da turma'])}
+          ${JOB('MBA em Finanças Corporativas','Nova SBE Lisboa','2016 – 2018',['CFA Prep Track — Derivativos, Portfolio Management e M&A'])}
         </div>
         <div style="overflow:hidden;border-left:1px solid #E2E8F0;padding-left:${f(6)};">
           ${SECC('COMPETÊNCIAS')}
@@ -1244,7 +1244,7 @@ function paper(color, small, tpl) {
           ${SECC('IDIOMAS')}
           ${SKILL('Português',100)}${SKILL('Inglês',90)}${SKILL('Francês',65)}
           ${SECC('CERTIFICAÇÕES')}
-          ${['CFA Level III','ACCA','Bloomberg Terminal'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+          ${['CFA Level III — Chartered Financial Analyst','ACCA — Contabilidade e Finanças','Bloomberg Market Concepts (BMC)'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
         </div>
       </div>
     </div>`;
@@ -1275,14 +1275,14 @@ function paper(color, small, tpl) {
         <div style="font-size:${f(5)};color:#64748b;line-height:1.6;margin-bottom:${f(3)};">Profissional técnico experiente com 8 anos em ${prof.toLowerCase()}, focado em entrega e qualidade.</div>
         <div style="height:1px;background:#E2E8F0;margin-bottom:${f(1)};"></div>
         ${SEC('EXPERIÊNCIA')}
-        ${JOB('Dev. Sénior','TechCorp','2021 – Presente',3)}
-        ${JOB('Full-Stack Dev','StartupHub','2018 – 2021',3)}
-        ${JOB('Dev. Junior','Agência Web','2015 – 2018',2)}
+        ${JOB('Dev. Sénior Full-Stack','TechCorp Angola','2021 – Presente',['Desenvolvimento de APIs REST com Node.js e 99.9% uptime','Migração de monolito para microserviços — 60% mais escalável','Code review semanal e mentoria de 4 desenvolvedores júniors'])}
+        ${JOB('Desenvolvedor Full-Stack','StartupHub','2018 – 2021',['Construção de plataforma e-commerce com 30k transacções/mês','Integração com sistemas de pagamento locais e internacionais','Redução de 50% no tempo de carregamento com optimizações'])}
+        ${JOB('Desenvolvedor Junior','Agência Web Pro','2015 – 2018',['Desenvolvimento de 12 websites responsivos com WordPress/React','Suporte técnico e manutenção de sistemas em produção'])}
         ${SEC('FORMAÇÃO')}
-        ${JOB('Lic. Eng. Informática','UAN','2015',1)}
-        ${JOB('Pós-Grad. Cloud','ISTM','2018',1)}
+        ${JOB('Lic. Eng. Informática','Universidade Agostinho Neto','2011 – 2015',['Tese em Segurança de Redes e Sistemas Distribuídos — 17 valores'])}
+        ${JOB('Pós-Grad. Cloud Computing','ISTM Luanda','2016 – 2018',['AWS, Azure e Google Cloud — Arquitectura e DevOps'])}
         ${SEC('CERTIFICAÇÕES')}
-        ${['AWS Developer','Docker Certified','Google Cloud'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+        ${['AWS Certified Developer Associate','Docker Certified Associate','Google Cloud Professional'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
       </div>
     </div>`;
 
@@ -1305,14 +1305,14 @@ function paper(color, small, tpl) {
         <div style="font-size:${f(7)};color:${c};font-weight:700;margin-bottom:${f(4)};">${prof}</div>
         <div style="height:1px;background:#E2E8F0;margin-bottom:${f(1)};"></div>
         ${SEC('EXPERIÊNCIA')}
-        ${JOB('Engenheiro Sénior','TechCorp','2021 – Presente',3)}
-        ${JOB('Desenvolvedor Full-Stack','StartupHub','2018 – 2021',3)}
-        ${JOB('Desenvolvedor Junior','Agência Digital','2015 – 2018',2)}
+        ${JOB('Engenheiro Sénior','TechCorp Angola','2021 – Presente',['Arquitectura de sistemas distribuídos de alta disponibilidade','Liderança de equipa de 6 engenheiros e 2 designers','Redução de 40% no tempo de resposta das APIs REST'])}
+        ${JOB('Desenvolvedor Full-Stack','StartupHub','2018 – 2021',['Plataforma SaaS com 50k utilizadores activos mensais','Integração de pagamentos Stripe, PayPal e M-Pesa','Microserviços com Docker, Kubernetes e CI/CD GitHub Actions'])}
+        ${JOB('Desenvolvedor Junior','Agência Digital Creative','2015 – 2018',['Desenvolvimento de 15+ websites responsivos para clientes','Optimização de queries SQL com melhoria de 35% na performance'])}
         ${SEC('FORMAÇÃO')}
-        ${JOB('Lic. Eng. Informática','UAN','2015',1)}
-        ${JOB('Pós-Graduação Cloud','ISTM','2018',1)}
+        ${JOB('Lic. Eng. Informática','Universidade Agostinho Neto','2011 – 2015',['Tese em Sistemas Distribuídos em Tempo Real — 18 valores'])}
+        ${JOB('Pós-Graduação Cloud','ISTM Luanda','2016 – 2018',['AWS, Azure e Google Cloud — Arquitectura e DevOps'])}
         ${SEC('CERTIFICAÇÕES')}
-        ${['AWS Solutions Architect','Google Cloud Pro','Scrum Master'].map(x=>`<div style="font-size:${f(5)};color:#334155;margin-bottom:${f(4)};">· ${x}</div>`).join('')}
+        ${['AWS Solutions Architect Professional','Google Cloud Professional Developer','Scrum Master Certified (CSM)'].map(x=>`<div style="font-size:${f(5.5)};color:#334155;line-height:1.5;margin-bottom:${f(3.5)};display:flex;gap:${f(3)};"><span style="color:${c};font-weight:700;">·</span><span>${x}</span></div>`).join('')}
       </div>
     </div>`;
   }
