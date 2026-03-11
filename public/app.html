@@ -419,7 +419,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     </a>
     <a class="sb-item" onclick="nav('coaches',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-      Coaches <span class="sb-cnt" id="coachesBadge">0</span>
+      Mentoria de Carreira <span class="sb-cnt" id="coachesBadge">0</span>
     </a>
     <a class="sb-item" onclick="nav('testimonials',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -779,7 +779,7 @@ const PAL_BG = {
 };
 const PANEL_TITLES = {
   overview:'Visão Geral', cvs:'CVs Criados', templates:'Templates de CV',
-  jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Coaches', testimonials:'Testemunhos',
+  jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos',
   plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições'
 };
 
@@ -1389,7 +1389,7 @@ function filterCourses(q) {
 /* ── COACHES ───────────────────────────────────── */
 function renderCoaches(list) {
   const g = document.getElementById('coachesList');
-  if (!list.length) { g.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="empty-t">Nenhum coach disponível</div><div class="empty-s">Em breve haverá coaches disponíveis.</div></div></div>`; return; }
+  if (!list.length) { g.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="empty-t">Nenhum mentor disponível</div><div class="empty-s">Em breve haverá mentores disponíveis.</div></div></div>`; return; }
   g.innerHTML = list.map(c => {
     const color  = c.Color || c.color || '#6366f1';
     const name   = c.Name || c.name || 'Coach';

@@ -230,7 +230,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="sb-section">Conteúdo</div>
     <div class="si" onclick="showPanel('jobs',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Vagas de Emprego</div>
     <div class="si" onclick="showPanel('courses',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Cursos</div>
-    <div class="si" onclick="showPanel('coaches',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Coaches</div>
+    <div class="si" onclick="showPanel('coaches',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Mentoria de Carreira</div>
     <div class="si" onclick="showPanel('testimonials',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Testemunhos</div>
     <div class="sb-section">Plataforma</div>
     <div class="si" onclick="showPanel('plans',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Planos & Preços</div>
@@ -370,8 +370,8 @@ tbody tr:hover{background:#fafafa;}
 <!-- ══ COACHES ════════════════════════════════════════════ -->
 <div id="panel-coaches" class="panel">
   <div class="panel-hdr">
-    <div><div class="panel-title">Coaches</div><div class="panel-sub">Gerir os coaches da plataforma</div></div>
-    <button class="btn btn-blue" onclick="openModal('coachModal');state.editId=null;document.getElementById('chPhoto').value='';document.getElementById('chPhotoFile').value='';updatePhotoPreview('');"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Coach</button>
+    <div><div class="panel-title">Mentoria de Carreira</div><div class="panel-sub">Gerir os mentores da plataforma</div></div>
+    <button class="btn btn-blue" onclick="openModal('coachModal');state.editId=null;document.getElementById('chPhoto').value='';document.getElementById('chPhotoFile').value='';updatePhotoPreview('');"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Mentor</button>
   </div>
   <div id="alertCoaches"></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;" id="coachesGrid"></div>
@@ -584,13 +584,13 @@ tbody tr:hover{background:#fafafa;}
 <!-- COACH MODAL -->
 <div class="modal-overlay" id="coachModal">
   <div class="modal">
-    <div class="modal-hdr"><div class="modal-title">Adicionar Coach</div><button class="modal-close" onclick="closeModal('coachModal')">✕</button></div>
+    <div class="modal-hdr"><div class="modal-title">Adicionar Mentor</div><button class="modal-close" onclick="closeModal('coachModal')">✕</button></div>
     <div class="modal-body">
       <div class="f-row">
-        <div class="f-field"><label>Nome</label><input type="text" id="chName" placeholder="Nome do coach"></div>
+        <div class="f-field"><label>Nome</label><input type="text" id="chName" placeholder="Nome do mentor"></div>
         <div class="f-field"><label>Localização</label><input type="text" id="chLocation" placeholder="ex: Lisboa, Portugal"></div>
         <div class="f-field" style="grid-column:1/-1">
-          <label>Foto do Coach</label>
+          <label>Foto do Mentor</label>
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
             <div id="chPhotoPreview" style="width:64px;height:64px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:var(--bg);">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -606,7 +606,7 @@ tbody tr:hover{background:#fafafa;}
           <input type="text" id="chPhoto" placeholder="https://exemplo.com/foto.jpg" oninput="updatePhotoPreview(this.value)">
         </div>
       </div>
-      <div class="f-field"><label>Biografia</label><textarea id="chBio" rows="3" placeholder="Breve descrição do coach..."></textarea></div>
+      <div class="f-field"><label>Biografia</label><textarea id="chBio" rows="3" placeholder="Breve descrição do mentor..."></textarea></div>
       <div class="f-field"><label>Especialidades (separadas por vírgula)</label><input type="text" id="chSkills" placeholder="Marca Pessoal, Entrevista, Salário"></div>
       <div class="f-row">
         <div class="f-field"><label>Cor do Avatar</label>
@@ -620,10 +620,10 @@ tbody tr:hover{background:#fafafa;}
           </div>
           <input type="hidden" id="chColor" value="#6366f1">
         </div>
-        <div class="f-field"><label>Email de Contacto</label><input type="email" id="chEmail" placeholder="coach@email.com"></div>
+        <div class="f-field"><label>Email de Contacto</label><input type="email" id="chEmail" placeholder="mentor@email.com"></div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('coachModal')">Cancelar</button><button class="btn btn-blue" onclick="saveCoach()">Adicionar Coach</button></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('coachModal')">Cancelar</button><button class="btn btn-blue" onclick="saveCoach()">Adicionar Mentor</button></div>
   </div>
 </div>
 
