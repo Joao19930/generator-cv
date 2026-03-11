@@ -241,17 +241,26 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .job-arrow{margin-left:auto;color:var(--t4);flex-shrink:0;}
 
 /* ── COACH CARDS ─────────────────────────────────── */
-.coach-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:all .2s;}
-.coach-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.09);transform:translateY(-3px);}
-.coach-banner{height:64px;display:flex;align-items:flex-end;padding-bottom:0;position:relative;}
-.coach-av{width:52px;height:52px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;position:absolute;bottom:-20px;left:16px;}
-.coach-body{padding:28px 16px 16px;}
-.coach-name{font-size:14px;font-weight:700;color:var(--text);}
-.coach-loc{font-size:11px;color:var(--t3);margin-top:2px;}
-.coach-bio{font-size:12px;color:var(--t2);line-height:1.5;margin-top:8px;}
-.coach-skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
-.coach-skill{font-size:10px;padding:2px 8px;background:var(--blue-l);color:var(--blue);border-radius:20px;font-weight:500;}
-.coach-foot{padding:12px 16px;border-top:1px solid var(--bg);display:flex;gap:8px;}
+.coach-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:24px 24px 0;transition:all .2s;display:flex;flex-direction:column;gap:0;}
+.coach-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);transform:translateY(-2px);}
+.coach-main{display:flex;gap:24px;padding-bottom:20px;}
+.coach-left{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1;}
+.coach-av-wrap{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;}
+.coach-av-wrap img{width:100%;height:100%;object-fit:cover;}
+.coach-header{display:flex;align-items:flex-start;gap:16px;}
+.coach-name{font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.coach-expertise{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.coach-loc{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;}
+.coach-specialty-tag{display:inline-block;background:#EFF6FF;color:var(--blue);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #BFDBFE;margin-top:6px;}
+.coach-bio{font-size:12.5px;color:var(--t2);line-height:1.6;margin-top:8px;}
+.coach-right{flex-shrink:0;width:260px;padding-left:24px;border-left:1px solid var(--border);}
+.coach-section-lbl{font-size:9.5px;font-weight:800;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.coach-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px;}
+.coach-tag{font-size:10.5px;color:var(--t2);background:var(--bg);border:1px solid var(--border);padding:3px 10px;border-radius:6px;font-weight:500;}
+.coach-foot{border-top:1px solid var(--border);padding:14px 0;text-align:center;}
+.coach-find-btn{display:inline-block;background:var(--blue);color:#fff;font-size:13px;font-weight:700;padding:10px 36px;border-radius:8px;text-decoration:none;border:none;cursor:pointer;font-family:'Sora',sans-serif;transition:background .2s;}
+.coach-find-btn:hover{background:var(--blue-d);}
+@media(max-width:700px){.coach-right{display:none;}.coach-av-wrap{width:56px;height:56px;font-size:20px;}}
 
 /* ── TESTIMONIAL CARDS ───────────────────────────── */
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
@@ -652,7 +661,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 
     <!-- ══ COACHES ═══════════════════════════════════ -->
     <div id="panel-coaches" class="panel">
-      <div class="cards-grid" id="coachesList" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));"></div>
+      <div style="display:flex;flex-direction:column;gap:14px;" id="coachesList"></div>
     </div>
 
     <!-- ══ TESTEMUNHOS ═══════════════════════════════ -->
@@ -1738,28 +1747,74 @@ function filterCourses(q) {
 /* ── COACHES ───────────────────────────────────── */
 function renderCoaches(list) {
   const g = document.getElementById('coachesList');
-  if (!list.length) { g.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="empty-t">Nenhum mentor disponível</div><div class="empty-s">Em breve haverá mentores disponíveis.</div></div></div>`; return; }
+  if (!list.length) {
+    g.innerHTML = `<div class="empty"><div class="empty-t">Nenhum mentor disponível</div><div class="empty-s">Em breve haverá mentores disponíveis.</div></div>`;
+    return;
+  }
   g.innerHTML = list.map(c => {
-    const color  = c.Color || c.color || '#6366f1';
-    const name   = c.Name || c.name || 'Coach';
-    const photo  = c.PhotoUrl || c.photo_url || '';
-    const skills = (c.Skills || c.skills || '').split(',').filter(Boolean);
-    const avatarInner = photo
-      ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\'font-size:20px;font-weight:800;color:#fff;\'>${name[0].toUpperCase()}</span>'">`
+    const color     = c.Color || c.color || '#6366f1';
+    const name      = c.Name  || c.name  || 'Mentor';
+    const photo     = c.PhotoUrl || c.photo_url || '';
+    const bio       = c.Bio   || c.bio   || '';
+    const location  = c.Location || c.location || '';
+    const specialty = c.Specialty || c.specialty || '';
+    const expertise = c.ExpertiseLevel || c.expertise_level || '';
+    /* Skills → JOB FUNCTION tags (first group) */
+    const skills    = (c.Skills || c.skills || '').split(',').map(x=>x.trim()).filter(Boolean);
+    /* Industries → separate field or second half of skills */
+    const industries= (c.Industries || c.industries || '').split(',').map(x=>x.trim()).filter(Boolean);
+
+    const avatarContent = photo
+      ? `<img src="${photo}" alt="${name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${name[0].toUpperCase()}';">`
       : name[0].toUpperCase();
+
+    /* expertise line */
+    const expertiseLine = expertise
+      ? `<div class="coach-expertise"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Experiência com · ${expertise}</div>`
+      : '';
+
+    const locationLine = location
+      ? `<div class="coach-loc"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${location}</div>`
+      : '';
+
+    /* show max 5 skill tags + "+N more" */
+    const MAX = 5;
+    const visSkills = skills.slice(0, MAX);
+    const extraSkills = skills.length > MAX ? `<span class="coach-tag">+${skills.length - MAX} mais</span>` : '';
+    const jobFuncSection = skills.length
+      ? `<div class="coach-section-lbl">FUNÇÃO / ESPECIALIDADE</div>
+         <div class="coach-tags">${visSkills.map(s=>`<span class="coach-tag">${s}</span>`).join('')}${extraSkills}</div>`
+      : '';
+
+    const visInd = industries.slice(0, 5);
+    const extraInd = industries.length > 5 ? `<span class="coach-tag">+${industries.length - 5} mais</span>` : '';
+    const industriesSection = industries.length
+      ? `<div class="coach-section-lbl">SECTORES</div>
+         <div class="coach-tags">${visInd.map(i=>`<span class="coach-tag">${i}</span>`).join('')}${extraInd}</div>`
+      : '';
+
+    const contactAction = c.Email
+      ? `<a href="mailto:${c.Email}" class="coach-find-btn">Contactar Mentor</a>`
+      : `<button class="coach-find-btn" disabled style="opacity:.5;cursor:not-allowed;">Contacto em breve</button>`;
+
     return `<div class="coach-card">
-      <div class="coach-banner" style="background:${color};">
-        <div class="coach-av" style="background:${color};overflow:hidden;">${avatarInner}</div>
+      <div class="coach-main">
+        <!-- left: photo + info -->
+        <div class="coach-header" style="flex:1;min-width:0;">
+          <div class="coach-av-wrap" style="background:${color};">${avatarContent}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="coach-name">${name}</div>
+            ${expertiseLine}
+            ${locationLine}
+            ${specialty ? `<span class="coach-specialty-tag">${specialty}</span>` : ''}
+            ${bio ? `<div class="coach-bio">${bio.length > 130 ? bio.substring(0,130)+'…' : bio}</div>` : ''}
+          </div>
+        </div>
+        <!-- right: tags -->
+        ${(jobFuncSection || industriesSection) ? `<div class="coach-right">${jobFuncSection}${industriesSection}</div>` : ''}
       </div>
-      <div class="coach-body">
-        <div class="coach-name">${name}</div>
-        ${c.Location ? `<div class="coach-loc">📍 ${c.Location}</div>` : ''}
-        ${c.Bio ? `<div class="coach-bio">${c.Bio.length > 100 ? c.Bio.substring(0,100)+'...' : c.Bio}</div>` : ''}
-        ${skills.length ? `<div class="coach-skills">${skills.map(s=>`<span class="coach-skill">${s.trim()}</span>`).join('')}</div>` : ''}
-      </div>
-      <div class="coach-foot">
-        ${c.Email ? `<a href="mailto:${c.Email}" class="btn-sm btn-blue-sm" style="flex:1;text-align:center;text-decoration:none;">Contactar</a>` : `<span class="btn-sm btn-out-sm" style="flex:1;text-align:center;">Contacto em breve</span>`}
-      </div>
+      <!-- footer -->
+      <div class="coach-foot">${contactAction}</div>
     </div>`;
   }).join('');
 }
