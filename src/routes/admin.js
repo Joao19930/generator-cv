@@ -261,7 +261,7 @@ router.get('/jobs', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/jobs', async (req, res) => {
-  const { title, company, city, country, category, date, jobDate, url, contactType } = req.body;
+  const { title, company, city, country, category, date, jobDate, startDate, endDate, url, contactType } = req.body;
   if (!title) return res.status(400).json({ error: 'Título obrigatório.' });
   const d = jobDate || date || null;
   try {
@@ -272,15 +272,17 @@ router.post('/jobs', async (req, res) => {
       .input('country',     sql.NVarChar, country||null)
       .input('cat',         sql.NVarChar, category||null)
       .input('date',        sql.Date,     d ? new Date(d) : null)
+      .input('startDate',   sql.Date,     startDate ? new Date(startDate) : null)
+      .input('endDate',     sql.Date,     endDate   ? new Date(endDate)   : null)
       .input('url',         sql.NVarChar, url||null)
       .input('contactType', sql.NVarChar, contactType||'url')
-      .query(`INSERT INTO jobs (title, company, city, country, category, job_date, url, contact_type, active, created_at)
-              VALUES (@title, @company, @city, @country, @cat, @date, @url, @contactType, TRUE, NOW()) RETURNING id`);
+      .query(`INSERT INTO jobs (title, company, city, country, category, job_date, start_date, end_date, url, contact_type, active, created_at)
+              VALUES (@title, @company, @city, @country, @cat, @date, @startDate, @endDate, @url, @contactType, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/jobs/:id', async (req, res) => {
-  const { title, company, city, country, category, date, jobDate, url, contactType } = req.body;
+  const { title, company, city, country, category, date, jobDate, startDate, endDate, url, contactType } = req.body;
   const d = jobDate || date || null;
   try {
     await req.db.request()
@@ -291,9 +293,11 @@ router.put('/jobs/:id', async (req, res) => {
       .input('country',     sql.NVarChar, country||null)
       .input('cat',         sql.NVarChar, category||null)
       .input('date',        sql.Date,     d ? new Date(d) : null)
+      .input('startDate',   sql.Date,     startDate ? new Date(startDate) : null)
+      .input('endDate',     sql.Date,     endDate   ? new Date(endDate)   : null)
       .input('url',         sql.NVarChar, url||null)
       .input('contactType', sql.NVarChar, contactType||'url')
-      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, job_date=@date, url=@url, contact_type=@contactType WHERE id=@id');
+      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, job_date=@date, start_date=@startDate, end_date=@endDate, url=@url, contact_type=@contactType WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

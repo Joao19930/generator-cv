@@ -544,6 +544,10 @@ tbody tr:hover{background:#fafafa;}
         <div class="f-field"><label>Categoria</label><select id="jCat"><option>TI & Tecnologia</option><option>Finanças</option><option>RH</option><option>Saúde</option><option>Engenharia</option><option>Marketing</option><option>Educação</option><option>Outro</option></select></div>
         <div class="f-field"><label>Data de Publicação</label><input type="date" id="jDate"></div>
       </div>
+      <div class="f-row">
+        <div class="f-field"><label>Início das Candidaturas</label><input type="date" id="jStartDate"></div>
+        <div class="f-field"><label>Prazo Final</label><input type="date" id="jEndDate"></div>
+      </div>
       <div class="f-field"><label>Descrição</label><textarea id="jDesc" rows="3" placeholder="Descreva os requisitos e responsabilidades..."></textarea></div>
       <div class="f-row">
         <div class="f-field"><label>Salário (opcional)</label><input type="text" id="jSalary" placeholder="ex: 1.500–2.500€/mês"></div>
@@ -1077,6 +1081,8 @@ async function saveJob() {
     country:     document.getElementById('jCountry').value.trim(),
     category:    document.getElementById('jCat').value,
     jobDate:     document.getElementById('jDate').value || null,
+    startDate:   document.getElementById('jStartDate').value || null,
+    endDate:     document.getElementById('jEndDate').value || null,
     url:         document.getElementById('jUrl').value.trim(),
     contactType: document.getElementById('jContactType').value
   };
@@ -1101,8 +1107,12 @@ function editJob(id) {
   document.getElementById('jCity').value    = j.City     || j.city    || '';
   document.getElementById('jCountry').value = j.Country  || j.country || '';
   document.getElementById('jCat').value     = j.Category || j.category|| '';
-  const d = j.JobDate || j.date || '';
+  const d = j.JobDate || j.job_date || '';
   document.getElementById('jDate').value        = d ? String(d).substring(0,10) : '';
+  const sd = j.StartDate || j.start_date || '';
+  const ed = j.EndDate   || j.end_date   || '';
+  document.getElementById('jStartDate').value   = sd ? String(sd).substring(0,10) : '';
+  document.getElementById('jEndDate').value     = ed ? String(ed).substring(0,10) : '';
   document.getElementById('jUrl').value         = j.Url         || j.url          || '';
   document.getElementById('jContactType').value = j.ContactType || j.contact_type || 'url';
   updateContactPlaceholder();

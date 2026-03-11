@@ -26,7 +26,7 @@ router.get('/courses', async (req, res) => {
 router.get('/jobs', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, title, company, city, country, category, job_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
+      .query('SELECT id, title, company, city, country, category, job_date, start_date, end_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
     res.json(r.recordset);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
