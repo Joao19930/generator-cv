@@ -214,6 +214,17 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .jb-dates{display:flex;flex-direction:column;gap:3px;}
 .jb-deadline{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;}
 .jb-desc{font-size:11.5px;color:var(--t3);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.jb-view-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--blue);color:#fff;border-radius:var(--rs);font-size:11px;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+.jb-view-btn:hover{background:var(--blue-d);transform:scale(1.02);}
+/* Job Detail Modal */
+.job-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;}
+.job-modal-box{background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22);display:flex;flex-direction:column;}
+.job-modal-hdr{padding:22px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:16px;}
+.job-modal-logo{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;}
+.job-modal-body{padding:20px 24px;flex:1;}
+.job-modal-desc{font-size:13px;color:var(--t2);line-height:1.75;white-space:pre-wrap;}
+.job-modal-foot{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+@media(max-width:640px){.job-modal-ov{padding:0;align-items:flex-end;}.job-modal-box{border-radius:16px 16px 0 0;max-height:92vh;}}
 .jb-actions{display:flex;align-items:center;gap:6px;}
 .jb-share-wrap{position:relative;}
 .jb-share-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);transition:all .2s;flex-shrink:0;}
@@ -1766,6 +1777,73 @@ function isNew(dateVal) {
 }
 
 let savedJobs = JSON.parse(localStorage.getItem('saved_jobs') || '[]');
+
+function openJobDetail(id) {
+  const j = allJobs.find(x => (x.Id||x.id) === id);
+  if (!j) return;
+  const grad = JOB_GRADIENTS[allJobs.indexOf(j) % JOB_GRADIENTS.length];
+  const loc  = [j.City, j.Country].filter(Boolean).join(', ');
+  const contactType = j.ContactType || j.contact_type || 'url';
+
+  const logoEl = document.getElementById('jobModalLogo');
+  logoEl.style.background = grad;
+  logoEl.textContent = (j.Company||'E')[0].toUpperCase();
+
+  document.getElementById('jobModalTitle').textContent = j.Title;
+  document.getElementById('jobModalCompany').innerHTML =
+    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+     ${j.Company||'Empresa'}${loc?' · '+loc:''}`;
+
+  const tags = [];
+  if (j.Category) tags.push(`<span class="jb-tag jb-tag-blue">${j.Category}</span>`);
+  if (loc) tags.push(`<span class="jb-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>`);
+  if (j.Url) tags.push(`<span class="jb-tag jb-tag-green">✓ ${contactType==='whatsapp'?'WhatsApp':contactType==='email'?'Email':'Online'}</span>`);
+  document.getElementById('jobModalTags').innerHTML = tags.join('');
+
+  const fmt = d => new Date(d).toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'});
+  const ago = jobsAgo(j.JobDate);
+  let datesHtml = '';
+  if (ago) datesHtml += `<div class="jb-date" style="font-size:11px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Publicado ${ago}</div>`;
+  const sd = j.StartDate || j.start_date;
+  const ed = j.EndDate   || j.end_date;
+  if (sd) datesHtml += `<div class="jb-date" style="font-size:11px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Início: ${fmt(sd)}</div>`;
+  if (ed) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const end = new Date(ed); end.setHours(0,0,0,0);
+    const diff = Math.ceil((end - now) / 86400000);
+    const expired = diff < 0;
+    const soon = !expired && diff <= 7;
+    datesHtml += `<div class="jb-deadline ${expired?'expired':soon?'soon':'active'}" style="font-size:11px;">${expired?`Prazo encerrado: ${fmt(ed)}`:soon?`Prazo: ${fmt(ed)} · <strong>${diff}d restantes</strong>`:`Prazo: ${fmt(ed)}`}</div>`;
+  }
+  document.getElementById('jobModalDates').innerHTML = datesHtml;
+
+  const desc = j.Description || j.description;
+  document.getElementById('jobModalDesc').innerHTML = desc
+    ? `<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Descrição da Vaga</div><div class="job-modal-desc">${desc.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
+    : `<p style="font-size:13px;color:var(--t4);text-align:center;padding:24px 0;">Sem descrição disponível.</p>`;
+
+  let applyHtml = `<span style="font-size:12px;color:var(--t4);">Sem contacto disponível</span>`;
+  if (j.Url) {
+    if (contactType === 'whatsapp') {
+      const wa = j.Url.replace(/\D/g,'');
+      applyHtml = `<a class="jb-apply jb-apply-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg> Candidatar via WhatsApp</a>`;
+    } else if (contactType === 'email') {
+      applyHtml = `<a class="jb-apply jb-apply-email" href="mailto:${j.Url}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Candidatar por Email</a>`;
+    } else {
+      applyHtml = `<a class="jb-apply" href="${j.Url}" target="_blank" rel="noopener">Candidatar-me <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>`;
+    }
+  }
+  document.getElementById('jobModalApplyBtn').innerHTML = applyHtml;
+
+  document.getElementById('jobModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeJobDetail() {
+  document.getElementById('jobModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function toggleSaveJob(id, btn) {
   const idx = savedJobs.indexOf(id);
   if (idx > -1) { savedJobs.splice(idx,1); btn.classList.remove('saved'); btn.title='Guardar'; }
@@ -1820,18 +1898,7 @@ function renderJobs(list) {
     const locTag  = loc ? `<span class="jb-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>` : '';
     const contactType = j.ContactType || j.contact_type || 'url';
     const onlineTag = j.Url ? `<span class="jb-tag jb-tag-green">✓ ${contactType === 'whatsapp' ? 'WhatsApp' : contactType === 'email' ? 'Email' : 'Online'}</span>` : '';
-    let applyBtn = `<span class="jb-apply jb-apply-ghost" style="cursor:default;opacity:.5;">Sem contacto</span>`;
-    if (j.Url) {
-      if (contactType === 'whatsapp') {
-        const wa = j.Url.replace(/\D/g,'');
-        applyBtn = `<a class="jb-apply jb-apply-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg> WhatsApp</a>`;
-      } else if (contactType === 'email') {
-        applyBtn = `<a class="jb-apply jb-apply-email" href="mailto:${j.Url}" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Enviar Email</a>`;
-      } else {
-        applyBtn = `<a class="jb-apply" href="${j.Url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Candidatar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>`;
-      }
-    }
-    return `<div class="jb-card" style="animation-delay:${i * 0.05}s">
+    return `<div class="jb-card" onclick="openJobDetail(${j.Id})" style="animation-delay:${i * 0.05}s">
       <div class="jb-top">
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="jb-logo" style="background:${grad}"><div class="jb-logo-ring"></div>${init}</div>
@@ -1881,7 +1948,7 @@ function renderJobs(list) {
           })()}
         </div>
         <div class="jb-actions">
-          ${applyBtn}
+          <button class="jb-view-btn">Ver Vaga <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
           <div class="jb-share-wrap">
             <button class="jb-share-btn" title="Partilhar vaga" onclick="event.stopPropagation();toggleShareMenu(this)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -1986,17 +2053,6 @@ function renderOverviewJobs() {
     const locTag  = loc ? `<span class="jb-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>` : '';
     const contactType = j.ContactType || j.contact_type || 'url';
     const onlineTag = j.Url ? `<span class="jb-tag jb-tag-green">✓ ${contactType==='whatsapp'?'WhatsApp':contactType==='email'?'Email':'Online'}</span>` : '';
-    let applyBtn = `<span class="jb-apply jb-apply-ghost" style="cursor:default;opacity:.5;">Sem contacto</span>`;
-    if (j.Url) {
-      if (contactType==='whatsapp') {
-        const wa = j.Url.replace(/\D/g,'');
-        applyBtn = `<a class="jb-apply jb-apply-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg> WhatsApp</a>`;
-      } else if (contactType==='email') {
-        applyBtn = `<a class="jb-apply jb-apply-email" href="mailto:${j.Url}" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</a>`;
-      } else {
-        applyBtn = `<a class="jb-apply" href="${j.Url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Candidatar →</a>`;
-      }
-    }
     /* inline deadline */
     const sd = j.StartDate||j.start_date, ed = j.EndDate||j.end_date;
     let dateLine = `<div class="jb-date"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${ago||'Data não especificada'}</div>`;
@@ -2009,7 +2065,7 @@ function renderOverviewJobs() {
       const fmt=d=>new Date(d).toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
       dateLine+=`<div class="jb-deadline ${cls}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${expired?`Prazo: ${fmt(ed)}<span class="jb-expired-badge">Encerrado</span>`:soon?`Prazo: ${fmt(ed)} · ${diff}d restantes`:`Prazo: ${fmt(ed)}`}</div>`;
     }
-    return `<div class="jb-card" style="animation-delay:${i*.05}s" onclick="nav('jobs',null)">
+    return `<div class="jb-card" style="animation-delay:${i*.05}s" onclick="openJobDetail(${j.Id||j.id})">
       <div class="jb-top">
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="jb-logo" style="background:${grad}"><div class="jb-logo-ring"></div>${init}</div>
@@ -2023,7 +2079,7 @@ function renderOverviewJobs() {
       <div class="jb-tags">${catTag}${locTag}${onlineTag}</div>
       <div class="jb-foot">
         <div class="jb-dates">${dateLine}</div>
-        ${applyBtn}
+        <button class="jb-view-btn">Ver Vaga <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
       </div>
     </div>`;
   }).join('');
@@ -2588,6 +2644,31 @@ document.querySelectorAll('.sb-item').forEach(el => {
   onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Pedir Ajuda">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
 </button>
+
+<!-- Modal Detalhes da Vaga -->
+<div id="jobModal" class="job-modal-ov" style="display:none;" onclick="if(event.target===this)closeJobDetail()">
+  <div class="job-modal-box">
+    <div class="job-modal-hdr">
+      <div class="job-modal-logo" id="jobModalLogo"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="jobModalTitle" style="font-size:17px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px;"></div>
+        <div id="jobModalCompany" style="font-size:12px;color:var(--t3);display:flex;align-items:center;gap:5px;"></div>
+        <div id="jobModalTags" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;"></div>
+      </div>
+      <button onclick="closeJobDetail()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="job-modal-body">
+      <div id="jobModalDates" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div id="jobModalDesc"></div>
+    </div>
+    <div class="job-modal-foot">
+      <button onclick="closeJobDetail()" style="padding:8px 16px;border:1.5px solid var(--border);border-radius:var(--rs);background:#fff;font-size:13px;cursor:pointer;color:var(--t3);">Fechar</button>
+      <div id="jobModalApplyBtn"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Suporte -->
 <div id="supportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:flex-end;justify-content:flex-end;padding:24px;" onclick="if(event.target===this)closeSupportChat()">
