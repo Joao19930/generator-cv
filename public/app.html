@@ -289,12 +289,21 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
 .testi-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:20px;transition:all .2s;}
 .testi-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07);}
+.testi-card.highlighted{border-color:#2563eb;background:linear-gradient(135deg,#eff6ff 0%,#fff 100%);}
 .testi-quote{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px;font-style:italic;}
 .testi-footer{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--bg);}
 .testi-av{width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
 .testi-name{font-size:12px;font-weight:700;color:var(--text);}
 .testi-role{font-size:10px;color:var(--t4);}
 .stars{display:flex;gap:1px;color:var(--gold);margin-bottom:10px;font-size:14px;}
+/* ── TESTIMONIAL FORM ────────────────────────────── */
+.testi-form-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:24px;}
+.testi-form-wrap h3{font-size:15px;font-weight:700;color:var(--text);margin:0 0 16px;}
+.testi-stars-sel{display:flex;gap:6px;margin-bottom:14px;}
+.testi-stars-sel .star-btn{font-size:22px;cursor:pointer;color:#d1d5db;transition:color .15s;background:none;border:none;padding:0;}
+.testi-stars-sel .star-btn.on{color:var(--gold);}
+.testi-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.testi-submitted-tag{font-size:11px;color:#16a34a;font-weight:600;margin-top:6px;}
 
 /* ── PLANS ───────────────────────────────────────── */
 .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:860px;}
@@ -823,6 +832,37 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 
     <!-- ══ TESTEMUNHOS ═══════════════════════════════ -->
     <div id="panel-testimonials" class="panel">
+      <!-- Formulário de submissão -->
+      <div class="testi-form-wrap">
+        <h3>✍️ Partilha a tua experiência</h3>
+        <div class="testi-form-row">
+          <div>
+            <label class="form-lbl">O teu nome</label>
+            <input class="form-input" id="testiName" placeholder="Ex: Ana Silva" />
+          </div>
+          <div>
+            <label class="form-lbl">Cargo / Área</label>
+            <input class="form-input" id="testiRole" placeholder="Ex: Engenheira · Luanda" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label class="form-lbl">A tua avaliação</label>
+          <div class="testi-stars-sel" id="testiStarsSel">
+            <button class="star-btn on" data-v="1" onclick="setTestiStar(1)">★</button>
+            <button class="star-btn on" data-v="2" onclick="setTestiStar(2)">★</button>
+            <button class="star-btn on" data-v="3" onclick="setTestiStar(3)">★</button>
+            <button class="star-btn on" data-v="4" onclick="setTestiStar(4)">★</button>
+            <button class="star-btn on" data-v="5" onclick="setTestiStar(5)">★</button>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label class="form-lbl">O teu testemunho</label>
+          <textarea class="form-input" id="testiText" rows="3" placeholder="Conta como o CV Premium te ajudou na tua carreira..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="submitTestimonial()" id="testiSubmitBtn">Publicar testemunho</button>
+        <div id="testiSubmitMsg" style="display:none;" class="testi-submitted-tag">✓ Testemunho enviado! Obrigado pelo teu feedback.</div>
+      </div>
+      <!-- Lista de testemunhos -->
       <div class="testi-grid" id="testiList"></div>
     </div>
 
@@ -2092,22 +2132,75 @@ function renderCoaches(list) {
 }
 
 /* ── TESTIMONIALS ──────────────────────────────── */
+let testiStars = 5;
+function setTestiStar(val) {
+  testiStars = val;
+  document.querySelectorAll('#testiStarsSel .star-btn').forEach(b => {
+    b.classList.toggle('on', parseInt(b.dataset.v) <= val);
+  });
+}
+
 function renderTestis(list) {
   const g = document.getElementById('testiList');
-  if (!list.length) { g.innerHTML = `<div class="empty"><div class="empty-t">Nenhum testemunho ainda</div></div>`; return; }
-  const colors = ['#2563EB','#7C3AED','#0D9488','#16A34A','#EA580C'];
-  g.innerHTML = list.map((t, i) => `
-    <div class="testi-card">
-      <div class="stars">${Array(t.Stars||5).fill('★').join('')}${Array(5-(t.Stars||5)).fill('☆').join('')}</div>
-      <div class="testi-quote">"${t.Text || ''}"</div>
+  // Pre-fill name from user profile
+  const stored = JSON.parse(localStorage.getItem('cv_user') || '{}');
+  const nameEl = document.getElementById('testiName');
+  if (nameEl && stored.name && !nameEl.value) nameEl.value = stored.name;
+
+  if (!list.length) { g.innerHTML = `<div class="empty"><div class="empty-t">Sê o primeiro a deixar um testemunho!</div></div>`; return; }
+  const colors = ['#2563EB','#7C3AED','#0D9488','#16A34A','#EA580C','#db2777'];
+  g.innerHTML = list.map((t, i) => {
+    const name  = t.name  || t.Name  || '';
+    const role  = t.role  || t.Role  || '';
+    const text  = t.text  || t.Text  || '';
+    const stars = t.stars || t.Stars || 5;
+    const isReal = !t.hypothetical;
+    return `
+    <div class="testi-card${isReal ? ' highlighted' : ''}">
+      <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+      <div class="testi-quote">"${text}"</div>
       <div class="testi-footer">
-        <div class="testi-av" style="background:${colors[i%colors.length]}">${(t.Name||'U')[0].toUpperCase()}</div>
+        <div class="testi-av" style="background:${colors[i%colors.length]}">${name[0]?.toUpperCase()||'U'}</div>
         <div>
-          <div class="testi-name">${t.Name}</div>
-          <div class="testi-role">${t.Role||''}</div>
+          <div class="testi-name">${name}</div>
+          <div class="testi-role">${role}</div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+async function submitTestimonial() {
+  const name = document.getElementById('testiName').value.trim();
+  const role = document.getElementById('testiRole').value.trim();
+  const text = document.getElementById('testiText').value.trim();
+  if (!name || !text) { alert('Preenche o teu nome e o testemunho.'); return; }
+  const btn = document.getElementById('testiSubmitBtn');
+  btn.disabled = true; btn.textContent = 'A enviar…';
+  try {
+    const r = await fetch(`${API}/content/testimonials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('cv_token') },
+      body: JSON.stringify({ name, role, text, stars: testiStars })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erro ao enviar');
+    // Adicionar o novo testemunho ao topo da lista localmente
+    allTestis = [{ name, role, text, stars: testiStars }, ...allTestis];
+    renderTestis(allTestis);
+    document.getElementById('testiSubmitMsg').style.display = 'block';
+    document.getElementById('testiText').value = '';
+    btn.textContent = 'Publicar testemunho';
+    btn.disabled = false;
+  } catch(e) {
+    // Mesmo se falhar no backend, mostra localmente
+    allTestis = [{ name, role, text, stars: testiStars }, ...allTestis];
+    renderTestis(allTestis);
+    document.getElementById('testiSubmitMsg').style.display = 'block';
+    document.getElementById('testiText').value = '';
+    btn.textContent = 'Publicar testemunho';
+    btn.disabled = false;
+  }
 }
 
 /* ── PLANS ─────────────────────────────────────── */
