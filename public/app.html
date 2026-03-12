@@ -502,7 +502,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     </a>
 
     <div class="sb-sec">Ferramentas</div>
-    <a href="/ats" class="sb-item">
+    <a class="sb-item" onclick="nav('ats',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Score ATS
     </a>
@@ -830,6 +830,65 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       </div>
     </div>
 
+    <!-- ══ SCORE ATS ═════════════════════════════════ -->
+    <div id="panel-ats" class="panel">
+
+      <!-- Info -->
+      <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:12px;padding:24px 28px;margin-bottom:22px;color:#fff;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;opacity:.7;margin-bottom:8px;">O QUE É O ATS?</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:8px;">Applicant Tracking System — o filtro automático das empresas</div>
+        <div style="font-size:12px;opacity:.8;line-height:1.6;max-width:600px;">Mais de 75% dos CVs são eliminados por software antes de um humano os ler. O ATS filtra por palavras-chave, formato e estrutura. Testa aqui o teu CV gratuitamente.</div>
+        <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
+          <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px 16px;text-align:center;"><strong style="display:block;font-size:20px;">75%</strong><span style="font-size:10px;opacity:.7;">CVs eliminados</span></div>
+          <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px 16px;text-align:center;"><strong style="display:block;font-size:20px;">6 seg</strong><span style="font-size:10px;opacity:.7;">Leitura humana</span></div>
+          <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px 16px;text-align:center;"><strong style="display:block;font-size:20px;">+40%</strong><span style="font-size:10px;opacity:.7;">Mais entrevistas</span></div>
+        </div>
+      </div>
+
+      <!-- Ferramenta de análise -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:22px;margin-bottom:22px;">
+        <div class="sec-title" style="margin-bottom:4px;">Analisar o meu CV</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:16px;">Cola o texto do teu CV e a descrição da vaga para obteres o score ATS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div>
+            <label class="form-lbl">Texto do teu CV</label>
+            <textarea class="form-input" id="atsCvText" rows="9" placeholder="Cola aqui todo o texto do teu CV (sem formatação especial)..."></textarea>
+          </div>
+          <div>
+            <label class="form-lbl">Descrição da vaga</label>
+            <textarea class="form-input" id="atsJobDesc" rows="9" placeholder="Cola aqui a descrição completa da vaga a que te candidatas..."></textarea>
+          </div>
+        </div>
+        <button class="btn-primary" id="atsAnalyzeBtn" onclick="runATSScore()">⚡ Analisar Score ATS</button>
+        <div id="atsResult" style="display:none;margin-top:18px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:18px;">
+          <div style="display:flex;align-items:flex-end;gap:14px;">
+            <div id="atsScoreNum" style="font-size:48px;font-weight:900;line-height:1;"></div>
+            <div style="flex:1;">
+              <div id="atsScoreLabel" style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px;"></div>
+              <div style="background:#e2e8f0;border-radius:20px;height:10px;overflow:hidden;"><div id="atsScoreBar" style="height:100%;border-radius:20px;background:var(--blue);transition:width .8s ease;width:0%;"></div></div>
+            </div>
+          </div>
+          <div id="atsScoreFeedback" style="font-size:12px;color:var(--t2);line-height:1.7;margin-top:14px;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- 10 exemplos -->
+      <div class="sec-hdr"><div class="sec-title">10 Exemplos de CV ATS Optimizado</div></div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:16px;">Sem foto, palavras-chave estratégicas, estrutura clara — prontos para copiar e adaptar</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:28px;" id="atsCvGrid"></div>
+
+      <!-- Dicas -->
+      <div class="sec-title" style="margin-bottom:12px;">Como tornar o teu CV ATS-friendly</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">📝</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Sem fotos nem gráficos</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">O ATS não consegue ler imagens. Remove a foto e gráficos de habilidades.</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">🔑</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Palavras-chave da vaga</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">Usa exactamente as mesmas palavras da descrição da vaga no teu CV.</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">📋</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Secções padrão</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">Usa títulos como "Experiência", "Educação", "Competências" — sem criatividade.</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">📊</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Números e resultados</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">"Aumentei vendas em 35%" vale muito mais que "melhorei vendas".</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">📅</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Formato de datas</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">Usa sempre mês/ano: Jan 2022 – Dez 2023. Nunca só "2022-2023".</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;"><div style="font-size:22px;margin-bottom:8px;">🗂️</div><div style="font-size:12px;font-weight:700;margin-bottom:4px;">Coluna única</div><div style="font-size:11px;color:var(--t3);line-height:1.5;">Evita tabelas e colunas. Um CV em coluna única passa melhor no ATS.</div></div>
+      </div>
+    </div>
+
     <!-- ══ TESTEMUNHOS ═══════════════════════════════ -->
     <div id="panel-testimonials" class="panel">
       <!-- Formulário de submissão -->
@@ -1001,7 +1060,7 @@ const PAL_BG = {
 };
 const PANEL_TITLES = {
   overview:'Visão Geral', cvs:'CVs Criados', templates:'Templates de CV',
-  jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos',
+  jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos', ats:'Score ATS',
   plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições',
   cover:'Carta de Apresentação'
 };
@@ -1091,6 +1150,7 @@ function nav(id, el) {
   if (el) el.classList.add('active');
   document.getElementById('tbTitle').textContent = PANEL_TITLES[id] || id;
   setBottomActive(id);
+  if (id === 'ats') initATSPanel();
 }
 
 function setBottomActive(id) {
@@ -2133,6 +2193,138 @@ function renderCoaches(list) {
   }).join('');
 }
 
+/* ── SCORE ATS ─────────────────────────────────── */
+const ATS_CVS = [
+  { name:'Carlos António Mendes', title:'Engenheiro de Software Sénior', score:94, color:'#2563EB',
+    exp:'Eng. Sénior · TechCorp Angola · Jan 2020–Presente', edu:'Lic. Eng. Informática · UAN · 2015',
+    skills:['Node.js','React','TypeScript','PostgreSQL','AWS','Docker','Kubernetes','Git'],
+    courses:['AWS Solutions Architect (2021)','React & TypeScript — Coursera (2021)'],
+    summary:'Engenheiro de Software com 8 anos de experiência em desenvolvimento web e mobile. Liderou equipas de até 12 pessoas. Reduziu tempo de resposta da API em 40%.',
+    fullExp:[{r:'Eng. Sénior',c:'TechCorp Angola',p:'Jan 2020–Presente',d:'Plataforma bancária digital com 500k utilizadores. Liderança técnica de equipa de 8 engenheiros.'},{r:'Eng. de Software',c:'Unitel',p:'Mar 2017–Dez 2019',d:'Migração de sistema legado COBOL para microserviços Node.js. Redução de custos em 60%.'}] },
+  { name:'Ana Luísa Ferreira', title:'Gestora de Projectos de TI', score:91, color:'#7C3AED',
+    exp:'Gestora Sénior · Sonangol · Abr 2021–Presente', edu:'MBA Gestão de Projectos · Univ. Católica AO · 2018',
+    skills:['PMP','Scrum','PRINCE2','MS Project','Power BI','JIRA','Gestão de Risco'],
+    courses:['PMP — PMI (2019)','Scrum Master — Scrum Alliance (2020)'],
+    summary:'Gestora de Projectos certificada PMP com 6 anos em TI e transformação digital. Entregou +20 projectos no prazo. Reduziu desvios de prazo em 25%.',
+    fullExp:[{r:'Gestora Sénior',c:'Sonangol',p:'Abr 2021–Presente',d:'Carteira de projectos digitais com orçamento de 5M USD. Implementação de PMO.'},{r:'Gestora de Projectos',c:'BAI Banco',p:'Jan 2018–Mar 2021',d:'Transformação digital do banco. Entregue 2 meses antes do prazo.'}] },
+  { name:'João Pedro Baptista', title:'Analista Financeiro Sénior', score:89, color:'#0D9488',
+    exp:'Analista Sénior · Banco BIC · Mar 2020–Presente', edu:'Lic. Finanças · Univ. Jean Piaget AO · 2015',
+    skills:['Excel Avançado','Bloomberg','Python','SQL','IFRS','DCF','Power BI','SAP FI'],
+    courses:['CFA Level II (2021)','Financial Modelling — CFI (2020)'],
+    summary:'Analista Financeiro com 7 anos em análise de investimentos e gestão de risco. Reduziu NPL em 18% com modelos de scoring. Fluente em PT, EN e FR.',
+    fullExp:[{r:'Analista Sénior',c:'Banco BIC',p:'Mar 2020–Presente',d:'Análise de crédito corporativo para carteira de 150M USD.'},{r:'Analista Financeiro',c:'BP Angola',p:'Jan 2017–Fev 2020',d:'Modelação financeira de projectos petrolíferos com investimentos de 50M USD+.'}] },
+  { name:'Maria Conceição Silva', title:'Enfermeira Especialista UCI', score:87, color:'#16A34A',
+    exp:'Enf. Especialista · Sagrada Esperança · Jun 2019–Presente', edu:'Especialização UCI · ISCS Angola · 2018',
+    skills:['UCI','Ventilação Mecânica','IACS','Triagem Manchester','SAV','BLS','HIS'],
+    courses:['SAV — AHA (2023)','Ventilação Mecânica — SPCI (2021)'],
+    summary:'Enfermeira Especialista com 9 anos em UCI e Emergência. Reduziu infecções nosocomiais em 30%. Formadora certificada em suporte avançado de vida.',
+    fullExp:[{r:'Enf. Especialista UCI',c:'Sagrada Esperança',p:'Jun 2019–Presente',d:'Coordenação de equipa de 15 enfermeiros. Protocolo próprio de higiene reduziu infecções em 30%.'},{r:'Enf. de Emergência',c:'Hospital Américo Boavida',p:'Jan 2016–Mai 2019',d:'Triagem e cuidados em serviço com 200 atendimentos/dia.'}] },
+  { name:'Rui António Domingos', title:'Arquitecto Civil Sénior', score:92, color:'#EA580C',
+    exp:'Arquitecto Sénior · COBA Angola · Fev 2019–Presente', edu:'Mestrado em Arquitectura · Univ. Técnica Lisboa · 2013',
+    skills:['AutoCAD','Revit','BIM','SketchUp','ArchiCAD','LEED','Gestão de Obra'],
+    courses:['BIM Avançado — Autodesk (2020)','LEED — GBCI (2021)'],
+    summary:'Arquitecto Civil com 10 anos em projectos residenciais e comerciais. Responsável por obras de habitação social para 2.000 famílias. Certificado BIM Manager.',
+    fullExp:[{r:'Arquitecto Sénior',c:'COBA Angola',p:'Fev 2019–Presente',d:'Liderança de equipa em projecto de habitação para 2.000 famílias em Benguela.'},{r:'Arquitecto de Projectos',c:'Mota-Engil Angola',p:'Mar 2016–Jan 2019',d:'Projectos de infra-estrutura para o MINCONS.'}] },
+  { name:'Fernanda Costa Queirós', title:'Advogada Corporativa', score:88, color:'#DB2777',
+    exp:'Advogada Sénior · MCA Law Firm · Mai 2020–Presente', edu:'Mestrado Direito Empresarial · Univ. Lusíada AO · 2015',
+    skills:['Direito Comercial','M&A','Due Diligence','Compliance','Arbitragem','FCPA'],
+    courses:['Arbitragem ICC (2021)','Compliance & Anti-Corrupção — ICA (2020)'],
+    summary:'Advogada especializada em Direito Comercial e M&A com 8 anos. Assessoria a multinacionais nos sectores petrolífero e financeiro. Arbitragem CIRDI e ICC.',
+    fullExp:[{r:'Advogada Sénior',c:'MCA Law Firm',p:'Mai 2020–Presente',d:'Assessoria a multinacionais. Contratos de joint venture e PPP.'},{r:'Advogada',c:'KPMG Angola',p:'Jan 2017–Abr 2020',d:'Due diligence em operações M&A acima de 200M USD.'}] },
+  { name:'Miguel Tavares Santos', title:'Director Comercial', score:90, color:'#D97706',
+    exp:'Director Comercial · Refriango · Jul 2020–Presente', edu:'MBA Marketing e Vendas · Univ. Católica AO · 2016',
+    skills:['Vendas B2B','KAM','CRM Salesforce','Negociação','P&L','Forecasting','Power BI'],
+    courses:['Negociação — HBS Online (2022)','Salesforce CRM (2021)'],
+    summary:'Director Comercial com 11 anos em vendas B2B. Cresceu receita de 35M para 77M USD em 3 anos. Abertura de 3 novos segmentos de mercado.',
+    fullExp:[{r:'Director Comercial',c:'Refriango',p:'Jul 2020–Presente',d:'Equipa de 45 pessoas em 6 províncias. Crescimento de 120% em 3 anos.'},{r:'Gestor de Grandes Contas',c:'Coca-Cola SABCO Angola',p:'Jan 2016–Jun 2020',d:'Carteira de 80 clientes-chave com facturação de 15M USD/ano.'}] },
+  { name:'Isabel Cardoso Neto', title:'CFO / Contabilista Certificada', score:93, color:'#0891B2',
+    exp:'CFO · Grupo Zahara Angola · Jan 2019–Presente', edu:'ACCA · ACCA Global · 2014',
+    skills:['SAP S/4HANA','IFRS','ACCA','Consolidação','Tesouraria','Power BI','Auditoria'],
+    courses:['SAP S/4HANA Finance (2019)','IFRS Avançado — ICAEW (2020)'],
+    summary:'CFO com 12 anos em gestão financeira. Implementou SAP com poupança de 800K USD/ano. Negoceou linhas de crédito de 30M USD. Supervisão de grupo com 200M USD de volume.',
+    fullExp:[{r:'CFO',c:'Grupo Zahara Angola',p:'Jan 2019–Presente',d:'10 empresas, 200M USD de volume. SAP S/4HANA reduz custos em 800K/ano.'},{r:'Controllora Financeira',c:'Standard Bank Angola',p:'Jun 2015–Dez 2018',d:'Relatórios IFRS para sede em Joanesburgo.'}] },
+  { name:'Pedro Lopes Mbinda', title:'Professor Universitário / Investigador', score:85, color:'#4F46E5',
+    exp:'Prof. Associado · ISTAA · Set 2017–Presente', edu:'Doutoramento Eng. Agronómica · ISA Lisboa · 2013',
+    skills:['Fitotecnia','GIS','R Estatístico','SPSS','Agricultura de Precisão','Publicação Científica'],
+    courses:['Agricultura de Precisão — Wageningen (2021)','Sistemas de Irrigação — FAO (2020)'],
+    summary:'Professor e Investigador com 14 anos em Eng. Agronómica. Publicou 18 artigos indexados. Coordenou 3 projectos FAO/UE. Orientou 12 dissertações de mestrado.',
+    fullExp:[{r:'Prof. Associado',c:'ISTAA Angola',p:'Set 2017–Presente',d:'Leccionação, orientação de dissertações e coordenação do Laboratório de Solos.'},{r:'Investigador Principal',c:'FAO Angola',p:'Jan 2014–Ago 2017',d:'Projecto de segurança alimentar para 50.000 famílias no corredor de Malanje.'}] },
+  { name:'Carla Sofia Domingos', title:'Especialista Marketing Digital', score:91, color:'#BE185D',
+    exp:'Head of Digital · Dentsu Angola · Mar 2021–Presente', edu:'Pós-Grad. Marketing Digital · ISCEM Lisboa · 2018',
+    skills:['Google Analytics 4','Meta Ads','Google Ads','SEO/SEM','HubSpot','Copywriting','A/B Testing'],
+    courses:['Meta Blueprint Professional (2022)','Google Analytics 4 (2023)'],
+    summary:'Head of Digital com 7 anos. Gere budget de 2M USD/ano. Cresceu 180% em leads qualificados. ROI de 420% nas campanhas de performance.',
+    fullExp:[{r:'Head of Digital',c:'Dentsu Angola',p:'Mar 2021–Presente',d:'Equipa de 10 profissionais. Clientes: Unitel, BAI, Ensa. Budget 2M USD/ano.'},{r:'Digital Manager',c:'Finstar Group',p:'Jun 2018–Fev 2021',d:'App com 100k downloads em 6 meses. ROI 420% em campanhas.'}] },
+];
+
+let _atsModalCV = null;
+function initATSPanel() {
+  const grid = document.getElementById('atsCvGrid');
+  if (!grid || grid.children.length) return;
+  grid.innerHTML = ATS_CVS.map((cv,i) => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:.2s;" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow=''">
+      <div style="padding:16px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+          <div style="width:40px;height:40px;border-radius:50%;background:${cv.color};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;">${cv.name[0]}</div>
+          <div style="min-width:0;">
+            <div style="font-size:13px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cv.name}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:1px;">${cv.title}</div>
+          </div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;color:var(--blue);white-space:nowrap;flex-shrink:0;">ATS ${cv.score}%</div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:.8px;margin-bottom:5px;">EXPERIÊNCIA RECENTE</div>
+        <div style="font-size:11px;color:#334155;margin-bottom:10px;">${cv.exp}</div>
+        <div style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:.8px;margin-bottom:5px;">COMPETÊNCIAS</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px;">${cv.skills.slice(0,5).map(s=>`<span style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 6px;font-size:10px;color:#475569;">${s}</span>`).join('')}</div>
+        <div style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:.8px;margin-bottom:5px;">FORMAÇÃO</div>
+        <div style="font-size:11px;color:#334155;">${cv.edu}</div>
+      </div>
+      <div style="padding:10px 16px;background:#f8fafc;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+        <button onclick="openATSCV(${i})" style="font-family:'Sora',sans-serif;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid #bfdbfe;border-radius:5px;padding:5px 10px;cursor:pointer;">Ver CV completo →</button>
+      </div>
+    </div>`).join('');
+}
+
+function openATSCV(i) {
+  _atsModalCV = ATS_CVS[i];
+  const cv = _atsModalCV;
+  const expTxt = cv.fullExp.map(e=>`${e.r} | ${e.c} | ${e.p}\n${e.d}`).join('\n\n');
+  const txt = `${cv.name.toUpperCase()}\n${cv.title}\n\nRESUMO PROFISSIONAL\n${cv.summary}\n\nEXPERIÊNCIA PROFISSIONAL\n${expTxt}\n\nFORMAÇÃO\n${cv.edu}\n\nCURSOS E CERTIFICAÇÕES\n${cv.courses.join('\n')}\n\nCOMPETÊNCIAS TÉCNICAS\n${cv.skills.join(' · ')}`;
+  document.getElementById('atsModalTitle').textContent = `${cv.name} — ${cv.title}`;
+  document.getElementById('atsModalBody').textContent = txt;
+  document.getElementById('atsModal').style.display = 'flex';
+}
+
+function closeATSModal() { document.getElementById('atsModal').style.display = 'none'; }
+function copyATSCV() {
+  navigator.clipboard.writeText(document.getElementById('atsModalBody').textContent);
+  const b = event.target; const t = b.textContent; b.textContent = '✓ Copiado!'; setTimeout(()=>b.textContent=t,1500);
+}
+
+async function runATSScore() {
+  const cvText = document.getElementById('atsCvText').value.trim();
+  const jobDesc = document.getElementById('atsJobDesc').value.trim();
+  if (!cvText || !jobDesc) { alert('Preenche os dois campos para analisar.'); return; }
+  const btn = document.getElementById('atsAnalyzeBtn');
+  btn.disabled = true; btn.textContent = '⏳ A analisar…';
+  try {
+    const r = await fetch(`${API}/cv/ats-score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cvText, jobDescription: jobDesc}) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erro na análise');
+    const score = typeof d.score === 'number' ? d.score : parseInt(d.score) || 0;
+    const col = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626';
+    document.getElementById('atsScoreNum').textContent = score + '%';
+    document.getElementById('atsScoreNum').style.color = col;
+    document.getElementById('atsScoreLabel').textContent = score >= 80 ? '🎉 Excelente — Passa no ATS!' : score >= 60 ? '⚠️ Bom — Pode melhorar' : '❌ Fraco — Necessita revisão';
+    document.getElementById('atsScoreBar').style.cssText = `height:100%;border-radius:20px;background:${col};transition:width .8s ease;width:${score}%;`;
+    document.getElementById('atsScoreFeedback').textContent = d.feedback || d.suggestions || '';
+    document.getElementById('atsResult').style.display = 'block';
+  } catch(e) { alert('Erro: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '⚡ Analisar Score ATS'; }
+}
+
 /* ── TESTIMONIALS ──────────────────────────────── */
 let testiStars = 5;
 function setTestiStar(val) {
@@ -2363,6 +2555,21 @@ document.querySelectorAll('.sb-item').forEach(el => {
     </button>
   </div>
 </nav>
+
+<!-- MODAL CV ATS -->
+<div id="atsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;" onclick="if(event.target===this)closeATSModal()">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;margin:16px;display:flex;flex-direction:column;">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div id="atsModalTitle" style="font-size:14px;font-weight:800;"></div>
+      <button onclick="closeATSModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8;line-height:1;">×</button>
+    </div>
+    <div id="atsModalBody" style="padding:22px;font-size:12px;color:#334155;line-height:1.7;white-space:pre-wrap;font-family:monospace;flex:1;"></div>
+    <div style="padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="copyATSCV()" style="font-family:'Sora',sans-serif;font-size:12px;font-weight:700;padding:9px 18px;background:#f1f5f9;color:#475569;border:1px solid var(--border);border-radius:7px;cursor:pointer;">📋 Copiar texto</button>
+      <button onclick="window.location.href='/editor'" style="font-family:'Sora',sans-serif;font-size:12px;font-weight:700;padding:9px 18px;background:var(--blue);color:#fff;border:none;border-radius:7px;cursor:pointer;">Usar como base →</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
