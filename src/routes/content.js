@@ -34,13 +34,39 @@ router.get('/courses', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+const daysAgo = d => { const dt = new Date(); dt.setDate(dt.getDate()-d); return dt.toISOString().split('T')[0]; };
+
+const HYPOTHETICAL_JOBS = [
+  // ── Serviços Domésticos ──────────────────────────────────────
+  { id:'hj1', title:'Empregada Doméstica', company:'Família Particular', city:'Luanda', country:'Angola', category:'Serviços Domésticos', description:'Procura-se empregada doméstica para limpeza, cozinha e cuidado de crianças. Regime de internamento. Experiência mínima 2 anos. Referências obrigatórias.', contact_type:'WhatsApp', url:'https://wa.me/244900000001', job_date: daysAgo(1), created_at: daysAgo(1) },
+  { id:'hj2', title:'Cozinheiro(a) Residencial', company:'Família Expat', city:'Luanda', country:'Angola', category:'Serviços Domésticos', description:'Família expatriada procura cozinheiro(a) para preparar refeições diárias (almoço e jantar). Conhecimento de culinária angolana e internacional. Contrato permanente com benefícios.', contact_type:'Email', url:'mailto:recruta@exemplo.com', job_date: daysAgo(2), created_at: daysAgo(2) },
+  { id:'hj3', title:'Babysitter / Ama', company:'Família Santos', city:'Talatona', country:'Angola', category:'Serviços Domésticos', description:'Procura-se ama para cuidar de 2 crianças (3 e 6 anos) das 07h às 17h. Segunda a sexta-feira. Experiência comprovada com crianças. Pessoa paciente, carinhosa e responsável.', contact_type:'Telefone', url:'tel:+244900000003', job_date: daysAgo(3), created_at: daysAgo(3) },
+  { id:'hj4', title:'Jardineiro / Tratador de Piscina', company:'Condomínio Vila Verde', city:'Luanda', country:'Angola', category:'Serviços Domésticos', description:'Condomínio residencial procura jardineiro com experiência em manutenção de jardins tropicais e tratamento de piscinas. Horário: 07h-14h. Documentação em ordem obrigatória.', contact_type:'WhatsApp', url:'https://wa.me/244900000004', job_date: daysAgo(4), created_at: daysAgo(4) },
+  { id:'hj5', title:'Motorista Particular', company:'Família Rodrigues', city:'Luanda', country:'Angola', category:'Serviços Domésticos', description:'Procura-se motorista com carta de condução categoria B válida, mínimo 5 anos de experiência e conhecimento de Luanda. Disponibilidade total. Salário competitivo + alimentação.', contact_type:'WhatsApp', url:'https://wa.me/244900000005', job_date: daysAgo(5), created_at: daysAgo(5) },
+  // ── Administrativos ──────────────────────────────────────────
+  { id:'hj6', title:'Secretária Executiva', company:'Grupo Zahara', city:'Luanda', country:'Angola', category:'Administrativos', description:'Multinacional angolana recruta secretária executiva para apoio à direcção geral. Requisitos: formação em secretariado ou gestão, domínio de Office, inglês fluente, experiência mínima 3 anos. CV Premium valorizado.', contact_type:'Email', url:'mailto:rh@zahara.ao', job_date: daysAgo(1), created_at: daysAgo(1) },
+  { id:'hj7', title:'Assistente Administrativo', company:'Mota-Engil Angola', city:'Luanda', country:'Angola', category:'Administrativos', description:'Empresa de construção recruta assistente administrativo. Funções: arquivo, correspondência, apoio logístico e gestão de agenda. Formação em gestão administrativa e experiência mínima 2 anos.', contact_type:'Email', url:'mailto:rh@mota-engil.ao', job_date: daysAgo(2), created_at: daysAgo(2) },
+  { id:'hj8', title:'Recepcionista Bilingue', company:'Hotel Epic Sana', city:'Luanda', country:'Angola', category:'Administrativos', description:'Hotel 5 estrelas recruta recepcionista com inglês fluente. Responsabilidades: atendimento ao cliente, check-in/check-out, gestão de reservas. Disponibilidade para turnos rotativos.', contact_type:'Email', url:'mailto:rh@epicsana.com', job_date: daysAgo(3), created_at: daysAgo(3) },
+  { id:'hj9', title:'Assistente de Recursos Humanos', company:'Refriango', city:'Luanda', country:'Angola', category:'Administrativos', description:'Empresa FMCG recruta assistente de RH para apoio ao departamento. Funções: processamento de salários, gestão de férias, recrutamento. Licenciatura em Gestão ou RH. Excel avançado obrigatório.', contact_type:'Email', url:'mailto:rh@refriango.ao', job_date: daysAgo(4), created_at: daysAgo(4) },
+  { id:'hj10',title:'Operador de Back-Office', company:'BAI Banco', city:'Luanda', country:'Angola', category:'Administrativos', description:'Banco recruta operadores de back-office para processamento de operações bancárias. Requisitos: licenciatura em Economia ou Finanças, atenção ao detalhe, capacidade de trabalho sob pressão.', contact_type:'Online', url:'https://bai.ao/carreiras', job_date: daysAgo(5), created_at: daysAgo(5) },
+  // ── Função Pública ───────────────────────────────────────────
+  { id:'hj11',title:'Técnico Superior (Concurso Público)', company:'Ministério das Finanças', city:'Luanda', country:'Angola', category:'Função Pública', description:'O Ministério das Finanças abre concurso para técnicos superiores. Requisitos: licenciatura em Economia, Finanças ou Contabilidade. Vínculo permanente ao Estado. Candidatura via portal do MAPESS.', contact_type:'Online', url:'https://mapess.gov.ao', job_date: daysAgo(2), created_at: daysAgo(2) },
+  { id:'hj12',title:'Inspector do Trabalho', company:'Ministério do Trabalho (MAPESS)', city:'Luanda', country:'Angola', category:'Função Pública', description:'Recrutamento de inspectores do trabalho para fiscalização das condições laborais. Licenciatura em Direito ou Gestão de RH. Viaturas e subsídio de campo incluídos. Candidatura presencial ou online.', contact_type:'Online', url:'https://mapess.gov.ao', job_date: daysAgo(3), created_at: daysAgo(3) },
+  { id:'hj13',title:'Professor do Ensino Secundário', company:'Ministério da Educação', city:'Diversas Províncias', country:'Angola', category:'Função Pública', description:'O MED abre vagas para professores do ensino secundário em todas as províncias. Licenciatura em área de ensino obrigatória. Subsídio de fixação para províncias do interior. Inscrições abertas durante 30 dias.', contact_type:'Online', url:'https://med.gov.ao', job_date: daysAgo(4), created_at: daysAgo(4) },
+  { id:'hj14',title:'Técnico de Saúde Pública', company:'Ministério da Saúde (MINSA)', city:'Luanda', country:'Angola', category:'Função Pública', description:'O MINSA recruta técnicos de saúde pública para programas de vacinação e vigilância epidemiológica. Formação em saúde pública ou enfermagem. Contrato por 2 anos renovável.', contact_type:'Online', url:'https://minsa.gov.ao', job_date: daysAgo(5), created_at: daysAgo(5) },
+  { id:'hj15',title:'Agente da Polícia Nacional (Recrutamento)', company:'Polícia Nacional de Angola', city:'Luanda', country:'Angola', category:'Função Pública', description:'Polícia Nacional abre concurso para ingresso na carreira policial. Requisitos: 18-30 anos, ensino médio completo, aptidão física e psicológica. Formação na Escola Nacional de Polícia incluída.', contact_type:'Presencial', url:'https://pna.gov.ao', job_date: daysAgo(6), created_at: daysAgo(6) },
+];
+
 // ── GET /api/content/jobs ─────────────────────────────────────
 router.get('/jobs', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, title, company, city, country, category, job_date, start_date, end_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
-    res.json(r.recordset);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+      .query('SELECT id, title, company, city, country, category, description, job_date, start_date, end_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
+    const real = r.recordset || [];
+    res.json([...real, ...HYPOTHETICAL_JOBS]);
+  } catch (e) {
+    res.json(HYPOTHETICAL_JOBS);
+  }
 });
 
 // ── GET /api/content/testimonials ────────────────────────────
