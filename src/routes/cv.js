@@ -146,6 +146,16 @@ router.post('/improve-text', auth, toolLimiter, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── POST /api/cv/generate-cover-letter — IA: carta de apresentação ──
+router.post('/generate-cover-letter', auth, toolLimiter, async (req, res) => {
+  const { name, role, company, years, skills, type } = req.body;
+  if (!name || !role) return res.status(400).json({ error: 'name e role são obrigatórios' });
+  try {
+    const letter = await openaiConnector.generateCoverLetter({ name, role, company, years, skills, type });
+    res.json({ letter });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── POST /api/cv/generate-summary — IA: gerar resumo ────────
 router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
   const { name, jobTitle, experiences } = req.body;

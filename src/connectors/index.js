@@ -138,6 +138,16 @@ const openaiConnector = {
       messages: [{ role: 'user', content: `Melhore este texto de experiência para o cargo "${jobTitle}" com foco em ATS. Retorne só o texto melhorado em português, máx 3 linhas: "${text}"` }] });
     return r.choices[0].message.content;
   },
+  generateCoverLetter: async ({ name, role, company, years, skills, type }) => {
+    const typeLabels = {
+      emprego:'candidatura a uma vaga específica', espontanea:'candidatura espontânea',
+      estagio:'candidatura a estágio profissional', promocao:'promoção interna',
+      mudanca:'mudança de área de carreira', linkedin:'mensagem no LinkedIn'
+    };
+    const prompt = `Escreve uma carta de apresentação profissional do tipo "${typeLabels[type]||'candidatura'}" em português de Angola (formal mas directo).\n\nCandidato: ${name}\nCargo: ${role}${company?'\nEmpresa: '+company:''}${years?'\nExperiência: '+years:''}${skills?'\nCompetências/conquistas: '+skills:''}\n\nEstrutura: saudação, parágrafo de motivação, parágrafo de valor concreto, fecho com disponibilidade, despedida com o nome.\nMáximo 320 palavras. Devolve apenas o texto da carta.`;
+    const r = await getAI().chat.completions.create({ model:'gpt-4o-mini', messages:[{role:'user',content:prompt}] });
+    return r.choices[0].message.content;
+  },
   generateSummary: async (name, jobTitle, experiences) => {
     const r = await getAI().chat.completions.create({ model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: `Crie um resumo profissional de 4 linhas focado em ATS para ${name}, cargo ${jobTitle}. Experiências: ${experiences}` }] });
@@ -157,7 +167,7 @@ const openaiConnector = {
 const pdfConnector = {
   fromHTML: async (htmlContent) => {
     const puppeteer = require('puppeteer');
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });

@@ -1960,24 +1960,19 @@ async function generateCoverLetter() {
   if (!name || !role) { alert('Preenche pelo menos o teu nome e o cargo.'); return; }
   const btn = document.getElementById('coverGenBtn');
   btn.disabled = true; btn.textContent = 'A gerar…';
-  const typeLabels = {
-    emprego:'candidatura a emprego', espontanea:'candidatura espontânea',
-    estagio:'estágio profissional', promocao:'promoção interna',
-    mudanca:'mudança de carreira', linkedin:'mensagem profissional no LinkedIn'
-  };
-  const prompt = `Escreve uma carta de apresentação profissional do tipo "${typeLabels[coverType]||'candidatura'}" em português de Angola (formal mas não pomposo).\n\nDados:\n- Nome: ${name}\n- Cargo desejado: ${role}${company?'\n- Empresa: '+company:''}${years?'\n- Experiência: '+years+' de experiência':''}${skills?'\n- Competências/conquistas: '+skills:''}\n\nEscreve a carta completa, com saudação, 3 parágrafos (motivação, valor que trago, fecho) e despedida. Máximo 350 palavras. Não incluas data nem cabeçalho de endereço.`;
   try {
-    const r = await fetch('/api/cv/improve-text', {
+    const r = await fetch('/api/cv/generate-cover-letter', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cvToken')},
-      body:JSON.stringify({text: prompt, instruction: 'Gera a carta conforme pedido, devolvendo apenas o texto da carta.'})
+      body:JSON.stringify({ name, role, company, years, skills, type: coverType })
     });
+    if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.error||r.status); }
     const d = await r.json();
-    const result = d.improved || d.result || d.text || 'Erro ao gerar. Tenta novamente.';
+    const result = d.letter || 'Erro ao gerar. Tenta novamente.';
     document.getElementById('coverResult').textContent = result;
     document.getElementById('coverResultWrap').style.display = 'block';
   } catch(e) {
-    document.getElementById('coverResult').textContent = 'Erro de ligação. Verifica a tua conexão e tenta novamente.';
+    document.getElementById('coverResult').textContent = 'Erro: ' + (e.message||'Falha de ligação. Verifica a tua conexão e tenta novamente.');
     document.getElementById('coverResultWrap').style.display = 'block';
   }
   btn.disabled = false;
