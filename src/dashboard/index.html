@@ -1196,6 +1196,7 @@ async function saveJob() {
     city:        document.getElementById('jCity').value.trim(),
     country:     document.getElementById('jCountry').value.trim(),
     category:    document.getElementById('jCat').value,
+    description: document.getElementById('jDesc').value.trim() || null,
     jobDate:     document.getElementById('jDate').value || null,
     startDate:   document.getElementById('jStartDate').value || null,
     endDate:     document.getElementById('jEndDate').value || null,
@@ -1229,6 +1230,7 @@ function editJob(id) {
   const ed = j.EndDate   || j.end_date   || '';
   document.getElementById('jStartDate').value   = sd ? String(sd).substring(0,10) : '';
   document.getElementById('jEndDate').value     = ed ? String(ed).substring(0,10) : '';
+  document.getElementById('jDesc').value        = j.Description || j.description  || '';
   document.getElementById('jUrl').value         = j.Url         || j.url          || '';
   document.getElementById('jContactType').value = j.ContactType || j.contact_type || 'url';
   updateContactPlaceholder();
