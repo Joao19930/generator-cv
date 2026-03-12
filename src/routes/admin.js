@@ -489,4 +489,66 @@ router.post('/template-items/import-sql', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── GET /api/admin/analytics ─────────────────────────────────
+router.get('/analytics', async (req, res) => {
+  try {
+    const [viewsRes, cvRes, supportRes] = await Promise.all([
+      req.db.request().query(`
+        SELECT page, COUNT(*) AS total,
+               COUNT(DISTINCT session_id) AS unique_sessions
+        FROM page_views
+        GROUP BY page ORDER BY total DESC
+      `),
+      req.db.request().query(`
+        SELECT
+          (SELECT COUNT(*) FROM cvs) AS total_cvs,
+          (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
+          (SELECT COUNT(*) FROM cvs WHERE download_count > 0) AS cvs_downloaded,
+          (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d,
+          (SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days') AS views_7d,
+          (SELECT COUNT(*) FROM page_views) AS views_total,
+          (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors,
+          (SELECT COUNT(*) FROM support_tickets WHERE status='open') AS open_tickets
+      `),
+      req.db.request().query(`
+        SELECT page, COUNT(*) AS visits, DATE(created_at) AS day
+        FROM page_views
+        WHERE created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY page, day ORDER BY day DESC, visits DESC
+      `),
+    ]);
+    const stats = cvRes.recordset[0] || {};
+    const abandoned = (stats.TotalCvs || 0) - (stats.CvsWithContent || 0);
+    res.json({
+      stats: { ...stats, abandoned },
+      byPage: viewsRes.recordset,
+      last7days: supportRes.recordset,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── GET /api/admin/support ───────────────────────────────────
+router.get('/support', async (req, res) => {
+  try {
+    const r = await req.db.request().query(
+      `SELECT id, user_id, name, email, message, status, reply, replied_at, created_at
+       FROM support_tickets ORDER BY created_at DESC`
+    );
+    res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── POST /api/admin/support/:id/reply ────────────────────────
+router.post('/support/:id/reply', async (req, res) => {
+  const { reply } = req.body;
+  if (!reply?.trim()) return res.status(400).json({ error: 'Resposta obrigatória.' });
+  try {
+    await req.db.request()
+      .input('id',    sql.Int,      req.params.id)
+      .input('reply', sql.NVarChar, reply.trim())
+      .query(`UPDATE support_tickets SET reply=@reply, status='replied', replied_at=NOW() WHERE id=@id`);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;

@@ -236,6 +236,8 @@ tbody tr:hover{background:#fafafa;}
     <div class="sb-section">Plataforma</div>
     <div class="si" onclick="showPanel('plans',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Planos & Preços</div>
     <div class="si" onclick="showPanel('templates',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Templates de CV</div>
+    <div class="si" onclick="showPanel('analytics',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics<span class="si-badge" id="analyticsBadge" style="display:none">!</span></div>
+    <div class="si" onclick="showPanel('support',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Suporte<span class="si-badge" id="supportBadge" style="display:none">!</span></div>
     <div class="si" onclick="showPanel('distribution',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Distribuição</div>
     <div class="si" onclick="showPanel('settings',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Definições</div>
     <div class="sb-section">Visualizar</div>
@@ -502,6 +504,52 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-field"><label>SendGrid API Key</label><input type="password" id="setSendgrid" placeholder="SG.xxx..."></div>
       <button class="btn btn-blue" onclick="saveAPIKeys()">Guardar Chaves</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ ANALYTICS ════════════════════════════════════════ -->
+<div id="panel-analytics" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Analytics</div><div class="panel-sub">Visitas ao site, abandono de CVs e comportamento dos utilizadores</div></div>
+    <button class="btn btn-blue btn-sm" onclick="loadAnalytics()">↻ Actualizar</button>
+  </div>
+  <div id="analyticsKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div class="table-card" style="padding:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Visitas por Página</div>
+      <div id="analyticsPages"></div>
+    </div>
+    <div class="table-card" style="padding:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Funil de CVs</div>
+      <div id="analyticsCvFunnel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUPORTE ═══════════════════════════════════════════ -->
+<div id="panel-support" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Suporte</div><div class="panel-sub">Mensagens e pedidos de ajuda dos utilizadores</div></div>
+    <button class="btn btn-blue btn-sm" onclick="loadSupport()">↻ Actualizar</button>
+  </div>
+  <div id="alertSupport"></div>
+  <div class="table-card">
+    <table class="table">
+      <thead><tr><th>Utilizador</th><th>Mensagem</th><th>Estado</th><th>Data</th><th>Acção</th></tr></thead>
+      <tbody id="supportTable"><tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px">Sem mensagens</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal resposta suporte -->
+<div id="replyModal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeModal('replyModal')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hdr"><span id="replyModalTitle">Responder</span><button class="modal-close" onclick="closeModal('replyModal')">✕</button></div>
+    <div style="padding:0 20px 8px;font-size:12px;color:var(--t3);" id="replyMsgPreview"></div>
+    <div class="modal-body">
+      <div class="f-field"><label>Resposta</label><textarea id="replyText" rows="4" placeholder="Escreva a sua resposta..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('replyModal')">Cancelar</button><button class="btn btn-blue" onclick="sendReply()">Enviar Resposta</button></div>
   </div>
 </div>
 
@@ -869,6 +917,9 @@ async function loadFromAPI() {
   } catch(e) {
     console.error('API load error:', e);
   }
+  // Carregar analytics e suporte em background
+  loadAnalytics().catch(()=>{});
+  loadSupport().catch(()=>{});
 }
 
 function applyStats(d) {
@@ -2016,6 +2067,114 @@ function changePassword() {
 
 function saveAPIKeys() {
   showAlert('alertSettings', 'Chaves de API guardadas (requer reinício do servidor).', 'green');
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const r = await fetch(API + '/api/admin/analytics', h);
+    if (!r.ok) { document.getElementById('analyticsKpis').innerHTML = '<p style="color:red">Erro ao carregar analytics.</p>'; return; }
+    const d = await r.json();
+    const s = d.stats || {};
+    const kpis = [
+      { label: 'Visitas Totais',    val: s.ViewsTotal   || s.views_total   || 0, color: '#2563EB' },
+      { label: 'Visitantes Únicos', val: s.UniqueVisitors|| s.unique_visitors|| 0, color: '#7C3AED' },
+      { label: 'CVs Abandonados',   val: s.Abandoned    || s.abandoned     || 0, color: '#DC2626' },
+      { label: 'Tickets Abertos',   val: s.OpenTickets  || s.open_tickets  || 0, color: '#F59E0B' },
+    ];
+    document.getElementById('analyticsKpis').innerHTML = kpis.map(k =>
+      `<div class="kpi-card"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-label">${k.label}</div></div>`
+    ).join('');
+
+    const pages = d.byPage || [];
+    document.getElementById('analyticsPages').innerHTML = pages.length ? pages.map(p =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span style="font-weight:600;color:var(--text)">${p.Page||p.page}</span>
+        <span style="color:var(--t3)">${p.Total||p.total} visitas · ${p.UniqueSessions||p.unique_sessions} únicos</span>
+      </div>`
+    ).join('') : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px">Sem visitas ainda</p>';
+
+    const tv = s.TotalCvs || s.total_cvs || 0;
+    const wc = s.CvsWithContent || s.cvs_with_content || 0;
+    const dl = s.CvsDownloaded || s.cvs_downloaded || 0;
+    const ab = s.Abandoned || s.abandoned || 0;
+    document.getElementById('analyticsCvFunnel').innerHTML = [
+      { label: 'CVs criados', val: tv, pct: 100 },
+      { label: 'Com conteúdo', val: wc, pct: tv ? Math.round(wc/tv*100) : 0 },
+      { label: 'Descarregados', val: dl, pct: tv ? Math.round(dl/tv*100) : 0 },
+      { label: 'Abandonados', val: ab, pct: tv ? Math.round(ab/tv*100) : 0 },
+    ].map(f =>
+      `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+          <span style="font-weight:600">${f.label}</span><span style="color:var(--t3)">${f.val} (${f.pct}%)</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${f.pct}%;background:var(--blue);border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`
+    ).join('');
+
+    // Badge tickets abertos
+    const openT = s.OpenTickets || s.open_tickets || 0;
+    const sb = document.getElementById('supportBadge');
+    if (sb) { sb.style.display = openT > 0 ? 'inline-block' : 'none'; sb.textContent = openT; }
+  } catch(e) { console.error('Analytics error', e); }
+}
+
+// ── SUPORTE ────────────────────────────────────────────────────
+let _replyId = null;
+
+async function loadSupport() {
+  try {
+    const r = await fetch(API + '/api/admin/support', h);
+    if (!r.ok) return;
+    const tickets = await r.json();
+    const tbody = document.getElementById('supportTable');
+    if (!tickets.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px">Sem mensagens de suporte</td></tr>';
+      return;
+    }
+    tbody.innerHTML = tickets.map(t => {
+      const id = t.Id || t.id;
+      const name = t.Name || t.name || 'Anónimo';
+      const msg = (t.Message || t.message || '').slice(0, 80);
+      const status = t.Status || t.status || 'open';
+      const date = new Date(t.CreatedAt || t.created_at).toLocaleDateString('pt-PT');
+      const badge = status === 'replied'
+        ? `<span style="background:#DCFCE7;color:#16A34A;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">Respondido</span>`
+        : `<span style="background:#FEF3C7;color:#B45309;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">Aberto</span>`;
+      return `<tr>
+        <td style="font-weight:600">${name}<br><span style="font-size:10px;color:var(--t3)">${t.Email||t.email||''}</span></td>
+        <td style="font-size:12px;color:var(--t3);max-width:260px">${msg}${(t.Message||t.message||'').length>80?'…':''}</td>
+        <td>${badge}</td>
+        <td style="font-size:11px;color:var(--t3)">${date}</td>
+        <td><button class="btn btn-blue btn-sm" onclick="openReply(${id},'${name.replace(/'/g,"\\'")}','${(t.Message||t.message||'').replace(/'/g,"\\'").replace(/\n/g,' ').slice(0,100)}')">Responder</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error('Support error', e); }
+}
+
+function openReply(id, name, msg) {
+  _replyId = id;
+  document.getElementById('replyModalTitle').textContent = `Responder a ${name}`;
+  document.getElementById('replyMsgPreview').textContent = `"${msg}"`;
+  document.getElementById('replyText').value = '';
+  document.getElementById('replyModal').style.display = 'flex';
+}
+
+async function sendReply() {
+  const reply = document.getElementById('replyText').value.trim();
+  if (!reply) { alert('Escreva uma resposta.'); return; }
+  try {
+    const r = await fetch(`${API}/api/admin/support/${_replyId}/reply`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ reply })
+    });
+    if (!r.ok) { alert('Erro ao enviar resposta.'); return; }
+    closeModal('replyModal');
+    showAlert('alertSupport', 'Resposta enviada com sucesso.', 'green');
+    await loadSupport();
+  } catch(e) { alert('Erro de ligação.'); }
 }
 
 // ── LOGOUT ────────────────────────────────────────────────────

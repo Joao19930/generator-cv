@@ -11,7 +11,7 @@ const cors    = require('cors');
 const path    = require('path');
 
 // Config & utils
-const { getPool } = require('./config/database');
+const { getPool, sql } = require('./config/database');
 const { socketConnector, redisConnector } = require('./connectors');
 const { setupCrons } = require('./cron/jobs');
 
@@ -141,6 +141,38 @@ app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testim
 app.use('/api/cv',      auth, cvRoutes);
 app.use('/api/payment', paymentRoutes);    // Webhook não usa auth
 
+// ── Tracking de visitas (público, fire-and-forget) ───────────
+app.post('/api/track', async (req, res) => {
+  res.json({ ok: true }); // responde imediatamente
+  try {
+    const pool = await getPool();
+    const { page = '/', sessionId } = req.body;
+    const uid = req.body.userId || null;
+    await pool.request()
+      .input('page', sql.VarChar, String(page).slice(0, 100))
+      .input('uid',  sql.Int,     uid ? parseInt(uid) : null)
+      .input('sid',  sql.VarChar, sessionId ? String(sessionId).slice(0, 64) : null)
+      .query(`INSERT INTO page_views (page, user_id, session_id) VALUES (@page, @uid, @sid)`);
+  } catch (_) {}
+});
+
+// ── Suporte — utilizador envia ticket (JWT) ───────────────────
+app.post('/api/support', auth, async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message?.trim()) return res.status(400).json({ error: 'Mensagem obrigatória.' });
+    const name  = req.user.name  || req.user.email || 'Utilizador';
+    const email = req.user.email || null;
+    await req.db.request()
+      .input('uid',  sql.Int,      req.user.id)
+      .input('name', sql.NVarChar, name)
+      .input('mail', sql.NVarChar, email)
+      .input('msg',  sql.NVarChar, message.trim())
+      .query(`INSERT INTO support_tickets (user_id, name, email, message) VALUES (@uid, @name, @mail, @msg)`);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Rotas Admin (JWT + role=admin) ──────────────────────────
 app.use('/api/admin',   auth, adminOnly, adminRoutes);
 
@@ -213,6 +245,24 @@ async function autoMigrate(pool) {
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE`,
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
     `ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`,
+    `CREATE TABLE IF NOT EXISTS page_views (
+      id         SERIAL PRIMARY KEY,
+      page       VARCHAR(100) NOT NULL,
+      user_id    INTEGER,
+      session_id VARCHAR(64),
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS support_tickets (
+      id          SERIAL PRIMARY KEY,
+      user_id     INTEGER,
+      name        VARCHAR(100) NOT NULL,
+      email       VARCHAR(255),
+      message     TEXT NOT NULL,
+      status      VARCHAR(20) DEFAULT 'open',
+      reply       TEXT,
+      replied_at  TIMESTAMP,
+      created_at  TIMESTAMP DEFAULT NOW()
+    )`,
   ];
   for (const sql of stmts) {
     try { await pool.request().query(sql); } catch (_) {}

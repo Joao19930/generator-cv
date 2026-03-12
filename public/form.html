@@ -1069,7 +1069,6 @@ function calcScore() {
     { key: 'edu',     label: 'Formação',      val: () => document.querySelector('[id^="edu-"]') !== null },
     { key: 'skills',  label: 'Competências',  val: () => (typeof skills !== 'undefined' && skills.length > 0) },
     { key: 'lang',    label: 'Idiomas',       val: () => document.querySelector('[id^="lang-"]') !== null },
-    { key: 'tpl',     label: 'Template',      val: () => (typeof selectedTplId !== 'undefined' && selectedTplId) },
   ];
 
   let filled = 0;
@@ -1203,6 +1202,17 @@ function initAIPanel() {
   const formPanel = document.querySelector('.form-panel');
   if (formPanel) observer.observe(formPanel, { childList: true, subtree: true });
 }
+
+// Tracking de visita
+(function(){
+  try {
+    let sid = sessionStorage.getItem('_sid');
+    if (!sid) { sid = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', sid); }
+    const uid = (() => { try { const t = localStorage.getItem('cv_token'); return t ? JSON.parse(atob(t.split('.')[1])).id : null; } catch(_){return null;} })();
+    fetch('/api/track', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ page: '/editor', sessionId: sid, userId: uid }) }).catch(()=>{});
+  } catch(_) {}
+})();
 
 // Iniciar após carregar CV
 const _origLoadCv = window.onload;

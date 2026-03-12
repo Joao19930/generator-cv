@@ -1084,7 +1084,18 @@ function catColor(cat) {
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   loadAll();
+  trackPageView('/app');
 });
+
+function trackPageView(page) {
+  try {
+    let sid = sessionStorage.getItem('_sid');
+    if (!sid) { sid = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', sid); }
+    const uid = (() => { try { const t = localStorage.getItem('cv_token'); return t ? JSON.parse(atob(t.split('.')[1])).id : null; } catch(_){return null;} })();
+    fetch('/api/track', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ page, sessionId: sid, userId: uid }) }).catch(()=>{});
+  } catch(_) {}
+}
 
 /* ── AUTH ──────────────────────────────────────── */
 function initAuth() {
@@ -2570,6 +2581,63 @@ document.querySelectorAll('.sb-item').forEach(el => {
     </div>
   </div>
 </div>
+
+<!-- ── BOTÃO DE SUPORTE FLUTUANTE ─────────────────────────── -->
+<button id="supportFab" onclick="openSupportChat()"
+  style="position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 18px rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;z-index:900;transition:transform .2s;"
+  onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Pedir Ajuda">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+
+<!-- Modal Suporte -->
+<div id="supportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:flex-end;justify-content:flex-end;padding:24px;" onclick="if(event.target===this)closeSupportChat()">
+  <div style="background:#fff;border-radius:16px;width:360px;max-height:480px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--text)">Suporte CV Premium</div>
+        <div style="font-size:11px;color:var(--t3)">Resposta em menos de 24h</div>
+      </div>
+      <button onclick="closeSupportChat()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--t3)">×</button>
+    </div>
+    <div style="flex:1;padding:16px 20px;overflow-y:auto;" id="supportChatBody">
+      <div style="background:var(--blue-l);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;">
+        <strong>Olá! 👋</strong><br>Como podemos ajudar? Escreve a tua dúvida ou problema e responderemos em breve.
+      </div>
+      <div id="supportSentMsg" style="display:none;background:var(--green-l);border-radius:10px;padding:12px 14px;font-size:12px;color:#16A34A;line-height:1.6;">
+        ✓ Mensagem enviada! Respondemos em menos de 24h.
+      </div>
+    </div>
+    <div id="supportInputArea" style="padding:12px 16px;border-top:1px solid var(--border);">
+      <textarea id="supportMsg" placeholder="Descreve o teu problema..." rows="3"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:12px;resize:none;outline:none;box-sizing:border-box;"></textarea>
+      <button onclick="sendSupportMsg()"
+        style="width:100%;margin-top:8px;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+        Enviar Mensagem
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openSupportChat() { document.getElementById('supportModal').style.display = 'flex'; }
+function closeSupportChat() { document.getElementById('supportModal').style.display = 'none'; }
+async function sendSupportMsg() {
+  const msg = (document.getElementById('supportMsg').value || '').trim();
+  if (!msg) { alert('Escreve a tua mensagem primeiro.'); return; }
+  try {
+    const token = localStorage.getItem('cv_token');
+    const r = await fetch('/api/support', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ message: msg })
+    });
+    if (!r.ok) { alert('Erro ao enviar. Tenta novamente.'); return; }
+    document.getElementById('supportInputArea').style.display = 'none';
+    document.getElementById('supportSentMsg').style.display = 'block';
+    document.getElementById('supportMsg').value = '';
+  } catch(_) { alert('Erro de ligação.'); }
+}
+</script>
 
 </body>
 </html>
