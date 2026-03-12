@@ -84,6 +84,8 @@ app.get('/free-preview', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'free-preview.html')));
 app.get('/demo',         (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'demo.html')));
+app.get('/ats',          (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
 
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
