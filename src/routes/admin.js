@@ -491,40 +491,43 @@ router.post('/template-items/import-sql', async (req, res) => {
 
 // ── GET /api/admin/analytics ─────────────────────────────────
 router.get('/analytics', async (req, res) => {
+  const safe = async (q) => { try { return (await req.db.request().query(q)).recordset; } catch(_) { return []; } };
+  const safeOne = async (q) => { try { return (await req.db.request().query(q)).recordset[0] || {}; } catch(_) { return {}; } };
+
+  const [byPage, cvStats, openTickets] = await Promise.all([
+    safe(`SELECT page, COUNT(*) AS total, COUNT(DISTINCT session_id) AS unique_sessions
+          FROM page_views GROUP BY page ORDER BY total DESC`),
+    safeOne(`SELECT
+      (SELECT COUNT(*) FROM cvs) AS total_cvs,
+      (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
+      (SELECT COUNT(*) FROM page_views) AS views_total,
+      (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors`),
+    safeOne(`SELECT COUNT(*) AS open_tickets FROM support_tickets WHERE status='open'`),
+  ]);
+
+  // download_count pode não existir — tentar separadamente
+  let cvs_downloaded = 0;
   try {
-    const [viewsRes, cvRes, supportRes] = await Promise.all([
-      req.db.request().query(`
-        SELECT page, COUNT(*) AS total,
-               COUNT(DISTINCT session_id) AS unique_sessions
-        FROM page_views
-        GROUP BY page ORDER BY total DESC
-      `),
-      req.db.request().query(`
-        SELECT
-          (SELECT COUNT(*) FROM cvs) AS total_cvs,
-          (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
-          (SELECT COUNT(*) FROM cvs WHERE download_count > 0) AS cvs_downloaded,
-          (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d,
-          (SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days') AS views_7d,
-          (SELECT COUNT(*) FROM page_views) AS views_total,
-          (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors,
-          (SELECT COUNT(*) FROM support_tickets WHERE status='open') AS open_tickets
-      `),
-      req.db.request().query(`
-        SELECT page, COUNT(*) AS visits, DATE(created_at) AS day
-        FROM page_views
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-        GROUP BY page, day ORDER BY day DESC, visits DESC
-      `),
-    ]);
-    const stats = cvRes.recordset[0] || {};
-    const abandoned = (stats.TotalCvs || 0) - (stats.CvsWithContent || 0);
-    res.json({
-      stats: { ...stats, abandoned },
-      byPage: viewsRes.recordset,
-      last7days: supportRes.recordset,
-    });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const r = await req.db.request().query(`SELECT COUNT(*) AS n FROM cvs WHERE download_count > 0`);
+    cvs_downloaded = r.recordset[0]?.N || r.recordset[0]?.n || 0;
+  } catch(_) {}
+
+  const total_cvs    = cvStats.TotalCvs    || cvStats.total_cvs    || 0;
+  const cvs_with_content = cvStats.CvsWithContent || cvStats.cvs_with_content || 0;
+  const abandoned    = total_cvs - cvs_with_content;
+
+  res.json({
+    stats: {
+      total_cvs,
+      cvs_with_content,
+      cvs_downloaded,
+      abandoned,
+      views_total:      cvStats.ViewsTotal      || cvStats.views_total      || 0,
+      unique_visitors:  cvStats.UniqueVisitors   || cvStats.unique_visitors   || 0,
+      open_tickets:     openTickets.OpenTickets  || openTickets.open_tickets  || 0,
+    },
+    byPage,
+  });
 });
 
 // ── GET /api/admin/support ───────────────────────────────────
