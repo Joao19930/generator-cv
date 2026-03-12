@@ -207,8 +207,9 @@ function buildCVHtml(content, templateName) {
   const { name='', jobTitle='', summary='', email='', phone='', address='',
           experiences=[], education=[], skills=[], languages=[], photoUrl='' } = content;
 
+  const nl2br = t => (t||'').replace(/\n/g, '<br>');
   const expHtml = experiences.map(e =>
-    `<div class="exp"><h4>${e.title} — ${e.company}</h4><span>${e.startDate} – ${e.endDate || 'Presente'}</span><p>${e.description}</p></div>`).join('');
+    `<div class="exp"><h4>${e.title} — ${e.company}</h4><span>${e.startDate} – ${e.endDate || 'Presente'}</span><p>${nl2br(e.description)}</p></div>`).join('');
   const eduHtml = education.map(e =>
     `<div class="edu"><h4>${e.degree} — ${e.institution}</h4><span>${e.year}</span></div>`).join('');
   const skillHtml = skills.map(s => `<span class="tag">${s}</span>`).join('');
@@ -229,7 +230,7 @@ function buildCVHtml(content, templateName) {
     <div><h1>${name}</h1><h3>${jobTitle}</h3>
     <div class="contact">${email} ${phone ? '| '+phone : ''} ${address ? '| '+address : ''}</div></div>
   </div>
-  ${summary ? `<section><h2>Resumo</h2><p>${summary}</p></section>` : ''}
+  ${summary ? `<section><h2>Resumo</h2><p>${nl2br(summary)}</p></section>` : ''}
   ${experiences.length ? `<section><h2>Experiência</h2>${expHtml}</section>` : ''}
   ${education.length   ? `<section><h2>Educação</h2>${eduHtml}</section>`   : ''}
   ${skills.length      ? `<section><h2>Competências</h2>${skillHtml}</section>` : ''}
