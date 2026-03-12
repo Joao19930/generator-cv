@@ -232,6 +232,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="si" onclick="showPanel('courses',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Cursos</div>
     <div class="si" onclick="showPanel('coaches',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Mentoria de Carreira</div>
     <div class="si" onclick="showPanel('testimonials',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Testemunhos</div>
+    <div class="si" onclick="showPanel('ats',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Score ATS</div>
     <div class="sb-section">Plataforma</div>
     <div class="si" onclick="showPanel('plans',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Planos & Preços</div>
     <div class="si" onclick="showPanel('templates',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Templates de CV</div>
@@ -387,6 +388,45 @@ tbody tr:hover{background:#fafafa;}
   <div class="table-card">
     <table><thead><tr><th>Autor</th><th>Cargo</th><th>Testemunho</th><th>Activo</th><th>Acções</th></tr></thead>
     <tbody id="testisTable"></tbody></table>
+  </div>
+</div>
+
+<!-- ══ SCORE ATS ════════════════════════════════════════════ -->
+<div id="panel-ats" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-title">Score ATS</div><div class="panel-sub">Gerir exemplos de CVs ATS e testar a ferramenta de análise</div></div>
+    <button class="btn btn-blue" onclick="openModal('atsExModal');atsEditId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Exemplo CV ATS</button>
+  </div>
+
+  <!-- Ferramenta ATS -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Testar Ferramenta Score ATS</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;">Analisa qualquer CV contra uma descrição de vaga (usa a mesma IA dos utilizadores)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--t3);display:block;margin-bottom:4px;">TEXTO DO CV</label>
+        <textarea id="adminAtsCv" rows="8" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:12px;outline:none;resize:vertical;" placeholder="Cola o texto do CV aqui..."></textarea>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--t3);display:block;margin-bottom:4px;">DESCRIÇÃO DA VAGA</label>
+        <textarea id="adminAtsJob" rows="8" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:12px;outline:none;resize:vertical;" placeholder="Cola a descrição da vaga aqui..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-blue" id="adminAtsBtn" onclick="runAdminATS()">⚡ Analisar Score ATS</button>
+    <div id="adminAtsResult" style="display:none;margin-top:14px;background:var(--bg);border-radius:8px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div id="adminAtsNum" style="font-size:42px;font-weight:900;"></div>
+        <div style="flex:1;"><div id="adminAtsLabel" style="font-size:12px;font-weight:700;margin-bottom:6px;"></div><div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;"><div id="adminAtsBar" style="height:100%;border-radius:20px;transition:width .8s;"></div></div></div>
+      </div>
+      <div id="adminAtsFeedback" style="font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap;"></div>
+    </div>
+  </div>
+
+  <!-- Tabela de exemplos -->
+  <div id="alertAts"></div>
+  <div class="table-card">
+    <table><thead><tr><th>Nome</th><th>Cargo</th><th>Score</th><th>Competências</th><th>Acções</th></tr></thead>
+    <tbody id="atsExTable"></tbody></table>
   </div>
 </div>
 
@@ -631,6 +671,30 @@ tbody tr:hover{background:#fafafa;}
   </div>
 </div>
 
+<!-- ATS EXAMPLE MODAL -->
+<div class="modal-overlay" id="atsExModal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-hdr"><div class="modal-title" id="atsExModalTitle">Adicionar Exemplo CV ATS</div><button class="modal-close" onclick="closeModal('atsExModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field"><label>Nome completo</label><input type="text" id="atsExName" placeholder="ex: Carlos Mendes"></div>
+        <div class="f-field"><label>Cargo / Título</label><input type="text" id="atsExTitle" placeholder="ex: Engenheiro de Software"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><label>Score ATS (%)</label><input type="number" id="atsExScore" min="0" max="100" placeholder="ex: 92"></div>
+        <div class="f-field"><label>Cor do avatar (hex)</label><input type="text" id="atsExColor" placeholder="ex: #2563EB" value="#2563EB"></div>
+      </div>
+      <div class="f-field"><label>Resumo profissional</label><textarea id="atsExSummary" rows="3" placeholder="Breve resumo do perfil..."></textarea></div>
+      <div class="f-row">
+        <div class="f-field"><label>Experiência recente (cargo · empresa · período)</label><input type="text" id="atsExExp" placeholder="ex: Eng. Sénior · TechCorp · 2020–Presente"></div>
+        <div class="f-field"><label>Formação (grau · escola · ano)</label><input type="text" id="atsExEdu" placeholder="ex: Lic. Informática · UAN · 2015"></div>
+      </div>
+      <div class="f-field"><label>Competências (separadas por vírgula)</label><input type="text" id="atsExSkills" placeholder="ex: Node.js, React, SQL, AWS, Docker"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('atsExModal')">Cancelar</button><button class="btn btn-blue" onclick="saveAtsEx()">Guardar</button></div>
+  </div>
+</div>
+
 <!-- TESTIMONIAL MODAL -->
 <div class="modal-overlay" id="testiModal">
   <div class="modal">
@@ -831,7 +895,7 @@ function updatePlanCounts() {
 const PANEL_TITLES = {
   overview:'Visão Geral', users:'Utilizadores', cvs:'CVs Criados',
   jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Coaches',
-  testimonials:'Testemunhos', plans:'Planos & Preços', templates:'Templates de CV',
+  testimonials:'Testemunhos', ats:'Score ATS', plans:'Planos & Preços', templates:'Templates de CV',
   distribution:'Distribuição de CV', settings:'Definições',
   'user-preview':'Dashboard do Utilizador'
 };
@@ -848,6 +912,7 @@ function showPanel(id, el) {
     const frame = document.getElementById('previewFrame');
     if (frame && frame.src === 'about:blank') frame.src = '/app';
   }
+  if (id === 'ats') renderAtsExamples();
 }
 
 function setPreviewDevice(device, btn) {
@@ -1365,6 +1430,119 @@ async function deleteTesti(id) {
     await loadFromAPI();
     showAlert('alertTestis', 'Testemunho removido.', 'green');
   } catch(e) { alert('Erro de ligação.'); }
+}
+
+// ── SCORE ATS ────────────────────────────────────────────────
+const ATS_EXAMPLES_KEY = 'admin_ats_examples';
+let atsExamples = JSON.parse(localStorage.getItem(ATS_EXAMPLES_KEY) || '[]');
+let atsEditId = null;
+
+// 10 exemplos pré-carregados
+const ATS_DEFAULTS = [
+  { id:'d1', name:'Carlos António Mendes',  title:'Engenheiro de Software Sénior', score:94, color:'#2563EB', exp:'Eng. Sénior · TechCorp Angola · 2020–Presente',    edu:'Lic. Eng. Informática · UAN · 2015',          skills:'Node.js, React, TypeScript, AWS, Docker, PostgreSQL' },
+  { id:'d2', name:'Ana Luísa Ferreira',      title:'Gestora de Projectos de TI',    score:91, color:'#7C3AED', exp:'Gestora Sénior · Sonangol · 2021–Presente',          edu:'MBA Gestão Projectos · Univ. Católica · 2018', skills:'PMP, Scrum, PRINCE2, MS Project, JIRA, Power BI' },
+  { id:'d3', name:'João Pedro Baptista',     title:'Analista Financeiro Sénior',     score:89, color:'#0D9488', exp:'Analista Sénior · Banco BIC · 2020–Presente',         edu:'Lic. Finanças · Jean Piaget · 2015',           skills:'Excel, Bloomberg, Python, SQL, IFRS, SAP FI' },
+  { id:'d4', name:'Maria Conceição Silva',   title:'Enfermeira Especialista UCI',    score:87, color:'#16A34A', exp:'Enf. Especialista · Sagrada Esperança · 2019–Pres.',  edu:'Especialização UCI · ISCS Angola · 2018',      skills:'UCI, Ventilação Mecânica, SAV, BLS, Triagem' },
+  { id:'d5', name:'Rui António Domingos',    title:'Arquitecto Civil Sénior',        score:92, color:'#EA580C', exp:'Arquitecto Sénior · COBA Angola · 2019–Presente',     edu:'Mestrado Arquitectura · Univ. Técnica Lisboa', skills:'AutoCAD, Revit, BIM, SketchUp, LEED, Gestão Obra' },
+  { id:'d6', name:'Fernanda Costa Queirós', title:'Advogada Corporativa',            score:88, color:'#DB2777', exp:'Advogada Sénior · MCA Law Firm · 2020–Presente',      edu:'Mestrado Direito · Univ. Lusíada AO · 2015',   skills:'Direito Comercial, M&A, Due Diligence, Compliance' },
+  { id:'d7', name:'Miguel Tavares Santos',   title:'Director Comercial',              score:90, color:'#D97706', exp:'Director Comercial · Refriango · 2020–Presente',      edu:'MBA Marketing · Univ. Católica AO · 2016',    skills:'Vendas B2B, KAM, Salesforce, P&L, Forecasting' },
+  { id:'d8', name:'Isabel Cardoso Neto',     title:'CFO / Contabilista Certificada', score:93, color:'#0891B2', exp:'CFO · Grupo Zahara Angola · 2019–Presente',           edu:'ACCA · ACCA Global · 2014',                    skills:'SAP S/4HANA, IFRS, ACCA, Consolidação, Tesouraria' },
+  { id:'d9', name:'Pedro Lopes Mbinda',      title:'Professor Universitário',         score:85, color:'#4F46E5', exp:'Prof. Associado · ISTAA · 2017–Presente',              edu:'Doutoramento Agronomia · ISA Lisboa · 2013',   skills:'Fitotecnia, GIS, R Estatístico, SPSS, Publicação' },
+  { id:'d10',name:'Carla Sofia Domingos',    title:'Especialista Marketing Digital',  score:91, color:'#BE185D', exp:'Head of Digital · Dentsu Angola · 2021–Presente',     edu:'Pós-Grad. Marketing Digital · ISCEM · 2018',  skills:'Google Ads, Meta Ads, SEO, HubSpot, Analytics' },
+];
+
+function getAllAtsEx() {
+  const custom = JSON.parse(localStorage.getItem(ATS_EXAMPLES_KEY) || '[]');
+  return [...ATS_DEFAULTS, ...custom];
+}
+
+function renderAtsExamples() {
+  const tbody = document.getElementById('atsExTable');
+  const all = getAllAtsEx();
+  if (!all.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">Nenhum exemplo.</td></tr>'; return; }
+  tbody.innerHTML = all.map(ex => {
+    const isDefault = ex.id && ex.id.startsWith('d');
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:50%;background:${ex.color||'#2563EB'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">${(ex.name||'?')[0]}</div><strong>${ex.name||''}</strong></div></td>
+      <td>${ex.title||''}</td>
+      <td><span style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:800;color:#2563EB;">ATS ${ex.score||0}%</span></td>
+      <td style="font-size:11px;color:var(--t3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ex.skills||''}</td>
+      <td>
+        ${!isDefault ? `<button class="btn btn-xs btn-ghost" onclick="editAtsEx('${ex.id}')">Editar</button> <button class="btn btn-xs" style="background:#fee2e2;color:#dc2626;border:none;" onclick="deleteAtsEx('${ex.id}')">Remover</button>` : '<span style="font-size:10px;color:var(--t4);">Pré-definido</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function saveAtsEx() {
+  const ex = {
+    id:      atsEditId || ('c' + Date.now()),
+    name:    document.getElementById('atsExName').value.trim(),
+    title:   document.getElementById('atsExTitle').value.trim(),
+    score:   parseInt(document.getElementById('atsExScore').value) || 0,
+    color:   document.getElementById('atsExColor').value.trim() || '#2563EB',
+    summary: document.getElementById('atsExSummary').value.trim(),
+    exp:     document.getElementById('atsExExp').value.trim(),
+    edu:     document.getElementById('atsExEdu').value.trim(),
+    skills:  document.getElementById('atsExSkills').value.trim(),
+  };
+  if (!ex.name || !ex.title) { alert('Nome e cargo são obrigatórios.'); return; }
+  const custom = JSON.parse(localStorage.getItem(ATS_EXAMPLES_KEY) || '[]');
+  if (atsEditId) {
+    const idx = custom.findIndex(x => x.id === atsEditId);
+    if (idx > -1) custom[idx] = ex; else custom.push(ex);
+  } else { custom.push(ex); }
+  localStorage.setItem(ATS_EXAMPLES_KEY, JSON.stringify(custom));
+  closeModal('atsExModal');
+  renderAtsExamples();
+  showAlert('alertAts', 'Exemplo guardado.', 'green');
+}
+
+function editAtsEx(id) {
+  atsEditId = id;
+  const custom = JSON.parse(localStorage.getItem(ATS_EXAMPLES_KEY) || '[]');
+  const ex = custom.find(x => x.id === id);
+  if (!ex) return;
+  document.getElementById('atsExName').value    = ex.name    || '';
+  document.getElementById('atsExTitle').value   = ex.title   || '';
+  document.getElementById('atsExScore').value   = ex.score   || '';
+  document.getElementById('atsExColor').value   = ex.color   || '#2563EB';
+  document.getElementById('atsExSummary').value = ex.summary || '';
+  document.getElementById('atsExExp').value     = ex.exp     || '';
+  document.getElementById('atsExEdu').value     = ex.edu     || '';
+  document.getElementById('atsExSkills').value  = ex.skills  || '';
+  document.getElementById('atsExModalTitle').textContent = 'Editar Exemplo CV ATS';
+  openModal('atsExModal');
+}
+
+function deleteAtsEx(id) {
+  if (!confirm('Remover este exemplo?')) return;
+  const custom = JSON.parse(localStorage.getItem(ATS_EXAMPLES_KEY) || '[]');
+  localStorage.setItem(ATS_EXAMPLES_KEY, JSON.stringify(custom.filter(x => x.id !== id)));
+  renderAtsExamples();
+  showAlert('alertAts', 'Exemplo removido.', 'green');
+}
+
+async function runAdminATS() {
+  const cvText = document.getElementById('adminAtsCv').value.trim();
+  const jobDesc = document.getElementById('adminAtsJob').value.trim();
+  if (!cvText || !jobDesc) { alert('Preenche os dois campos.'); return; }
+  const btn = document.getElementById('adminAtsBtn');
+  btn.disabled = true; btn.textContent = '⏳ A analisar…';
+  try {
+    const r = await fetch(API + '/api/cv/ats-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cvText, jobDescription: jobDesc}) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erro');
+    const score = typeof d.score === 'number' ? d.score : parseInt(d.score) || 0;
+    const col = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626';
+    document.getElementById('adminAtsNum').textContent = score + '%';
+    document.getElementById('adminAtsNum').style.color = col;
+    document.getElementById('adminAtsLabel').textContent = score >= 80 ? '🎉 Excelente — Passa no ATS!' : score >= 60 ? '⚠️ Bom — Pode melhorar' : '❌ Fraco — Necessita revisão';
+    document.getElementById('adminAtsBar').style.cssText = `height:100%;border-radius:20px;background:${col};transition:width .8s;width:${score}%;`;
+    document.getElementById('adminAtsFeedback').textContent = d.feedback || d.suggestions || '';
+    document.getElementById('adminAtsResult').style.display = 'block';
+  } catch(e) { alert('Erro: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '⚡ Analisar Score ATS'; }
 }
 
 // ── RENDER PLANS ─────────────────────────────────────────────
