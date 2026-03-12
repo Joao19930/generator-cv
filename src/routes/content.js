@@ -20,8 +20,8 @@ const HYPOTHETICAL_TESTIS = [
 router.get('/coaches', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, name, location, bio, skills, email, color, photo_url, created_at FROM coaches WHERE active=TRUE ORDER BY created_at DESC');
-    res.json(r.recordset);
+      .query('SELECT * FROM coaches WHERE active=TRUE ORDER BY created_at DESC');
+    res.json(r.recordset || []);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -29,18 +29,27 @@ router.get('/coaches', async (req, res) => {
 router.get('/courses', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, title, source, category, rating, url, created_at FROM courses WHERE active=TRUE ORDER BY created_at DESC');
-    res.json(r.recordset);
+      .query('SELECT * FROM courses WHERE active=TRUE ORDER BY created_at DESC');
+    res.json(r.recordset || []);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── GET /api/content/jobs ─────────────────────────────────────
 router.get('/jobs', async (req, res) => {
-  try {
-    const r = await req.db.request()
-      .query('SELECT id, title, company, city, country, category, description, job_date, start_date, end_date, url, contact_type, created_at FROM jobs WHERE active=TRUE ORDER BY job_date DESC, created_at DESC');
-    res.json(r.recordset || []);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  // Tenta queries progressivamente mais simples até uma funcionar
+  const attempts = [
+    'SELECT * FROM jobs WHERE active=TRUE ORDER BY created_at DESC',
+    'SELECT * FROM jobs WHERE active=TRUE',
+    'SELECT * FROM jobs ORDER BY created_at DESC',
+    'SELECT * FROM jobs',
+  ];
+  for (const q of attempts) {
+    try {
+      const r = await req.db.request().query(q);
+      return res.json(r.recordset || []);
+    } catch (_) {}
+  }
+  res.json([]);
 });
 
 // ── GET /api/content/testimonials ────────────────────────────

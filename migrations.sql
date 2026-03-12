@@ -124,9 +124,11 @@ CREATE TABLE IF NOT EXISTS coaches (
   skills     VARCHAR(500),
   email      VARCHAR(255),
   color      VARCHAR(20) DEFAULT '#6366f1',
+  photo_url  VARCHAR(500),
   active     BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW()
 );
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500);
 
 -- ── Courses ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS courses (
@@ -142,17 +144,26 @@ CREATE TABLE IF NOT EXISTS courses (
 
 -- ── Jobs ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jobs (
-  id         SERIAL PRIMARY KEY,
-  title      VARCHAR(255) NOT NULL,
-  company    VARCHAR(255),
-  city       VARCHAR(100),
-  country    VARCHAR(100),
-  category   VARCHAR(100),
-  job_date   DATE,
-  url        VARCHAR(500),
-  active     BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT NOW()
+  id           SERIAL PRIMARY KEY,
+  title        VARCHAR(255) NOT NULL,
+  company      VARCHAR(255),
+  city         VARCHAR(100),
+  country      VARCHAR(100),
+  category     VARCHAR(100),
+  description  TEXT,
+  job_date     DATE,
+  start_date   DATE,
+  end_date     DATE,
+  url          VARCHAR(500),
+  contact_type VARCHAR(20) DEFAULT 'url',
+  active       BOOLEAN DEFAULT TRUE,
+  created_at   TIMESTAMP DEFAULT NOW()
 );
+-- Colunas adicionadas em v2 (ignoradas se já existirem)
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS description  TEXT;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS start_date   DATE;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url';
 
 -- ── Testimonials ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS testimonials (

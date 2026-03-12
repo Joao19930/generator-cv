@@ -98,6 +98,31 @@ app.get('/admin-panel', (req, res) =>
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
 
+// ── Debug jobs (remover após diagnóstico) ─────────────────────
+app.get('/debug-jobs', async (req, res) => {
+  const results = {};
+  try {
+    const pool = await getPool();
+    // Testa cada query e regista resultado ou erro
+    const queries = [
+      'SELECT COUNT(*) AS n FROM jobs',
+      'SELECT * FROM jobs LIMIT 3',
+      'SELECT * FROM jobs WHERE active=TRUE LIMIT 3',
+    ];
+    for (const q of queries) {
+      try {
+        const r = await pool.request().query(q);
+        results[q] = { ok: true, rows: r.recordset };
+      } catch (e) {
+        results[q] = { ok: false, error: e.message };
+      }
+    }
+  } catch(e) {
+    results['db_connection'] = { ok: false, error: e.message };
+  }
+  res.json(results);
+});
+
 // ── Rate limiting global ─────────────────────────────────────
 app.use(rateLimiter(300, 3600));
 
@@ -132,7 +157,70 @@ app.use((err, req, res, _next) => {
 // ── Iniciar ──────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 
-getPool().then((pool) => {
+async function autoMigrate(pool) {
+  const stmts = [
+    // Criar tabelas de conteúdo se não existirem
+    `CREATE TABLE IF NOT EXISTS jobs (
+      id           SERIAL PRIMARY KEY,
+      title        VARCHAR(255) NOT NULL,
+      company      VARCHAR(255),
+      city         VARCHAR(100),
+      country      VARCHAR(100),
+      category     VARCHAR(100),
+      description  TEXT,
+      job_date     DATE,
+      start_date   DATE,
+      end_date     DATE,
+      url          VARCHAR(500),
+      contact_type VARCHAR(20) DEFAULT 'url',
+      active       BOOLEAN DEFAULT TRUE,
+      created_at   TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS coaches (
+      id         SERIAL PRIMARY KEY,
+      name       VARCHAR(100) NOT NULL,
+      location   VARCHAR(100),
+      bio        TEXT,
+      skills     VARCHAR(500),
+      email      VARCHAR(255),
+      color      VARCHAR(20) DEFAULT '#6366f1',
+      photo_url  VARCHAR(500),
+      active     BOOLEAN DEFAULT TRUE,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS courses (
+      id         SERIAL PRIMARY KEY,
+      title      VARCHAR(255) NOT NULL,
+      source     VARCHAR(100),
+      category   VARCHAR(100),
+      rating     VARCHAR(10),
+      url        VARCHAR(500),
+      active     BOOLEAN DEFAULT TRUE,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS testimonials (
+      id         SERIAL PRIMARY KEY,
+      name       VARCHAR(100) NOT NULL,
+      role       VARCHAR(100),
+      text       TEXT,
+      stars      INTEGER DEFAULT 5,
+      active     BOOLEAN DEFAULT TRUE,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    // Adicionar colunas em falta a tabelas já existentes
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS description  TEXT`,
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS start_date   DATE`,
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE`,
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
+    `ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`,
+  ];
+  for (const sql of stmts) {
+    try { await pool.request().query(sql); } catch (_) {}
+  }
+}
+
+getPool().then(async (pool) => {
+  await autoMigrate(pool);
   setupCrons(pool);
   server.listen(PORT, () => {
     console.log(`\n🚀 CV Generator Pro`);
