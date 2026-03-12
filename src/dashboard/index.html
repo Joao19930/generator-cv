@@ -2074,8 +2074,9 @@ function saveAPIKeys() {
 // ── ANALYTICS ─────────────────────────────────────────────────
 async function loadAnalytics() {
   document.getElementById('analyticsKpis').innerHTML = '<p style="font-size:12px;color:var(--t4)">A carregar...</p>';
+  const ah = { headers: { Authorization: 'Bearer ' + TOKEN } };
   try {
-    const r = await fetch(API + '/api/admin/analytics', h);
+    const r = await fetch(API + '/api/admin/analytics', ah);
     if (!r.ok) {
       const err = await r.json().catch(()=>({}));
       document.getElementById('analyticsKpis').innerHTML = `<p style="color:red;font-size:12px">Erro: ${err.error||r.status}</p>`;
@@ -2138,7 +2139,7 @@ let _replyId = null;
 
 async function loadSupport() {
   try {
-    const r = await fetch(API + '/api/admin/support', h);
+    const r = await fetch(API + '/api/admin/support', { headers: { Authorization: 'Bearer ' + TOKEN } });
     if (!r.ok) return;
     const tickets = await r.json();
     const tbody = document.getElementById('supportTable');
