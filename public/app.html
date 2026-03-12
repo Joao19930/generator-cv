@@ -1963,7 +1963,7 @@ async function generateCoverLetter() {
   try {
     const r = await fetch('/api/cv/generate-cover-letter', {
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cvToken')},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cv_token')},
       body:JSON.stringify({ name, role, company, years, skills, type: coverType })
     });
     if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.error||r.status); }
