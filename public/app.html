@@ -262,6 +262,29 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .coach-find-btn:hover{background:var(--blue-d);}
 @media(max-width:700px){.coach-right{display:none;}.coach-av-wrap{width:56px;height:56px;font-size:20px;}}
 
+/* ── CARTA DE APRESENTAÇÃO ───────────────────────── */
+.cover-quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:700px){.cover-quick-grid{grid-template-columns:1fr;}}
+.cover-quick-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);padding:18px;display:flex;gap:12px;align-items:flex-start;transition:all .2s;cursor:pointer;}
+.cover-quick-card:hover{border-color:var(--blue);box-shadow:0 6px 24px rgba(37,99,235,.1);transform:translateY(-2px);}
+.cover-quick-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cover-quick-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.cover-quick-desc{font-size:11px;color:var(--t3);line-height:1.5;}
+.cover-types-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.cover-type-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);padding:22px;display:flex;gap:16px;align-items:flex-start;transition:all .2s;cursor:pointer;position:relative;overflow:hidden;}
+.cover-type-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple));transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.cover-type-card:hover{border-color:rgba(37,99,235,.3);box-shadow:0 8px 32px rgba(37,99,235,.12);transform:translateY(-3px);}
+.cover-type-card:hover::before{transform:scaleX(1);}
+.cover-type-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cover-type-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.cover-type-desc{font-size:12px;color:var(--t3);line-height:1.55;}
+.cover-type-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:8px;}
+.cover-gen-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-top:20px;}
+.cover-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:600px){.cover-form-row{grid-template-columns:1fr;}}
+.cover-result{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:13px;color:var(--t2);line-height:1.7;min-height:160px;margin-top:16px;white-space:pre-wrap;}
+.cover-result-actions{display:flex;gap:10px;margin-top:12px;}
+
 /* ── TESTIMONIAL CARDS ───────────────────────────── */
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
 .testi-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:20px;transition:all .2s;}
@@ -432,6 +455,10 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
       Templates <span class="sb-cnt" id="tplBadge">200+</span>
     </a>
+    <a class="sb-item" onclick="nav('cover',this)">
+      <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Carta de Apresentação
+    </a>
 
     <div class="sb-sec">Conteúdo</div>
     <a class="sb-item" onclick="nav('jobs',this)">
@@ -560,14 +587,25 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 
       <div id="lockNoticeWrap"></div>
 
-      <div class="sec-mb">
+      <!-- 1. VAGAS RECENTES -->
+      <div class="sec-mb" id="overviewJobsWrap" style="display:none;">
         <div class="sec-hdr">
-          <span class="sec-title">Os meus CVs recentes</span>
-          <a class="sec-link" onclick="nav('cvs',null)">Ver todos →</a>
+          <span class="sec-title">Vagas recentes</span>
+          <a class="sec-link" onclick="nav('jobs',null)">Ver todas →</a>
         </div>
-        <div class="cvs-grid" id="recentCvsGrid"></div>
+        <div class="jobs-grid" id="overviewJobsList"></div>
       </div>
 
+      <!-- 2. CARTA DE APRESENTAÇÃO (quick action) -->
+      <div class="sec-mb">
+        <div class="sec-hdr">
+          <span class="sec-title">Carta de Apresentação</span>
+          <a class="sec-link" onclick="nav('cover',null)">Ver todas →</a>
+        </div>
+        <div class="cover-quick-grid" id="coverQuickGrid"></div>
+      </div>
+
+      <!-- 3. TEMPLATES -->
       <div class="sec-mb">
         <div class="sec-hdr">
           <span class="sec-title">Templates recomendados</span>
@@ -576,12 +614,13 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <div class="tpl-grid" id="featuredTplGrid"></div>
       </div>
 
-      <div class="sec-mb" id="overviewJobsWrap" style="display:none;">
+      <!-- 4. CVS RECENTES -->
+      <div class="sec-mb">
         <div class="sec-hdr">
-          <span class="sec-title">Vagas recentes</span>
-          <a class="sec-link" onclick="nav('jobs',null)">Ver todas →</a>
+          <span class="sec-title">Os meus CVs recentes</span>
+          <a class="sec-link" onclick="nav('cvs',null)">Ver todos →</a>
         </div>
-        <div id="overviewJobsList"></div>
+        <div class="cvs-grid" id="recentCvsGrid"></div>
       </div>
     </div>
 
@@ -662,6 +701,124 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     <!-- ══ COACHES ═══════════════════════════════════ -->
     <div id="panel-coaches" class="panel">
       <div style="display:flex;flex-direction:column;gap:14px;" id="coachesList"></div>
+    </div>
+
+    <!-- ══ CARTA DE APRESENTAÇÃO ══════════════════════ -->
+    <div id="panel-cover" class="panel">
+      <div style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:var(--rl);padding:32px 28px;margin-bottom:24px;color:#fff;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(37,99,235,.35),transparent 70%);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Carta de Apresentação</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:20px;">Cria cartas profissionais com IA em segundos. Personalizada para cada vaga.</div>
+          <button class="btn-primary" onclick="openCoverGenerator()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Gerar com IA
+          </button>
+        </div>
+      </div>
+
+      <div class="cover-types-grid">
+        <div class="cover-type-card" onclick="setCoverType('emprego')">
+          <div class="cover-type-icon" style="background:#EFF6FF;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Candidatura a Emprego</div>
+            <div class="cover-type-desc">Para responder a uma vaga específica publicada por uma empresa.</div>
+            <span class="cover-type-badge" style="background:#EFF6FF;color:#2563EB;">Mais usado</span>
+          </div>
+        </div>
+        <div class="cover-type-card" onclick="setCoverType('espontanea')">
+          <div class="cover-type-icon" style="background:#F0FDF4;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Candidatura Espontânea</div>
+            <div class="cover-type-desc">Para enviar sem vaga aberta, demonstrando interesse na empresa.</div>
+            <span class="cover-type-badge" style="background:#F0FDF4;color:#16A34A;">Proactivo</span>
+          </div>
+        </div>
+        <div class="cover-type-card" onclick="setCoverType('estagio')">
+          <div class="cover-type-icon" style="background:#FAF5FF;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Estágio Profissional</div>
+            <div class="cover-type-desc">Para candidatura a programas de estágio curricular ou profissional.</div>
+            <span class="cover-type-badge" style="background:#FAF5FF;color:#7C3AED;">Estudantes</span>
+          </div>
+        </div>
+        <div class="cover-type-card" onclick="setCoverType('promocao')">
+          <div class="cover-type-icon" style="background:#FEF3C7;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Promoção Interna</div>
+            <div class="cover-type-desc">Para candidatar a uma posição superior dentro da mesma empresa.</div>
+            <span class="cover-type-badge" style="background:#FEF3C7;color:#F59E0B;">Carreira</span>
+          </div>
+        </div>
+        <div class="cover-type-card" onclick="setCoverType('mudanca')">
+          <div class="cover-type-icon" style="background:#FFF7ED;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Mudança de Carreira</div>
+            <div class="cover-type-desc">Para transitar para uma área diferente da sua experiência actual.</div>
+            <span class="cover-type-badge" style="background:#FFF7ED;color:#EA580C;">Transição</span>
+          </div>
+        </div>
+        <div class="cover-type-card" onclick="setCoverType('linkedin')">
+          <div class="cover-type-icon" style="background:#EFF6FF;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div>
+            <div class="cover-type-title">Mensagem LinkedIn</div>
+            <div class="cover-type-desc">Mensagem de apresentação profissional para enviar no LinkedIn.</div>
+            <span class="cover-type-badge" style="background:#EFF6FF;color:#0A66C2;">LinkedIn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- gerador -->
+      <div class="cover-gen-wrap" id="coverGenWrap">
+        <div style="font-size:16px;font-weight:800;margin-bottom:16px;" id="coverGenTitle">Gerar Carta de Apresentação</div>
+        <div class="cover-form-row">
+          <div>
+            <label class="form-lbl">O teu nome</label>
+            <input type="text" class="form-input" id="coverName" placeholder="Carlos Mendes">
+          </div>
+          <div>
+            <label class="form-lbl">Cargo a que te candidatas</label>
+            <input type="text" class="form-input" id="coverRole" placeholder="Engenheiro de Software">
+          </div>
+        </div>
+        <div class="cover-form-row">
+          <div>
+            <label class="form-lbl">Empresa</label>
+            <input type="text" class="form-input" id="coverCompany" placeholder="TechCorp Angola">
+          </div>
+          <div>
+            <label class="form-lbl">Anos de experiência</label>
+            <input type="text" class="form-input" id="coverYears" placeholder="5 anos">
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label class="form-lbl">As tuas principais competências / conquistas</label>
+          <textarea class="form-input" id="coverSkills" rows="3" placeholder="Ex: Liderança de equipas, desenvolvimento em React e Node.js, redução de custos em 30%..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateCoverLetter()" id="coverGenBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Gerar Carta com IA
+        </button>
+        <div id="coverResultWrap" style="display:none;">
+          <div class="cover-result" id="coverResult"></div>
+          <div class="cover-result-actions">
+            <button class="btn-primary" onclick="copyCover()">Copiar texto</button>
+            <button class="btn-out" onclick="document.getElementById('coverResultWrap').style.display='none'">Nova carta</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ TESTEMUNHOS ═══════════════════════════════ -->
@@ -805,7 +962,8 @@ const PAL_BG = {
 const PANEL_TITLES = {
   overview:'Visão Geral', cvs:'CVs Criados', templates:'Templates de CV',
   jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos',
-  plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições'
+  plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições',
+  cover:'Carta de Apresentação'
 };
 
 function catColor(cat) {
@@ -939,6 +1097,7 @@ async function loadAll() {
       renderFeaturedTpls();
       renderFullTpls(allTpls);
       renderModalTpls(allTpls);
+      renderCoverQuick();
     }
     if (jobsR.ok) {
       allJobs = await jobsR.json();
@@ -1701,20 +1860,138 @@ function shareJobTo(platform, title, url) {
 function renderOverviewJobs() {
   if (!allJobs.length) return;
   document.getElementById('overviewJobsWrap').style.display = 'block';
+  /* reuse same jb-card renderer but limited to 6 */
+  const list = allJobs.slice(0, 6);
   const g = document.getElementById('overviewJobsList');
-  g.innerHTML = allJobs.slice(0, 3).map((j, i) => {
+  g.innerHTML = list.map((j, i) => {
     const grad = JOB_GRADIENTS[i % JOB_GRADIENTS.length];
     const init = (j.Company||'E')[0].toUpperCase();
+    const ago  = jobsAgo(j.JobDate);
+    const newBadge = isNew(j.JobDate);
     const loc  = [j.City, j.Country].filter(Boolean).join(', ');
-    return `<div class="job-card" onclick="nav('jobs',null)">
-      <div class="job-logo" style="background:${grad}">${init}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="job-title">${j.Title}</div>
-        <div class="job-meta">${j.Company||''}${loc?' · '+loc:''}</div>
+    const catTag  = j.Category ? `<span class="jb-tag jb-tag-blue">${j.Category}</span>` : '';
+    const locTag  = loc ? `<span class="jb-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>` : '';
+    const contactType = j.ContactType || j.contact_type || 'url';
+    const onlineTag = j.Url ? `<span class="jb-tag jb-tag-green">✓ ${contactType==='whatsapp'?'WhatsApp':contactType==='email'?'Email':'Online'}</span>` : '';
+    let applyBtn = `<span class="jb-apply jb-apply-ghost" style="cursor:default;opacity:.5;">Sem contacto</span>`;
+    if (j.Url) {
+      if (contactType==='whatsapp') {
+        const wa = j.Url.replace(/\D/g,'');
+        applyBtn = `<a class="jb-apply jb-apply-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg> WhatsApp</a>`;
+      } else if (contactType==='email') {
+        applyBtn = `<a class="jb-apply jb-apply-email" href="mailto:${j.Url}" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</a>`;
+      } else {
+        applyBtn = `<a class="jb-apply" href="${j.Url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Candidatar →</a>`;
+      }
+    }
+    /* inline deadline */
+    const sd = j.StartDate||j.start_date, ed = j.EndDate||j.end_date;
+    let dateLine = `<div class="jb-date"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${ago||'Data não especificada'}</div>`;
+    if (ed) {
+      const now=new Date();now.setHours(0,0,0,0);
+      const end=new Date(ed);end.setHours(0,0,0,0);
+      const diff=Math.ceil((end-now)/86400000);
+      const expired=diff<0, soon=!expired&&diff<=7;
+      const cls=expired?'expired':soon?'soon':'active';
+      const fmt=d=>new Date(d).toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+      dateLine+=`<div class="jb-deadline ${cls}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${expired?`Prazo: ${fmt(ed)}<span class="jb-expired-badge">Encerrado</span>`:soon?`Prazo: ${fmt(ed)} · ${diff}d restantes`:`Prazo: ${fmt(ed)}`}</div>`;
+    }
+    return `<div class="jb-card" style="animation-delay:${i*.05}s" onclick="nav('jobs',null)">
+      <div class="jb-top">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jb-logo" style="background:${grad}"><div class="jb-logo-ring"></div>${init}</div>
+          <div>
+            <div class="jb-title">${j.Title}</div>
+            <div class="jb-company"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${j.Company||'Empresa'}${loc?' · '+loc:''}</div>
+          </div>
+        </div>
+        <div class="jb-badges">${newBadge?'<span class="jb-new">NOVO</span>':''}</div>
       </div>
-      <svg class="job-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div class="jb-tags">${catTag}${locTag}${onlineTag}</div>
+      <div class="jb-foot">
+        <div class="jb-dates">${dateLine}</div>
+        ${applyBtn}
+      </div>
     </div>`;
   }).join('');
+}
+
+/* ── COVER LETTER ──────────────────────────────── */
+function renderCoverQuick() {
+  const g = document.getElementById('coverQuickGrid');
+  if (!g) return;
+  const types = [
+    {icon:'💼',bg:'#EFF6FF',title:'Candidatura a Emprego',desc:'Para responder a uma vaga específica'},
+    {icon:'✉️',bg:'#F0FDF4',title:'Candidatura Espontânea',desc:'Sem vaga aberta, mostrar interesse'},
+    {icon:'🎓',bg:'#FAF5FF',title:'Estágio Profissional',desc:'Para programas de estágio e trainee'},
+  ];
+  g.innerHTML = types.map(t => `
+    <div class="cover-quick-card" onclick="nav('cover',null)">
+      <div class="cover-quick-icon" style="background:${t.bg};font-size:20px;">${t.icon}</div>
+      <div>
+        <div class="cover-quick-title">${t.title}</div>
+        <div class="cover-quick-desc">${t.desc}</div>
+        <span style="font-size:10px;font-weight:700;color:var(--blue);margin-top:6px;display:inline-block;">Gerar com IA →</span>
+      </div>
+    </div>`).join('');
+}
+
+let coverType = 'emprego';
+function setCoverType(type) {
+  coverType = type;
+  const titles = {
+    emprego:'Carta — Candidatura a Emprego', espontanea:'Carta — Candidatura Espontânea',
+    estagio:'Carta — Estágio Profissional', promocao:'Carta — Promoção Interna',
+    mudanca:'Carta — Mudança de Carreira', linkedin:'Mensagem LinkedIn'
+  };
+  document.getElementById('coverGenTitle').textContent = titles[type] || 'Gerar Carta';
+  document.getElementById('coverResultWrap').style.display = 'none';
+  document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function openCoverGenerator() {
+  document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+async function generateCoverLetter() {
+  const name    = document.getElementById('coverName').value.trim();
+  const role    = document.getElementById('coverRole').value.trim();
+  const company = document.getElementById('coverCompany').value.trim();
+  const years   = document.getElementById('coverYears').value.trim();
+  const skills  = document.getElementById('coverSkills').value.trim();
+  if (!name || !role) { alert('Preenche pelo menos o teu nome e o cargo.'); return; }
+  const btn = document.getElementById('coverGenBtn');
+  btn.disabled = true; btn.textContent = 'A gerar…';
+  const typeLabels = {
+    emprego:'candidatura a emprego', espontanea:'candidatura espontânea',
+    estagio:'estágio profissional', promocao:'promoção interna',
+    mudanca:'mudança de carreira', linkedin:'mensagem profissional no LinkedIn'
+  };
+  const prompt = `Escreve uma carta de apresentação profissional do tipo "${typeLabels[coverType]||'candidatura'}" em português de Angola (formal mas não pomposo).\n\nDados:\n- Nome: ${name}\n- Cargo desejado: ${role}${company?'\n- Empresa: '+company:''}${years?'\n- Experiência: '+years+' de experiência':''}${skills?'\n- Competências/conquistas: '+skills:''}\n\nEscreve a carta completa, com saudação, 3 parágrafos (motivação, valor que trago, fecho) e despedida. Máximo 350 palavras. Não incluas data nem cabeçalho de endereço.`;
+  try {
+    const r = await fetch('/api/cv/improve-text', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cvToken')},
+      body:JSON.stringify({text: prompt, instruction: 'Gera a carta conforme pedido, devolvendo apenas o texto da carta.'})
+    });
+    const d = await r.json();
+    const result = d.improved || d.result || d.text || 'Erro ao gerar. Tenta novamente.';
+    document.getElementById('coverResult').textContent = result;
+    document.getElementById('coverResultWrap').style.display = 'block';
+  } catch(e) {
+    document.getElementById('coverResult').textContent = 'Erro de ligação. Verifica a tua conexão e tenta novamente.';
+    document.getElementById('coverResultWrap').style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Gerar Carta com IA';
+}
+function copyCover() {
+  const txt = document.getElementById('coverResult').textContent;
+  navigator.clipboard.writeText(txt).then(() => {
+    const t = document.createElement('div');
+    t.textContent = '✓ Carta copiada!';
+    Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',background:'#1e293b',color:'#fff',padding:'8px 18px',borderRadius:'20px',fontSize:'13px',fontWeight:'600',zIndex:'9999',transition:'opacity .4s'});
+    document.body.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},2000);
+  });
 }
 
 /* ── COURSES ───────────────────────────────────── */
