@@ -2123,7 +2123,12 @@ async function loadAnalytics() {
     const openT = s.OpenTickets || s.open_tickets || 0;
     const sb = document.getElementById('supportBadge');
     if (sb) { sb.style.display = openT > 0 ? 'inline-block' : 'none'; sb.textContent = openT; }
-  } catch(e) { console.error('Analytics error', e); }
+  } catch(e) {
+    console.error('Analytics error', e);
+    document.getElementById('analyticsKpis').innerHTML = `<p style="color:#DC2626;font-size:12px;padding:8px 0;">Erro ao carregar: ${e.message}</p>`;
+    document.getElementById('analyticsPages').innerHTML = '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px;">Sem dados disponíveis</p>';
+    document.getElementById('analyticsCvFunnel').innerHTML = '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px;">Sem dados disponíveis</p>';
+  }
 }
 
 // ── SUPORTE ────────────────────────────────────────────────────

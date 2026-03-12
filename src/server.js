@@ -265,7 +265,8 @@ async function autoMigrate(pool) {
     )`,
   ];
   for (const sql of stmts) {
-    try { await pool.request().query(sql); } catch (_) {}
+    try { await pool.request().query(sql); }
+    catch (e) { console.warn('⚠️  autoMigrate:', e.message?.slice(0, 120)); }
   }
 }
 

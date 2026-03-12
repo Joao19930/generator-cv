@@ -491,43 +491,60 @@ router.post('/template-items/import-sql', async (req, res) => {
 
 // ── GET /api/admin/analytics ─────────────────────────────────
 router.get('/analytics', async (req, res) => {
-  const safe = async (q) => { try { return (await req.db.request().query(q)).recordset; } catch(_) { return []; } };
-  const safeOne = async (q) => { try { return (await req.db.request().query(q)).recordset[0] || {}; } catch(_) { return {}; } };
-
-  const [byPage, cvStats, openTickets] = await Promise.all([
-    safe(`SELECT page, COUNT(*) AS total, COUNT(DISTINCT session_id) AS unique_sessions
-          FROM page_views GROUP BY page ORDER BY total DESC`),
-    safeOne(`SELECT
-      (SELECT COUNT(*) FROM cvs) AS total_cvs,
-      (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
-      (SELECT COUNT(*) FROM page_views) AS views_total,
-      (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors`),
-    safeOne(`SELECT COUNT(*) AS open_tickets FROM support_tickets WHERE status='open'`),
-  ]);
-
-  // download_count pode não existir — tentar separadamente
-  let cvs_downloaded = 0;
   try {
-    const r = await req.db.request().query(`SELECT COUNT(*) AS n FROM cvs WHERE download_count > 0`);
-    cvs_downloaded = r.recordset[0]?.N || r.recordset[0]?.n || 0;
-  } catch(_) {}
+    // Auto-criar tabelas de tracking se ainda não existirem
+    await req.db.request().query(`CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, page VARCHAR(100) NOT NULL, user_id INTEGER, session_id VARCHAR(64), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
+    await req.db.request().query(`CREATE TABLE IF NOT EXISTS support_tickets (id SERIAL PRIMARY KEY, user_id INTEGER, name VARCHAR(100) NOT NULL, email VARCHAR(255), message TEXT NOT NULL, status VARCHAR(20) DEFAULT 'open', reply TEXT, replied_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
 
-  const total_cvs    = cvStats.TotalCvs    || cvStats.total_cvs    || 0;
-  const cvs_with_content = cvStats.CvsWithContent || cvStats.cvs_with_content || 0;
-  const abandoned    = total_cvs - cvs_with_content;
+    const safe = async (q) => {
+      try { return (await req.db.request().query(q)).recordset; }
+      catch(e) { console.warn('analytics safe query failed:', e.message); return []; }
+    };
+    const safeOne = async (q) => {
+      try { return (await req.db.request().query(q)).recordset[0] || {}; }
+      catch(e) { console.warn('analytics safeOne query failed:', e.message); return {}; }
+    };
 
-  res.json({
-    stats: {
-      total_cvs,
-      cvs_with_content,
-      cvs_downloaded,
-      abandoned,
-      views_total:      cvStats.ViewsTotal      || cvStats.views_total      || 0,
-      unique_visitors:  cvStats.UniqueVisitors   || cvStats.unique_visitors   || 0,
-      open_tickets:     openTickets.OpenTickets  || openTickets.open_tickets  || 0,
-    },
-    byPage,
-  });
+    const [byPage, cvStats, openTickets] = await Promise.all([
+      safe(`SELECT page, COUNT(*) AS total, COUNT(DISTINCT session_id) AS unique_sessions
+            FROM page_views GROUP BY page ORDER BY total DESC`),
+      safeOne(`SELECT
+        (SELECT COUNT(*) FROM cvs) AS total_cvs,
+        (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
+        (SELECT COUNT(*) FROM page_views) AS views_total,
+        (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors`),
+      safeOne(`SELECT COUNT(*) AS open_tickets FROM support_tickets WHERE status='open'`),
+    ]);
+
+    let cvs_downloaded = 0;
+    try {
+      const r = await req.db.request().query(`SELECT COUNT(*) AS n FROM cvs WHERE download_count > 0`);
+      cvs_downloaded = r.recordset[0]?.N || r.recordset[0]?.n || 0;
+    } catch(_) {}
+
+    const total_cvs        = Number(cvStats.TotalCvs    || cvStats.total_cvs    || 0);
+    const cvs_with_content = Number(cvStats.CvsWithContent || cvStats.cvs_with_content || 0);
+    const views_total      = Number(cvStats.ViewsTotal   || cvStats.views_total   || 0);
+    const unique_visitors  = Number(cvStats.UniqueVisitors|| cvStats.unique_visitors|| 0);
+    const open_tickets     = Number(openTickets.OpenTickets|| openTickets.open_tickets|| 0);
+
+    res.json({
+      ok: true,
+      stats: {
+        total_cvs,
+        cvs_with_content,
+        cvs_downloaded,
+        abandoned: total_cvs - cvs_with_content,
+        views_total,
+        unique_visitors,
+        open_tickets,
+      },
+      byPage,
+    });
+  } catch(e) {
+    console.error('analytics route error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── GET /api/admin/support ───────────────────────────────────
