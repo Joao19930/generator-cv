@@ -820,7 +820,7 @@ function renderTemplates(list) {
       <div class="tpl-name">${t.Name}</div>`;
     card.style.animationDelay = (i * 0.03) + 's';
     card.onclick = () => {
-      if (locked) { window.location.href = '/checkout/pro'; return; }
+      if (locked) { window.open('https://wa.me/244944524292?text=Olá!%20Gostaria%20de%20activar%20o%20Plano%20Pro%20para%20aceder%20a%20todos%20os%20templates%20do%20CV%20Premium.', '_blank'); return; }
       selectTemplate(t);
     };
     grid.appendChild(card);

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preview CV - CVPremium</title>
     <!-- Calibri é fonte nativa do sistema -->
-    <script src="https://www.paypal.com/sdk/js?client-id=AaQ_zTUgp1MewSk5fNWNWVDJ58cSgk11Vr5nLUCNdSGSzMl-RWcMbGB1p1eBjSDpJdtP8ttlgCB6cY5U&currency=USD"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>emailjs.init('hP_48MpVt8XwvoWC7');</script>
     <style>
@@ -453,7 +452,7 @@
         <a href="/" class="logo">CV<span>Premium</span></a>
         <div class="nav-actions" id="navActions">
             <a href="/editor" class="btn-back" id="btnBack">← Editar CV</a>
-            <button class="btn-download" onclick="showPayment()" id="btnDownload">⬇ Download PDF — $1.99</button>
+            <button class="btn-download" onclick="showPayment()" id="btnDownload">⬇ Download PDF</button>
         </div>
     </nav>
 
@@ -468,15 +467,21 @@
         <div class="payment-card">
             <h2>Download <span>CV Premium</span></h2>
             <p>Sem marcas de água · Formato profissional · Alta resolução</p>
-            <div class="price-display">$1.99</div>
-            <div class="price-note">Pagamento único · Download imediato</div>
+            <div class="price-display" style="font-size:40px;">📲</div>
+            <div class="price-note">Pagamento via WhatsApp · Activação imediata</div>
             <div class="features-list">
                 <div><span>✓</span> PDF sem marcas de água</div>
                 <div><span>✓</span> Formato A4 optimizado para impressão</div>
                 <div><span>✓</span> Compatível com ATS</div>
                 <div><span>✓</span> Envio por email incluído</div>
             </div>
-            <div id="paypal-button-container"></div>
+            <button onclick="payViaWhatsApp()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg>
+                Pagar via WhatsApp
+            </button>
+            <button onclick="confirmPaymentDone()" style="width:100%;background:transparent;border:1px solid #333;border-radius:10px;padding:11px;font-size:13px;color:#aaa;cursor:pointer;margin-bottom:8px;">
+                ✅ Já paguei — Descarregar CV
+            </button>
             <button class="btn-cancel" onclick="closePayment()">Cancelar</button>
         </div>
     </div>
@@ -891,48 +896,24 @@
 
         function showPayment() {
             document.getElementById('paymentOverlay').classList.add('active');
-            renderPayPalButton();
         }
 
         function closePayment() {
             document.getElementById('paymentOverlay').classList.remove('active');
         }
 
-        var paypalRendered = false;
-        function renderPayPalButton() {
-            if (paypalRendered) return;
-            paypalRendered = true;
-            paypal.Buttons({
-                style: {
-                    layout: 'vertical',
-                    color: 'gold',
-                    shape: 'rect',
-                    label: 'pay',
-                    height: 45
-                },
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            description: 'CV Premium - CVPremium.com',
-                            amount: { currency_code: 'USD', value: '1.99' }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        closePayment();
-                        document.getElementById('successOverlay').classList.add('active');
-                        // Pre-fill email if available
-                        if (window.cvData && window.cvData.email) {
-                            document.getElementById('emailInput').value = window.cvData.email;
-                        }
-                    });
-                },
-                onError: function(err) {
-                    alert('Erro no pagamento. Por favor tenta novamente.');
-                    console.error(err);
-                }
-            }).render('#paypal-button-container');
+        function payViaWhatsApp() {
+            var name = (data && data.name) ? data.name : 'utilizador';
+            var msg = encodeURIComponent('Olá! Quero fazer o pagamento para descarregar o meu CV Premium.\nNome: ' + name);
+            window.open('https://wa.me/244944524292?text=' + msg, '_blank');
+        }
+
+        function confirmPaymentDone() {
+            closePayment();
+            document.getElementById('successOverlay').classList.add('active');
+            if (data && data.email) {
+                document.getElementById('emailInput').value = data.email;
+            }
         }
 
         function downloadCV() {
