@@ -494,54 +494,84 @@ router.post('/template-items/import-sql', async (req, res) => {
 // ── GET /api/admin/analytics ─────────────────────────────────
 router.get('/analytics', async (req, res) => {
   try {
-    // Auto-criar tabelas de tracking se ainda não existirem
     await req.db.request().query(`CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, page VARCHAR(100) NOT NULL, user_id INTEGER, session_id VARCHAR(64), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
     await req.db.request().query(`CREATE TABLE IF NOT EXISTS support_tickets (id SERIAL PRIMARY KEY, user_id INTEGER, name VARCHAR(100) NOT NULL, email VARCHAR(255), message TEXT NOT NULL, status VARCHAR(20) DEFAULT 'open', reply TEXT, replied_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
 
     const safe = async (q) => {
       try { return (await req.db.request().query(q)).recordset; }
-      catch(e) { console.warn('analytics safe query failed:', e.message); return []; }
+      catch(e) { console.warn('analytics query failed:', e.message); return []; }
     };
     const safeOne = async (q) => {
       try { return (await req.db.request().query(q)).recordset[0] || {}; }
-      catch(e) { console.warn('analytics safeOne query failed:', e.message); return {}; }
+      catch(e) { console.warn('analytics query failed:', e.message); return {}; }
     };
 
-    const [byPage, cvStats, openTickets] = await Promise.all([
+    const [byPage, cvStats, openTickets, sessionStats, topUsers, abandonedCvs, bounces] = await Promise.all([
       safe(`SELECT page, COUNT(*) AS total, COUNT(DISTINCT session_id) AS unique_sessions
             FROM page_views GROUP BY page ORDER BY total DESC`),
       safeOne(`SELECT
         (SELECT COUNT(*) FROM cvs) AS total_cvs,
         (SELECT COUNT(*) FROM cvs WHERE content_json IS NOT NULL AND content_json != '{}' AND content_json != '') AS cvs_with_content,
         (SELECT COUNT(*) FROM page_views) AS views_total,
-        (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors`),
+        (SELECT COUNT(DISTINCT session_id) FROM page_views) AS unique_visitors,
+        (SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days') AS views_7d,
+        (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d`),
       safeOne(`SELECT COUNT(*) AS open_tickets FROM support_tickets WHERE status='open'`),
+      safeOne(`SELECT
+        COALESCE(ROUND(AVG(dur)::numeric,0),0) AS avg_sec,
+        COUNT(CASE WHEN cnt=1 THEN 1 END) AS bounces,
+        COUNT(*) AS total_sessions
+        FROM (SELECT session_id, COUNT(*) AS cnt,
+              EXTRACT(EPOCH FROM (MAX(created_at)-MIN(created_at))) AS dur
+              FROM page_views WHERE session_id IS NOT NULL GROUP BY session_id) t`),
+      safe(`SELECT u.id, u.name, u.email, u.plan,
+            COUNT(pv.id) AS views,
+            MIN(pv.created_at) AS first_seen, MAX(pv.created_at) AS last_seen
+            FROM users u JOIN page_views pv ON pv.user_id = u.id
+            GROUP BY u.id, u.name, u.email, u.plan
+            ORDER BY views DESC LIMIT 10`),
+      safe(`SELECT u.name, u.email, c.id AS cv_id, c.created_at,
+            CASE WHEN c.content_json IS NULL OR c.content_json='{}' OR c.content_json=''
+            THEN 'Vazio' ELSE 'Sem download' END AS reason
+            FROM cvs c JOIN users u ON u.id = c.user_id
+            WHERE c.content_json IS NULL OR c.content_json='{}' OR c.content_json=''
+               OR COALESCE(c.download_count,0)=0
+            ORDER BY c.created_at DESC LIMIT 20`),
+      safe(`SELECT pv.page, pv.created_at, u.name, u.email
+            FROM page_views pv LEFT JOIN users u ON u.id = pv.user_id
+            WHERE pv.session_id IN (
+              SELECT session_id FROM page_views WHERE session_id IS NOT NULL
+              GROUP BY session_id HAVING COUNT(*)=1
+            ) ORDER BY pv.created_at DESC LIMIT 15`),
     ]);
 
     let cvs_downloaded = 0;
     try {
       const r = await req.db.request().query(`SELECT COUNT(*) AS n FROM cvs WHERE download_count > 0`);
-      cvs_downloaded = r.recordset[0]?.N || r.recordset[0]?.n || 0;
+      cvs_downloaded = Number(r.recordset[0]?.N || r.recordset[0]?.n || 0);
     } catch(_) {}
 
-    const total_cvs        = Number(cvStats.TotalCvs    || cvStats.total_cvs    || 0);
-    const cvs_with_content = Number(cvStats.CvsWithContent || cvStats.cvs_with_content || 0);
-    const views_total      = Number(cvStats.ViewsTotal   || cvStats.views_total   || 0);
-    const unique_visitors  = Number(cvStats.UniqueVisitors|| cvStats.unique_visitors|| 0);
-    const open_tickets     = Number(openTickets.OpenTickets|| openTickets.open_tickets|| 0);
+    const n = (obj, k1, k2) => Number(obj[k1] || obj[k2] || 0);
+    const total_cvs        = n(cvStats,'TotalCvs','total_cvs');
+    const cvs_with_content = n(cvStats,'CvsWithContent','cvs_with_content');
+    const total_sessions   = n(sessionStats,'TotalSessions','total_sessions');
+    const bounces_count    = n(sessionStats,'Bounces','bounces');
 
     res.json({
       ok: true,
       stats: {
-        total_cvs,
-        cvs_with_content,
-        cvs_downloaded,
+        total_cvs, cvs_with_content, cvs_downloaded,
         abandoned: total_cvs - cvs_with_content,
-        views_total,
-        unique_visitors,
-        open_tickets,
+        views_total:     n(cvStats,'ViewsTotal','views_total'),
+        unique_visitors: n(cvStats,'UniqueVisitors','unique_visitors'),
+        views_7d:        n(cvStats,'Views7d','views_7d'),
+        cvs_7d:          n(cvStats,'Cvs7d','cvs_7d'),
+        open_tickets:    n(openTickets,'OpenTickets','open_tickets'),
+        avg_sec:         n(sessionStats,'AvgSec','avg_sec'),
+        total_sessions,
+        bounce_rate: total_sessions > 0 ? Math.round(bounces_count/total_sessions*100) : 0,
       },
-      byPage,
+      byPage, topUsers, abandonedCvs, bounces,
     });
   } catch(e) {
     console.error('analytics route error:', e.message);

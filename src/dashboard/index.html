@@ -107,6 +107,20 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .stat-change.up{color:var(--green);}
 .stat-change.down{color:var(--red);}
 
+/* ANALYTICS CARDS */
+.an-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.an-card-hdr{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.an-retention{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border:none;}
+.an-kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.an-kpi-icon{font-size:18px;margin-bottom:4px;}
+.an-kpi-val{font-size:22px;font-weight:800;line-height:1.1;}
+.an-kpi-lbl{font-size:10px;font-weight:700;color:var(--t3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+.an-kpi-sub{font-size:10px;color:var(--t4);margin-top:2px;}
+.an-kpi-bar{position:absolute;bottom:0;left:0;right:0;height:3px;opacity:.4;}
+.an-ins{background:rgba(255,255,255,.07);border:1px solid rgba(165,180,252,.15);border-radius:10px;padding:14px;}
+.an-ins-icon{font-size:16px;margin-bottom:6px;}
+.an-ins-text{font-size:12px;color:#e0e7ff;line-height:1.55;}
+.an-ins-action{display:inline-block;margin-top:8px;background:rgba(99,102,241,.35);color:#a5b4fc;font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;}
 /* TABLE */
 .table-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .table-toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
@@ -510,19 +524,47 @@ tbody tr:hover{background:#fafafa;}
 <!-- ══ ANALYTICS ════════════════════════════════════════ -->
 <div id="panel-analytics" class="panel">
   <div class="panel-hdr">
-    <div><div class="panel-title">Analytics</div><div class="panel-sub">Visitas ao site, abandono de CVs e comportamento dos utilizadores</div></div>
+    <div><div class="panel-title">Analytics</div><div class="panel-sub">Performance, comportamento e retenção de utilizadores</div></div>
     <button class="btn btn-blue btn-sm" onclick="loadAnalytics()">↻ Actualizar</button>
   </div>
-  <div id="analyticsKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-    <div class="table-card" style="padding:18px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Visitas por Página</div>
+
+  <!-- KPI ROW -->
+  <div id="analyticsKpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;"></div>
+
+  <!-- Visitas + Funil -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="an-card">
+      <div class="an-card-hdr">📄 Visitas por Página</div>
       <div id="analyticsPages"></div>
     </div>
-    <div class="table-card" style="padding:18px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Funil de CVs</div>
+    <div class="an-card">
+      <div class="an-card-hdr">🔻 Funil de CVs</div>
       <div id="analyticsCvFunnel"></div>
     </div>
+  </div>
+
+  <!-- Top Utilizadores -->
+  <div class="an-card" style="margin-bottom:16px;">
+    <div class="an-card-hdr">🏆 Utilizadores Mais Activos no Site</div>
+    <div id="analyticsTopUsers"></div>
+  </div>
+
+  <!-- CVs Abandonados + Bounces -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="an-card">
+      <div class="an-card-hdr">⚠️ CVs Abandonados — Não concluíram</div>
+      <div id="analyticsAbandoned"></div>
+    </div>
+    <div class="an-card">
+      <div class="an-card-hdr">🚪 Entraram e Saíram — Sessão de 1 página</div>
+      <div id="analyticsBounces"></div>
+    </div>
+  </div>
+
+  <!-- Painel de Retenção -->
+  <div class="an-card an-retention">
+    <div class="an-card-hdr" style="color:#a5b4fc;">🎯 Painel de Análise & Decisão de Retenção</div>
+    <div id="analyticsRetention"></div>
   </div>
 </div>
 
@@ -2073,64 +2115,158 @@ function saveAPIKeys() {
 
 // ── ANALYTICS ─────────────────────────────────────────────────
 async function loadAnalytics() {
-  document.getElementById('analyticsKpis').innerHTML = '<p style="font-size:12px;color:var(--t4)">A carregar...</p>';
+  const ids = ['analyticsKpis','analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'];
+  const loading = '<p style="font-size:12px;color:var(--t4);padding:12px 0;">A carregar...</p>';
+  ids.forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=loading; });
   const ah = { headers: { Authorization: 'Bearer ' + TOKEN } };
   try {
     const r = await fetch(API + '/api/admin/analytics', ah);
     if (!r.ok) {
       const err = await r.json().catch(()=>({}));
-      document.getElementById('analyticsKpis').innerHTML = `<p style="color:red;font-size:12px">Erro: ${err.error||r.status}</p>`;
+      document.getElementById('analyticsKpis').innerHTML = `<p style="color:#dc2626;font-size:12px;grid-column:1/-1">Erro ${r.status}: ${err.error||'falha na ligação'}</p>`;
       return;
     }
     const d = await r.json();
     const s = d.stats || {};
+    const n = k => Number(s[k]||0);
+
+    // ── KPIs ──────────────────────────────────────────────
+    const fmtSec = v => { if(!v||v<5) return '—'; if(v<60) return v+'s'; return Math.floor(v/60)+'m '+(v%60)+'s'; };
+    const br = n('bounce_rate');
     const kpis = [
-      { label: 'Visitas Totais',    val: s.ViewsTotal   || s.views_total   || 0, color: '#2563EB' },
-      { label: 'Visitantes Únicos', val: s.UniqueVisitors|| s.unique_visitors|| 0, color: '#7C3AED' },
-      { label: 'CVs Abandonados',   val: s.Abandoned    || s.abandoned     || 0, color: '#DC2626' },
-      { label: 'Tickets Abertos',   val: s.OpenTickets  || s.open_tickets  || 0, color: '#F59E0B' },
+      { icon:'👁', label:'Visitas Totais',    val: n('views_total'),      sub:`+${n('views_7d')} esta semana`,      color:'#1a56db' },
+      { icon:'👤', label:'Visitantes Únicos', val: n('unique_visitors'),   sub:`${n('total_sessions')} sessões`,     color:'#7c3aed' },
+      { icon:'⏱', label:'Tempo Médio',        val: fmtSec(n('avg_sec')),  sub:'por sessão',                         color:'#059669' },
+      { icon:'🚪', label:'Taxa de Rejeição',   val: br+'%',                sub:'saíram na 1ª pág.',                  color: br>60?'#dc2626':br>40?'#f59e0b':'#059669' },
+      { icon:'📄', label:'CVs (7 dias)',       val: n('cvs_7d'),           sub:`${n('total_cvs')} no total`,         color:'#0891b2' },
+      { icon:'💬', label:'Tickets Abertos',   val: n('open_tickets'),     sub:'aguardam resposta',                  color: n('open_tickets')>0?'#dc2626':'#9ca3af' },
     ];
     document.getElementById('analyticsKpis').innerHTML = kpis.map(k =>
-      `<div class="kpi-card"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-label">${k.label}</div></div>`
+      `<div class="an-kpi">
+        <div class="an-kpi-icon">${k.icon}</div>
+        <div class="an-kpi-val" style="color:${k.color}">${k.val}</div>
+        <div class="an-kpi-lbl">${k.label}</div>
+        <div class="an-kpi-sub">${k.sub}</div>
+        <div class="an-kpi-bar" style="background:${k.color}"></div>
+      </div>`
     ).join('');
 
+    // ── Visitas por Página ─────────────────────────────────
     const pages = d.byPage || [];
-    document.getElementById('analyticsPages').innerHTML = pages.length ? pages.map(p =>
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">
-        <span style="font-weight:600;color:var(--text)">${p.Page||p.page}</span>
-        <span style="color:var(--t3)">${p.Total||p.total} visitas · ${p.UniqueSessions||p.unique_sessions} únicos</span>
-      </div>`
-    ).join('') : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px">Sem visitas ainda</p>';
+    const maxV = Math.max(...pages.map(p=>Number(p.Total||p.total||0)),1);
+    const pgNames = {'/app':'Dashboard','/editor':'Editor CV','/':'Landing Page','/free':'CV Gratuito','/ats':'Score ATS','/demo':'Demo','/login':'Login','/register':'Registo'};
+    document.getElementById('analyticsPages').innerHTML = pages.length
+      ? pages.map(p => {
+          const v = Number(p.Total||p.total||0), u = Number(p.UniqueSessions||p.unique_sessions||0);
+          const pg = p.Page||p.page; const nm = pgNames[pg]||pg;
+          return `<div style="margin-bottom:11px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="font-weight:600;color:var(--text)">${nm}</span>
+              <span style="color:var(--t3)">${v} vis · ${u} únicos</span>
+            </div>
+            <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${Math.round(v/maxV*100)}%;background:var(--blue);border-radius:3px;"></div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">Sem visitas registadas ainda</p>';
 
-    const tv = s.TotalCvs || s.total_cvs || 0;
-    const wc = s.CvsWithContent || s.cvs_with_content || 0;
-    const dl = s.CvsDownloaded || s.cvs_downloaded || 0;
-    const ab = s.Abandoned || s.abandoned || 0;
+    // ── Funil de CVs ───────────────────────────────────────
+    const tv=n('total_cvs'), wc=n('cvs_with_content'), dl=n('cvs_downloaded'), ab=n('abandoned');
     document.getElementById('analyticsCvFunnel').innerHTML = [
-      { label: 'CVs criados', val: tv, pct: 100 },
-      { label: 'Com conteúdo', val: wc, pct: tv ? Math.round(wc/tv*100) : 0 },
-      { label: 'Descarregados', val: dl, pct: tv ? Math.round(dl/tv*100) : 0 },
-      { label: 'Abandonados', val: ab, pct: tv ? Math.round(ab/tv*100) : 0 },
-    ].map(f =>
-      `<div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
-          <span style="font-weight:600">${f.label}</span><span style="color:var(--t3)">${f.val} (${f.pct}%)</span>
-        </div>
-        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-          <div style="height:100%;width:${f.pct}%;background:var(--blue);border-radius:3px;transition:width .4s"></div>
-        </div>
-      </div>`
-    ).join('');
+      {label:'CVs criados',  val:tv, pct:100,                               color:'#1a56db'},
+      {label:'Preenchidos',  val:wc, pct:tv?Math.round(wc/tv*100):0,        color:'#7c3aed'},
+      {label:'Descarregados',val:dl, pct:tv?Math.round(dl/tv*100):0,        color:'#059669'},
+      {label:'Abandonados',  val:ab, pct:tv?Math.round(ab/tv*100):0,        color:'#dc2626'},
+    ].map(f=>`<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="font-weight:600">${f.label}</span>
+        <span><strong style="color:${f.color}">${f.val}</strong> <span style="font-size:10px;background:${f.color}18;color:${f.color};padding:1px 7px;border-radius:4px;">${f.pct}%</span></span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${f.pct}%;background:${f.color};border-radius:4px;transition:width .5s"></div>
+      </div>
+    </div>`).join('');
 
-    // Badge tickets abertos
-    const openT = s.OpenTickets || s.open_tickets || 0;
+    // ── Top Utilizadores ──────────────────────────────────
+    const fmtD = v => v ? new Date(v).toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+    const top = d.topUsers||[];
+    document.getElementById('analyticsTopUsers').innerHTML = top.length
+      ? `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="border-bottom:2px solid var(--border);">
+            <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t3);text-transform:uppercase;">#</th>
+            <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t3);text-transform:uppercase;">Utilizador</th>
+            <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--t3);text-transform:uppercase;">Plano</th>
+            <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--t3);text-transform:uppercase;">Páginas vistas</th>
+            <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--t3);text-transform:uppercase;">1ª Visita</th>
+            <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--t3);text-transform:uppercase;">Última Visita</th>
+          </tr></thead>
+          <tbody>${top.map((u,i)=>{
+            const plan=u.Plan||u.plan||'free';
+            const badge=plan==='premium'?'<span style="background:#fef3c7;color:#b45309;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;">PREMIUM</span>':'<span style="background:var(--bg);color:var(--t4);font-size:9px;padding:2px 6px;border-radius:4px;">FREE</span>';
+            return `<tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px;color:var(--t4);font-weight:700;">${i+1}</td>
+              <td style="padding:8px;"><div style="font-weight:600">${u.Name||u.name||'—'}</div><div style="font-size:10px;color:var(--t4)">${u.Email||u.email||'—'}</div></td>
+              <td style="padding:8px;text-align:center">${badge}</td>
+              <td style="padding:8px;text-align:center;font-weight:800;color:var(--blue)">${Number(u.Views||u.views||0)}</td>
+              <td style="padding:8px;text-align:center;color:var(--t3)">${fmtD(u.FirstSeen||u.first_seen)}</td>
+              <td style="padding:8px;text-align:center;color:var(--t3)">${fmtD(u.LastSeen||u.last_seen)}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>`
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">Nenhum utilizador autenticado visitou o site ainda</p>';
+
+    // ── CVs Abandonados ────────────────────────────────────
+    const abList = d.abandonedCvs||[];
+    document.getElementById('analyticsAbandoned').innerHTML = abList.length
+      ? abList.map(u=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;">
+          <div><div style="font-weight:600">${u.Name||u.name||'Utilizador'}</div><div style="font-size:10px;color:var(--t4)">${u.Email||u.email||'—'}</div></div>
+          <span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0;">${u.Reason||u.reason||'Abandonado'}</span>
+        </div>`).join('')
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">✅ Nenhum CV abandonado</p>';
+
+    // ── Bounces ────────────────────────────────────────────
+    const bList = d.bounces||[];
+    document.getElementById('analyticsBounces').innerHTML = bList.length
+      ? bList.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;">
+          <div>
+            <div style="font-weight:600">${b.Name||b.name||'Visitante anónimo'}</div>
+            <div style="font-size:10px;color:var(--t4)">${b.Email||b.email||'Sem conta'} · Página: ${b.Page||b.page}</div>
+          </div>
+          <div style="font-size:10px;color:var(--t4);flex-shrink:0;margin-left:8px">${fmtD(b.CreatedAt||b.created_at)}</div>
+        </div>`).join('')
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">Sem dados de rejeição ainda</p>';
+
+    // ── Painel de Retenção ─────────────────────────────────
+    const insights = [];
+    if (br > 60)       insights.push({icon:'🔴',text:`Taxa de rejeição alta (${br}%) — Utilizadores saem sem interagir. Reveja a landing page e o primeiro ecrã.`,action:'Melhorar landing page'});
+    else if (br > 40)  insights.push({icon:'🟡',text:`Taxa de rejeição moderada (${br}%) — Há espaço para melhorar o engajamento inicial.`,action:'Optimizar onboarding'});
+    else if (br > 0)   insights.push({icon:'🟢',text:`Taxa de rejeição saudável (${br}%) — Os utilizadores estão a explorar o site activamente.`,action:null});
+    if (ab > 0)        insights.push({icon:'⚠️',text:`${ab} CV(s) abandonados — Considera enviar email de reactivação. Pequeno incentivo pode converter estes utilizadores.`,action:`Contactar ${Math.min(ab,10)} utilizadores`});
+    if (n('cvs_7d')>0) insights.push({icon:'📈',text:`${n('cvs_7d')} CVs criados esta semana — Momento activo. Ideal para campanha de conversão para premium.`,action:'Lançar campanha premium'});
+    if (wc>0&&dl===0)  insights.push({icon:'💡',text:`${wc} CVs preenchidos mas nenhum descarregado — Rever o fluxo de download. Pode haver uma barreira no botão de exportação.`,action:'Rever fluxo de download'});
+    if (n('open_tickets')>0) insights.push({icon:'💬',text:`${n('open_tickets')} ticket(s) de suporte sem resposta — Responder rapidamente reduz o churn e aumenta a satisfação.`,action:'Ver suporte'});
+    if (top.length>0)  insights.push({icon:'🏆',text:`Utilizador mais activo: ${top[0].Name||top[0].name||'—'} (${Number(top[0].Views||top[0].views||0)} páginas). Candidato ideal para testemunho ou programa de embaixadores.`,action:null});
+    if (insights.length===0) insights.push({icon:'📊',text:'Dados insuficientes para análise. Continue a recolher visitas — as recomendações aparecerão automaticamente.',action:null});
+
+    document.getElementById('analyticsRetention').innerHTML =
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+        ${insights.map(ins=>`<div class="an-ins">
+          <div class="an-ins-icon">${ins.icon}</div>
+          <div class="an-ins-text">${ins.text}</div>
+          ${ins.action?`<span class="an-ins-action">→ ${ins.action}</span>`:''}
+        </div>`).join('')}
+      </div>`;
+
     const sb = document.getElementById('supportBadge');
-    if (sb) { sb.style.display = openT > 0 ? 'inline-block' : 'none'; sb.textContent = openT; }
+    if (sb) { sb.style.display=n('open_tickets')>0?'inline-block':'none'; sb.textContent=n('open_tickets'); }
+
   } catch(e) {
-    console.error('Analytics error', e);
-    document.getElementById('analyticsKpis').innerHTML = `<p style="color:#DC2626;font-size:12px;padding:8px 0;">Erro ao carregar: ${e.message}</p>`;
-    document.getElementById('analyticsPages').innerHTML = '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px;">Sem dados disponíveis</p>';
-    document.getElementById('analyticsCvFunnel').innerHTML = '<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px;">Sem dados disponíveis</p>';
+    console.error('Analytics error:', e);
+    document.getElementById('analyticsKpis').innerHTML = `<p style="color:#dc2626;font-size:12px;grid-column:1/-1">Erro: ${e.message}</p>`;
+    ['analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.innerHTML='<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px">Sem dados disponíveis</p>';
+    });
   }
 }
 
