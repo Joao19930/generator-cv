@@ -679,7 +679,7 @@ tbody tr:hover{background:#fafafa;}
         <div class="f-field"><label>Empresa</label><input type="text" id="jCompany" placeholder="ex: Microsoft"></div>
       </div>
       <div class="f-row">
-        <div class="f-field"><label>Cidade</label><input type="text" id="jCity" placeholder="Lisboa"></div>
+        <div class="f-field"><label>Cidade</label><input type="text" id="jCity" placeholder="Luanda" value="Luanda"></div>
         <div class="f-field"><label>País</label><input type="text" id="jCountry" value="Angola"></div>
       </div>
       <div class="f-row">
@@ -702,7 +702,7 @@ tbody tr:hover{background:#fafafa;}
           </select>
         </div>
       </div>
-      <div class="f-field"><label id="jUrlLabel">URL de Candidatura</label><input type="text" id="jUrl" placeholder="https://..."></div>
+      <div class="f-field"><label id="jUrlLabel">URL de Candidatura</label><input type="text" id="jUrl" placeholder="https://..." oninput="autoDetectContactType(this.value)"></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancelar</button><button class="btn btn-blue" onclick="saveJob()">Publicar Vaga</button></div>
   </div>
@@ -1234,6 +1234,18 @@ function filterJobs(v) {
   document.getElementById('jobsPagInfo').textContent = f.length + ' vagas';
 }
 
+function autoDetectContactType(val) {
+  val = val.trim();
+  const sel = document.getElementById('jContactType');
+  if (/[\w.+-]+@[\w-]+\.\w+/.test(val)) {
+    sel.value = 'email';
+  } else if (/^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) {
+    sel.value = 'whatsapp';
+  } else if (/https?:\/\//i.test(val)) {
+    sel.value = 'url';
+  }
+  updateContactPlaceholder();
+}
 function updateContactPlaceholder() {
   const type = document.getElementById('jContactType').value;
   const label = document.getElementById('jUrlLabel');
@@ -1245,6 +1257,10 @@ function updateContactPlaceholder() {
 
 function resetPasteArea() {
   document.getElementById('jRawText').value = '';
+  document.getElementById('jCity').value = 'Luanda';
+  document.getElementById('jCountry').value = 'Angola';
+  document.getElementById('jContactType').value = 'url';
+  updateContactPlaceholder();
   document.getElementById('jPasteArea').style.display = 'none';
   const btn = document.querySelector('#jPasteWrap > button');
   btn.textContent = '📋 Colar texto da vaga (WhatsApp)';
@@ -1347,7 +1363,7 @@ function parseAndFillJob() {
   if (city)     document.getElementById('jCity').value    = city;
   if (country)  document.getElementById('jCountry').value = country;
   if (salary)   document.getElementById('jSalary').value  = salary;
-  if (contact)  document.getElementById('jUrl').value     = contact;
+  if (contact) { document.getElementById('jUrl').value = contact; autoDetectContactType(contact); }
   if (description) document.getElementById('jDesc').value = description;
   if (endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate)) document.getElementById('jEndDate').value = endDate;
   if (category) {
