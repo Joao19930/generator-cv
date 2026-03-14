@@ -1272,11 +1272,14 @@ function togglePasteArea() {
   a.style.display = a.style.display === 'none' ? 'block' : 'none';
 }
 
+function cleanLine(l) {
+  // Remove invisible Unicode: LTR/RTL marks, zero-width spaces, variation selectors, BOM
+  return l.replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF\uFE0F]/g, '').trim();
+}
 function detectMultipleJobs(raw) {
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  // Bullet patterns: ▫️ ▪ • ◦ ○ ● ► ▶ → - * or numbered 1. 1)
-  const bulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA\u{1F539}\u{1F538}]\s*(.+)|^\*\s*(?!\s*Responsável|\s*Requisito|\s*Gestão|\s*Atendimento)/u;
-  const titleBulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA]\s*(.+)/u;
+  const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
+  // Bullet patterns: ▫️ ▪ • ◦ ○ ● ► ▶ → and variations
+  const titleBulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA\u25C6\u25C7\u2605]\s*(.+)/u;
   const descBulletRx = /^\*\s+(.+)|^[-–]\s+(.+)/;
 
   let jobs = [];
@@ -1322,7 +1325,7 @@ function parseAndFillJob() {
   }
 
   // Helpers
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
   const getField = (keys) => {
     for (const line of lines) {
       for (const k of keys) {
@@ -1477,7 +1480,7 @@ function detectContactType(val) {
 }
 
 function extractSharedFields(raw) {
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
   const getField = (keys) => {
     for (const line of lines) {
       for (const k of keys) {
