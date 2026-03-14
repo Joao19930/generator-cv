@@ -68,20 +68,14 @@ app.get('/auth/google',   (req, res) => res.redirect('/api/auth/google'));
 app.get('/auth/linkedin', (req, res) => res.redirect('/api/auth/linkedin'));
 
 // ── App pages ────────────────────────────────────────────────
-app.get('/app',        (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'app.html')));
-app.get('/dashboard',  (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'dashboard.html')));
-app.get('/definicoes', (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'definicoes.html')));
-app.get('/editor',   (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'form.html')));
-app.get('/preview',  (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'preview.html')));
-app.get('/free',     (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'free.html')));
-app.get('/free-preview', (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'free-preview.html')));
+const noCache = (res) => res.setHeader('Cache-Control', 'no-store');
+app.get('/app',        (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'app.html')); });
+app.get('/dashboard',  (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'dashboard.html')); });
+app.get('/definicoes', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'definicoes.html')); });
+app.get('/editor',     (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'form.html')); });
+app.get('/preview',    (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'preview.html')); });
+app.get('/free',       (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'free.html')); });
+app.get('/free-preview', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'free-preview.html')); });
 app.get('/demo',         (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'demo.html')));
 app.get('/ats',          (req, res) =>
