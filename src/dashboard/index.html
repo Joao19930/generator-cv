@@ -1297,11 +1297,15 @@ function cleanLine(l) {
   // Remove invisible Unicode: LTR/RTL marks, zero-width spaces, variation selectors, BOM
   return l.replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF\uFE0F]/g, '').trim();
 }
+// Linhas que indicam fim da lista de cargos (passam a ser campos partilhados)
+const SHARED_FIELD_RX = /^(local|cidade|contacto|contact|email|cv para|envie|apenas|requisitos?|horário|horario|salário|salario|prazo|data\s*limite|candidatura|informaç)/i;
+
 function detectMultipleJobs(raw) {
   const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
-  // Bullet patterns: ▫️ ▪ • ◦ ○ ● ► ▶ → and variations
+
+  // Padrão 1 — bullets: ▫️ ▪ • ◦ ○ ● ► ▶ →
   const titleBulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA\u25C6\u25C7\u2605]\s*(.+)/u;
-  const descBulletRx = /^\*\s+(.+)|^[-–]\s+(.+)/;
+  const descBulletRx  = /^\*\s+(.+)|^[-–]\s+(.+)/;
 
   let jobs = [];
   let currentJob = null;
@@ -1310,20 +1314,40 @@ function detectMultipleJobs(raw) {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Detect "Vagas disponíveis:" type headers
-    if (/vagas?\s*(disponíveis|abertas|em?\s*aberto|:)|estamos\s+a\s+recrutar|recrutamos|oportunidades\s+de/i.test(line)) {
+
+    // Cabeçalho de lista: "Vagas disponíveis:", "a recrutar ... em:", "profissionais em:"
+    if (/vagas?\s*(disponíveis|abertas|em?\s*aberto|:)|oportunidades\s+de|(estamos\s+a\s+recrutar|recrutamos|recrutar\s+profissionais)[^:]*:/i.test(line)) {
       inJobSection = true; continue;
     }
+
+    // Padrão 1: bullet explícito
     const titleM = line.match(titleBulletRx);
-    if (titleM && titleM[1].length < 100) {
+    if (titleM && titleM[1].length < 120) {
       inJobSection = true;
       if (currentJob) jobs.push(currentJob);
       currentJob = { title: titleM[1].replace(/[*_]/g,'').trim(), description: '' };
-    } else if (currentJob) {
+      continue;
+    }
+
+    // Padrão 2: linha simples sem bullet, dentro de uma secção de lista
+    // Critérios: inJobSection, sem ":", curta (< 80 chars), não é campo partilhado
+    if (inJobSection && !currentJob?.description && !SHARED_FIELD_RX.test(line) && !line.includes(':') && line.length < 80) {
+      // Verifica se parece um cargo: começa por maiúscula ou contém parênteses típicos
+      if (/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÜ]/.test(line) || /\(.*\)/.test(line)) {
+        if (currentJob) jobs.push(currentJob);
+        currentJob = { title: line, description: '' };
+        continue;
+      }
+    }
+
+    if (currentJob) {
+      // Parar de adicionar descrição quando chegamos a campos partilhados
+      if (SHARED_FIELD_RX.test(line)) {
+        jobs.push(currentJob); currentJob = null; continue;
+      }
       const descM = line.match(descBulletRx);
       const text = descM ? (descM[1]||descM[2]) : line;
-      // Skip contact/closing lines
-      if (!/email|cv para|envie|📌|🔍|procuramos|organizada|criativa|responsável/i.test(text) || descM) {
+      if (!/📌|🔍|procuramos pessoas|organizada|criativa/i.test(text) || descM) {
         currentJob.description += (currentJob.description ? '\n' : '') + text;
       }
     } else if (!inJobSection) {
@@ -1331,7 +1355,10 @@ function detectMultipleJobs(raw) {
     }
   }
   if (currentJob) jobs.push(currentJob);
-  return jobs.length >= 2 ? { jobs, sharedDesc: sharedDesc.join('\n') } : null;
+
+  // Filtrar títulos que parecem ser frases longas (não são cargos reais)
+  const validJobs = jobs.filter(j => j.title.length < 80 && j.title.split(' ').length <= 8);
+  return validJobs.length >= 2 ? { jobs: validJobs, sharedDesc: sharedDesc.join('\n') } : null;
 }
 
 function parseAndFillJob() {
