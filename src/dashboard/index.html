@@ -672,6 +672,7 @@ tbody tr:hover{background:#fafafa;}
           <button type="button" class="btn btn-blue" style="margin-top:8px;gap:6px;" onclick="parseAndFillJob()">
             🔍 Analisar e preencher campos
           </button>
+          <div id="jMultiPreview" style="display:none;margin-top:14px;"></div>
         </div>
       </div>
       <div class="f-row">
@@ -1271,9 +1272,54 @@ function togglePasteArea() {
   a.style.display = a.style.display === 'none' ? 'block' : 'none';
 }
 
+function detectMultipleJobs(raw) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  // Bullet patterns: ▫️ ▪ • ◦ ○ ● ► ▶ → - * or numbered 1. 1)
+  const bulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA\u{1F539}\u{1F538}]\s*(.+)|^\*\s*(?!\s*Responsável|\s*Requisito|\s*Gestão|\s*Atendimento)/u;
+  const titleBulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA]\s*(.+)/u;
+  const descBulletRx = /^\*\s+(.+)|^[-–]\s+(.+)/;
+
+  let jobs = [];
+  let currentJob = null;
+  let sharedDesc = [];
+  let inJobSection = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Detect "Vagas disponíveis:" type headers
+    if (/vagas?\s*(disponíveis|abertas|em?\s*aberto|:)|estamos\s+a\s+recrutar|recrutamos|oportunidades\s+de/i.test(line)) {
+      inJobSection = true; continue;
+    }
+    const titleM = line.match(titleBulletRx);
+    if (titleM && titleM[1].length < 100) {
+      inJobSection = true;
+      if (currentJob) jobs.push(currentJob);
+      currentJob = { title: titleM[1].replace(/[*_]/g,'').trim(), description: '' };
+    } else if (currentJob) {
+      const descM = line.match(descBulletRx);
+      const text = descM ? (descM[1]||descM[2]) : line;
+      // Skip contact/closing lines
+      if (!/email|cv para|envie|📌|🔍|procuramos|organizada|criativa|responsável/i.test(text) || descM) {
+        currentJob.description += (currentJob.description ? '\n' : '') + text;
+      }
+    } else if (!inJobSection) {
+      sharedDesc.push(line);
+    }
+  }
+  if (currentJob) jobs.push(currentJob);
+  return jobs.length >= 2 ? { jobs, sharedDesc: sharedDesc.join('\n') } : null;
+}
+
 function parseAndFillJob() {
   const raw = document.getElementById('jRawText').value.trim();
   if (!raw) return;
+
+  // Try multi-job detection first
+  const multi = detectMultipleJobs(raw);
+  if (multi && multi.jobs.length >= 2) {
+    renderMultiJobPreview(raw, multi);
+    return;
+  }
 
   // Helpers
   const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -1381,6 +1427,110 @@ function parseAndFillJob() {
   btn.style.borderColor = '#22C55E';
   btn.style.color = '#16A34A';
   setTimeout(() => { btn.textContent = '📋 Colar texto da vaga (WhatsApp)'; btn.style.borderColor=''; btn.style.color=''; }, 4000);
+}
+
+function renderMultiJobPreview(raw, multi) {
+  // Extract shared fields using the normal single-job parser
+  const shared = extractSharedFields(raw);
+  const preview = document.getElementById('jMultiPreview');
+  let html = `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-weight:700;color:#16A34A;margin-bottom:8px;">✅ ${multi.jobs.length} vagas detectadas</div>`;
+  multi.jobs.forEach((j, i) => {
+    html += `<div style="background:#fff;border:1px solid #D1FAE5;border-radius:6px;padding:10px 12px;margin-bottom:8px;">
+      <div style="font-weight:600;font-size:13px;color:#0F172A;">${i+1}. ${j.title}</div>
+      ${j.description ? `<div style="font-size:12px;color:#64748B;margin-top:4px;line-height:1.5;">${j.description.split('\n')[0].substring(0,100)}${j.description.length>100?'…':''}</div>` : ''}
+    </div>`;
+  });
+  html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:140px;"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:3px;">EMPRESA</label>
+      <input id="mCompany" type="text" value="${shared.company||''}" style="width:100%;border:1px solid #CBD5E1;border-radius:6px;padding:6px 8px;font-size:13px;" placeholder="Nome da empresa"></div>
+    <div style="flex:1;min-width:120px;"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:3px;">CIDADE</label>
+      <input id="mCity" type="text" value="${shared.city||'Luanda'}" style="width:100%;border:1px solid #CBD5E1;border-radius:6px;padding:6px 8px;font-size:13px;"></div>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:140px;"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:3px;">CONTACTO</label>
+      <input id="mContact" type="text" value="${shared.contact||''}" oninput="document.getElementById('mContactType').value=detectContactType(this.value)" style="width:100%;border:1px solid #CBD5E1;border-radius:6px;padding:6px 8px;font-size:13px;" placeholder="email ou número"></div>
+    <div style="flex:1;min-width:120px;"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:3px;">TIPO</label>
+      <select id="mContactType" style="width:100%;border:1px solid #CBD5E1;border-radius:6px;padding:6px 8px;font-size:13px;">
+        <option value="url">Link / URL</option><option value="email">Email</option><option value="whatsapp">WhatsApp</option>
+      </select></div>
+  </div>
+  <button type="button" class="btn btn-blue" style="margin-top:12px;width:100%;justify-content:center;" onclick="publishMultipleJobs()">
+    🚀 Publicar ${multi.jobs.length} vagas separadas
+  </button></div>`;
+  preview.innerHTML = html;
+  preview.style.display = 'block';
+  // Set contact type
+  if (shared.contact) {
+    const ct = detectContactType(shared.contact);
+    document.getElementById('mContactType').value = ct;
+  }
+  // Store jobs data for publishing
+  preview._jobs = multi.jobs;
+}
+
+function detectContactType(val) {
+  val = (val||'').trim();
+  if (/[\w.+-]+@[\w-]+\.\w+/.test(val)) return 'email';
+  if (/^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) return 'whatsapp';
+  return 'url';
+}
+
+function extractSharedFields(raw) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const getField = (keys) => {
+    for (const line of lines) {
+      for (const k of keys) {
+        const rx = new RegExp('^[*_\\-•]*\\s*' + k + '[:\\s]+(.+)', 'i');
+        const m = line.match(rx);
+        if (m) return m[1].replace(/[*_]/g,'').trim();
+      }
+    }
+    return '';
+  };
+  // Company: look for "A [Nome] está a recrutar" or "empresa:"
+  let company = getField(['empresa','empregador','entidade','organização','organizacao','company','grupo']);
+  if (!company) {
+    const m = raw.match(/(?:^|\n)\s*(?:A|O)\s+([A-ZÁÀÂÃÉÊÍÓÔÕÚÜ][^\n]{2,40}?)\s+(?:está|estamos|está a recrutar|recruta)/i);
+    if (m) company = m[1].trim();
+  }
+  let city = getField(['local','localização','localizacao','cidade','location']);
+  if (!city) { const m = raw.match(/\bem\s+(Luanda|Benguela|Huambo|Lubango|Malanje|[A-Z][a-záàâãéêíóôõúü]+)\b/); if (m) city = m[1]; }
+  let contact = getField(['candidatura','candidaturas','enviar cv','cv para','contact','contacto','email','link','whatsapp']);
+  if (!contact) {
+    const emailM = raw.match(/[\w.+-]+@[\w-]+\.\w+/); if (emailM) contact = emailM[0];
+    if (!contact) { const waM = raw.match(/\+?244?\s*(9\d{8})/); if (waM) contact = 'https://wa.me/244' + waM[1]; }
+    if (!contact) { const urlM = raw.match(/https?:\/\/\S+/); if (urlM) contact = urlM[0]; }
+  }
+  return { company, city: city||'Luanda', contact };
+}
+
+async function publishMultipleJobs() {
+  const preview = document.getElementById('jMultiPreview');
+  const jobs = preview._jobs;
+  if (!jobs || !jobs.length) return;
+  const company     = document.getElementById('mCompany').value.trim();
+  const city        = document.getElementById('mCity').value.trim() || 'Luanda';
+  const contact     = document.getElementById('mContact').value.trim();
+  const contactType = document.getElementById('mContactType').value;
+  const jobDate     = new Date().toISOString().split('T')[0];
+  if (!company) { alert('Preencha o nome da empresa.'); return; }
+  const btn = preview.querySelector('button[onclick="publishMultipleJobs()"]');
+  btn.textContent = '⏳ A publicar…'; btn.disabled = true;
+  let ok = 0, fail = 0;
+  for (const j of jobs) {
+    try {
+      const res = await fetch(API + '/api/admin/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+        body: JSON.stringify({ title: j.title, company, city, country: 'Angola', description: j.description || null, url: contact, contactType, jobDate })
+      });
+      if (res.ok) ok++; else fail++;
+    } catch { fail++; }
+  }
+  closeModal('jobModal');
+  await loadFromAPI();
+  showAlert('alertJobs', `✅ ${ok} vaga(s) publicada(s) com sucesso${fail ? ` — ${fail} com erro` : ''}.`, 'green');
 }
 
 async function saveJob() {
