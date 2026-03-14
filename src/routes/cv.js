@@ -268,7 +268,9 @@ ${name}`
 router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
   const { name, jobTitle, experiences } = req.body;
   try {
-    const summary = await openaiConnector.generateSummary(name, jobTitle, experiences);
+    let summary;
+    try { summary = await openaiConnector.generateSummary(name, jobTitle, experiences); }
+    catch { summary = generateSummaryLocal(name, jobTitle, experiences); }
     res.json({ summary });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -278,8 +280,10 @@ router.post('/generate-responsibilities', auth, toolLimiter, async (req, res) =>
   const { jobTitle } = req.body;
   if (!jobTitle) return res.status(400).json({ error: 'jobTitle é obrigatório' });
   try {
-    const text = await openaiConnector.generateResponsibilities(jobTitle);
-    res.json({ responsibilities: text });
+    let responsibilities;
+    try { responsibilities = await openaiConnector.generateResponsibilities(jobTitle); }
+    catch { responsibilities = generateResponsibilitiesLocal(jobTitle); }
+    res.json({ responsibilities });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -353,6 +357,38 @@ function buildCVHtml(content, templateName) {
   ${education.length   ? `<section><h2>Educação</h2>${eduHtml}</section>`   : ''}
   ${skills.length      ? `<section><h2>Competências</h2>${skillHtml}</section>` : ''}
   </body></html>`;
+}
+
+function generateSummaryLocal(name, jobTitle, experiences) {
+  const n = name || 'o candidato';
+  const j = jobTitle || 'profissional';
+  const expNote = experiences ? ` com experiência em ${experiences.slice(0, 80)}` : '';
+  return `${n} é um(a) ${j} dedicado(a)${expNote}. Orientado(a) para resultados, com forte capacidade de trabalho em equipa e resolução de problemas. Comprometido(a) com a excelência profissional e o desenvolvimento contínuo. Disponível para novos desafios e para contribuir para o crescimento da organização.`;
+}
+
+function generateResponsibilitiesLocal(jobTitle) {
+  const jt = (jobTitle || '').toLowerCase();
+  const maps = [
+    { rx: /motorista|condutor|driver/,         items: ['Condução segura de veículos da empresa', 'Cumprimento das rotas e horários estabelecidos', 'Manutenção básica e verificação do estado do veículo', 'Transporte de mercadorias e/ou passageiros', 'Registo de quilómetros e ocorrências de viagem', 'Cumprimento do código da estrada e normas de segurança'] },
+    { rx: /cozinheiro|chef|cozinha|pasteleiro/, items: ['Preparação e confecção de refeições conforme o menu', 'Controlo de qualidade e higiene alimentar', 'Gestão de stocks e encomenda de ingredientes', 'Organização e limpeza da área de trabalho', 'Criação de novas receitas e sugestões do dia', 'Cumprimento das normas HACCP'] },
+    { rx: /contabilist|financ|auditor/,         items: ['Registo e lançamento de documentos contabilísticos', 'Elaboração de relatórios financeiros mensais', 'Controlo e reconciliação de contas bancárias', 'Cumprimento das obrigações fiscais e declarativas', 'Análise de custos e apoio à gestão orçamental', 'Arquivo e organização da documentação contabilística'] },
+    { rx: /vendedor|comercial|sales/,           items: ['Prospeção e captação de novos clientes', 'Apresentação e demonstração de produtos/serviços', 'Negociação e fecho de vendas', 'Acompanhamento e fidelização da carteira de clientes', 'Registo de actividades no CRM', 'Cumprimento das metas comerciais mensais'] },
+    { rx: /electricista|electric/,             items: ['Instalação e manutenção de sistemas eléctricos', 'Diagnóstico e resolução de avarias eléctricas', 'Leitura e interpretação de esquemas eléctricos', 'Instalação de quadros eléctricos e cablagens', 'Cumprimento das normas de segurança eléctrica', 'Registo de intervenções técnicas realizadas'] },
+    { rx: /professor|docente|ensino/,           items: ['Planificação e leccionação de aulas', 'Avaliação contínua e sumativa dos alunos', 'Elaboração de materiais pedagógicos', 'Acompanhamento individualizado dos alunos', 'Participação em reuniões pedagógicas', 'Comunicação regular com os encarregados de educação'] },
+    { rx: /rh|recursos humanos|recrutamento/,   items: ['Recrutamento e selecção de candidatos', 'Gestão de admissões, contratos e documentação', 'Controlo de assiduidade e gestão de férias', 'Elaboração de processos de avaliação de desempenho', 'Organização de acções de formação interna', 'Apoio ao cumprimento da legislação laboral'] },
+    { rx: /marketing|digital|social media/,     items: ['Gestão das redes sociais da empresa', 'Criação de conteúdos e campanhas digitais', 'Análise de métricas e relatórios de desempenho', 'Gestão de tráfego pago (Meta Ads, Google Ads)', 'Desenvolvimento de estratégias de marketing de conteúdo', 'Coordenação com fornecedores criativos e agências'] },
+    { rx: /engenheir|engineer/,                 items: ['Desenvolvimento e acompanhamento de projectos técnicos', 'Elaboração de relatórios e documentação técnica', 'Supervisão de obras e equipas no terreno', 'Controlo de qualidade e cumprimento de normas', 'Resolução de problemas técnicos complexos', 'Coordenação com clientes e fornecedores'] },
+  ];
+  const match = maps.find(m => m.rx.test(jt));
+  const items = match ? match.items : [
+    `Execução das funções inerentes ao cargo de ${jobTitle}`,
+    'Colaboração com a equipa para atingir os objectivos da empresa',
+    'Elaboração de relatórios de actividades e resultados',
+    'Cumprimento dos procedimentos internos e normas de qualidade',
+    'Atendimento e apoio a clientes/parceiros conforme necessário',
+    'Participação em formações e actividades de melhoria contínua',
+  ];
+  return items.map(i => `• ${i}`).join('\n');
 }
 
 module.exports = router;
