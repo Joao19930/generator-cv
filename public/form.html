@@ -740,7 +740,7 @@ async function generateSummaryAI() {
   const btn = document.getElementById('btnGenSummary');
   btn.textContent = '⏳ A gerar...'; btn.disabled = true;
   try {
-    const TOKEN = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const TOKEN = localStorage.getItem('cv_token');
     const r = await fetch('/api/cv/generate-summary', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
@@ -761,7 +761,7 @@ async function suggestResponsibilities(btn) {
   if (!jobTitle) { alert('Preenche primeiro o campo Cargo.'); return; }
   btn.textContent = '⏳ A gerar...'; btn.disabled = true;
   try {
-    const TOKEN = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const TOKEN = localStorage.getItem('cv_token');
     const r = await fetch('/api/cv/generate-responsibilities', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
