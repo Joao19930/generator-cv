@@ -90,9 +90,11 @@ app.get('/ats',          (req, res) =>
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'admin-login.html')));
-app.use('/admin-panel', express.static(path.join(__dirname, 'dashboard')));
-app.get('/admin-panel', (req, res) =>
-  res.sendFile(path.join(__dirname, 'dashboard', 'index.html')));
+app.use('/admin-panel', express.static(path.join(__dirname, 'dashboard'), { etag: false, maxAge: 0 }));
+app.get('/admin-panel', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(__dirname, 'dashboard', 'index.html'));
+});
 
 // ── Rotas públicas ───────────────────────────────────────────
 app.get('/health', (req, res) =>

@@ -358,7 +358,7 @@ tbody tr:hover{background:#fafafa;}
 <div id="panel-jobs" class="panel">
   <div class="panel-hdr">
     <div><div class="panel-title">Vagas de Emprego</div><div class="panel-sub">Gerir vagas exibidas no dashboard dos utilizadores</div></div>
-    <button class="btn btn-blue" onclick="openModal('jobModal');state.editId=null;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Vaga</button>
+    <button class="btn btn-blue" onclick="openModal('jobModal');state.editId=null;resetPasteArea();"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Vaga</button>
   </div>
   <div id="alertJobs"></div>
   <div class="table-card">
@@ -662,16 +662,28 @@ tbody tr:hover{background:#fafafa;}
   <div class="modal">
     <div class="modal-hdr"><div class="modal-title" id="jobModalTitle">Adicionar Vaga</div><button class="modal-close" onclick="closeModal('jobModal')">✕</button></div>
     <div class="modal-body">
+      <!-- COLAR TEXTO -->
+      <div id="jPasteWrap" style="margin-bottom:14px;">
+        <button type="button" class="btn btn-ghost" style="width:100%;justify-content:center;gap:6px;border:1.5px dashed #CBD5E1;" onclick="togglePasteArea()">
+          📋 Colar texto da vaga (WhatsApp)
+        </button>
+        <div id="jPasteArea" style="display:none;margin-top:10px;">
+          <textarea id="jRawText" rows="6" style="width:100%;border:1px solid #CBD5E1;border-radius:8px;padding:10px;font-size:13px;resize:vertical;" placeholder="Cola aqui o texto da vaga copiado do WhatsApp..."></textarea>
+          <button type="button" class="btn btn-blue" style="margin-top:8px;gap:6px;" onclick="parseAndFillJob()">
+            🔍 Analisar e preencher campos
+          </button>
+        </div>
+      </div>
       <div class="f-row">
         <div class="f-field"><label>Cargo</label><input type="text" id="jTitle" placeholder="ex: Engenheiro de Software"></div>
         <div class="f-field"><label>Empresa</label><input type="text" id="jCompany" placeholder="ex: Microsoft"></div>
       </div>
       <div class="f-row">
         <div class="f-field"><label>Cidade</label><input type="text" id="jCity" placeholder="Lisboa"></div>
-        <div class="f-field"><label>País</label><input type="text" id="jCountry" value="Portugal"></div>
+        <div class="f-field"><label>País</label><input type="text" id="jCountry" value="Angola"></div>
       </div>
       <div class="f-row">
-        <div class="f-field"><label>Categoria</label><select id="jCat"><option>TI & Tecnologia</option><option>Finanças</option><option>RH</option><option>Saúde</option><option>Engenharia</option><option>Marketing</option><option>Educação</option><option>Serviços Domésticos</option><option>Administrativos</option><option>Função Pública</option><option>Outro</option></select></div>
+        <div class="f-field"><label>Categoria</label><select id="jCat"><option>TI & Tecnologia</option><option>Finanças</option><option>RH</option><option>Saúde</option><option>Engenharia</option><option>Marketing</option><option>Educação</option><option>Construção Civil</option><option>Oil &amp; Gás</option><option>Cozinha</option><option>Motoristas</option><option>Serviços Gerais</option><option>Serviços Domésticos</option><option>Administrativos</option><option>Função Pública</option><option>Outro</option></select></div>
         <div class="f-field"><label>Data de Publicação</label><input type="date" id="jDate"></div>
       </div>
       <div class="f-row">
@@ -1229,6 +1241,130 @@ function updateContactPlaceholder() {
   if (type === 'email') { label.textContent = 'Email de Candidatura'; input.placeholder = 'exemplo@empresa.com'; input.type = 'email'; }
   else if (type === 'whatsapp') { label.textContent = 'Número WhatsApp'; input.placeholder = '+244 9xx xxx xxx'; input.type = 'text'; }
   else { label.textContent = 'URL de Candidatura'; input.placeholder = 'https://...'; input.type = 'text'; }
+}
+
+function resetPasteArea() {
+  document.getElementById('jRawText').value = '';
+  document.getElementById('jPasteArea').style.display = 'none';
+  const btn = document.querySelector('#jPasteWrap > button');
+  btn.textContent = '📋 Colar texto da vaga (WhatsApp)';
+  btn.style.borderColor = ''; btn.style.color = '';
+}
+function togglePasteArea() {
+  const a = document.getElementById('jPasteArea');
+  a.style.display = a.style.display === 'none' ? 'block' : 'none';
+}
+
+function parseAndFillJob() {
+  const raw = document.getElementById('jRawText').value.trim();
+  if (!raw) return;
+
+  // Helpers
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const getField = (keys) => {
+    for (const line of lines) {
+      for (const k of keys) {
+        const rx = new RegExp('^[*_\\-•]*\\s*' + k + '[:\\s]+(.+)', 'i');
+        const m = line.match(rx);
+        if (m) return m[1].replace(/[*_]/g,'').trim();
+      }
+    }
+    return '';
+  };
+
+  // --- Cargo ---
+  let title = getField(['cargo','vaga','função','funcao','título','titulo','posição','posicao','oportunidade','role','job','perfil']);
+  if (!title) {
+    // primeira linha em maiúsculas ou com emoji
+    const firstMaj = lines.find(l => l.replace(/[^a-zA-ZÀ-ú]/g,'').length > 3 && l === l.toUpperCase() && l.length < 60);
+    const firstEmoji = lines.find(l => /[\u{1F300}-\u{1FFFF}]/u.test(l) && l.length < 80);
+    title = firstMaj || firstEmoji?.replace(/[^\w\sÀ-ú]/gu,'').trim() || lines[0];
+  }
+
+  // --- Empresa ---
+  let company = getField(['empresa','empregador','entidade','organização','organizacao','company','grupo']);
+
+  // --- Cidade / País ---
+  let city = getField(['local','localização','localizacao','cidade','location','distrito','município','municipio']);
+  let country = getField(['país','pais','country']) || '';
+  if (!country && city && /angola/i.test(city)) { country = 'Angola'; city = city.replace(/angola/i,'').replace(/[,\-]/g,'').trim(); }
+  if (!country) country = 'Angola';
+
+  // --- Salário ---
+  let salary = getField(['salário','salario','remuneração','remuneracao','vencimento','salary','compensação','compensacao','pacote']);
+  if (!salary) {
+    const salLine = lines.find(l => /\d[\d\s.,]*\s*(kz|akz|kwanza|usd|\$|€|aoa)/i.test(l));
+    if (salLine) salary = salLine.replace(/^[^:]+:/,'').trim();
+  }
+
+  // --- Prazo ---
+  let endDate = getField(['prazo','data.?limite','validade','deadline','candidaturas.?até','até','expires']);
+  if (!endDate) {
+    const dl = lines.find(l => /prazo|deadline|validade|até/i.test(l) && /\d{1,2}[\/\-\.]\d{1,2}/.test(l));
+    if (dl) { const dm = dl.match(/(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.](\d{2,4}))?/); if (dm) { const y = dm[3] ? (dm[3].length===2?'20'+dm[3]:dm[3]) : new Date().getFullYear(); endDate = `${y}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`; } }
+  }
+
+  // --- Contacto ---
+  let contact = getField(['candidatura','candidaturas','enviar cv','cv para','contact','contacto','email','link','whatsapp','watsapp','zap','formulário','formulario']);
+  if (!contact) {
+    const urlLine = lines.find(l => /https?:\/\//i.test(l) || /\bwa\.me\b/i.test(l));
+    if (urlLine) { const um = urlLine.match(/https?:\/\/\S+/); contact = um ? um[0] : ''; }
+    const emailLine = lines.find(l => /[\w.+-]+@[\w-]+\.\w+/.test(l));
+    if (!contact && emailLine) { const em = emailLine.match(/[\w.+-]+@[\w-]+\.\w+/); contact = em ? em[0] : ''; }
+    const waLine = lines.find(l => /\b(9\d{8}|\+244\s*9\d{8})\b/.test(l));
+    if (!contact && waLine) { const wm = waLine.match(/\+?244?\s*(9\d{8})/); if (wm) contact = 'https://wa.me/244' + wm[1]; }
+  }
+
+  // --- Categoria auto ---
+  const catMap = [
+    { cat: 'Motoristas',       rx: /motorista|condutor|transport|driver|chofer/i },
+    { cat: 'Cozinha',          rx: /cozinheiro|cozinha|chef|pasteleiro|padeiro|garçon|garcom|restaurante|bar/i },
+    { cat: 'Oil & Gás',        rx: /oil|gás|gas|petróleo|petroleo|refinaria|offshore|onshore|drilling|poço|poco|upstream|downstream|pipeline/i },
+    { cat: 'Construção Civil', rx: /construção|construcao|pedreiro|electricista|electric|canalizador|pintor de obra|carpinteiro|soldador|serralheiro/i },
+    { cat: 'Serviços Gerais',  rx: /faxineiro|limpeza|seguranç|vigilante|porteiro|estafeta|mensageiro|recepcionista|atendente/i },
+    { cat: 'Serviços Domésticos', rx: /doméstic|domestica|empregad|cuidador|babysitter|babá/i },
+    { cat: 'Saúde',            rx: /médico|medico|enfermeiro|farmacêutico|saúde|clínica|hospital|nursing/i },
+    { cat: 'Educação',         rx: /professor|docente|ensino|educação|escola|tutor/i },
+    { cat: 'TI & Tecnologia',  rx: /developer|programador|software|tecnologia|TI\b|web|frontend|backend|full.?stack/i },
+    { cat: 'Finanças',         rx: /contabilist|financ|auditor|tesoureiro|banking|banc/i },
+    { cat: 'Engenharia',       rx: /engenheir|engineer|mecânic|mecanic|industrial/i },
+    { cat: 'Marketing',        rx: /marketing|publicidade|comunicação|digital|social media|designer/i },
+    { cat: 'Administrativos',  rx: /secretári|secretaria|administrativo|recepcionista|escritório|office/i },
+    { cat: 'RH',               rx: /recursos humanos|\bRH\b|recrutamento|talent/i },
+  ];
+  let category = '';
+  const fullText = raw;
+  for (const { cat, rx } of catMap) { if (rx.test(fullText)) { category = cat; break; } }
+
+  // --- Descrição: tudo que não foi reconhecido ---
+  const usedPatterns = /^[*_•\-]?\s*(cargo|vaga|função|funcao|título|titulo|posição|posicao|empresa|empregador|entidade|local|localização|localizacao|cidade|salário|salario|remuneração|remuneracao|prazo|deadline|validade|candidatura|contact|contacto|email|link|whatsapp|watsapp|país|pais)/i;
+  const descLines = lines.filter(l => !usedPatterns.test(l) && l !== title && l !== company && l !== city);
+  const description = descLines.join('\n');
+
+  // --- Preencher campos ---
+  if (title)    document.getElementById('jTitle').value   = title.replace(/[*_]/g,'').replace(/^(cargo|vaga|função|funcao)[:\s]*/i,'').trim();
+  if (company)  document.getElementById('jCompany').value = company;
+  if (city)     document.getElementById('jCity').value    = city;
+  if (country)  document.getElementById('jCountry').value = country;
+  if (salary)   document.getElementById('jSalary').value  = salary;
+  if (contact)  document.getElementById('jUrl').value     = contact;
+  if (description) document.getElementById('jDesc').value = description;
+  if (endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate)) document.getElementById('jEndDate').value = endDate;
+  if (category) {
+    const sel = document.getElementById('jCat');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === category || sel.options[i].text === category) { sel.selectedIndex = i; break; }
+    }
+  }
+  document.getElementById('jDate').value = new Date().toISOString().split('T')[0];
+
+  // Fechar área de paste e mostrar feedback
+  document.getElementById('jPasteArea').style.display = 'none';
+  const btn = document.querySelector('#jPasteWrap > button');
+  btn.textContent = '✅ Campos preenchidos — revisa e publica';
+  btn.style.borderColor = '#22C55E';
+  btn.style.color = '#16A34A';
+  setTimeout(() => { btn.textContent = '📋 Colar texto da vaga (WhatsApp)'; btn.style.borderColor=''; btn.style.color=''; }, 4000);
 }
 
 async function saveJob() {

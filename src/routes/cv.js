@@ -146,15 +146,123 @@ router.post('/improve-text', auth, toolLimiter, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── POST /api/cv/generate-cover-letter — IA: carta de apresentação ──
-router.post('/generate-cover-letter', auth, toolLimiter, async (req, res) => {
+// ── POST /api/cv/generate-cover-letter — carta de apresentação ──
+router.post('/generate-cover-letter', auth, premiumOnly, toolLimiter, async (req, res) => {
   const { name, role, company, years, skills, type } = req.body;
   if (!name || !role) return res.status(400).json({ error: 'name e role são obrigatórios' });
   try {
-    const letter = await openaiConnector.generateCoverLetter({ name, role, company, years, skills, type });
+    // Tentar via OpenAI; se falhar (quota/sem chave), usa gerador local
+    let letter;
+    try {
+      letter = await openaiConnector.generateCoverLetter({ name, role, company, years, skills, type });
+    } catch (_aiErr) {
+      letter = generateCoverLetterLocal({ name, role, company, years, skills, type });
+    }
     res.json({ letter });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+function generateCoverLetterLocal({ name, role, company, years, skills, type }) {
+  const today = new Date().toLocaleDateString('pt-AO', { day: 'numeric', month: 'long', year: 'numeric' });
+  const companyLine = company ? `à ${company}` : 'à vossa organização';
+  const yearsLine   = years   ? `Conto com ${years} anos de experiência profissional` : 'Tenho experiência profissional relevante';
+  const skillsLine  = skills  ? `As minhas principais competências incluem: ${skills}.` : '';
+
+  const templates = {
+    emprego: `${name}
+${today}
+
+Exmo(a). Senhor(a) Responsável de Recursos Humanos,
+
+Venho por este meio candidatar-me à vaga de ${role} ${companyLine}, com grande entusiasmo e motivação.
+
+${yearsLine} na área de ${role}, durante a qual desenvolvi sólidas competências técnicas e interpessoais. ${skillsLine}
+
+Acredito que o meu perfil está alinhado com os requisitos da função e que poderei contribuir de forma significativa para os objectivos da organização. Estou disponível para qualquer esclarecimento adicional e para uma entrevista no momento que for mais conveniente.
+
+Agradeço desde já a atenção dispensada à minha candidatura.
+
+Com os melhores cumprimentos,
+${name}`,
+
+    espontanea: `${name}
+${today}
+
+Exmo(a). Senhor(a) Responsável de Recursos Humanos,
+
+Escrevo-lhe com o intuito de me candidatar espontaneamente a uma posição de ${role} ${companyLine}.
+
+${yearsLine} e acompanho de perto o trabalho desenvolvido pela vossa organização, que admiro pela sua visão e impacto. ${skillsLine}
+
+Estaria muito interessado(a) em explorar oportunidades de colaboração, mesmo que não exista uma vaga em aberto neste momento. Estou disponível para uma conversa informal sempre que for oportuno.
+
+Agradeço a disponibilidade e aguardo o vosso contacto.
+
+Com os melhores cumprimentos,
+${name}`,
+
+    estagio: `${name}
+${today}
+
+Exmo(a). Senhor(a) Responsável de Recursos Humanos,
+
+Venho por este meio manifestar o meu interesse em integrar um programa de estágio na área de ${role} ${companyLine}.
+
+Encontro-me numa fase de desenvolvimento académico e profissional, e considero que a vossa organização representa uma oportunidade única de aprendizagem. ${skillsLine}
+
+Sou uma pessoa proactiva, com forte vontade de aprender e contribuir. Estou disponível para uma entrevista e para apresentar o meu percurso académico em detalhe.
+
+Agradeço a consideração da minha candidatura.
+
+Com os melhores cumprimentos,
+${name}`,
+
+    promocao: `${name}
+${today}
+
+Exmo(a). Senhor(a) Director(a),
+
+Venho por este meio expressar o meu interesse na promoção para o cargo de ${role}.
+
+${yearsLine} nesta organização, durante os quais me dediquei com empenho às minhas funções. ${skillsLine}
+
+Acredito que estou preparado(a) para assumir novas responsabilidades e contribuir ainda mais para os objectivos da equipa. Ficaria muito grato(a) pela oportunidade de discutir esta candidatura interna.
+
+Com os melhores cumprimentos,
+${name}`,
+
+    mudanca: `${name}
+${today}
+
+Exmo(a). Senhor(a) Responsável de Recursos Humanos,
+
+Escrevo-lhe com o propósito de me candidatar à posição de ${role} ${companyLine}, no âmbito de uma transição de carreira que tenho vindo a preparar com determinação.
+
+${yearsLine} noutras áreas, o que me conferiu uma perspectiva única e competências transferíveis valiosas. ${skillsLine}
+
+Estou motivado(a) a aplicar toda a minha experiência nesta nova área e acredito que a minha polivalência será uma mais-valia para a equipa.
+
+Fico ao dispor para uma entrevista.
+
+Com os melhores cumprimentos,
+${name}`,
+
+    linkedin: `Olá,
+
+O meu nome é ${name} e sou profissional na área de ${role}. ${yearsLine} e fiquei muito impressionado(a) com o trabalho que ${company || 'a vossa organização'} tem desenvolvido.
+
+${skillsLine}
+
+Gostaria de me conectar consigo para trocar ideias e explorar possíveis sinergias. Acredito que poderia haver oportunidades interessantes de colaboração.
+
+Fico à disposição para uma conversa.
+
+Cumprimentos,
+${name}`
+  };
+
+  return templates[type] || templates.emprego;
+}
 
 // ── POST /api/cv/generate-summary — IA: gerar resumo ────────
 router.post('/generate-summary', auth, toolLimiter, async (req, res) => {

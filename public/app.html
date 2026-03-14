@@ -1193,6 +1193,10 @@ function logout() {
 
 /* ── NAVIGATION ────────────────────────────────── */
 function nav(id, el) {
+  if (id === 'cover' && userPlan === 'free') {
+    window.open('https://wa.me/244944524292?text=Ol%C3%A1!%20Gostaria%20de%20activar%20o%20Plano%20Premium%20para%20aceder%20%C3%A0%20Carta%20de%20Apresenta%C3%A7%C3%A3o.', '_blank');
+    return;
+  }
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
@@ -2146,6 +2150,10 @@ function setCoverType(type) {
   document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
 }
 function openCoverGenerator() {
+  if (userPlan === 'free') {
+    window.open('https://wa.me/244944524292?text=Ol%C3%A1!%20Gostaria%20de%20activar%20o%20Plano%20Premium%20para%20aceder%20%C3%A0%20Carta%20de%20Apresenta%C3%A7%C3%A3o.', '_blank');
+    return;
+  }
   document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
 }
 async function generateCoverLetter() {
