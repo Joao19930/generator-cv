@@ -124,19 +124,25 @@ const s3Connector = {
 };
 
 // ═══════════════════════════════════════════════════════
-// 6. OPENAI — IA: melhorar texto, score ATS, resumo
+// 6. CLAUDE (Anthropic) — IA: melhorar texto, score ATS, resumo, carta
 // ═══════════════════════════════════════════════════════
-let _openai;
+let _claude;
 const getAI = () => {
-  if (!_openai) { const OpenAI = require('openai'); _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
-  return _openai;
+  if (!_claude) { const Anthropic = require('@anthropic-ai/sdk'); _claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }); }
+  return _claude;
+};
+const claudeAsk = async (prompt, maxTokens = 1024) => {
+  const r = await getAI().messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: maxTokens,
+    messages: [{ role: 'user', content: prompt }]
+  });
+  return r.content[0].text;
 };
 
 const openaiConnector = {
   improveText: async (text, jobTitle) => {
-    const r = await getAI().chat.completions.create({ model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: `Melhore este texto de experiência para o cargo "${jobTitle}" com foco em ATS. Retorne só o texto melhorado em português, máx 3 linhas: "${text}"` }] });
-    return r.choices[0].message.content;
+    return claudeAsk(`Melhore este texto de experiência para o cargo "${jobTitle}" com foco em ATS. Retorne só o texto melhorado em português angolano, máx 3 linhas: "${text}"`);
   },
   generateCoverLetter: async ({ name, role, company, years, skills, type }) => {
     const typeLabels = {
@@ -145,19 +151,18 @@ const openaiConnector = {
       mudanca:'mudança de área de carreira', linkedin:'mensagem no LinkedIn'
     };
     const prompt = `Escreve uma carta de apresentação profissional do tipo "${typeLabels[type]||'candidatura'}" em português de Angola (formal mas directo).\n\nCandidato: ${name}\nCargo: ${role}${company?'\nEmpresa: '+company:''}${years?'\nExperiência: '+years:''}${skills?'\nCompetências/conquistas: '+skills:''}\n\nEstrutura: saudação, parágrafo de motivação, parágrafo de valor concreto, fecho com disponibilidade, despedida com o nome.\nMáximo 320 palavras. Devolve apenas o texto da carta.`;
-    const r = await getAI().chat.completions.create({ model:'gpt-4o-mini', messages:[{role:'user',content:prompt}] });
-    return r.choices[0].message.content;
+    return claudeAsk(prompt, 800);
   },
   generateSummary: async (name, jobTitle, experiences) => {
-    const r = await getAI().chat.completions.create({ model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: `Crie um resumo profissional de 4 linhas focado em ATS para ${name}, cargo ${jobTitle}. Experiências: ${experiences}` }] });
-    return r.choices[0].message.content;
+    return claudeAsk(`Crie um resumo profissional de 4 linhas focado em ATS para ${name}, cargo ${jobTitle}, em português angolano. Experiências: ${experiences}. Retorne apenas o texto do resumo.`);
   },
   atsScore: async (cvText, jobDescription) => {
-    const r = await getAI().chat.completions.create({ model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: `Analise a compatibilidade ATS. CV: "${cvText}". VAGA: "${jobDescription}". Retorne APENAS JSON válido: {"score":0-100,"keywords_missing":[],"suggestions":[]}` }],
-      response_format: { type: 'json_object' } });
-    return JSON.parse(r.choices[0].message.content);
+    const raw = await claudeAsk(`Analise a compatibilidade ATS. CV: "${cvText}". VAGA: "${jobDescription}". Retorne APENAS JSON válido sem markdown: {"score":0-100,"keywords_missing":[],"suggestions":[]}`, 512);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+  },
+  generateResponsibilities: async (jobTitle) => {
+    return claudeAsk(`Lista 6 responsabilidades profissionais típicas para o cargo "${jobTitle}" em português angolano. Formato: cada linha começa com "• " e é concisa (máx 12 palavras). Retorna apenas as 6 linhas, sem introdução.`, 400);
   }
 };
 
