@@ -273,6 +273,16 @@ router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── POST /api/cv/generate-responsibilities — IA: sugerir responsabilidades ──
+router.post('/generate-responsibilities', auth, toolLimiter, async (req, res) => {
+  const { jobTitle } = req.body;
+  if (!jobTitle) return res.status(400).json({ error: 'jobTitle é obrigatório' });
+  try {
+    const text = await openaiConnector.generateResponsibilities(jobTitle);
+    res.json({ responsibilities: text });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── POST /api/cv/ats-score — Score ATS público ──────────────
 router.post('/ats-score', toolLimiter, async (req, res) => {
   const { cvText, jobDescription, email } = req.body;

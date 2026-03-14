@@ -81,6 +81,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 .skills-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;}
 .skill-chip{display:flex;align-items:center;gap:5px;background:var(--blue-l);border:1px solid var(--blue-m);color:var(--blue);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .skill-chip button{background:none;border:none;color:var(--blue);cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:.7;}
+.skill-sug{background:#F8FAFC;border:1px solid #E2E8F0;color:#475569;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;}
+.skill-sug:hover{background:var(--blue-l);border-color:var(--blue-m);color:var(--blue);}
+.skill-sug.used{opacity:.35;pointer-events:none;text-decoration:line-through;}
 .skill-chip button:hover{opacity:1;}
 .skill-row{display:flex;gap:8px;}
 .skill-row input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:12px;color:var(--text);outline:none;}
@@ -306,7 +309,13 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
           <div class="f-group"><label>LinkedIn / Website</label><input type="text" id="linkedin" placeholder="linkedin.com/in/joaosilva"></div>
         </div>
         <div class="f-row full">
-          <div class="f-group"><label>Resumo Profissional *</label><textarea id="summary" placeholder="Escreva um resumo sobre si (2-4 frases sobre experiência, competências e objectivos)..."></textarea></div>
+          <div class="f-group">
+            <label style="display:flex;align-items:center;justify-content:space-between;">
+              Resumo Profissional *
+              <button type="button" id="btnGenSummary" onclick="generateSummaryAI()" style="font-size:11px;font-weight:600;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:3px 10px;cursor:pointer;">✨ Gerar com IA</button>
+            </label>
+            <textarea id="summary" placeholder="Escreva um resumo sobre si (2-4 frases sobre experiência, competências e objectivos)..."></textarea>
+          </div>
         </div>
         <div class="f-row full">
           <div class="f-group">
@@ -404,6 +413,31 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
         <div class="skill-row">
           <input type="text" id="skillInput" placeholder="Ex: Excel, Power BI, Liderança..." onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill();}">
           <button class="btn-add-skill" onclick="addSkill()">+ Adicionar</button>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.4px;">Sugestões rápidas — clica para adicionar</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;" id="skillSuggestions">
+            <!-- Soft skills universais -->
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Comunicação</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Trabalho em equipa</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Liderança</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Resolução de problemas</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Organização</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Pontualidade</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Proactividade</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Adaptabilidade</button>
+            <!-- Hard skills universais -->
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Microsoft Office</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Microsoft Excel</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Microsoft Word</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Google Workspace</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Redes Sociais</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Atendimento ao Cliente</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Gestão de Tempo</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Negociação</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Análise de Dados</button>
+            <button type="button" class="skill-sug" onclick="addSkillTag(this)">Gestão de Projectos</button>
+          </div>
         </div>
       </div>
     </div>
@@ -618,7 +652,13 @@ function addExperience() {
     <button class="btn-remove" onclick="removeItem('${id}')">Remover</button>
     <div class="f-row"><div class="f-group"><label>Cargo *</label><input type="text" placeholder="Cargo"></div><div class="f-group"><label>Empresa *</label><input type="text" placeholder="Empresa"></div></div>
     <div class="f-row three"><div class="f-group"><label>Início</label><input type="text" placeholder="Jan 2020"></div><div class="f-group"><label>Fim</label><input type="text" placeholder="Presente"></div><div class="f-group"><label>Local</label><input type="text" placeholder="Luanda"></div></div>
-    <div class="f-row full"><div class="f-group"><label>Descrição <span style="font-size:10px;color:var(--t3);font-weight:400;">(Enter para nova linha com •)</span></label><textarea class="bullet-ta" placeholder="• Descrição das funções..."></textarea></div></div>
+    <div class="f-row full"><div class="f-group">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Descrição <span style="font-size:10px;color:var(--t3);font-weight:400;">(Enter para nova linha com •)</span></span>
+        <button type="button" onclick="suggestResponsibilities(this)" style="font-size:11px;font-weight:600;color:#2563EB;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:3px 10px;cursor:pointer;">✨ Sugerir funções</button>
+      </label>
+      <textarea class="bullet-ta" placeholder="• Descrição das funções..."></textarea>
+    </div></div>
   </div>`;
   document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
   updateCounts();
@@ -675,6 +715,64 @@ function addSkill() {
   inp.value = '';
 }
 function removeSkill(i) { skills.splice(i, 1); renderSkills(); }
+
+function addSkillTag(btn) {
+  const skill = btn.textContent.trim();
+  if (!skills.includes(skill)) { skills.push(skill); renderSkills(); }
+  btn.classList.add('used');
+}
+
+function renderSkills() {
+  document.getElementById('skillsContainer').innerHTML = skills.map((s, i) =>
+    `<div class="skill-chip">${s}<button onclick="removeSkill(${i})" title="Remover">×</button></div>`).join('');
+  document.getElementById('skillCountLabel').textContent = skills.length + ' competência' + (skills.length !== 1 ? 's' : '');
+  // Marcar tags de sugestão como usadas
+  document.querySelectorAll('.skill-sug').forEach(b => {
+    b.classList.toggle('used', skills.includes(b.textContent.trim()));
+  });
+}
+
+async function generateSummaryAI() {
+  const name     = document.getElementById('fullName')?.value.trim() || '';
+  const jobTitle = document.getElementById('jobTitle')?.value.trim() || '';
+  const expDescs = [...document.querySelectorAll('.bullet-ta')].map(t => t.value.trim()).filter(Boolean).join('; ');
+  if (!jobTitle) { alert('Preenche primeiro o cargo profissional.'); return; }
+  const btn = document.getElementById('btnGenSummary');
+  btn.textContent = '⏳ A gerar...'; btn.disabled = true;
+  try {
+    const TOKEN = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const r = await fetch('/api/cv/generate-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ name, jobTitle, experiences: expDescs || jobTitle })
+    });
+    const d = await r.json();
+    if (d.summary) document.getElementById('summary').value = d.summary;
+    else alert('Erro: ' + (d.error || 'falha'));
+  } catch { alert('Erro de ligação.'); }
+  btn.textContent = '✨ Gerar com IA'; btn.disabled = false;
+}
+
+async function suggestResponsibilities(btn) {
+  const card    = btn.closest('.item-card');
+  const titleIn = card.querySelector('input[placeholder="Cargo"]');
+  const descTa  = card.querySelector('.bullet-ta');
+  const jobTitle = titleIn?.value.trim();
+  if (!jobTitle) { alert('Preenche primeiro o campo Cargo.'); return; }
+  btn.textContent = '⏳ A gerar...'; btn.disabled = true;
+  try {
+    const TOKEN = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const r = await fetch('/api/cv/generate-responsibilities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ jobTitle })
+    });
+    const d = await r.json();
+    if (d.responsibilities) descTa.value = d.responsibilities;
+    else alert('Erro: ' + (d.error || 'falha'));
+  } catch { alert('Erro de ligação.'); }
+  btn.textContent = '✨ Sugerir funções'; btn.disabled = false;
+}
 function renderSkills() {
   document.getElementById('skillsContainer').innerHTML =
     skills.map((s, i) => `<div class="skill-chip">${s}<button onclick="removeSkill(${i})">×</button></div>`).join('');
