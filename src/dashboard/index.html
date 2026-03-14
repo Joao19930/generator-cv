@@ -1272,6 +1272,27 @@ function togglePasteArea() {
   a.style.display = a.style.display === 'none' ? 'block' : 'none';
 }
 
+const JOB_CAT_MAP = [
+  { cat: 'Motoristas',          rx: /motorista|condutor|transport|driver|chofer/i },
+  { cat: 'Cozinha',             rx: /cozinheiro|cozinha|chef|pasteleiro|padeiro|garçon|garcom|restaurante|bar/i },
+  { cat: 'Oil & Gás',           rx: /oil|gás|gas|petróleo|petroleo|refinaria|offshore|onshore|drilling|poço|poco|upstream|downstream|pipeline/i },
+  { cat: 'Construção Civil',    rx: /construção|construcao|pedreiro|electricista|electric|canalizador|pintor de obra|carpinteiro|soldador|serralheiro/i },
+  { cat: 'Serviços Gerais',     rx: /faxineiro|limpeza|seguranç|vigilante|porteiro|estafeta|mensageiro|recepcionista|atendente|armazém|armazem|fiel de armazém|logístic|logistic/i },
+  { cat: 'Serviços Domésticos', rx: /doméstic|domestica|empregad|cuidador|babysitter|babá/i },
+  { cat: 'Saúde',               rx: /médico|medico|enfermeiro|farmacêutico|saúde|clínica|hospital|nursing/i },
+  { cat: 'Educação',            rx: /professor|docente|ensino|educação|escola|tutor/i },
+  { cat: 'TI & Tecnologia',     rx: /developer|programador|software|tecnologia|TI\b|web|frontend|backend|full.?stack/i },
+  { cat: 'Finanças',            rx: /contabilist|financ|auditor|tesoureiro|banking|banc/i },
+  { cat: 'Engenharia',          rx: /engenheir|engineer|mecânic|mecanic|industrial/i },
+  { cat: 'Marketing',           rx: /marketing|publicidade|comunicação|digital|social.?media|designer|redes.?sociais|community/i },
+  { cat: 'Administrativos',     rx: /secretári|secretaria|administrativo|assistente\s+de\s+loja|escritório|office/i },
+  { cat: 'RH',                  rx: /recursos humanos|\bRH\b|recrutamento|talent/i },
+];
+function detectJobCategory(text) {
+  for (const { cat, rx } of JOB_CAT_MAP) { if (rx.test(text)) return cat; }
+  return '';
+}
+
 function cleanLine(l) {
   // Remove invisible Unicode: LTR/RTL marks, zero-width spaces, variation selectors, BOM
   return l.replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF\uFE0F]/g, '').trim();
@@ -1381,25 +1402,7 @@ function parseAndFillJob() {
   }
 
   // --- Categoria auto ---
-  const catMap = [
-    { cat: 'Motoristas',       rx: /motorista|condutor|transport|driver|chofer/i },
-    { cat: 'Cozinha',          rx: /cozinheiro|cozinha|chef|pasteleiro|padeiro|garçon|garcom|restaurante|bar/i },
-    { cat: 'Oil & Gás',        rx: /oil|gás|gas|petróleo|petroleo|refinaria|offshore|onshore|drilling|poço|poco|upstream|downstream|pipeline/i },
-    { cat: 'Construção Civil', rx: /construção|construcao|pedreiro|electricista|electric|canalizador|pintor de obra|carpinteiro|soldador|serralheiro/i },
-    { cat: 'Serviços Gerais',  rx: /faxineiro|limpeza|seguranç|vigilante|porteiro|estafeta|mensageiro|recepcionista|atendente/i },
-    { cat: 'Serviços Domésticos', rx: /doméstic|domestica|empregad|cuidador|babysitter|babá/i },
-    { cat: 'Saúde',            rx: /médico|medico|enfermeiro|farmacêutico|saúde|clínica|hospital|nursing/i },
-    { cat: 'Educação',         rx: /professor|docente|ensino|educação|escola|tutor/i },
-    { cat: 'TI & Tecnologia',  rx: /developer|programador|software|tecnologia|TI\b|web|frontend|backend|full.?stack/i },
-    { cat: 'Finanças',         rx: /contabilist|financ|auditor|tesoureiro|banking|banc/i },
-    { cat: 'Engenharia',       rx: /engenheir|engineer|mecânic|mecanic|industrial/i },
-    { cat: 'Marketing',        rx: /marketing|publicidade|comunicação|digital|social media|designer/i },
-    { cat: 'Administrativos',  rx: /secretári|secretaria|administrativo|recepcionista|escritório|office/i },
-    { cat: 'RH',               rx: /recursos humanos|\bRH\b|recrutamento|talent/i },
-  ];
-  let category = '';
-  const fullText = raw;
-  for (const { cat, rx } of catMap) { if (rx.test(fullText)) { category = cat; break; } }
+  let category = detectJobCategory(raw);
 
   // --- Descrição: tudo que não foi reconhecido ---
   const usedPatterns = /^[*_•\-]?\s*(cargo|vaga|função|funcao|título|titulo|posição|posicao|empresa|empregador|entidade|local|localização|localizacao|cidade|salário|salario|remuneração|remuneracao|prazo|deadline|validade|candidatura|contact|contacto|email|link|whatsapp|watsapp|país|pais)/i;
@@ -1439,9 +1442,11 @@ function renderMultiJobPreview(raw, multi) {
   let html = `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
     <div style="font-weight:700;color:#16A34A;margin-bottom:8px;">✅ ${multi.jobs.length} vagas detectadas</div>`;
   multi.jobs.forEach((j, i) => {
+    j.category = detectJobCategory(j.title + ' ' + (j.description||''));
+    const catBadge = j.category ? `<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 6px;margin-left:6px;">${j.category}</span>` : '';
     html += `<div style="background:#fff;border:1px solid #D1FAE5;border-radius:6px;padding:10px 12px;margin-bottom:8px;">
-      <div style="font-weight:600;font-size:13px;color:#0F172A;">${i+1}. ${j.title}</div>
-      ${j.description ? `<div style="font-size:12px;color:#64748B;margin-top:4px;line-height:1.5;">${j.description.split('\n')[0].substring(0,100)}${j.description.length>100?'…':''}</div>` : ''}
+      <div style="font-weight:600;font-size:13px;color:#0F172A;">${i+1}. ${j.title}${catBadge}</div>
+      ${j.description ? `<div style="font-size:12px;color:#64748B;margin-top:4px;line-height:1.5;">${j.description.split('\n')[0].substring(0,120)}${j.description.length>120?'…':''}</div>` : ''}
     </div>`;
   });
   html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
@@ -1526,7 +1531,7 @@ async function publishMultipleJobs() {
       const res = await fetch(API + '/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
-        body: JSON.stringify({ title: j.title, company, city, country: 'Angola', description: j.description || null, url: contact, contactType, jobDate })
+        body: JSON.stringify({ title: j.title, company, city, country: 'Angola', description: j.description || null, url: contact, contactType, jobDate, category: j.category || 'Outro' })
       });
       if (res.ok) ok++; else fail++;
     } catch { fail++; }
