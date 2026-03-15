@@ -114,6 +114,18 @@ router.post('/request', auth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── GET /api/payment/my-requests — Pedidos pendentes do utilizador
+router.get('/my-requests', auth, async (req, res) => {
+  try {
+    const r = await req.db.request()
+      .input('userId', sql.Int, req.user.id)
+      .query(`SELECT id, type, amount, status, created_at, cv_id
+              FROM payment_requests WHERE user_id=@userId AND status='pending'
+              ORDER BY created_at DESC`);
+    res.json({ requests: r.recordset });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── GET /api/payment/my-access — Verificar acesso do utilizador
 router.get('/my-access', auth, async (req, res) => {
   try {
