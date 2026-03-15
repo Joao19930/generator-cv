@@ -539,6 +539,14 @@
         function esc(s) {
             return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         }
+        function descHTML(s) {
+            if (!s) return '';
+            var text = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            // Dividir por bullet (•) ou newline
+            var items = text.split(/\n|(?=•)/).map(function(l){ return l.replace(/^•\s*/,'').trim(); }).filter(Boolean);
+            if (items.length <= 1) return text;
+            return items.map(function(i){ return '<div style="display:flex;gap:6px;margin-bottom:2px;"><span style="flex-shrink:0;">•</span><span>' + i + '</span></div>'; }).join('');
+        }
 
         function expHTML(p) {
             if (!data.experience || !data.experience.length) return '<p style="color:#aaa;font-size:12px;font-family:sans-serif">Sem experiência adicionada.</p>';
@@ -549,7 +557,7 @@
                     '<div class="' + p + '-title">' + esc(e.title) + '</div>' +
                     '<div class="' + p + '-company">' + esc(e.company) + '</div>' +
                     '<div class="' + p + '-meta">' + esc(meta) + '</div>' +
-                    (e.description ? '<div class="' + p + '-desc">' + esc(e.description) + '</div>' : '') +
+                    (e.description ? '<div class="' + p + '-desc">' + descHTML(e.description) + '</div>' : '') +
                     '</div>';
             }).join('');
         }
@@ -752,7 +760,7 @@
                         '<div class="tmpl-9 exp-title">' + esc(e.title) + '</div>' +
                         '<div class="tmpl-9 exp-company">' + esc(e.company) + '</div>' +
                         '<div class="tmpl-9 exp-meta">' + esc(meta) + '</div>' +
-                        (e.description ? '<div class="tmpl-9 exp-desc">' + esc(e.description) + '</div>' : '') +
+                        (e.description ? '<div class="tmpl-9 exp-desc">' + descHTML(e.description) + '</div>' : '') +
                         '</div>';
                 });
                 timelineHTML += '</div>';
@@ -798,7 +806,7 @@
                         '<div class="exp-title">' + esc(e.title) + '</div>' +
                         '<div class="exp-company">' + esc(e.company) + '</div>' +
                         (e.location ? '<div class="exp-meta">' + esc(e.location) + '</div>' : '') +
-                        (e.description ? '<div class="exp-desc">' + esc(e.description) + '</div>' : '') +
+                        (e.description ? '<div class="exp-desc">' + descHTML(e.description) + '</div>' : '') +
                         '</div></div>';
                 });
             }
@@ -841,7 +849,7 @@
                     expATS += '<div class="exp-item">' +
                         '<div class="exp-header"><div class="exp-title">' + esc(e.title) + '</div><div class="exp-dates">' + esc(dates) + '</div></div>' +
                         '<div class="exp-company">' + esc(e.company) + (e.location ? ' | ' + esc(e.location) : '') + '</div>' +
-                        (e.description ? '<div class="exp-desc">' + esc(e.description) + '</div>' : '') +
+                        (e.description ? '<div class="exp-desc">' + descHTML(e.description) + '</div>' : '') +
                         '</div>';
                 });
             } else {
