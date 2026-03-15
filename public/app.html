@@ -2689,7 +2689,7 @@ async function runATSScore() {
   const btn = document.getElementById('atsAnalyzeBtn');
   btn.disabled = true; btn.textContent = '⏳ A analisar…';
   try {
-    const r = await fetch(`${API}/cv/ats-score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cvText, jobDescription: jobDesc}) });
+    const r = await fetch(`${API}/cv/ats-score`, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cv_token')}, body: JSON.stringify({cvText, jobDescription: jobDesc}) });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Erro na análise');
     const score = typeof d.score === 'number' ? d.score : parseInt(d.score) || 0;
