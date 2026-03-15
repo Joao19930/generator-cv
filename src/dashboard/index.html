@@ -287,7 +287,10 @@ tbody tr:hover{background:#fafafa;}
 <div id="panel-overview" class="panel active">
   <div class="panel-hdr">
     <div><div class="panel-title">Visão Geral</div><div class="panel-sub">Bem-vindo ao painel de administração do CV Premium</div></div>
-    <div style="font-size:12px;color:var(--t3);" id="lastUpdate">Actualizado agora</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="font-size:12px;color:var(--t3);" id="lastUpdate">Actualizado agora</div>
+      <button onclick="_loaded.delete('overview');loadOverview();" style="font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--t2);cursor:pointer;">↻ Actualizar</button>
+    </div>
   </div>
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon" style="background:#EFF6FF;color:var(--blue)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-val" id="statUsers">0</div><div class="stat-lbl">Total Utilizadores</div><div class="stat-change up" id="statUsersChange">A carregar...</div></div>
@@ -1013,43 +1016,71 @@ let state = {
 };
 
 // ── INIT ────────────────────────────────────────────────────
+const _loaded = new Set(); // painéis já carregados
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('lastUpdate').textContent = 'Actualizado em ' + new Date().toLocaleTimeString('pt-PT');
   renderPlans();
-  loadFromAPI();
+  loadOverview();         // só o essencial no arranque
+  checkPendingPayments().catch(()=>{});
 });
 
-// ── API LOAD ────────────────────────────────────────────────
-async function loadFromAPI() {
+// ── CARREGA SÓ O OVERVIEW NO ARRANQUE ───────────────────────
+async function loadOverview() {
   if (!TOKEN) return;
   const h = { headers: { Authorization: 'Bearer ' + TOKEN } };
   try {
-    const [statsRes, usersRes, cvsRes, templatesRes, coachesRes, coursesRes, jobsRes, testisRes] = await Promise.all([
-      fetch(API + '/api/admin/overview',       h),
-      fetch(API + '/api/admin/users',          h),
-      fetch(API + '/api/cv',                   h),
-      fetch(API + '/api/admin/template-items', h),
-      fetch(API + '/api/admin/coaches',        h),
-      fetch(API + '/api/admin/courses',        h),
-      fetch(API + '/api/admin/jobs',           h),
-      fetch(API + '/api/admin/testimonials',   h)
-    ]);
+    const r = await fetch(API + '/api/admin/overview', h);
+    if (r.ok) { const d = await r.json(); applyStats(d); }
+    // Carregar utilizadores recentes para o widget do overview
+    const ur = await fetch(API + '/api/admin/users?limit=5', h);
+    if (ur.ok) {
+      const d = await ur.json();
+      state.users = d.users || [];
+      renderRecentUsers();
+      updatePlanCounts();
+    }
+  } catch(e) { console.error('overview load error:', e); }
+  _loaded.add('overview');
+  document.getElementById('lastUpdate').textContent = 'Actualizado em ' + new Date().toLocaleTimeString('pt-PT');
+}
 
-    if (statsRes.ok)     { const d = await statsRes.json();     applyStats(d); }
-    if (usersRes.ok)     { const d = await usersRes.json();     state.users = d.users || (Array.isArray(d) ? d : []); renderUsers(); renderRecentUsers(); updatePlanCounts(); }
-    if (cvsRes.ok)       { const d = await cvsRes.json();       state.cvs   = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); }
-    if (templatesRes.ok) { const d = await templatesRes.json(); state.templates = d.templates || (Array.isArray(d) ? d : []); renderTemplates(); }
-    if (coachesRes.ok)   { state.coaches = await coachesRes.json();   renderCoaches(); }
-    if (coursesRes.ok)   { state.courses = await coursesRes.json();   renderCourses(); }
-    if (jobsRes.ok)      { state.jobs    = await jobsRes.json();      renderJobs(); }
-    if (testisRes.ok)    { state.testis  = await testisRes.json();    renderTestis(); }
+// ── LAZY LOAD POR PAINEL ─────────────────────────────────────
+async function loadPanelData(id) {
+  if (_loaded.has(id) || !TOKEN) return;
+  _loaded.add(id); // marcar imediatamente para evitar duplos pedidos
+  const h = { headers: { Authorization: 'Bearer ' + TOKEN } };
+  try {
+    if (id === 'users') {
+      const r = await fetch(API + '/api/admin/users', h);
+      if (r.ok) { const d = await r.json(); state.users = d.users || []; renderUsers(); updatePlanCounts(); }
+    } else if (id === 'cvs') {
+      const r = await fetch(API + '/api/cv', h);
+      if (r.ok) { const d = await r.json(); state.cvs = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); }
+    } else if (id === 'templates') {
+      const r = await fetch(API + '/api/admin/template-items', h);
+      if (r.ok) { const d = await r.json(); state.templates = d.templates || []; renderTemplates(); }
+    } else if (id === 'jobs') {
+      const r = await fetch(API + '/api/admin/jobs', h);
+      if (r.ok) { state.jobs = await r.json(); renderJobs(); }
+    } else if (id === 'courses') {
+      const r = await fetch(API + '/api/admin/courses', h);
+      if (r.ok) { state.courses = await r.json(); renderCourses(); }
+    } else if (id === 'coaches') {
+      const r = await fetch(API + '/api/admin/coaches', h);
+      if (r.ok) { state.coaches = await r.json(); renderCoaches(); }
+    } else if (id === 'testimonials') {
+      const r = await fetch(API + '/api/admin/testimonials', h);
+      if (r.ok) { state.testis = await r.json(); renderTestis(); }
+    } else if (id === 'analytics') {
+      loadAnalytics().catch(()=>{});
+    } else if (id === 'support') {
+      loadSupport().catch(()=>{});
+    }
   } catch(e) {
-    console.error('API load error:', e);
+    _loaded.delete(id); // permitir retry se falhar
+    console.error('panel load error:', id, e);
   }
-  // Carregar analytics e suporte em background
-  loadAnalytics().catch(()=>{});
-  loadSupport().catch(()=>{});
-  checkPendingPayments().catch(()=>{});
 }
 
 function applyStats(d) {
@@ -1105,7 +1136,9 @@ function showPanel(id, el) {
   if (p) p.classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('tbTitle').textContent = PANEL_TITLES[id] || id;
-  // Carregar iframe ao abrir o preview (lazy load)
+  // Lazy load do painel
+  loadPanelData(id);
+  // Casos especiais
   if (id === 'user-preview') {
     const frame = document.getElementById('previewFrame');
     if (frame && frame.src === 'about:blank') frame.src = '/app';
