@@ -755,7 +755,7 @@ async function generateSummaryAI() {
 
 async function suggestResponsibilities(btn) {
   const card    = btn.closest('.item-card');
-  const titleIn = card.querySelector('input[placeholder="Cargo"]');
+  const titleIn = card.querySelector('.f-row input[type="text"]');
   const descTa  = card.querySelector('.bullet-ta');
   const jobTitle = titleIn?.value.trim();
   if (!jobTitle) { alert('Preenche primeiro o campo Cargo.'); return; }
