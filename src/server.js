@@ -119,6 +119,21 @@ app.get('/debug-jobs', async (req, res) => {
   res.json(results);
 });
 
+// ── Tracking de visitas (público, antes do rate limiter) ─────
+app.post('/api/track', async (req, res) => {
+  res.json({ ok: true }); // responde imediatamente
+  try {
+    const pool = await getPool();
+    const { page = '/', sessionId } = req.body;
+    const uid = req.body.userId || null;
+    await pool.request()
+      .input('page', sql.VarChar, String(page).slice(0, 100))
+      .input('uid',  sql.Int,     uid ? parseInt(uid) : null)
+      .input('sid',  sql.VarChar, sessionId ? String(sessionId).slice(0, 64) : null)
+      .query(`INSERT INTO page_views (page, user_id, session_id) VALUES (@page, @uid, @sid)`);
+  } catch (_) {}
+});
+
 // ── Rate limiting global ─────────────────────────────────────
 app.use(rateLimiter(300, 3600));
 
@@ -137,20 +152,6 @@ app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testim
 app.use('/api/cv',      auth, cvRoutes);
 app.use('/api/payment', paymentRoutes);    // Webhook não usa auth
 
-// ── Tracking de visitas (público, fire-and-forget) ───────────
-app.post('/api/track', async (req, res) => {
-  res.json({ ok: true }); // responde imediatamente
-  try {
-    const pool = await getPool();
-    const { page = '/', sessionId } = req.body;
-    const uid = req.body.userId || null;
-    await pool.request()
-      .input('page', sql.VarChar, String(page).slice(0, 100))
-      .input('uid',  sql.Int,     uid ? parseInt(uid) : null)
-      .input('sid',  sql.VarChar, sessionId ? String(sessionId).slice(0, 64) : null)
-      .query(`INSERT INTO page_views (page, user_id, session_id) VALUES (@page, @uid, @sid)`);
-  } catch (_) {}
-});
 
 // ── Suporte — utilizador envia ticket (JWT) ───────────────────
 app.post('/api/support', auth, async (req, res) => {
@@ -281,6 +282,8 @@ async function autoMigrate(pool) {
 
 getPool().then(async (pool) => {
   await autoMigrate(pool);
+  // Limpar cache do overview ao reiniciar (garante dados frescos após deploy)
+  redisConnector.del('admin:overview').catch(() => {});
   setupCrons(pool);
   server.listen(PORT, () => {
     console.log(`\n🚀 CV Generator Pro`);
