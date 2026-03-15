@@ -298,6 +298,11 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 @media(max-width:600px){.cover-form-row{grid-template-columns:1fr;}}
 .cover-result{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:13px;color:var(--t2);line-height:1.7;min-height:160px;margin-top:16px;white-space:pre-wrap;}
 .cover-result-actions{display:flex;gap:10px;margin-top:12px;}
+.cover-pdf-tpl{border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.cover-pdf-tpl:hover{border-color:#2563eb;transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,99,235,.15);}
+.cover-pdf-tpl.active{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+.cover-pdf-preview{min-height:52px;}
+.cover-pdf-label{text-align:center;font-size:11px;font-weight:700;color:var(--text);padding:6px 0;background:#fff;}
 .cover-switch-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:center;cursor:pointer;transition:all .2s;}
 .cover-switch-card:hover{border-color:rgba(37,99,235,.3);box-shadow:0 4px 12px rgba(37,99,235,.1);transform:translateY(-1px);}
 .cover-switch-card.active{border-color:var(--blue);background:#EFF6FF;}
@@ -843,6 +848,64 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
           <div class="cover-result-actions">
             <button class="btn-primary" onclick="copyCover()">Copiar texto</button>
             <button class="btn-out" onclick="document.getElementById('coverResultWrap').style.display='none'">Nova carta</button>
+          </div>
+          <!-- ── PDF DOWNLOAD ── -->
+          <div style="margin-top:20px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--r);padding:18px;">
+            <div style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:12px;">BAIXAR EM PDF — ESCOLHE O TEMPLATE</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" id="coverPdfTemplates">
+              <div class="cover-pdf-tpl active" data-tpl="classico" onclick="selectPdfTemplate('classico')">
+                <div class="cover-pdf-preview" style="background:#1e3a5f;color:#fff;padding:8px 10px;">
+                  <div style="font-size:7px;font-weight:700;font-family:serif;">Nome</div>
+                  <div style="font-size:5px;opacity:.6;font-family:serif;">Cargo</div>
+                </div>
+                <div style="background:#fff;padding:6px 10px;">
+                  <div style="height:2px;background:#eee;border-radius:1px;margin-bottom:3px;"></div>
+                  <div style="height:2px;background:#eee;border-radius:1px;margin-bottom:3px;width:80%;"></div>
+                  <div style="height:2px;background:#eee;border-radius:1px;width:60%;"></div>
+                </div>
+                <div class="cover-pdf-label">Clássico</div>
+              </div>
+              <div class="cover-pdf-tpl" data-tpl="moderno" onclick="selectPdfTemplate('moderno')">
+                <div style="display:flex;">
+                  <div style="width:5px;background:linear-gradient(180deg,#2563eb,#7c3aed);flex-shrink:0;border-radius:3px 0 0 0;"></div>
+                  <div style="flex:1;">
+                    <div class="cover-pdf-preview" style="background:#fff;padding:8px 10px;border-bottom:1px solid #e2e8f0;">
+                      <div style="font-size:7px;font-weight:700;color:#2563eb;">Nome</div>
+                      <div style="font-size:5px;color:#94a3b8;text-transform:uppercase;">Carta</div>
+                    </div>
+                    <div style="background:#fff;padding:6px 10px;">
+                      <div style="height:2px;background:#eee;border-radius:1px;margin-bottom:3px;"></div>
+                      <div style="height:2px;background:#eee;border-radius:1px;width:75%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cover-pdf-label">Moderno</div>
+              </div>
+              <div class="cover-pdf-tpl" data-tpl="minimalista" onclick="selectPdfTemplate('minimalista')">
+                <div class="cover-pdf-preview" style="background:#fff;padding:10px 10px 6px;">
+                  <div style="font-size:7px;font-weight:300;color:#111;letter-spacing:1px;">Nome</div>
+                  <div style="width:14px;height:1.5px;background:#374151;margin:4px 0 6px;"></div>
+                  <div style="height:2px;background:#eee;border-radius:1px;margin-bottom:3px;"></div>
+                  <div style="height:2px;background:#eee;border-radius:1px;width:70%;"></div>
+                </div>
+                <div class="cover-pdf-label">Minimalista</div>
+              </div>
+              <div class="cover-pdf-tpl" data-tpl="executivo" onclick="selectPdfTemplate('executivo')">
+                <div class="cover-pdf-preview" style="background:#0f172a;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-size:7px;font-weight:700;color:#fff;">Nome</div>
+                  <div style="font-size:4px;background:#c9a227;color:#0f172a;padding:1.5px 4px;font-weight:700;">CARTA</div>
+                </div>
+                <div style="background:#fff;padding:6px 10px;">
+                  <div style="height:2px;background:#eee;border-radius:1px;margin-bottom:3px;"></div>
+                  <div style="height:2px;background:#eee;border-radius:1px;width:80%;"></div>
+                </div>
+                <div class="cover-pdf-label">Executivo</div>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="downloadCoverPdf()" id="coverPdfBtn" style="width:100%;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Baixar PDF
+            </button>
           </div>
           <div style="margin-top:20px;">
             <div style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:10px;">GERAR NOUTRO FORMATO</div>
@@ -2342,6 +2405,34 @@ async function generateCoverLetter() {
   }
   btn.disabled = false;
   btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Gerar Carta com IA';
+}
+let coverPdfTemplate = 'classico';
+function selectPdfTemplate(tpl) {
+  coverPdfTemplate = tpl;
+  document.querySelectorAll('.cover-pdf-tpl').forEach(c => {
+    c.classList.toggle('active', c.dataset.tpl === tpl);
+  });
+}
+async function downloadCoverPdf() {
+  const letterText = document.getElementById('coverResult').textContent;
+  const name = document.getElementById('coverName').value.trim();
+  if (!letterText) return;
+  const btn = document.getElementById('coverPdfBtn');
+  btn.disabled = true; btn.textContent = 'A gerar PDF…';
+  try {
+    const r = await fetch('/api/cv/generate-cover-letter-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('cv_token') },
+      body: JSON.stringify({ letterText, template: coverPdfTemplate, name })
+    });
+    if (!r.ok) { const e = await r.json().catch(() => {}); throw new Error(e?.error || r.status); }
+    const d = await r.json();
+    window.open(d.url, '_blank');
+  } catch (e) {
+    alert('Erro ao gerar PDF: ' + (e.message || 'Tenta novamente.'));
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar PDF';
 }
 function switchAndRegenerate(type) {
   coverType = type;

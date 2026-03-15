@@ -146,6 +146,98 @@ router.post('/improve-text', auth, toolLimiter, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── POST /api/cv/generate-cover-letter-pdf — PDF da carta ───────
+router.post('/generate-cover-letter-pdf', auth, premiumOnly, async (req, res) => {
+  const { letterText, template = 'classico', name = '' } = req.body;
+  if (!letterText) return res.status(400).json({ error: 'letterText é obrigatório' });
+  try {
+    const html = buildCoverLetterHtml(letterText, template, name);
+    const pdfBuf = await pdfConnector.fromHTML(html);
+    const slug = `carta-${req.user.id}-${Date.now()}`;
+    const key  = await s3Connector.upload(pdfBuf, `${slug}.pdf`, req.user.id);
+    const url  = await s3Connector.getUrl(key, 3600);
+    res.json({ url, expires_in: 3600 });
+  } catch (err) {
+    console.error('cover-letter-pdf:', err.message);
+    res.status(500).json({ error: 'Erro ao gerar PDF' });
+  }
+});
+
+function buildCoverLetterHtml(letterText, template, name) {
+  const lines = letterText.split('\n');
+  const bodyHtml = lines.map(l => l.trim() === '' ? '<br>' : `<p>${l}</p>`).join('');
+
+  const templates = {
+    classico: `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Times New Roman',serif;font-size:12pt;color:#1a1a1a;background:#fff;padding:0;}
+  .header{background:#1e3a5f;color:#fff;padding:36px 48px 28px;}
+  .header-name{font-size:22pt;font-weight:700;letter-spacing:.5px;}
+  .header-sub{font-size:10pt;opacity:.75;margin-top:6px;}
+  .body{padding:40px 48px;}
+  p{margin-bottom:14px;line-height:1.75;text-align:justify;}
+  .footer{border-top:2px solid #1e3a5f;margin:32px 48px 0;padding-top:12px;font-size:9pt;color:#666;text-align:center;}
+</style></head><body>
+<div class="header"><div class="header-name">${name || 'Carta de Apresentação'}</div><div class="header-sub">Carta de Apresentação Profissional</div></div>
+<div class="body">${bodyHtml}</div>
+<div class="footer">Documento gerado via CV Premium · cvpremium.net</div>
+</body></html>`,
+
+    moderno: `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#1a1a1a;background:#fff;display:flex;min-height:100vh;}
+  .sidebar{width:8px;background:linear-gradient(180deg,#2563eb,#7c3aed);flex-shrink:0;}
+  .content{flex:1;padding:44px 52px;}
+  .top{border-bottom:1px solid #e2e8f0;padding-bottom:18px;margin-bottom:28px;}
+  .top-name{font-size:20pt;font-weight:700;color:#2563eb;}
+  .top-sub{font-size:9pt;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.8px;}
+  p{margin-bottom:14px;line-height:1.75;text-align:justify;}
+  .footer{margin-top:32px;font-size:8.5pt;color:#94a3b8;text-align:right;}
+</style></head><body>
+<div class="sidebar"></div>
+<div class="content">
+  <div class="top"><div class="top-name">${name || 'Carta de Apresentação'}</div><div class="top-sub">Carta de Apresentação</div></div>
+  ${bodyHtml}
+  <div class="footer">CV Premium · cvpremium.net</div>
+</div></body></html>`,
+
+    minimalista: `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11pt;color:#374151;background:#fff;padding:60px 72px;}
+  .name{font-size:18pt;font-weight:300;color:#111;letter-spacing:1px;margin-bottom:4px;}
+  .line{width:40px;height:2px;background:#374151;margin-bottom:36px;}
+  p{margin-bottom:16px;line-height:1.8;text-align:justify;}
+  .footer{margin-top:48px;font-size:8.5pt;color:#9ca3af;border-top:1px solid #f3f4f6;padding-top:12px;}
+</style></head><body>
+<div class="name">${name || 'Carta de Apresentação'}</div>
+<div class="line"></div>
+${bodyHtml}
+<div class="footer">CV Premium · cvpremium.net</div>
+</body></html>`,
+
+    executivo: `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Georgia,serif;font-size:11.5pt;color:#1a1a1a;background:#fff;padding:0;}
+  .header{background:#0f172a;color:#fff;padding:40px 52px;display:flex;justify-content:space-between;align-items:flex-end;}
+  .header-name{font-size:21pt;font-weight:700;letter-spacing:.5px;}
+  .header-badge{font-size:8pt;background:#c9a227;color:#0f172a;padding:4px 12px;border-radius:2px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+  .body{padding:44px 52px;}
+  p{margin-bottom:15px;line-height:1.8;text-align:justify;}
+  .footer{margin:0 52px;border-top:3px double #0f172a;padding-top:12px;font-size:8.5pt;color:#64748b;display:flex;justify-content:space-between;}
+</style></head><body>
+<div class="header"><div class="header-name">${name || 'Carta de Apresentação'}</div><div class="header-badge">Carta de Apresentação</div></div>
+<div class="body">${bodyHtml}</div>
+<div class="footer"><span>Documento Confidencial</span><span>CV Premium · cvpremium.net</span></div>
+</body></html>`
+  };
+
+  return templates[template] || templates.classico;
+}
+
 // ── POST /api/cv/generate-cover-letter — carta de apresentação ──
 router.post('/generate-cover-letter', auth, premiumOnly, toolLimiter, async (req, res) => {
   const { name, role, company, years, skills, type } = req.body;
