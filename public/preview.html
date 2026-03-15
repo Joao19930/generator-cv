@@ -902,12 +902,46 @@
                 '</div></div>';
         }
 
-        function showPayment() {
+        async function showPayment() {
+            var token = localStorage.getItem('cv_token');
+            if (token) {
+                try {
+                    var ar = await fetch('/api/payment/my-access', { headers: { Authorization: 'Bearer ' + token } });
+                    var access = await ar.json();
+                    if (access.hasFullAccess || access.cvCredits > 0) { allowDownload(); return; }
+                    var pr = await fetch('/api/payment/my-requests', { headers: { Authorization: 'Bearer ' + token } });
+                    var pd = await pr.json();
+                    var pending = (pd.requests || []).find(function(r) {
+                        return r.Type === 'cv_single' || r.Type === 'week' || r.Type === 'biweek';
+                    });
+                    if (pending) { showPendingMessage(); return; }
+                } catch(_) {}
+            }
             document.getElementById('paymentOverlay').classList.add('active');
         }
 
         function closePayment() {
             document.getElementById('paymentOverlay').classList.remove('active');
+        }
+
+        function allowDownload() {
+            if (data && data.email) document.getElementById('emailInput').value = data.email;
+            document.getElementById('successOverlay').classList.add('active');
+        }
+
+        function showPendingMessage() {
+            var existing = document.getElementById('pendingMsg');
+            if (existing) { existing.remove(); }
+            var el = document.createElement('div');
+            el.id = 'pendingMsg';
+            el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+            el.innerHTML = '<div style="background:#1e293b;border-radius:16px;padding:32px;max-width:380px;width:100%;text-align:center;">' +
+                '<div style="font-size:44px;margin-bottom:14px;">⏳</div>' +
+                '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">Aguardando Aprovação</div>' +
+                '<div style="font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:24px;">O teu pedido foi recebido.<br>Assim que o pagamento for confirmado o acesso é activado automaticamente.</div>' +
+                '<button onclick="document.getElementById(\'pendingMsg\').remove()" style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:11px 28px;font-size:14px;font-weight:600;cursor:pointer;">OK, Aguardo</button>' +
+                '</div>';
+            document.body.appendChild(el);
         }
 
         function payViaWhatsApp() {
@@ -916,11 +950,41 @@
             window.open('https://wa.me/244944524292?text=' + msg, '_blank');
         }
 
-        function confirmPaymentDone() {
-            closePayment();
-            document.getElementById('successOverlay').classList.add('active');
-            if (data && data.email) {
-                document.getElementById('emailInput').value = data.email;
+        async function confirmPaymentDone() {
+            var token = localStorage.getItem('cv_token');
+            if (!token) {
+                alert('Por favor faz login primeiro para continuar.');
+                window.location.href = '/login';
+                return;
+            }
+            try {
+                // Verificar se já tem acesso
+                var ar = await fetch('/api/payment/my-access', { headers: { Authorization: 'Bearer ' + token } });
+                var access = await ar.json();
+                if (access.hasFullAccess || access.cvCredits > 0) {
+                    closePayment();
+                    allowDownload();
+                    return;
+                }
+                // Verificar se já tem pedido pendente
+                var pr = await fetch('/api/payment/my-requests', { headers: { Authorization: 'Bearer ' + token } });
+                var pd = await pr.json();
+                var pending = (pd.requests || []).find(function(r) {
+                    return r.Type === 'cv_single' || r.Type === 'week' || r.Type === 'biweek';
+                });
+                if (pending) { closePayment(); showPendingMessage(); return; }
+                // Submeter novo pedido
+                var r = await fetch('/api/payment/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ type: 'cv_single', cvId: null })
+                });
+                var d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Erro ao registar pedido');
+                closePayment();
+                showPendingMessage();
+            } catch(err) {
+                alert('Erro: ' + err.message);
             }
         }
 
