@@ -16,6 +16,9 @@ router.get('/overview', async (req, res) => {
     const cached = await redisConnector.get('admin:overview');
     if (cached) return res.json(cached);
 
+    // Garantir que a tabela page_views existe
+    await req.db.request().query(`CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, page VARCHAR(100) NOT NULL, user_id INTEGER, session_id VARCHAR(64), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
+
     const r = await req.db.request().query(`
       SELECT
         (SELECT COUNT(*) FROM users) AS total_users,
@@ -29,7 +32,10 @@ router.get('/overview', async (req, res) => {
         (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS revenue_30d,
         (SELECT COUNT(*) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS paid_30d,
         (SELECT COUNT(*)::float / NULLIF((SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days'),0)*100
-         FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS conversion_rate
+         FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS conversion_rate,
+        (SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day') AS visitors_today,
+        (SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days') AS visitors_7d,
+        (SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day') AS pageviews_today
     `);
     const data = r.recordset[0];
     await redisConnector.set('admin:overview', data, 300);
