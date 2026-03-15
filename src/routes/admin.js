@@ -218,31 +218,35 @@ router.get('/courses', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/courses', async (req, res) => {
-  const { title, source, category, rating, url } = req.body;
+  const { title, source, category, description, rating, url, contact_type } = req.body;
   if (!title) return res.status(400).json({ error: 'Título obrigatório.' });
   try {
     const r = await req.db.request()
-      .input('title',    sql.NVarChar, title)
-      .input('source',   sql.NVarChar, source||null)
-      .input('category', sql.NVarChar, category||null)
-      .input('rating',   sql.NVarChar, rating||null)
-      .input('url',      sql.NVarChar, url||null)
-      .query(`INSERT INTO courses (title, source, category, rating, url, active, created_at)
-              VALUES (@title, @source, @category, @rating, @url, TRUE, NOW()) RETURNING id`);
+      .input('title',        sql.NVarChar, title)
+      .input('source',       sql.NVarChar, source||null)
+      .input('category',     sql.NVarChar, category||null)
+      .input('description',  sql.NVarChar, description||null)
+      .input('rating',       sql.NVarChar, rating||null)
+      .input('url',          sql.NVarChar, url||null)
+      .input('contact_type', sql.NVarChar, contact_type||'url')
+      .query(`INSERT INTO courses (title, source, category, description, rating, url, contact_type, active, created_at)
+              VALUES (@title, @source, @category, @description, @rating, @url, @contact_type, TRUE, NOW()) RETURNING id`);
     res.json({ success: true, id: r.recordset[0].Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/courses/:id', async (req, res) => {
-  const { title, source, category, rating, url } = req.body;
+  const { title, source, category, description, rating, url, contact_type } = req.body;
   try {
     await req.db.request()
-      .input('id',       sql.Int,      req.params.id)
-      .input('title',    sql.NVarChar, title)
-      .input('source',   sql.NVarChar, source||null)
-      .input('category', sql.NVarChar, category||null)
-      .input('rating',   sql.NVarChar, rating||null)
-      .input('url',      sql.NVarChar, url||null)
-      .query('UPDATE courses SET title=@title, source=@source, category=@category, rating=@rating, url=@url WHERE id=@id');
+      .input('id',           sql.Int,      req.params.id)
+      .input('title',        sql.NVarChar, title)
+      .input('source',       sql.NVarChar, source||null)
+      .input('category',     sql.NVarChar, category||null)
+      .input('description',  sql.NVarChar, description||null)
+      .input('rating',       sql.NVarChar, rating||null)
+      .input('url',          sql.NVarChar, url||null)
+      .input('contact_type', sql.NVarChar, contact_type||'url')
+      .query('UPDATE courses SET title=@title, source=@source, category=@category, description=@description, rating=@rating, url=@url, contact_type=@contact_type WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -405,6 +409,28 @@ router.post('/template-items', async (req, res) => {
       .input('prev',  sql.NVarChar, previewUrl || null)
       .query(`INSERT INTO templates (name, slug, category, is_premium, template_type, preview_url, active, sort_order, created_at)
               VALUES (@name, @slug, @cat, @prem, @ttype, @prev, TRUE, 0, NOW())`);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PATCH /api/admin/template-items/:id ──────────────────────
+router.patch('/template-items/:id', async (req, res) => {
+  const { name, category, isPremium, templateType, previewUrl } = req.body;
+  try {
+    await req.db.request()
+      .input('id',    sql.Int,      req.params.id)
+      .input('name',  sql.NVarChar, name        || null)
+      .input('cat',   sql.NVarChar, category    || null)
+      .input('prem',  sql.Bit,      isPremium != null ? !!isPremium : null)
+      .input('ttype', sql.NVarChar, templateType || null)
+      .input('prev',  sql.NVarChar, previewUrl  || null)
+      .query(`UPDATE templates SET
+        name         = ISNULL(@name,  name),
+        category     = ISNULL(@cat,   category),
+        is_premium   = ISNULL(@prem,  is_premium),
+        template_type= ISNULL(@ttype, template_type),
+        preview_url  = ISNULL(@prev,  preview_url)
+        WHERE id = @id`);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

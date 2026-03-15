@@ -754,12 +754,21 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-field"><label>Título do Curso</label><input type="text" id="cTitle" placeholder="ex: Introdução ao Python"></div>
       <div class="f-row">
         <div class="f-field"><label>Fonte / Plataforma</label><input type="text" id="cSource" placeholder="ex: Coursera"></div>
-        <div class="f-field"><label>Categoria</label><select id="cCat"><option>TI & Informática</option><option>Gestão & Negócios</option><option>Cibersegurança</option><option>Finanças</option><option>Marketing</option><option>Design</option></select></div>
+        <div class="f-field"><label>Categoria</label><select id="cCat"><option>TI & Informática</option><option>Gestão & Negócios</option><option>Cibersegurança</option><option>Finanças</option><option>Marketing</option><option>Design</option><option>Construção Civil</option><option>Oil & Gás</option><option>Saúde</option><option>Educação</option><option>Outro</option></select></div>
       </div>
+      <div class="f-field"><label>Descrição</label><textarea id="cDesc" rows="3" placeholder="Descreva brevemente o conteúdo do curso..."></textarea></div>
       <div class="f-row">
         <div class="f-field"><label>Avaliação (0-5)</label><input type="number" id="cRating" min="0" max="5" step="0.1" placeholder="4.5"></div>
-        <div class="f-field"><label>URL do Curso</label><input type="url" id="cUrl" placeholder="https://..."></div>
+        <div class="f-field">
+          <label>Tipo de Contacto</label>
+          <select id="cContactType" onchange="updateCoursePlaceholder()">
+            <option value="url">Link / URL</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="email">Email</option>
+          </select>
+        </div>
       </div>
+      <div class="f-field"><label id="cUrlLabel">Link do Curso</label><input type="text" id="cUrl" placeholder="https://..." oninput="autoCourseContact(this.value)"></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('courseModal')">Cancelar</button><button class="btn btn-blue" onclick="saveCourse()">Adicionar Curso</button></div>
   </div>
@@ -1308,7 +1317,7 @@ function autoDetectContactType(val) {
   const sel = document.getElementById('jContactType');
   if (/[\w.+-]+@[\w-]+\.\w+/.test(val)) {
     sel.value = 'email';
-  } else if (/^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) {
+  } else if (/^9\d{8}$/.test(val) || /^\+?244\d{9}/.test(val) || /^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) {
     sel.value = 'whatsapp';
   } else if (/https?:\/\//i.test(val)) {
     sel.value = 'url';
@@ -1371,24 +1380,47 @@ const SHARED_FIELD_RX = /^(local|cidade|contacto|contact|email|cv para|envie|ape
 function detectMultipleJobs(raw) {
   const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
 
-  // Padrão 1 — bullets: ▫️ ▪ • ◦ ○ ● ► ▶ →
-  const titleBulletRx = /^[▫▪►▶•◦○●◆◇→\u25AB\u25AA\u25C6\u25C7\u2605]\s*(.+)/u;
-  const descBulletRx  = /^\*\s+(.+)|^[-–]\s+(.+)/;
+  // Padrão 1 — bullets: ▫️ ▪ • ◦ ○ ● ► ▶ → * (asterisco também é título no WhatsApp)
+  const titleBulletRx = /^[▫▪►▶•◦○●◆◇→*\u25AB\u25AA\u25C6\u25C7\u2605]\s*(.+)/u;
+  const descBulletRx  = /^[-–]\s+(.+)/;
 
   let jobs = [];
   let currentJob = null;
   let sharedDesc = [];
   let inJobSection = false;
 
+  // Regex de cabeçalho de secção — inclui "Funções:", "Posições:", "Cargos:", etc.
+  const sectionHeaderRx = /^(?:funções?|posições?|cargos?|postos?\s+disponíveis?|vagas?\s*(?:disponíveis|abertas|em?\s*aberto)?|procuramos|oportunidades?\s+de\s+emprego)\s*:/i;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Cabeçalho de lista: "Vagas disponíveis:", "a recrutar ... em:", "profissionais em:"
-    if (/vagas?\s*(disponíveis|abertas|em?\s*aberto|:)|oportunidades\s+de|(estamos\s+a\s+recrutar|recrutamos|recrutar\s+profissionais)[^:]*:/i.test(line)) {
+    // Cabeçalho clássico em linha própria: "Vagas disponíveis:", "a recrutar ... em:", etc.
+    const classicHeader = /vagas?\s*(disponíveis|abertas|em?\s*aberto|:)|oportunidades\s+de|(estamos\s+a\s+recrutar|recrutamos|recrutar\s+profissionais)[^:]*:/i.test(line);
+
+    // Cabeçalho de campo "Funções: [cargo]" — pode ter conteúdo inline na mesma linha
+    const inlineHeaderM = line.match(/^(?:funções?|posições?|cargos?|postos?\s+disponíveis?|vagas?)\s*:\s*(.*)/i);
+
+    if (classicHeader && !inlineHeaderM) {
       inJobSection = true; continue;
     }
 
-    // Padrão 1: bullet explícito
+    if (inlineHeaderM) {
+      inJobSection = true;
+      const rest = inlineHeaderM[1].trim();
+      if (rest) {
+        // Resto da linha pode ser "* Limpezas na via pública" ou simplesmente "Pedreiro"
+        const bulletM = rest.match(/^[▫▪►▶•◦○●◆◇→*\u25AB\u25AA\u25C6\u25C7\u2605]\s*(.+)/u);
+        const jobTitle = bulletM ? bulletM[1].replace(/[*_]/g,'').trim() : rest.replace(/[*_]/g,'').trim();
+        if (jobTitle.length < 120 && !SHARED_FIELD_RX.test(jobTitle)) {
+          if (currentJob) jobs.push(currentJob);
+          currentJob = { title: jobTitle, description: '' };
+        }
+      }
+      continue;
+    }
+
+    // Padrão 1: bullet explícito no início da linha
     const titleM = line.match(titleBulletRx);
     if (titleM && titleM[1].length < 120) {
       inJobSection = true;
@@ -1399,8 +1431,7 @@ function detectMultipleJobs(raw) {
 
     // Padrão 2: linha simples sem bullet, dentro de uma secção de lista
     // Critérios: inJobSection, sem ":", curta (< 80 chars), não é campo partilhado
-    if (inJobSection && !currentJob?.description && !SHARED_FIELD_RX.test(line) && !line.includes(':') && line.length < 80) {
-      // Verifica se parece um cargo: começa por maiúscula ou contém parênteses típicos
+    if (inJobSection && !SHARED_FIELD_RX.test(line) && !line.includes(':') && line.length < 80) {
       if (/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÜ]/.test(line) || /\(.*\)/.test(line)) {
         if (currentJob) jobs.push(currentJob);
         currentJob = { title: line, description: '' };
@@ -1414,7 +1445,7 @@ function detectMultipleJobs(raw) {
         jobs.push(currentJob); currentJob = null; continue;
       }
       const descM = line.match(descBulletRx);
-      const text = descM ? (descM[1]||descM[2]) : line;
+      const text = descM ? descM[1] : line;
       if (!/📌|🔍|procuramos pessoas|organizada|criativa/i.test(text) || descM) {
         currentJob.description += (currentJob.description ? '\n' : '') + text;
       }
@@ -1575,7 +1606,7 @@ function renderMultiJobPreview(raw, multi) {
 function detectContactType(val) {
   val = (val||'').trim();
   if (/[\w.+-]+@[\w-]+\.\w+/.test(val)) return 'email';
-  if (/^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) return 'whatsapp';
+  if (/^9\d{8}$/.test(val) || /^\+?244\d{9}/.test(val) || /^\+?[\d\s\-()]{7,}$/.test(val) || /wa\.me/i.test(val)) return 'whatsapp';
   return 'url';
 }
 
@@ -1600,11 +1631,21 @@ function extractSharedFields(raw) {
   let city = getField(['local','localização','localizacao','cidade','location']);
   if (!city) { const m = raw.match(/\bem\s+(Luanda|Benguela|Huambo|Lubango|Malanje|[A-Z][a-záàâãéêíóôõúü]+)\b/); if (m) city = m[1]; }
   let contact = getField(['candidatura','candidaturas','enviar cv','cv para','contact','contacto','email','link','whatsapp']);
+  // Se o contacto extraído for uma frase longa, tentar tirar apenas o número/email do fim
+  if (contact && contact.length > 40) {
+    const phoneInContact = contact.match(/\b(9\d{8})\b/);
+    if (phoneInContact) contact = phoneInContact[1];
+    else { const emailInContact = contact.match(/[\w.+-]+@[\w-]+\.\w+/); if (emailInContact) contact = emailInContact[0]; }
+  }
   if (!contact) {
     const emailM = raw.match(/[\w.+-]+@[\w-]+\.\w+/); if (emailM) contact = emailM[0];
-    if (!contact) { const waM = raw.match(/\+?244?\s*(9\d{8})/); if (waM) contact = 'https://wa.me/244' + waM[1]; }
-    if (!contact) { const urlM = raw.match(/https?:\/\/\S+/); if (urlM) contact = urlM[0]; }
   }
+  if (!contact) {
+    // Detectar número angolano 9xxxxxxxx (9 dígitos) em qualquer parte do texto
+    const phoneM = raw.match(/\b(9\d{8})\b/); if (phoneM) contact = phoneM[1];
+  }
+  if (!contact) { const waM = raw.match(/\+?244\s*(9\d{8})/); if (waM) contact = '244' + waM[1]; }
+  if (!contact) { const urlM = raw.match(/https?:\/\/\S+/); if (urlM) contact = urlM[0]; }
   return { company, city: city||'Luanda', contact };
 }
 
@@ -1721,13 +1762,33 @@ function renderCourses() {
   }).join('');
 }
 
+function updateCoursePlaceholder() {
+  const type = document.getElementById('cContactType').value;
+  const label = document.getElementById('cUrlLabel');
+  const input = document.getElementById('cUrl');
+  if (type === 'whatsapp') { label.textContent = 'Número WhatsApp'; input.placeholder = '244944000000'; }
+  else if (type === 'email') { label.textContent = 'Endereço Email'; input.placeholder = 'exemplo@email.com'; }
+  else { label.textContent = 'Link do Curso'; input.placeholder = 'https://...'; }
+}
+
+function autoCourseContact(val) {
+  const sel = document.getElementById('cContactType');
+  if (!val) return;
+  if (/^[\+\d\s\(\)-]{7,}$/.test(val.trim())) sel.value = 'whatsapp';
+  else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim())) sel.value = 'email';
+  else if (/^https?:\/\//.test(val.trim())) sel.value = 'url';
+  updateCoursePlaceholder();
+}
+
 async function saveCourse() {
   const c = {
-    title:    document.getElementById('cTitle').value.trim(),
-    source:   document.getElementById('cSource').value.trim(),
-    category: document.getElementById('cCat').value,
-    rating:   document.getElementById('cRating').value || '4.0',
-    url:      document.getElementById('cUrl').value.trim()
+    title:       document.getElementById('cTitle').value.trim(),
+    source:      document.getElementById('cSource').value.trim(),
+    category:    document.getElementById('cCat').value,
+    description: document.getElementById('cDesc').value.trim(),
+    rating:      document.getElementById('cRating').value || '4.0',
+    contact_type: document.getElementById('cContactType').value,
+    url:         document.getElementById('cUrl').value.trim()
   };
   if (!c.title) { alert('Preencha o título.'); return; }
   try {
@@ -1745,11 +1806,14 @@ function editCourse(id) {
   state.editId = id;
   const c = state.courses.find(x => (x.Id||x.id) === id);
   if (!c) return;
-  document.getElementById('cTitle').value  = c.Title    || c.title    || '';
-  document.getElementById('cSource').value = c.Source   || c.source   || '';
-  document.getElementById('cCat').value    = c.Category || c.category || '';
-  document.getElementById('cRating').value = c.Rating   || c.rating   || '4.0';
-  document.getElementById('cUrl').value    = c.Url      || c.url      || '';
+  document.getElementById('cTitle').value       = c.Title       || c.title       || '';
+  document.getElementById('cSource').value      = c.Source      || c.source      || '';
+  document.getElementById('cCat').value         = c.Category    || c.category    || '';
+  document.getElementById('cDesc').value        = c.Description || c.description || '';
+  document.getElementById('cRating').value      = c.Rating      || c.rating      || '4.0';
+  document.getElementById('cContactType').value = c.ContactType || c.contact_type || 'url';
+  document.getElementById('cUrl').value         = c.Url         || c.url         || '';
+  updateCoursePlaceholder();
   openModal('courseModal');
 }
 
@@ -2093,6 +2157,7 @@ function renderTemplates() {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">A carregar templates da base de dados...</td></tr>';
     return;
   }
+  const typeLabel = { com_foto: '🖼 Com Foto', sem_foto: '📄 Sem Foto', ats: '🎯 ATS' };
   tbody.innerHTML = state.templates.map(t => `<tr>
     <td>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -2104,10 +2169,11 @@ function renderTemplates() {
       </div>
     </td>
     <td style="font-size:12px;">${t.Category||'—'}</td>
+    <td><span class="badge badge-gray" style="font-size:11px;">${typeLabel[t.TemplateType||t.template_type]||'📄 Sem Foto'}</span></td>
     <td>${t.IsPremium ? '<span class="badge badge-orange">Premium</span>' : '<span class="badge badge-green">Grátis</span>'}</td>
     <td>${t.Active ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
     <td><div class="action-btns">
-      <button class="btn btn-ghost btn-xs" onclick="viewTemplate(${t.Id})">Ver</button>
+      <button class="btn btn-ghost btn-xs" onclick="editTemplate(${t.Id},'${(t.Name||'').replace(/'/g,'\\'')}','${t.TemplateType||t.template_type||'sem_foto'}','${t.Category||''}',${t.IsPremium?1:0})">Editar</button>
       <button class="btn btn-ghost btn-xs" onclick="toggleTemplate(${t.Id},${t.Active})">${t.Active ? 'Desactivar' : 'Activar'}</button>
     </div></td>
   </tr>`).join('');
@@ -2413,6 +2479,53 @@ async function confirmImport() {
   btn.textContent = 'Importar Agora';
 }
 
+function editTemplate(id, name, ttype, category, isPremium) {
+  const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;" id="editTplOverlay">
+    <div style="background:#fff;border-radius:12px;padding:28px;width:400px;max-width:90vw;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:18px;">Editar Template</div>
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Nome</label>
+      <input id="etName" type="text" value="${name}" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Tipo</label>
+      <select id="etType" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:12px;">
+        <option value="com_foto" ${ttype==='com_foto'?'selected':''}>🖼 Com Foto</option>
+        <option value="sem_foto" ${ttype==='sem_foto'?'selected':''}>📄 Sem Foto</option>
+        <option value="ats"      ${ttype==='ats'?'selected':''}>🎯 ATS</option>
+      </select>
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Categoria</label>
+      <input id="etCat" type="text" value="${category}" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Plano</label>
+      <select id="etPrem" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:20px;">
+        <option value="0" ${!isPremium?'selected':''}>Grátis</option>
+        <option value="1" ${isPremium?'selected':''}>Premium</option>
+      </select>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('editTplOverlay').remove()" style="padding:8px 16px;border:1px solid #e2e8f0;background:#fff;border-radius:6px;cursor:pointer;font-size:13px;">Cancelar</button>
+        <button onclick="saveEditTemplate(${id})" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Guardar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+async function saveEditTemplate(id) {
+  const name = document.getElementById('etName').value.trim();
+  const ttype = document.getElementById('etType').value;
+  const cat = document.getElementById('etCat').value.trim();
+  const isPremium = parseInt(document.getElementById('etPrem').value);
+  try {
+    const res = await fetch(API + '/api/admin/template-items/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ name, templateType: ttype, category: cat, isPremium })
+    });
+    if (res.ok) {
+      document.getElementById('editTplOverlay').remove();
+      const t = state.templates.find(x => x.Id === id);
+      if (t) { t.Name = name; t.TemplateType = ttype; t.Category = cat; t.IsPremium = isPremium; }
+      renderTemplates();
+      alert('Template actualizado.');
+    } else { alert('Erro ao guardar.'); }
+  } catch(e) { alert('Erro de ligação.'); }
+}
 async function toggleTemplate(id, currentActive) {
   try {
     const res = await fetch(API + '/api/admin/template-items/' + id + '/toggle', {
