@@ -205,3 +205,20 @@ CREATE INDEX IF NOT EXISTS ix_payments_user_id    ON payments(user_id);
 CREATE INDEX IF NOT EXISTS ix_payments_status     ON payments(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_email_queue_pending ON email_queue(scheduled_at) WHERE sent = FALSE;
 CREATE INDEX IF NOT EXISTS ix_users_plan          ON users(plan);
+
+-- ── Payment Requests (Akz manual) ────────────────────────────
+CREATE TABLE IF NOT EXISTS payment_requests (
+  id           SERIAL PRIMARY KEY,
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type         VARCHAR(20) NOT NULL, -- 'cv_single','week','biweek','cover_letter'
+  amount       INTEGER NOT NULL,     -- em Akz
+  cv_id        INTEGER REFERENCES cvs(id) ON DELETE SET NULL,
+  status       VARCHAR(20) DEFAULT 'pending', -- pending/approved/rejected
+  admin_note   VARCHAR(255),
+  created_at   TIMESTAMP DEFAULT NOW(),
+  approved_at  TIMESTAMP
+);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS cv_credits     INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS cover_credits  INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS access_until   TIMESTAMP;
+CREATE INDEX IF NOT EXISTS ix_pay_req_status ON payment_requests(status, created_at DESC);

@@ -242,6 +242,18 @@ async function autoMigrate(pool) {
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
     `ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`,
     `ALTER TABLE templates ADD COLUMN IF NOT EXISTS template_type VARCHAR(20) DEFAULT 'sem_foto'`,
+    `ALTER TABLE courses ADD COLUMN IF NOT EXISTS description  TEXT`,
+    `ALTER TABLE courses ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
+    // Inserir 3 templates ATS se ainda não existirem
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at)
+     SELECT 'ATS Simples', 'ats-simples', 'ATS', FALSE, 'ats', TRUE, NOW()
+     WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug = 'ats-simples')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at)
+     SELECT 'ATS Profissional', 'ats-profissional', 'ATS', FALSE, 'ats', TRUE, NOW()
+     WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug = 'ats-profissional')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at)
+     SELECT 'ATS Executivo', 'ats-executivo', 'ATS', FALSE, 'ats', TRUE, NOW()
+     WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug = 'ats-executivo')`,
     `CREATE TABLE IF NOT EXISTS page_views (
       id         SERIAL PRIMARY KEY,
       page       VARCHAR(100) NOT NULL,

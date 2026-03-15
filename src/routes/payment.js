@@ -93,4 +93,44 @@ router.post('/stripe/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
+// ── POST /api/payment/request — Pedido de pagamento Akz ──────
+const PRICES = { cv_single: 1500, week: 3000, biweek: 5000, cover_letter: 1000 };
+router.post('/request', auth, async (req, res) => {
+  const { type, cvId } = req.body;
+  if (!PRICES[type]) return res.status(400).json({ error: 'Tipo inválido' });
+  try {
+    const result = await req.db.request()
+      .input('userId', sql.Int,     req.user.id)
+      .input('type',   sql.NVarChar, type)
+      .input('amount', sql.Int,     PRICES[type])
+      .input('cvId',   sql.Int,     cvId || null)
+      .query(`INSERT INTO payment_requests (user_id, type, amount, cv_id, status, created_at)
+              VALUES (@userId, @type, @amount, @cvId, 'pending', NOW())
+              RETURNING id`);
+    const reqId = result.recordset[0]?.id;
+    // Notificar admin via Socket.IO
+    try { socketConnector.emit('admin:payment_request', { id: reqId, type, amount: PRICES[type], userId: req.user.id }); } catch {}
+    res.json({ success: true, requestId: reqId, amount: PRICES[type] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/payment/my-access — Verificar acesso do utilizador
+router.get('/my-access', auth, async (req, res) => {
+  try {
+    const r = await req.db.request().input('id', sql.Int, req.user.id)
+      .query('SELECT cv_credits, cover_credits, access_until, plan FROM users WHERE id=@id');
+    const u = r.recordset[0];
+    const now = new Date();
+    const hasFullAccess = u?.Plan === 'premium' ||
+      (u?.AccessUntil && new Date(u.AccessUntil) > now);
+    res.json({
+      hasFullAccess,
+      cvCredits:    u?.CvCredits    || 0,
+      coverCredits: u?.CoverCredits || 0,
+      accessUntil:  u?.AccessUntil  || null,
+      plan:         u?.Plan         || 'free'
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

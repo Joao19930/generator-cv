@@ -631,4 +631,65 @@ router.post('/support/:id/reply', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── GET /api/admin/payment-requests ──────────────────────────
+router.get('/payment-requests', async (req, res) => {
+  const status = req.query.status || 'pending';
+  try {
+    const r = await req.db.request()
+      .input('status', sql.NVarChar, status)
+      .query(`SELECT pr.id, pr.type, pr.amount, pr.status, pr.created_at, pr.cv_id, pr.admin_note,
+                     u.name AS user_name, u.email AS user_email, u.phone AS user_phone
+              FROM payment_requests pr
+              JOIN users u ON u.id = pr.user_id
+              WHERE pr.status = @status
+              ORDER BY pr.created_at DESC`);
+    res.json({ requests: r.recordset, total: r.recordset.length });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PATCH /api/admin/payment-requests/:id/approve ─────────────
+router.patch('/payment-requests/:id/approve', async (req, res) => {
+  const { note } = req.body;
+  try {
+    const pr = (await req.db.request()
+      .input('id', sql.Int, req.params.id)
+      .query('SELECT * FROM payment_requests WHERE id=@id')).recordset[0];
+    if (!pr) return res.status(404).json({ error: 'Pedido não encontrado' });
+
+    // Conceder acesso conforme o tipo
+    if (pr.Type === 'cv_single') {
+      await req.db.request().input('uid', sql.Int, pr.UserId)
+        .query('UPDATE users SET cv_credits = COALESCE(cv_credits,0)+1 WHERE id=@uid');
+    } else if (pr.Type === 'cover_letter') {
+      await req.db.request().input('uid', sql.Int, pr.UserId)
+        .query('UPDATE users SET cover_credits = COALESCE(cover_credits,0)+1 WHERE id=@uid');
+    } else if (pr.Type === 'week') {
+      await req.db.request().input('uid', sql.Int, pr.UserId)
+        .query(`UPDATE users SET plan='premium', access_until=NOW()+INTERVAL '7 days' WHERE id=@uid`);
+    } else if (pr.Type === 'biweek') {
+      await req.db.request().input('uid', sql.Int, pr.UserId)
+        .query(`UPDATE users SET plan='premium', access_until=NOW()+INTERVAL '15 days' WHERE id=@uid`);
+    }
+
+    await req.db.request()
+      .input('id',   sql.Int,      req.params.id)
+      .input('note', sql.NVarChar, note || null)
+      .query(`UPDATE payment_requests SET status='approved', approved_at=NOW(), admin_note=@note WHERE id=@id`);
+
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PATCH /api/admin/payment-requests/:id/reject ──────────────
+router.patch('/payment-requests/:id/reject', async (req, res) => {
+  const { note } = req.body;
+  try {
+    await req.db.request()
+      .input('id',   sql.Int,      req.params.id)
+      .input('note', sql.NVarChar, note || null)
+      .query(`UPDATE payment_requests SET status='rejected', approved_at=NOW(), admin_note=@note WHERE id=@id`);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

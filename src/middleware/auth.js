@@ -22,9 +22,18 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-const premiumOnly = (req, res, next) => {
-  if (req.user.plan !== 'premium') return res.status(403).json({ error: 'Funcionalidade premium' });
-  next();
+const premiumOnly = async (req, res, next) => {
+  if (req.user.plan === 'premium') return next();
+  // Verificar access_until e cover_credits na BD
+  try {
+    const { sql } = require('../config/database');
+    const r = await req.db.request().input('id', sql.Int, req.user.id)
+      .query('SELECT cover_credits, access_until FROM users WHERE id=@id');
+    const u = r.recordset[0];
+    if (u && u.CoverCredits > 0) return next();
+    if (u && u.AccessUntil && new Date(u.AccessUntil) > new Date()) return next();
+  } catch(_) {}
+  return res.status(403).json({ error: 'Pagamento necessário. Acede ao painel para activar.' });
 };
 
 module.exports = { auth, adminOnly, premiumOnly };

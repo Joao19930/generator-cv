@@ -294,6 +294,21 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .cover-type-desc{font-size:12px;color:var(--t3);line-height:1.55;}
 .cover-type-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:8px;}
 .cover-gen-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-top:20px;}
+/* ── PAYMENT MODAL ── */
+.pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}
+.pay-modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:460px;box-shadow:0 24px 80px rgba(0,0,0,.2);}
+.pay-title{font-size:17px;font-weight:800;margin-bottom:4px;}
+.pay-sub{font-size:13px;color:var(--t3);margin-bottom:20px;}
+.pay-option{border:2px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.pay-option:hover{border-color:#2563eb;background:#f8faff;}
+.pay-option.selected{border-color:#2563eb;background:#EFF6FF;}
+.pay-option-price{font-size:18px;font-weight:800;color:#2563eb;white-space:nowrap;}
+.pay-option-info{flex:1;}
+.pay-option-title{font-size:13px;font-weight:700;color:var(--text);}
+.pay-option-desc{font-size:11px;color:var(--t3);margin-top:2px;}
+.pay-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;}
+.pay-instructions{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;margin:16px 0;line-height:1.6;}
+.pay-actions{display:flex;gap:10px;margin-top:18px;}
 .cover-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:600px){.cover-form-row{grid-template-columns:1fr;}}
 .cover-result{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:13px;color:var(--t2);line-height:1.7;min-height:160px;margin-top:16px;white-space:pre-wrap;}
@@ -2387,6 +2402,16 @@ function openCoverGenerator() {
   document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
 }
 async function generateCoverLetter() {
+  // Verificar acesso
+  try {
+    const ar = await fetch(`${API}/payment/my-access`, { headers:{ Authorization:'Bearer '+localStorage.getItem('cv_token') } });
+    const access = await ar.json();
+    if (!access.hasFullAccess && access.coverCredits < 1) {
+      showPaymentModal('cover', null);
+      return;
+    }
+  } catch(_) {}
+
   const name    = document.getElementById('coverName').value.trim();
   const role    = document.getElementById('coverRole').value.trim();
   const email   = document.getElementById('coverEmail').value.trim();
@@ -2843,10 +2868,89 @@ async function startCV(t) {
 /* ── CV ACTIONS ────────────────────────────────── */
 function editCV(e, id) { e.stopPropagation(); location.href = `/editor?cv=${id}`; }
 
-function dlCV(e, id) {
+async function dlCV(e, id) {
   e.stopPropagation();
-  if (userPlan === 'free') { window.open('https://wa.me/244944524292?text=Olá!%20Quero%20activar%20o%20Plano%20Premium%20de%205.000%20Akz%20do%20CV%20Premium.', '_blank'); return; }
-  window.open(`${API}/cv/${id}/pdf`, '_blank');
+  try {
+    const r = await fetch(`${API}/payment/my-access`, { headers:{ Authorization:'Bearer '+localStorage.getItem('cv_token') } });
+    const access = await r.json();
+    if (access.hasFullAccess || access.cvCredits > 0) {
+      // Tem acesso — ir directamente para o CV
+      window.open(`/form.html?id=${id}`, '_blank');
+    } else {
+      showPaymentModal('cv', id);
+    }
+  } catch(_) { showPaymentModal('cv', id); }
+}
+
+let _payType = 'cv', _payCvId = null, _paySelected = null;
+function showPaymentModal(type, cvId) {
+  _payType = type; _payCvId = cvId || null; _paySelected = null;
+  const isCover = type === 'cover';
+  const opts = isCover
+    ? [{ type:'cover_letter', price:'1.000 Akz', title:'1 Carta de Apresentação', desc:'Geração única por IA', badge:'', badgeColor:'' },
+       { type:'week',         price:'3.000 Akz', title:'7 Dias Ilimitado',         desc:'Acesso total a todas as funcionalidades', badge:'Popular', badgeColor:'#2563eb' },
+       { type:'biweek',       price:'5.000 Akz', title:'15 Dias Ilimitado',        desc:'Acesso total a todas as funcionalidades', badge:'Melhor valor', badgeColor:'#16a34a' }]
+    : [{ type:'cv_single',    price:'1.500 Akz', title:'1 CV em PDF',              desc:'Download único deste CV', badge:'', badgeColor:'' },
+       { type:'week',         price:'3.000 Akz', title:'7 Dias Ilimitado',         desc:'Todos os CVs + cartas ilimitadas', badge:'Popular', badgeColor:'#2563eb' },
+       { type:'biweek',       price:'5.000 Akz', title:'15 Dias Ilimitado',        desc:'Todos os CVs + cartas ilimitadas', badge:'Melhor valor', badgeColor:'#16a34a' }];
+
+  const html = `<div class="pay-overlay" id="payOverlay" onclick="if(event.target===this)closePayModal()">
+    <div class="pay-modal">
+      <div class="pay-title">${isCover ? '✍ Gerar Carta com IA' : '⬇ Download CV em PDF'}</div>
+      <div class="pay-sub">Escolhe um plano e efectua o pagamento para continuar</div>
+      ${opts.map(o=>`
+        <div class="pay-option" id="payOpt_${o.type}" onclick="selectPayOption('${o.type}')">
+          <div class="pay-option-price">${o.price}</div>
+          <div class="pay-option-info">
+            <div class="pay-option-title">${o.title}${o.badge?`<span class="pay-badge" style="background:${o.badgeColor}22;color:${o.badgeColor};">${o.badge}</span>`:''}</div>
+            <div class="pay-option-desc">${o.desc}</div>
+          </div>
+        </div>`).join('')}
+      <div class="pay-instructions">
+        📲 <strong>Como pagar:</strong> Transferência / Multicaixa Express para o número <strong>944 524 292</strong> (João Faustion).<br>
+        Após o pagamento, clica em <strong>"Já paguei"</strong> e aguarda aprovação (normalmente em minutos).
+      </div>
+      <div class="pay-actions">
+        <button class="btn-out" style="flex:1" onclick="closePayModal()">Cancelar</button>
+        <button class="btn-primary" style="flex:2" onclick="submitPayRequest()" id="paySubmitBtn" disabled>Já paguei — Aguardar aprovação</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function selectPayOption(type) {
+  _paySelected = type;
+  document.querySelectorAll('.pay-option').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('payOpt_'+type);
+  if (el) el.classList.add('selected');
+  document.getElementById('paySubmitBtn').disabled = false;
+}
+async function submitPayRequest() {
+  if (!_paySelected) return;
+  const btn = document.getElementById('paySubmitBtn');
+  btn.disabled = true; btn.textContent = 'A enviar…';
+  try {
+    const r = await fetch(`${API}/payment/request`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cv_token')},
+      body: JSON.stringify({ type: _paySelected, cvId: _payCvId })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erro');
+    closePayModal();
+    showToast('✅ Pedido enviado! O admin vai aprovar em breve.');
+  } catch(err) {
+    btn.disabled = false; btn.textContent = 'Já paguei — Aguardar aprovação';
+    alert('Erro: ' + err.message);
+  }
+}
+function closePayModal() { document.getElementById('payOverlay')?.remove(); }
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',background:'#1e293b',color:'#fff',padding:'10px 20px',borderRadius:'20px',fontSize:'13px',fontWeight:'600',zIndex:'9999',maxWidth:'90vw',textAlign:'center'});
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},3500);
 }
 
 async function delCV(e, id) {
