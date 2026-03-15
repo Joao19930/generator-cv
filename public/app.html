@@ -143,6 +143,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .cat-tab{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--t3);transition:all .15s;white-space:nowrap;}
 .cat-tab:hover{border-color:var(--blue);color:var(--blue);}
 .cat-tab.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.modal-type-btn{flex:1;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--t3);transition:all .15s;text-align:center;white-space:nowrap;}
+.modal-type-btn:hover{border-color:var(--blue);color:var(--blue);}
+.modal-type-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 
 /* ── CONTENT CARDS ───────────────────────────────── */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
@@ -295,6 +298,10 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 @media(max-width:600px){.cover-form-row{grid-template-columns:1fr;}}
 .cover-result{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:13px;color:var(--t2);line-height:1.7;min-height:160px;margin-top:16px;white-space:pre-wrap;}
 .cover-result-actions{display:flex;gap:10px;margin-top:12px;}
+.cover-switch-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:center;cursor:pointer;transition:all .2s;}
+.cover-switch-card:hover{border-color:rgba(37,99,235,.3);box-shadow:0 4px 12px rgba(37,99,235,.1);transform:translateY(-1px);}
+.cover-switch-card.active{border-color:var(--blue);background:#EFF6FF;}
+.cover-switch-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;}
 
 /* ── TESTIMONIAL CARDS ───────────────────────────── */
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
@@ -837,6 +844,47 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
             <button class="btn-primary" onclick="copyCover()">Copiar texto</button>
             <button class="btn-out" onclick="document.getElementById('coverResultWrap').style.display='none'">Nova carta</button>
           </div>
+          <div style="margin-top:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:10px;">GERAR NOUTRO FORMATO</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+              <div class="cover-switch-card" onclick="switchAndRegenerate('emprego')" data-type="emprego">
+                <div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Candidatura a Emprego</div><span class="cover-type-badge" style="background:#EFF6FF;color:#2563EB;">Mais usado</span></div>
+              </div>
+              <div class="cover-switch-card" onclick="switchAndRegenerate('espontanea')" data-type="espontanea">
+                <div style="width:32px;height:32px;border-radius:8px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Candidatura Espontânea</div><span class="cover-type-badge" style="background:#F0FDF4;color:#16A34A;">Proactivo</span></div>
+              </div>
+              <div class="cover-switch-card" onclick="switchAndRegenerate('estagio')" data-type="estagio">
+                <div style="width:32px;height:32px;border-radius:8px;background:#FAF5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Estágio Profissional</div><span class="cover-type-badge" style="background:#FAF5FF;color:#7C3AED;">Estudantes</span></div>
+              </div>
+              <div class="cover-switch-card" onclick="switchAndRegenerate('promocao')" data-type="promocao">
+                <div style="width:32px;height:32px;border-radius:8px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Promoção Interna</div><span class="cover-type-badge" style="background:#FEF3C7;color:#F59E0B;">Carreira</span></div>
+              </div>
+              <div class="cover-switch-card" onclick="switchAndRegenerate('mudanca')" data-type="mudanca">
+                <div style="width:32px;height:32px;border-radius:8px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Mudança de Carreira</div><span class="cover-type-badge" style="background:#FFF7ED;color:#EA580C;">Transição</span></div>
+              </div>
+              <div class="cover-switch-card" onclick="switchAndRegenerate('linkedin')" data-type="linkedin">
+                <div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                </div>
+                <div><div class="cover-switch-title">Mensagem LinkedIn</div><span class="cover-type-badge" style="background:#EFF6FF;color:#0A66C2;">LinkedIn</span></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1073,6 +1121,12 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <strong style="margin-right:4px">1 template grátis</strong> disponível. Os restantes requerem plano Pro.
         <a href="https://wa.me/244944524292?text=Olá!%20Gostaria%20de%20activar%20o%20Plano%20Pro%20do%20CV%20Premium." target="_blank" rel="noopener">Upgrade →</a>
       </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;" id="modalTypeBtns">
+        <button type="button" class="modal-type-btn active" data-type="" onclick="filterModalByType('',this)">🗂 Todos</button>
+        <button type="button" class="modal-type-btn" data-type="com_foto" onclick="filterModalByType('com_foto',this)">🖼 Com Foto</button>
+        <button type="button" class="modal-type-btn" data-type="sem_foto" onclick="filterModalByType('sem_foto',this)">📄 Sem Foto</button>
+        <button type="button" class="modal-type-btn" data-type="ats" onclick="filterModalByType('ats',this)">🎯 ATS</button>
+      </div>
       <div class="cat-tabs" id="modalCatTabs" style="margin-bottom:14px;"></div>
       <div class="modal-tpl-grid" id="modalGrid"></div>
     </div>
@@ -1246,6 +1300,7 @@ async function loadAll() {
       allTpls = (d.templates || []).map(t => ({
         id: t.Id, name: t.Name, slug: t.Slug,
         premium: !!t.IsPremium, cat: t.Category || 'Geral',
+        tplType: (t.template_type || t.TemplateType || 'sem_foto').toLowerCase(),
         color: catColor(t.Category)
       }));
       document.getElementById('tplBadge').textContent = allTpls.length;
@@ -1381,9 +1436,86 @@ function paper(color, small, tpl) {
     </div>`;
 
   let inner = '';
+  const isAts = tpl && tpl.tplType === 'ats';
+  const atsSlug = tpl ? (tpl.slug || '') : '';
 
+  /* ══ 0. ATS TEMPLATES (sem cores, coluna única) ══ */
+  if (isAts) {
+    if (atsSlug.includes('executivo')) {
+      // ATS Executivo — cabeçalho com box cinza, secções com linha
+      inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;background:#fff;padding:${f(7)} ${f(8)};">
+        <div style="border:1px solid #CBD5E1;padding:${f(5)} ${f(6)};margin-bottom:${f(5)};border-radius:2px;">
+          <div style="font-size:${f(12)};font-weight:800;color:#0f172a;letter-spacing:-.3px;">CARLOS MENDES</div>
+          <div style="font-size:${f(6)};color:#334155;margin:${f(2)} 0;">${prof}</div>
+          <div style="display:flex;gap:${f(8)};margin-top:${f(3)};">
+            ${['+244 923 456 789','carlos@email.com','Luanda, Angola'].map(x=>`<span style="font-size:${f(4.5)};color:#475569;">${x}</span>`).join('')}
+          </div>
+        </div>
+        <div style="font-size:${f(5.5)};font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid #0f172a;padding-bottom:${f(2)};margin-bottom:${f(4)};">EXPERIÊNCIA PROFISSIONAL</div>
+        ${[['Director de Operações','MegaCorp Angola','2020–Presente'],['Gestor de Projectos Sénior','Construtora Sul','2017–2020']].map(([t,c,p])=>`
+          <div style="margin-bottom:${f(5)};">
+            <div style="font-size:${f(5.5)};font-weight:700;color:#0f172a;">${t} — ${c} (${p})</div>
+            ${[L('95%','#CBD5E1',3.5),L('85%','#CBD5E1',3.5),L('70%','#CBD5E1',3.5)].join('')}
+          </div>`).join('')}
+        <div style="font-size:${f(5.5)};font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid #0f172a;padding-bottom:${f(2)};margin-bottom:${f(4)};">FORMAÇÃO ACADÉMICA</div>
+        <div style="margin-bottom:${f(4)};">
+          <div style="font-size:${f(5.5)};font-weight:700;color:#0f172a;">MBA Gestão Executiva — ISTM Luanda (2015–2017)</div>
+          ${L('90%','#CBD5E1',3.5)}${L('75%','#CBD5E1',3.5)}
+        </div>
+        <div style="font-size:${f(5.5)};font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1.5px solid #0f172a;padding-bottom:${f(2)};margin-bottom:${f(4)};">COMPETÊNCIAS</div>
+        <div style="display:flex;flex-wrap:wrap;gap:${f(3)};">
+          ${['Liderança','Negociação','Estratégia','Gestão de Risco','PMP','PRINCE2'].map(x=>`<span style="font-size:${f(4.5)};color:#334155;border:1px solid #CBD5E1;padding:${f(1)} ${f(4)};border-radius:2px;">${x}</span>`).join('')}
+        </div>
+      </div>`;
+    } else if (atsSlug.includes('profissional')) {
+      // ATS Profissional — nome à esquerda, contactos em linha, secções bold com underline
+      inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;background:#fff;padding:${f(7)} ${f(8)};">
+        <div style="margin-bottom:${f(4)};">
+          <div style="font-size:${f(13)};font-weight:800;color:#111827;letter-spacing:-.2px;">Carlos Mendes</div>
+          <div style="font-size:${f(5.5)};color:#374151;margin:${f(1.5)} 0 ${f(3)};">${prof}</div>
+          <div style="height:1px;background:#9CA3AF;margin-bottom:${f(3)};"></div>
+          <div style="font-size:${f(4.5)};color:#4B5563;">carlos@email.com &nbsp;|&nbsp; +244 923 456 789 &nbsp;|&nbsp; Luanda, Angola &nbsp;|&nbsp; linkedin.com/in/carlos</div>
+        </div>
+        <div style="margin-bottom:${f(4)};">
+          <div style="font-size:${f(5.5)};font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:.8px;margin-bottom:${f(2)};">Resumo Profissional</div>
+          <div style="height:1px;background:#D1D5DB;margin-bottom:${f(3)};"></div>
+          ${L('100%','#D1D5DB',3.5)}${L('92%','#D1D5DB',3.5)}${L('75%','#D1D5DB',3.5)}
+        </div>
+        <div style="margin-bottom:${f(4)};">
+          <div style="font-size:${f(5.5)};font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:.8px;margin-bottom:${f(2)};">Experiência</div>
+          <div style="height:1px;background:#D1D5DB;margin-bottom:${f(3)};"></div>
+          ${[['Eng. Sénior','TechCorp Angola','2021–Presente'],['Dev. Full-Stack','StartupHub','2018–2021'],['Dev. Junior','Agência Web','2015–2018']].map(([t,c,p])=>`
+            <div style="margin-bottom:${f(4)};">
+              <div style="font-size:${f(5.5)};font-weight:700;color:#111827;">${t}, ${c}</div>
+              <div style="font-size:${f(4.5)};color:#6B7280;margin-bottom:${f(2)};">${p}</div>
+              ${L('92%','#D1D5DB',3.5)}${L('80%','#D1D5DB',3.5)}
+            </div>`).join('')}
+        </div>
+        <div>
+          <div style="font-size:${f(5.5)};font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:.8px;margin-bottom:${f(2)};">Competências Técnicas</div>
+          <div style="height:1px;background:#D1D5DB;margin-bottom:${f(3)};"></div>
+          <div style="font-size:${f(4.5)};color:#374151;">${['JavaScript','React','Node.js','Python','SQL','AWS','Docker','Git'].join('  ·  ')}</div>
+        </div>
+      </div>`;
+    } else {
+      // ATS Simples — coluna única, puro preto/cinza, zero decoração
+      inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;background:#fff;padding:${f(8)} ${f(9)};">
+        <div style="text-align:center;margin-bottom:${f(5)};">
+          <div style="font-size:${f(13)};font-weight:800;color:#000;letter-spacing:-.2px;">CARLOS MENDES</div>
+          <div style="font-size:${f(5.5)};color:#333;margin:${f(1.5)} 0 ${f(2)};">${prof}</div>
+          <div style="font-size:${f(4.5)};color:#555;">carlos@email.com | +244 923 456 789 | Luanda, Angola</div>
+          <div style="height:1.5px;background:#000;margin-top:${f(4)};"></div>
+        </div>
+        ${[['EXPERIÊNCIA PROFISSIONAL',[['Engenheiro Sénior — TechCorp Angola','2021–Presente'],['Dev. Full-Stack — StartupHub','2018–2021']]],['FORMAÇÃO ACADÉMICA',[['Lic. Engenharia Informática — UAN','2011–2015']]],['COMPETÊNCIAS',null]].map(([sec,items])=>`
+          <div style="margin-bottom:${f(4)};">
+            <div style="font-size:${f(5.5)};font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.8px;margin-bottom:${f(2)};">${sec}</div>
+            <div style="height:1px;background:#000;margin-bottom:${f(3)};"></div>
+            ${items ? items.map(([t,p])=>`<div style="margin-bottom:${f(3.5)};"><div style="font-size:${f(5.5)};font-weight:700;color:#000;">${t} (${p})</div>${L('85%','#9CA3AF',3.5)}${L('70%','#9CA3AF',3.5)}</div>`).join('') : `<div style="font-size:${f(4.5)};color:#333;">${['JavaScript','React','Node.js','Python','SQL','AWS','Docker','Git','Linux','TypeScript'].join(' · ')}</div>`}
+          </div>`).join('')}
+      </div>`;
+    }
   /* ══ 1. MODERNO / PROFISSIONAL / CLÁSSICO ══ */
-  if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
+  } else if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
     inner = `<div style="display:flex;height:100%;margin:-${f(6)};overflow:hidden;">
       <!-- sidebar -->
       <div style="width:32%;background:${c};padding:${f(6)} ${f(4)};display:flex;flex-direction:column;align-items:center;overflow:hidden;flex-shrink:0;">
@@ -1743,9 +1875,21 @@ function filterTpls(q) {
 }
 
 /* ── MODAL TEMPLATES ───────────────────────────── */
-function renderModalTpls(list) {
-  const g = document.getElementById('modalGrid'); g.innerHTML = '';
-  // Build modal cat tabs
+let modalCurrentType = '';
+let modalCurrentCat  = '';
+
+function filterModalByType(type, btn) {
+  modalCurrentType = type;
+  modalCurrentCat  = '';
+  document.querySelectorAll('.modal-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyModalFilters();
+}
+
+function applyModalFilters() {
+  let list = allTpls;
+  if (modalCurrentType) list = list.filter(t => t.tplType === modalCurrentType);
+  // Rebuild cat tabs with the filtered list
   const cats = ['Todos', ...new Set(list.map(t => t.cat).filter(Boolean))];
   const tabEl = document.getElementById('modalCatTabs'); tabEl.innerHTML = '';
   cats.forEach((c, i) => {
@@ -1753,10 +1897,23 @@ function renderModalTpls(list) {
     d.className = 'cat-tab' + (i === 0 ? ' active' : '');
     const cnt = c === 'Todos' ? list.length : list.filter(t => t.cat === c).length;
     d.innerHTML = `${c} <span style="opacity:.6;font-size:10px">${cnt}</span>`;
-    d.onclick = () => { tabEl.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active')); d.classList.add('active'); fillModalGrid(c === 'Todos' ? list : list.filter(t => t.cat === c)); };
+    d.onclick = () => {
+      tabEl.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      modalCurrentCat = c === 'Todos' ? '' : c;
+      fillModalGrid(modalCurrentCat ? list.filter(t => t.cat === modalCurrentCat) : list);
+    };
     tabEl.appendChild(d);
   });
   fillModalGrid(list);
+}
+
+function renderModalTpls(list) {
+  modalCurrentType = '';
+  modalCurrentCat  = '';
+  // Reset type buttons
+  document.querySelectorAll('.modal-type-btn').forEach((b, i) => { b.classList.toggle('active', i === 0); });
+  applyModalFilters();
 }
 
 function fillModalGrid(list) {
@@ -2176,12 +2333,22 @@ async function generateCoverLetter() {
     const result = d.letter || 'Erro ao gerar. Tenta novamente.';
     document.getElementById('coverResult').textContent = result;
     document.getElementById('coverResultWrap').style.display = 'block';
+    document.querySelectorAll('.cover-switch-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.type === coverType);
+    });
   } catch(e) {
     document.getElementById('coverResult').textContent = 'Erro: ' + (e.message||'Falha de ligação. Verifica a tua conexão e tenta novamente.');
     document.getElementById('coverResultWrap').style.display = 'block';
   }
   btn.disabled = false;
   btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Gerar Carta com IA';
+}
+function switchAndRegenerate(type) {
+  coverType = type;
+  document.querySelectorAll('.cover-switch-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.type === type);
+  });
+  generateCoverLetter();
 }
 function copyCover() {
   const txt = document.getElementById('coverResult').textContent;
