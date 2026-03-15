@@ -392,8 +392,12 @@ router.post('/ats-score', toolLimiter, async (req, res) => {
   if (!cvText || !jobDescription)
     return res.status(400).json({ error: 'cvText e jobDescription são obrigatórios' });
   try {
-    const score = await openaiConnector.atsScore(cvText, jobDescription);
-    // Capturar lead se e-mail fornecido
+    let score;
+    try {
+      score = await openaiConnector.atsScore(cvText, jobDescription);
+    } catch (_aiErr) {
+      score = atsScoreLocal(cvText, jobDescription);
+    }
     if (email) {
       req.db.request().input('email', sql.NVarChar, email).input('score', sql.Int, score.score)
         .query(`INSERT INTO leads (email, ats_score, source, created_at) VALUES (@email, @score, 'ats_tool', NOW()) ON CONFLICT (email) DO NOTHING`).catch(() => {});
@@ -403,6 +407,33 @@ router.post('/ats-score', toolLimiter, async (req, res) => {
     res.json(score);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+function atsScoreLocal(cvText, jobDescription) {
+  const cv  = cvText.toLowerCase();
+  const job = jobDescription.toLowerCase();
+  const jobWords = job.match(/\b\w{4,}\b/g) || [];
+  const unique = [...new Set(jobWords)].filter(w => !['para','como','com','que','uma','dos','das','por','ser','ter','mais','seus','sua'].includes(w));
+  const matched = unique.filter(w => cv.includes(w));
+  const keywordScore = unique.length ? Math.round((matched.length / unique.length) * 100) : 50;
+
+  const hasEmail    = /[\w.]+@[\w.]+\.\w+/.test(cv);
+  const hasPhone    = /[\+\d][\d\s\-]{7,}/.test(cv);
+  const hasLinkedin = cv.includes('linkedin');
+  const hasSections = ['experiência','educação','competências','formação','skills','experience'].some(s => cv.includes(s));
+  const structureScore = ((hasEmail?25:0) + (hasPhone?15:0) + (hasLinkedin?10:0) + (hasSections?50:0));
+
+  const score = Math.min(98, Math.round(keywordScore * 0.65 + structureScore * 0.35));
+  const missing = unique.filter(w => !cv.includes(w)).slice(0, 5);
+  const feedback = [
+    `Palavras-chave encontradas: ${matched.length} de ${unique.length}.`,
+    missing.length ? `Palavras em falta: ${missing.join(', ')}.` : '',
+    !hasEmail    ? '⚠ Adiciona o teu e-mail ao CV.' : '',
+    !hasPhone    ? '⚠ Adiciona o teu telefone ao CV.' : '',
+    !hasSections ? '⚠ Organiza o CV em secções claras (Experiência, Educação, Competências).' : '',
+  ].filter(Boolean).join('\n');
+
+  return { score, feedback };
+}
 
 // ── POST /api/cv/:id/upload-photo — Foto de perfil ──────────
 router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) => {
