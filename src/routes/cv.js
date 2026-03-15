@@ -153,13 +153,19 @@ router.post('/generate-cover-letter-pdf', auth, premiumOnly, async (req, res) =>
   try {
     const html = buildCoverLetterHtml(letterText, template, name);
     const pdfBuf = await pdfConnector.fromHTML(html);
-    const slug = `carta-${req.user.id}-${Date.now()}`;
-    const key  = await s3Connector.upload(pdfBuf, `${slug}.pdf`, req.user.id);
-    const url  = await s3Connector.getUrl(key, 3600);
-    res.json({ url, expires_in: 3600 });
+    // Tentar S3; se falhar, envia o PDF directamente
+    try {
+      const slug = `carta-${req.user.id}-${Date.now()}`;
+      const key  = await s3Connector.upload(pdfBuf, `${slug}.pdf`, req.user.id);
+      const url  = await s3Connector.getUrl(key, 3600);
+      res.json({ url, expires_in: 3600 });
+    } catch (_s3Err) {
+      res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="carta-apresentacao.pdf"` });
+      res.send(pdfBuf);
+    }
   } catch (err) {
-    console.error('cover-letter-pdf:', err.message);
-    res.status(500).json({ error: 'Erro ao gerar PDF' });
+    console.error('cover-letter-pdf:', err.message, err.stack);
+    res.status(500).json({ error: 'Erro ao gerar PDF: ' + err.message });
   }
 });
 
