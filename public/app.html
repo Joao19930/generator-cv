@@ -827,6 +827,16 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         </div>
         <div class="cover-form-row">
           <div>
+            <label class="form-lbl">Email</label>
+            <input type="email" class="form-input" id="coverEmail" placeholder="carlos@email.com">
+          </div>
+          <div>
+            <label class="form-lbl">Telefone</label>
+            <input type="text" class="form-input" id="coverPhone" placeholder="+244 900 000 000">
+          </div>
+        </div>
+        <div class="cover-form-row">
+          <div>
             <label class="form-lbl">Empresa</label>
             <input type="text" class="form-input" id="coverCompany" placeholder="TechCorp Angola">
           </div>
@@ -2379,6 +2389,8 @@ function openCoverGenerator() {
 async function generateCoverLetter() {
   const name    = document.getElementById('coverName').value.trim();
   const role    = document.getElementById('coverRole').value.trim();
+  const email   = document.getElementById('coverEmail').value.trim();
+  const phone   = document.getElementById('coverPhone').value.trim();
   const company = document.getElementById('coverCompany').value.trim();
   const years   = document.getElementById('coverYears').value.trim();
   const skills  = document.getElementById('coverSkills').value.trim();
@@ -2389,7 +2401,7 @@ async function generateCoverLetter() {
     const r = await fetch('/api/cv/generate-cover-letter', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('cv_token')},
-      body:JSON.stringify({ name, role, company, years, skills, type: coverType })
+      body:JSON.stringify({ name, role, email, phone, company, years, skills, type: coverType })
     });
     if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.error||r.status); }
     const d = await r.json();
@@ -2413,35 +2425,32 @@ function selectPdfTemplate(tpl) {
     c.classList.toggle('active', c.dataset.tpl === tpl);
   });
 }
-async function downloadCoverPdf() {
+function downloadCoverPdf() {
   const letterText = document.getElementById('coverResult').textContent;
-  const name = document.getElementById('coverName').value.trim();
+  const name  = document.getElementById('coverName').value.trim();
+  const email = document.getElementById('coverEmail').value.trim();
+  const phone = document.getElementById('coverPhone').value.trim();
   if (!letterText) return;
-  const btn = document.getElementById('coverPdfBtn');
-  btn.disabled = true; btn.textContent = 'A gerar PDF…';
-  try {
-    const r = await fetch('/api/cv/generate-cover-letter-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('cv_token') },
-      body: JSON.stringify({ letterText, template: coverPdfTemplate, name })
-    });
-    if (!r.ok) { const e = await r.json().catch(() => {}); throw new Error(e?.error || r.status); }
-    const ct = r.headers.get('Content-Type') || '';
-    if (ct.includes('application/pdf')) {
-      const blob = await r.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'carta-apresentacao.pdf';
-      a.click();
-    } else {
-      const d = await r.json();
-      window.open(d.url, '_blank');
-    }
-  } catch (e) {
-    alert('Erro ao gerar PDF: ' + (e.message || 'Tenta novamente.'));
-  }
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar PDF';
+
+  const lines = letterText.split('\n');
+  const bodyHtml = lines.map(l => l.trim() === '' ? '<br>' : `<p>${l}</p>`).join('');
+  const contactHtml = (email || phone) ? `<div class="contact">${[email,phone].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div>` : '';
+
+  const tpls = {
+    classico: `<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Times New Roman',serif;font-size:12pt;color:#1a1a1a;}.header{background:#1e3a5f;color:#fff;padding:32px 48px 24px;}.header-name{font-size:20pt;font-weight:700;}.contact{font-size:10pt;opacity:.75;margin-top:6px;}.body{padding:36px 48px;}p{margin-bottom:13px;line-height:1.75;text-align:justify;}.footer{border-top:2px solid #1e3a5f;margin:28px 48px 0;padding-top:10px;font-size:9pt;color:#666;text-align:center;}</style><div class="header"><div class="header-name">${name||'Carta de Apresentação'}</div>${contactHtml}</div><div class="body">${bodyHtml}</div><div class="footer">CV Premium · cvpremium.net</div>`,
+
+    moderno: `<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;display:flex;min-height:100vh;}.sidebar{width:7px;background:linear-gradient(180deg,#2563eb,#7c3aed);}.content{flex:1;padding:40px 48px;}.top{border-bottom:1px solid #e2e8f0;padding-bottom:16px;margin-bottom:24px;}.top-name{font-size:18pt;font-weight:700;color:#2563eb;}.contact{font-size:9pt;color:#64748b;margin-top:4px;}p{margin-bottom:13px;line-height:1.75;text-align:justify;}.footer{margin-top:28px;font-size:8.5pt;color:#94a3b8;text-align:right;}</style><div class="sidebar"></div><div class="content"><div class="top"><div class="top-name">${name||'Carta de Apresentação'}</div>${contactHtml}</div>${bodyHtml}<div class="footer">CV Premium · cvpremium.net</div></div>`,
+
+    minimalista: `<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11pt;color:#374151;padding:56px 68px;}.name{font-size:17pt;font-weight:300;color:#111;letter-spacing:1px;}.line{width:36px;height:2px;background:#374151;margin:6px 0 8px;}.contact{font-size:9.5pt;color:#6b7280;margin-bottom:32px;}p{margin-bottom:15px;line-height:1.8;text-align:justify;}.footer{margin-top:44px;font-size:8.5pt;color:#9ca3af;border-top:1px solid #f3f4f6;padding-top:10px;}</style><div class="name">${name||'Carta de Apresentação'}</div><div class="line"></div>${contactHtml}<br>${bodyHtml}<div class="footer">CV Premium · cvpremium.net</div>`,
+
+    executivo: `<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Georgia,serif;font-size:11.5pt;color:#1a1a1a;}.header{background:#0f172a;color:#fff;padding:36px 48px;display:flex;justify-content:space-between;align-items:flex-end;}.header-left .name{font-size:19pt;font-weight:700;}.contact{font-size:9pt;opacity:.65;margin-top:5px;}.badge{font-size:8pt;background:#c9a227;color:#0f172a;padding:3px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:2px;white-space:nowrap;}.body{padding:40px 48px;}p{margin-bottom:14px;line-height:1.8;text-align:justify;}.footer{margin:0 48px;border-top:3px double #0f172a;padding-top:10px;font-size:8.5pt;color:#64748b;display:flex;justify-content:space-between;}</style><div class="header"><div class="header-left"><div class="name">${name||'Carta de Apresentação'}</div>${contactHtml}</div><div class="badge">Carta</div></div><div class="body">${bodyHtml}</div><div class="footer"><span>Documento Confidencial</span><span>CV Premium · cvpremium.net</span></div>`
+  };
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Carta de Apresentação</title></head><body>${tpls[coverPdfTemplate]||tpls.classico}</body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
 }
 function switchAndRegenerate(type) {
   coverType = type;

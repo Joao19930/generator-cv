@@ -246,28 +246,29 @@ ${bodyHtml}
 
 // ── POST /api/cv/generate-cover-letter — carta de apresentação ──
 router.post('/generate-cover-letter', auth, premiumOnly, toolLimiter, async (req, res) => {
-  const { name, role, company, years, skills, type } = req.body;
+  const { name, role, email, phone, company, years, skills, type } = req.body;
   if (!name || !role) return res.status(400).json({ error: 'name e role são obrigatórios' });
   try {
     // Tentar via OpenAI; se falhar (quota/sem chave), usa gerador local
     let letter;
     try {
-      letter = await openaiConnector.generateCoverLetter({ name, role, company, years, skills, type });
+      letter = await openaiConnector.generateCoverLetter({ name, role, email, phone, company, years, skills, type });
     } catch (_aiErr) {
-      letter = generateCoverLetterLocal({ name, role, company, years, skills, type });
+      letter = generateCoverLetterLocal({ name, role, email, phone, company, years, skills, type });
     }
     res.json({ letter });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-function generateCoverLetterLocal({ name, role, company, years, skills, type }) {
+function generateCoverLetterLocal({ name, role, email, phone, company, years, skills, type }) {
   const today = new Date().toLocaleDateString('pt-AO', { day: 'numeric', month: 'long', year: 'numeric' });
   const companyLine = company ? `à ${company}` : 'à vossa organização';
   const yearsLine   = years   ? `Conto com ${years} anos de experiência profissional` : 'Tenho experiência profissional relevante';
   const skillsLine  = skills  ? `As minhas principais competências incluem: ${skills}.` : '';
+  const contactLine = [email, phone].filter(Boolean).join(' | ');
 
   const templates = {
-    emprego: `${name}
+    emprego: `${name}${contactLine ? '\n' + contactLine : ''}
 ${today}
 
 Exmo(a). Senhor(a) Responsável de Recursos Humanos,
