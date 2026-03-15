@@ -320,9 +320,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
             <textarea id="summary" placeholder="Escreva um resumo sobre si (2-4 frases sobre experiência, competências e objectivos)..."></textarea>
           </div>
         </div>
-        <div class="f-row full">
+        <div class="f-row full" id="photoSection">
           <div class="f-group">
-            <label>Foto de Perfil <span style="font-weight:400;text-transform:none;letter-spacing:0">(apenas para templates com foto)</span></label>
+            <label>Foto de Perfil</label>
             <div class="photo-row">
               <div class="photo-circle" id="photoPreview">📷</div>
               <div>
@@ -397,7 +397,6 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
             </div>
             <div class="f-row">
               <div class="f-group"><label>Ano de Conclusão</label><input type="text" placeholder="2018"></div>
-              <div class="f-group"><label>Classificação</label><input type="text" placeholder="Ex: 18 valores"></div>
             </div>
           </div>
         </div>
@@ -697,7 +696,7 @@ function addEducation() {
     <div class="item-card-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg> Formação ${n}</div>
     <button class="btn-remove" onclick="removeItem('${id}')">Remover</button>
     <div class="f-row"><div class="f-group"><label>Curso</label><input type="text" placeholder="Licenciatura"></div><div class="f-group"><label>Instituição</label><input type="text" placeholder="UCAN"></div></div>
-    <div class="f-row"><div class="f-group"><label>Ano</label><input type="text" placeholder="2015"></div><div class="f-group"><label>Classificação</label><input type="text" placeholder="Muito Bom"></div></div>
+    <div class="f-row"><div class="f-group"><label>Ano</label><input type="text" placeholder="2015"></div></div>
   </div>`;
   document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
   updateCounts();
@@ -963,6 +962,8 @@ function filterByType(type, btn) {
   currentType = type;
   document.querySelectorAll('.tpl-type-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const photoSection = document.getElementById('photoSection');
+  if (photoSection) photoSection.style.display = (type === 'com_foto') ? '' : 'none';
   applyFilters();
 }
 function filterByCategory(cat, btn) {
@@ -1012,7 +1013,7 @@ function generateCV() {
   eduCards.forEach(card => {
     const inputs = card.querySelectorAll('input');
     if (inputs[0] && inputs[0].value.trim()) {
-      education.push({ degree: inputs[0].value, school: inputs[1]?.value || '', year: inputs[2]?.value || '', grade: inputs[3]?.value || '' });
+      education.push({ degree: inputs[0].value, school: inputs[1]?.value || '', year: inputs[2]?.value || '' });
     }
   });
 
