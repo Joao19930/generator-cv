@@ -357,7 +357,13 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
               <div class="f-group"><label>Localização</label><input type="text" placeholder="Luanda"></div>
             </div>
             <div class="f-row full">
-              <div class="f-group"><label>Descrição <span style="font-size:10px;color:var(--t3);font-weight:400;">(Enter para nova linha com •)</span></label><textarea class="bullet-ta" placeholder="• Descreva as suas funções e responsabilidades..."></textarea></div>
+              <div class="f-group">
+                <label style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>Descrição <span style="font-size:10px;color:var(--t3);font-weight:400;">(Enter para nova linha com •)</span></span>
+                  <button type="button" onclick="suggestResponsibilities(this)" style="font-size:11px;font-weight:600;color:#2563EB;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:3px 10px;cursor:pointer;">✨ Sugerir funções</button>
+                </label>
+                <textarea class="bullet-ta" placeholder="• Descreva as suas funções e responsabilidades..."></textarea>
+              </div>
             </div>
           </div>
         </div>
