@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     if (search) { where += ' AND name ILIKE @search'; request.input('search', sql.NVarChar, `%${search}%`); }
 
     const result = await request.query(`
-      SELECT id, name, slug, category, is_premium, preview_url, created_at
+      SELECT id, name, slug, category, is_premium, preview_url, template_type, created_at
       FROM templates WHERE active = TRUE ${where}
       ORDER BY is_premium ASC, sort_order ASC, name ASC
       LIMIT @lim OFFSET @offset

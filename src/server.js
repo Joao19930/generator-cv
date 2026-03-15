@@ -241,6 +241,7 @@ async function autoMigrate(pool) {
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE`,
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
     `ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`,
+    `ALTER TABLE templates ADD COLUMN IF NOT EXISTS template_type VARCHAR(20) DEFAULT 'sem_foto'`,
     `CREATE TABLE IF NOT EXISTS page_views (
       id         SERIAL PRIMARY KEY,
       page       VARCHAR(100) NOT NULL,

@@ -383,7 +383,7 @@ router.get('/users/:id/profile', async (req, res) => {
 router.get('/template-items', async (req, res) => {
   try {
     const r = await req.db.request().query(`
-      SELECT id, name, slug, category, is_premium, preview_url, active, sort_order, created_at
+      SELECT id, name, slug, category, is_premium, preview_url, template_type, active, sort_order, created_at
       FROM templates
       ORDER BY active DESC, is_premium ASC, sort_order ASC, name ASC
     `);
@@ -393,7 +393,7 @@ router.get('/template-items', async (req, res) => {
 
 // ── POST /api/admin/template-items ───────────────────────────
 router.post('/template-items', async (req, res) => {
-  const { name, slug, category, isPremium } = req.body;
+  const { name, slug, category, isPremium, templateType, previewUrl } = req.body;
   if (!name || !slug) return res.status(400).json({ error: 'name e slug obrigatórios' });
   try {
     await req.db.request()
@@ -401,8 +401,10 @@ router.post('/template-items', async (req, res) => {
       .input('slug', sql.NVarChar, slug)
       .input('cat',  sql.NVarChar, category || 'Geral')
       .input('prem', sql.Bit, isPremium ? true : false)
-      .query(`INSERT INTO templates (name, slug, category, is_premium, active, sort_order, created_at)
-              VALUES (@name, @slug, @cat, @prem, TRUE, 0, NOW())`);
+      .input('ttype', sql.NVarChar, templateType || 'sem_foto')
+      .input('prev',  sql.NVarChar, previewUrl || null)
+      .query(`INSERT INTO templates (name, slug, category, is_premium, template_type, preview_url, active, sort_order, created_at)
+              VALUES (@name, @slug, @cat, @prem, @ttype, @prev, TRUE, 0, NOW())`);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

@@ -882,6 +882,17 @@ tbody tr:hover{background:#fafafa;}
         <div class="f-field"><label>Slug (URL)</label><input type="text" id="tmSlug" placeholder="ex: executivo-azul"></div>
         <div class="f-field"><label>Premium?</label><select id="tmPremium"><option value="1">Sim (Premium)</option><option value="0">Não (Grátis)</option></select></div>
       </div>
+      <div class="f-row">
+        <div class="f-field">
+          <label>Tipo de Template</label>
+          <select id="tmType">
+            <option value="sem_foto">📄 Sem Foto</option>
+            <option value="com_foto">🖼 Com Foto</option>
+            <option value="ats">🎯 ATS (Optimizado para sistemas de triagem)</option>
+          </select>
+        </div>
+        <div class="f-field"><label>URL Preview (imagem)</label><input type="text" id="tmPreview" placeholder="https://..."></div>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('templateModal')">Cancelar</button><button class="btn btn-blue" onclick="saveTemplate()">Adicionar Template</button></div>
   </div>
@@ -2108,16 +2119,18 @@ function filterTemplates(v) {
 }
 
 async function saveTemplate() {
-  const name    = document.getElementById('tmName').value.trim();
-  const cat     = document.getElementById('tmCat').value;
-  const slug    = document.getElementById('tmSlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');
-  const premium = document.getElementById('tmPremium').value;
+  const name         = document.getElementById('tmName').value.trim();
+  const cat          = document.getElementById('tmCat').value;
+  const slug         = document.getElementById('tmSlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');
+  const premium      = document.getElementById('tmPremium').value;
+  const templateType = document.getElementById('tmType').value;
+  const previewUrl   = document.getElementById('tmPreview').value.trim();
   if (!name) { alert('Preencha o nome.'); return; }
   try {
     const res = await fetch(API + '/api/admin/template-items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
-      body: JSON.stringify({ name, slug, category: cat, isPremium: parseInt(premium) })
+      body: JSON.stringify({ name, slug, category: cat, isPremium: parseInt(premium), templateType, previewUrl })
     });
     if (res.ok) {
       closeModal('templateModal');

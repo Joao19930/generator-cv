@@ -110,6 +110,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 .tpl-cat{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--t3);white-space:nowrap;transition:all .15s;}
 .tpl-cat:hover{border-color:var(--blue);color:var(--blue);}
 .tpl-cat.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.tpl-type-btn{flex:1;padding:7px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--t3);transition:all .15s;text-align:center;white-space:nowrap;}
+.tpl-type-btn:hover{border-color:var(--blue);color:var(--blue);}
+.tpl-type-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .tpl-grid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;}
 .tpl-card{border:2px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
 .tpl-card:hover{border-color:var(--blue-m);transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,99,235,.1);}
@@ -568,6 +571,21 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
         <input placeholder="Pesquisar modelos..." oninput="filterTemplates(this.value)" id="tplSearchInput">
       </div>
     </div>
+    <!-- Filtros de tipo -->
+    <div style="display:flex;gap:6px;padding:10px 18px 0;flex-shrink:0;">
+      <button type="button" class="tpl-type-btn active" data-type="" onclick="filterByType('',this)">
+        🗂 Todos
+      </button>
+      <button type="button" class="tpl-type-btn" data-type="com_foto" onclick="filterByType('com_foto',this)">
+        🖼 Com Foto
+      </button>
+      <button type="button" class="tpl-type-btn" data-type="sem_foto" onclick="filterByType('sem_foto',this)">
+        📄 Sem Foto
+      </button>
+      <button type="button" class="tpl-type-btn" data-type="ats" onclick="filterByType('ats',this)">
+        🎯 ATS
+      </button>
+    </div>
     <div class="tpl-cats" id="tplCats">
       <div class="tpl-cat active" onclick="filterByCategory('',this)">Todos</div>
     </div>
@@ -940,17 +958,31 @@ function selectTemplate(t) {
   if (card) { card.classList.add('sel'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
 
+let currentType = '';
+function filterByType(type, btn) {
+  currentType = type;
+  document.querySelectorAll('.tpl-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
 function filterByCategory(cat, btn) {
   currentCat = cat;
   document.querySelectorAll('.tpl-cat').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const filtered = cat ? allTemplates.filter(t => t.Category === cat) : allTemplates;
   document.getElementById('tplSearchInput').value = '';
-  renderTemplates(filtered);
+  applyFilters();
+}
+function applyFilters() {
+  let list = allTemplates;
+  if (currentType) list = list.filter(t => (t.template_type || t.TemplateType || 'sem_foto') === currentType);
+  if (currentCat)  list = list.filter(t => t.Category === currentCat);
+  renderTemplates(list);
 }
 
 function filterTemplates(q) {
-  const base = currentCat ? allTemplates.filter(t => t.Category === currentCat) : allTemplates;
+  let base = allTemplates;
+  if (currentType) base = base.filter(t => (t.template_type || t.TemplateType || 'sem_foto') === currentType);
+  if (currentCat)  base = base.filter(t => t.Category === currentCat);
   const filtered = q ? base.filter(t => (t.Name||'').toLowerCase().includes(q.toLowerCase())) : base;
   renderTemplates(filtered);
 }
