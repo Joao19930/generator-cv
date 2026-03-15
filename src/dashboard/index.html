@@ -2173,7 +2173,7 @@ function renderTemplates() {
     <td>${t.IsPremium ? '<span class="badge badge-orange">Premium</span>' : '<span class="badge badge-green">Grátis</span>'}</td>
     <td>${t.Active ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
     <td><div class="action-btns">
-      <button class="btn btn-ghost btn-xs" onclick="editTemplate(${t.Id},'${(t.Name||'').replace(/'/g,'\\'')}','${t.TemplateType||t.template_type||'sem_foto'}','${t.Category||''}',${t.IsPremium?1:0})">Editar</button>
+      <button class="btn btn-ghost btn-xs" data-edit-id="${t.Id}" onclick="editTemplate(this.dataset.editId)">Editar</button>
       <button class="btn btn-ghost btn-xs" onclick="toggleTemplate(${t.Id},${t.Active})">${t.Active ? 'Desactivar' : 'Activar'}</button>
     </div></td>
   </tr>`).join('');
@@ -2479,7 +2479,14 @@ async function confirmImport() {
   btn.textContent = 'Importar Agora';
 }
 
-function editTemplate(id, name, ttype, category, isPremium) {
+function editTemplate(id) {
+  id = parseInt(id);
+  const t = state.templates.find(x => x.Id === id);
+  if (!t) return;
+  const name = t.Name || '';
+  const ttype = t.TemplateType || t.template_type || 'sem_foto';
+  const category = t.Category || '';
+  const isPremium = t.IsPremium ? 1 : 0;
   const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;" id="editTplOverlay">
     <div style="background:#fff;border-radius:12px;padding:28px;width:400px;max-width:90vw;">
       <div style="font-size:16px;font-weight:700;margin-bottom:18px;">Editar Template</div>
