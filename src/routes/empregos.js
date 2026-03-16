@@ -115,7 +115,7 @@ async function importAdzuna(db) {
   try {
     const { data } = await axios.get(
       `https://api.adzuna.com/v1/api/jobs/${country}/search/1`,
-      { params: { app_id: appId, app_key: appKey, results_per_page: 50, content_type: 'application/json' }, timeout: 15000 }
+      { params: { app_id: appId, app_key: appKey, results_per_page: 50 }, timeout: 15000 }
     );
     const results = data.results || [];
     if (!results.length) { console.warn('[empregos] Adzuna: 0 resultados recebidos'); return false; }
@@ -276,7 +276,7 @@ router.post('/importar', async (req, res) => {
       try {
         const { data } = await axios.get(
           `https://api.adzuna.com/v1/api/jobs/${country}/search/1`,
-          { params: { app_id: appId, app_key: appKey, results_per_page: 50, content_type: 'application/json' }, timeout: 15000 }
+          { params: { app_id: appId, app_key: appKey, results_per_page: 50 }, timeout: 15000 }
         );
         const results = data.results || [];
         log.push(`✓ Adzuna API: ${results.length} vagas recebidas (total no índice: ${data.count})`);
