@@ -619,7 +619,20 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 <script>
 const API   = '/api';
 const token = localStorage.getItem('cv_token');
-const user  = JSON.parse(localStorage.getItem('cv_user') || '{}');
+let user = JSON.parse(localStorage.getItem('cv_user') || '{}');
+// Refrescar plano da BD para não depender do JWT em cache
+if (token) {
+  fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d) return;
+      const freshPlan = d.Plan || d.plan || 'free';
+      user = { ...user, plan: freshPlan };
+      localStorage.setItem('cv_user', JSON.stringify({ ...user, plan: freshPlan }));
+      // Re-renderizar templates com plano actualizado
+      if (typeof allTemplates !== 'undefined' && allTemplates.length) renderTemplates(allTemplates);
+    }).catch(() => {});
+}
 const params = new URLSearchParams(window.location.search);
 const cvId   = params.get('cv');
 const tplParam = params.get('template');
