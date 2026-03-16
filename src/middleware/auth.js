@@ -30,8 +30,10 @@ const premiumOnly = async (req, res, next) => {
     const r = await req.db.request().input('id', sql.Int, req.user.id)
       .query('SELECT cover_credits, access_until FROM users WHERE id=@id');
     const u = r.recordset[0];
-    if (u && u.CoverCredits > 0) return next();
-    if (u && u.AccessUntil && new Date(u.AccessUntil) > new Date()) return next();
+    const coverCredits = u?.CoverCredits ?? u?.cover_credits ?? 0;
+    const accessUntil  = u?.AccessUntil  || u?.access_until  || null;
+    if (coverCredits > 0) return next();
+    if (accessUntil && new Date(accessUntil) > new Date()) return next();
   } catch(_) {}
   return res.status(403).json({ error: 'Pagamento necessário. Acede ao painel para activar.' });
 };

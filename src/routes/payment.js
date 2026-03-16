@@ -133,14 +133,19 @@ router.get('/my-access', auth, async (req, res) => {
       .query('SELECT cv_credits, cover_credits, access_until, plan FROM users WHERE id=@id');
     const u = r.recordset[0];
     const now = new Date();
-    const hasFullAccess = u?.Plan === 'premium' ||
-      (u?.AccessUntil && new Date(u.AccessUntil) > now);
+    // MSSQL pode retornar colunas em lowercase ou PascalCase — tratar ambos
+    const plan        = u?.Plan        || u?.plan        || 'free';
+    const cvCredits   = u?.CvCredits   ?? u?.cv_credits   ?? 0;
+    const coverCredits= u?.CoverCredits?? u?.cover_credits ?? 0;
+    const accessUntil = u?.AccessUntil || u?.access_until || null;
+    const hasFullAccess = plan === 'premium' ||
+      (accessUntil && new Date(accessUntil) > now);
     res.json({
       hasFullAccess,
-      cvCredits:    u?.CvCredits    || 0,
-      coverCredits: u?.CoverCredits || 0,
-      accessUntil:  u?.AccessUntil  || null,
-      plan:         u?.Plan         || 'free'
+      cvCredits,
+      coverCredits,
+      accessUntil,
+      plan
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
