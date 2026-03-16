@@ -1287,7 +1287,7 @@ function initAuth() {
     userPlan = (p.plan || 'free').toLowerCase();
     userInfo = p;
     const name = p.name || p.email?.split('@')[0] || 'Utilizador';
-    document.getElementById('sbAv').textContent    = name[0].toUpperCase();
+    document.getElementById('sbAv').textContent    = (name||'U')[0].toUpperCase();
     document.getElementById('sbName').textContent  = name;
     document.getElementById('sbEmail').textContent = p.email || '';
     document.getElementById('setName').value       = name;
@@ -1320,6 +1320,14 @@ function applyPlanUI() {
     document.getElementById('setPlanInfo').textContent = 'Tem acesso a todas as funcionalidades da plataforma.';
     document.getElementById('setPlanBtn').style.display = 'none';
     document.getElementById('statPlan').textContent = 'Premium';
+  } else if (userPlan === 'semanal') {
+    tag.className = 'plan-tag tag-pro';
+    tag.innerHTML = '⚡ Plano Semanal';
+    document.getElementById('upgradeBox').style.display = 'none';
+    document.getElementById('setPlanName').textContent = 'Semanal';
+    document.getElementById('setPlanInfo').textContent = 'Tem acesso a todas as funcionalidades durante 7 dias.';
+    document.getElementById('setPlanBtn').textContent = '★ Upgrade para Premium';
+    document.getElementById('statPlan').textContent = 'Semanal';
   } else if (userPlan === 'pro') {
     tag.className = 'plan-tag tag-pro';
     tag.innerHTML = '⚡ Plano Pro';
@@ -2557,9 +2565,10 @@ function renderCoaches(list) {
     /* Industries → separate field or second half of skills */
     const industries= (c.Industries || c.industries || '').split(',').map(x=>x.trim()).filter(Boolean);
 
+    const nameInitial = (name||'U')[0].toUpperCase();
     const avatarContent = photo
-      ? `<img src="${photo}" alt="${name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${name[0].toUpperCase()}';">`
-      : name[0].toUpperCase();
+      ? `<img src="${photo}" alt="${name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${nameInitial}';">`
+      : nameInitial;
 
     /* expertise line */
     const expertiseLine = expertise
@@ -2684,7 +2693,7 @@ function initATSPanel() {
     <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:.2s;" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow=''">
       <div style="padding:16px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
         <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-          <div style="width:40px;height:40px;border-radius:50%;background:${cv.color};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;">${cv.name[0]}</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:${cv.color};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;">${(cv.name||'?')[0]}</div>
           <div style="min-width:0;">
             <div style="font-size:13px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cv.name}</div>
             <div style="font-size:11px;color:var(--t3);margin-top:1px;">${cv.title}</div>
