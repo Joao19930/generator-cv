@@ -71,7 +71,11 @@ router.post('/', async (req, res) => {
     res.json({ reply: r.content[0].text });
   } catch (e) {
     console.error('🔴 Chat error:', e.message, e.status || '', e.error || '');
-    res.status(500).json({ error: 'Não foi possível processar a mensagem. Tente novamente.' });
+    const isDev = process.env.NODE_ENV !== 'production';
+    res.status(500).json({
+      error: 'Não foi possível processar a mensagem. Tente novamente.',
+      _debug: isDev ? { msg: e.message, status: e.status } : undefined
+    });
   }
 });
 
