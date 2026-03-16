@@ -90,6 +90,21 @@ router.get('/destacadas', async (req, res) => {
   }
 });
 
+// ── Inserir uma vaga (INSERT simples sem @param duplicado) ────
+async function insertJob(db, { title, company, city, description, url, salary, source, category }) {
+  await db.request()
+    .input('t',   sql.VarChar, (title   || '').substring(0, 255))
+    .input('c',   sql.VarChar, (company || 'Empresa').substring(0, 255))
+    .input('l',   sql.VarChar, (city    || '').substring(0, 100))
+    .input('cat', sql.VarChar, (category|| '').substring(0, 100))
+    .input('d',   sql.VarChar, (description || '').substring(0, 2000))
+    .input('u',   sql.VarChar, (url     || '').substring(0, 500))
+    .input('s',   sql.VarChar, salary ? String(salary).substring(0, 100) : null)
+    .input('src', sql.VarChar, source || 'manual')
+    .query(`INSERT INTO jobs (title,company,city,category,description,url,salary,source,active,created_at)
+            VALUES (@t,@c,@l,@cat,@d,@u,@s,@src,TRUE,NOW())`);
+}
+
 // ── Importar via Adzuna ───────────────────────────────────────
 async function importAdzuna(db) {
   const appId   = process.env.ADZUNA_APP_ID;
@@ -100,30 +115,23 @@ async function importAdzuna(db) {
   try {
     const { data } = await axios.get(
       `https://api.adzuna.com/v1/api/jobs/${country}/search/1`,
-      { params: { app_id: appId, app_key: appKey, results_per_page: 50 }, timeout: 15000 }
+      { params: { app_id: appId, app_key: appKey, results_per_page: 50, content_type: 'application/json' }, timeout: 15000 }
     );
-    let n = 0;
-    for (const j of (data.results || [])) {
-      const title  = (j.title || '').substring(0, 255);
-      const comp   = ((j.company?.display_name) || 'Empresa').substring(0, 255);
-      const loc    = (j.location?.display_name || '').substring(0, 100);
-      const desc   = (j.description || '').substring(0, 2000);
-      const url    = (j.redirect_url || '').substring(0, 500);
-      const salary = j.salary_min ? `${Math.round(j.salary_min).toLocaleString('pt-AO')} Kz` : null;
-      await db.request()
-        .input('t',   sql.VarChar, title)
-        .input('c',   sql.VarChar, comp)
-        .input('l',   sql.VarChar, loc)
-        .input('d',   sql.VarChar, desc)
-        .input('u',   sql.VarChar, url)
-        .input('s',   sql.VarChar, salary)
-        .input('src', sql.VarChar, 'adzuna')
-        .query(`INSERT INTO jobs (title,company,city,description,url,salary,source,active,created_at)
-                SELECT @t,@c,@l,@d,@u,@s,@src,TRUE,NOW()
-                WHERE NOT EXISTS (SELECT 1 FROM jobs WHERE url=@u AND url!='')`).catch(() => {});
-      n++;
+    const results = data.results || [];
+    if (!results.length) { console.warn('[empregos] Adzuna: 0 resultados recebidos'); return false; }
+    for (const j of results) {
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company?.display_name,
+        city:        j.location?.display_name,
+        description: j.description,
+        url:         j.redirect_url,
+        salary:      j.salary_min ? `${Math.round(j.salary_min).toLocaleString('pt-AO')} Kz` : null,
+        source:      'adzuna',
+        category:    j.category?.tag || ''
+      }).catch(e => console.warn('[empregos] insert err:', e.message));
     }
-    console.log(`[empregos] Adzuna: ${n} vagas`);
+    console.log(`[empregos] Adzuna: ${results.length} vagas importadas`);
     return true;
   } catch (e) {
     console.error('[empregos] Adzuna:', e.message);
@@ -142,28 +150,20 @@ async function importJooble(db) {
       { keywords: '', location: 'Angola', resultsOnPage: 50 },
       { timeout: 15000 }
     );
-    let n = 0;
-    for (const j of (data.jobs || [])) {
-      const title  = (j.title   || '').substring(0, 255);
-      const comp   = (j.company || 'Empresa').substring(0, 255);
-      const loc    = (j.location || 'Angola').substring(0, 100);
-      const desc   = (j.snippet || '').substring(0, 2000);
-      const url    = (j.link    || '').substring(0, 500);
-      const salary = j.salary ? String(j.salary).substring(0, 100) : null;
-      await db.request()
-        .input('t',   sql.VarChar, title)
-        .input('c',   sql.VarChar, comp)
-        .input('l',   sql.VarChar, loc)
-        .input('d',   sql.VarChar, desc)
-        .input('u',   sql.VarChar, url)
-        .input('s',   sql.VarChar, salary)
-        .input('src', sql.VarChar, 'jooble')
-        .query(`INSERT INTO jobs (title,company,city,description,url,salary,source,active,created_at)
-                SELECT @t,@c,@l,@d,@u,@s,@src,TRUE,NOW()
-                WHERE NOT EXISTS (SELECT 1 FROM jobs WHERE url=@u AND url!='')`).catch(() => {});
-      n++;
+    const jobs = data.jobs || [];
+    if (!jobs.length) { console.warn('[empregos] Jooble: 0 resultados'); return false; }
+    for (const j of jobs) {
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company,
+        city:        j.location,
+        description: j.snippet,
+        url:         j.link,
+        salary:      j.salary,
+        source:      'jooble'
+      }).catch(e => console.warn('[empregos] insert err:', e.message));
     }
-    console.log(`[empregos] Jooble: ${n} vagas`);
+    console.log(`[empregos] Jooble: ${jobs.length} vagas importadas`);
     return true;
   } catch (e) {
     console.error('[empregos] Jooble:', e.message);
@@ -208,19 +208,58 @@ async function seedDemoJobs(db) {
   console.log('[empregos] Demo jobs inseridos');
 }
 
-// ── Função principal (chamada pelo cron) ──────────────────────
+// ── Função principal (chamada pelo cron e no arranque) ────────
 async function importJobs(db) {
   try {
     await migrateTable(db);
-    // Limpar vagas importadas com mais de 7 dias
+    // Apagar vagas antigas da API antes de re-importar (evita duplicados)
     await db.request()
-      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble') AND created_at < NOW() - INTERVAL '7 days'`)
+      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble')`)
       .catch(() => {});
     const ok = await importAdzuna(db) || await importJooble(db);
-    if (!ok) await seedDemoJobs(db);
+    if (!ok) {
+      console.log('[empregos] Sem chave API — a usar vagas demo');
+      await seedDemoJobs(db);
+    }
   } catch (e) {
     console.error('[empregos] importJobs:', e.message);
   }
 }
+
+// ── GET /api/empregos/debug — diagnóstico (remover após teste) ─
+router.get('/debug', async (req, res) => {
+  const info = {};
+  try {
+    info.adzuna_id  = process.env.ADZUNA_APP_ID  ? '✓ configurado' : '✗ em falta';
+    info.adzuna_key = process.env.ADZUNA_APP_KEY ? '✓ configurado' : '✗ em falta';
+    info.jooble_key = process.env.JOOBLE_API_KEY ? '✓ configurado' : '✗ em falta';
+    info.country    = process.env.ADZUNA_COUNTRY || 'za (padrão)';
+
+    const cnt = await req.db.request().query(`SELECT COUNT(*) AS total FROM jobs`);
+    info.total_jobs = parseInt(cnt.recordset[0].total);
+
+    const src = await req.db.request().query(`SELECT source, COUNT(*) AS n FROM jobs GROUP BY source`);
+    info.by_source = src.recordset;
+
+    const sample = await req.db.request().query(`SELECT id,title,company,city,source,created_at FROM jobs ORDER BY created_at DESC LIMIT 3`);
+    info.sample = sample.recordset;
+
+    // Testar chamada Adzuna directamente
+    if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_APP_KEY) {
+      try {
+        const r = await axios.get(
+          `https://api.adzuna.com/v1/api/jobs/${process.env.ADZUNA_COUNTRY||'za'}/search/1`,
+          { params: { app_id: process.env.ADZUNA_APP_ID, app_key: process.env.ADZUNA_APP_KEY, results_per_page: 3 }, timeout: 10000 }
+        );
+        info.adzuna_api_test = { ok: true, count: r.data.count, results: r.data.results?.length };
+      } catch (e) {
+        info.adzuna_api_test = { ok: false, error: e.message };
+      }
+    }
+  } catch (e) {
+    info.error = e.message;
+  }
+  res.json(info);
+});
 
 module.exports = { router, importJobs, migrateTable };
