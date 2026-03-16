@@ -1036,6 +1036,29 @@
         }
 
         loadCV();
+
+        // Verificar acesso ao carregar — se premium, mostrar botão de download directamente
+        (async function checkAccessOnLoad() {
+            var token = localStorage.getItem('cv_token');
+            if (!token) return;
+            try {
+                var ar = await fetch('/api/payment/my-access', { headers: { Authorization: 'Bearer ' + token } });
+                var access = await ar.json();
+                if (access.hasFullAccess || access.cvCredits > 0) {
+                    // Premium: substituir botão por download directo
+                    var btn = document.getElementById('btnDownload');
+                    if (btn) {
+                        btn.textContent = '⬇ Download PDF';
+                        btn.onclick = function() { downloadCV(); };
+                        btn.style.background = '#16a34a';
+                        btn.style.color = '#fff';
+                    }
+                    // Remover marca de água
+                    var wm = document.querySelector('.watermark');
+                    if (wm) wm.style.display = 'none';
+                }
+            } catch(_) {}
+        })();
     </script>
 <script src="/track.js"></script>
 </body>
