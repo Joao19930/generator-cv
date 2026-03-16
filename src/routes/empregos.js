@@ -139,6 +139,99 @@ async function importAdzuna(db) {
   }
 }
 
+// ── Importar via Arbeitnow (sem chave) ────────────────────────
+async function importArbeitnow(db) {
+  try {
+    const { data } = await axios.get(
+      'https://arbeitnow.com/api/job-board-api',
+      { timeout: 15000 }
+    );
+    const jobs = data.data || [];
+    if (!jobs.length) { console.warn('[empregos] Arbeitnow: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs) {
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company_name,
+        city:        j.remote ? 'Remoto' : (j.location || ''),
+        description: (j.description || '').substring(0, 2000),
+        url:         j.url,
+        salary:      null,
+        source:      'arbeitnow',
+        category:    (j.tags && j.tags[0]) || ''
+      }).then(() => ok++).catch(e => console.warn('[empregos] arbeitnow insert:', e.message));
+    }
+    console.log(`[empregos] Arbeitnow: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] Arbeitnow:', e.message);
+    return 0;
+  }
+}
+
+// ── Importar via Remotive (sem chave) ─────────────────────────
+async function importRemotive(db) {
+  try {
+    const { data } = await axios.get(
+      'https://remotive.com/api/remote-jobs',
+      { params: { limit: 50 }, timeout: 15000 }
+    );
+    const jobs = data.jobs || [];
+    if (!jobs.length) { console.warn('[empregos] Remotive: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs) {
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company_name,
+        city:        j.candidate_required_location || 'Remoto',
+        description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.url,
+        salary:      j.salary ? String(j.salary).substring(0, 100) : null,
+        source:      'remotive',
+        category:    j.category || ''
+      }).then(() => ok++).catch(e => console.warn('[empregos] remotive insert:', e.message));
+    }
+    console.log(`[empregos] Remotive: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] Remotive:', e.message);
+    return 0;
+  }
+}
+
+// ── Importar via Jobicy (sem chave) ───────────────────────────
+async function importJobicy(db) {
+  try {
+    const { data } = await axios.get(
+      'https://jobicy.com/api/v2/remote-jobs',
+      { params: { count: 50 }, timeout: 15000 }
+    );
+    const jobs = data.jobs || [];
+    if (!jobs.length) { console.warn('[empregos] Jobicy: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs) {
+      const salary = j.annualSalaryMin
+        ? `${j.annualSalaryMin}–${j.annualSalaryMax || j.annualSalaryMin} ${j.salaryCurrency || 'USD'}/ano`
+        : null;
+      await insertJob(db, {
+        title:       j.jobTitle,
+        company:     j.companyName,
+        city:        j.jobGeo || 'Remoto',
+        description: (j.jobDescription || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.url,
+        salary:      salary,
+        source:      'jobicy',
+        category:    j.jobIndustry || ''
+      }).then(() => ok++).catch(e => console.warn('[empregos] jobicy insert:', e.message));
+    }
+    console.log(`[empregos] Jobicy: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] Jobicy:', e.message);
+    return 0;
+  }
+}
+
 // ── Importar via Jooble ───────────────────────────────────────
 async function importJooble(db) {
   const key = process.env.JOOBLE_API_KEY;
@@ -212,13 +305,22 @@ async function seedDemoJobs(db) {
 async function importJobs(db) {
   try {
     await migrateTable(db);
-    // Apagar vagas antigas da API antes de re-importar (evita duplicados)
+    // Apagar vagas antigas antes de re-importar (evita duplicados)
     await db.request()
-      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble')`)
+      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')`)
       .catch(() => {});
-    const ok = await importAdzuna(db) || await importJooble(db);
-    if (!ok) {
-      console.log('[empregos] Sem chave API — a usar vagas demo');
+
+    let total = 0;
+    // APIs pagas (se configuradas)
+    if (await importAdzuna(db)) total++;
+    if (await importJooble(db)) total++;
+    // APIs gratuitas (sem chave)
+    total += await importArbeitnow(db);
+    total += await importRemotive(db);
+    total += await importJobicy(db);
+
+    if (!total) {
+      console.log('[empregos] Todas as APIs falharam — a usar vagas demo');
       await seedDemoJobs(db);
     }
   } catch (e) {
@@ -264,14 +366,14 @@ router.post('/importar', async (req, res) => {
 
     // Apagar vagas importadas anteriores
     const del = await req.db.request()
-      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble') RETURNING id`).catch(() => ({ recordset: [] }));
+      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy') RETURNING id`)
+      .catch(() => ({ recordset: [] }));
     log.push(`✓ ${del.recordset?.length || 0} vagas antigas apagadas`);
 
-    // Tentar Adzuna
+    // ── Adzuna ──────────────────────────────────────────────────
     const appId  = process.env.ADZUNA_APP_ID;
     const appKey = process.env.ADZUNA_APP_KEY;
     const country= process.env.ADZUNA_COUNTRY || 'za';
-
     if (appId && appKey) {
       try {
         const { data } = await axios.get(
@@ -279,7 +381,7 @@ router.post('/importar', async (req, res) => {
           { params: { app_id: appId, app_key: appKey, results_per_page: 50 }, timeout: 15000 }
         );
         const results = data.results || [];
-        log.push(`✓ Adzuna API: ${results.length} vagas recebidas (total no índice: ${data.count})`);
+        log.push(`✓ Adzuna: ${results.length} vagas recebidas`);
         let ok = 0, err = 0;
         for (const j of results) {
           try {
@@ -290,19 +392,87 @@ router.post('/importar', async (req, res) => {
               source: 'adzuna', category: j.category?.tag || ''
             });
             ok++;
-          } catch (e) { err++; log.push(`  ✗ insert: ${e.message.substring(0, 80)}`); }
+          } catch (e) { err++; }
         }
-        log.push(`✓ Inseridas: ${ok} | Erros: ${err}`);
-      } catch (e) {
-        log.push(`✗ Adzuna API erro: ${e.message}`);
-      }
+        log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+      } catch (e) { log.push(`✗ Adzuna erro: ${e.message.substring(0, 100)}`); }
     } else {
-      log.push('✗ ADZUNA_APP_ID / ADZUNA_APP_KEY não configurados');
+      log.push('⚠ Adzuna: ADZUNA_APP_ID / ADZUNA_APP_KEY não configurados');
     }
 
+    // ── Arbeitnow (sem chave) ───────────────────────────────────
+    try {
+      const { data } = await axios.get('https://arbeitnow.com/api/job-board-api', { timeout: 15000 });
+      const jobs = data.data || [];
+      log.push(`✓ Arbeitnow: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs) {
+        try {
+          await insertJob(req.db, {
+            title: j.title, company: j.company_name,
+            city: j.remote ? 'Remoto' : (j.location || ''),
+            description: (j.description || '').substring(0, 2000),
+            url: j.url, salary: null,
+            source: 'arbeitnow', category: (j.tags && j.tags[0]) || ''
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ Arbeitnow erro: ${e.message.substring(0, 100)}`); }
+
+    // ── Remotive (sem chave) ────────────────────────────────────
+    try {
+      const { data } = await axios.get('https://remotive.com/api/remote-jobs', { params: { limit: 50 }, timeout: 15000 });
+      const jobs = data.jobs || [];
+      log.push(`✓ Remotive: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs) {
+        try {
+          await insertJob(req.db, {
+            title: j.title, company: j.company_name,
+            city: j.candidate_required_location || 'Remoto',
+            description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.url, salary: j.salary ? String(j.salary).substring(0, 100) : null,
+            source: 'remotive', category: j.category || ''
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ Remotive erro: ${e.message.substring(0, 100)}`); }
+
+    // ── Jobicy (sem chave) ──────────────────────────────────────
+    try {
+      const { data } = await axios.get('https://jobicy.com/api/v2/remote-jobs', { params: { count: 50 }, timeout: 15000 });
+      const jobs = data.jobs || [];
+      log.push(`✓ Jobicy: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs) {
+        try {
+          const salary = j.annualSalaryMin
+            ? `${j.annualSalaryMin}–${j.annualSalaryMax || j.annualSalaryMin} ${j.salaryCurrency || 'USD'}/ano`
+            : null;
+          await insertJob(req.db, {
+            title: j.jobTitle, company: j.companyName,
+            city: j.jobGeo || 'Remoto',
+            description: (j.jobDescription || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.url, salary,
+            source: 'jobicy', category: j.jobIndustry || ''
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
+
     // Contagem final
-    const cnt = await req.db.request().query(`SELECT COUNT(*) AS total FROM jobs WHERE source='adzuna'`);
-    log.push(`→ Total Adzuna na BD agora: ${parseInt(cnt.recordset[0].total)}`);
+    const cnt = await req.db.request().query(
+      `SELECT source, COUNT(*) AS n FROM jobs
+       WHERE source IN ('adzuna','arbeitnow','remotive','jobicy') GROUP BY source`
+    );
+    const totals = cnt.recordset.map(r => `${r.source}:${r.n}`).join(', ');
+    log.push(`→ Total na BD: ${totals || '0'}`);
 
   } catch (e) { log.push(`✗ Erro geral: ${e.message}`); }
   res.json({ log });
