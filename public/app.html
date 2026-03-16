@@ -259,8 +259,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .coach-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);transform:translateY(-2px);}
 .coach-main{display:flex;gap:24px;padding-bottom:20px;}
 .coach-left{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1;}
-.coach-av-wrap{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;}
-.coach-av-wrap img{width:100%;height:100%;object-fit:cover;}
+.coach-av-wrap{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;position:relative;}
+.coach-av-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
 .coach-header{display:flex;align-items:flex-start;gap:16px;}
 .coach-name{font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;}
 .coach-expertise{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;margin-bottom:3px;}
@@ -2566,9 +2566,7 @@ function renderCoaches(list) {
     const industries= (c.Industries || c.industries || '').split(',').map(x=>x.trim()).filter(Boolean);
 
     const nameInitial = (name||'U')[0].toUpperCase();
-    const avatarContent = photo
-      ? `<img src="${photo}" alt="${name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${nameInitial}';">`
-      : nameInitial;
+    const avatarContent = nameInitial + (photo ? `<img src="${photo}" alt="${name}" onerror="this.style.display='none';">` : '');
 
     /* expertise line */
     const expertiseLine = expertise
