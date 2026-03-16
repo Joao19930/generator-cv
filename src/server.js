@@ -27,6 +27,7 @@ const paymentRoutes   = require('./routes/payment');
 const growthRoutes    = require('./routes/growth');
 const templatesRoutes = require('./routes/templates');
 const contentRoutes   = require('./routes/content');
+const { router: chatRoutes } = require('./routes/chat');
 
 // ── Criar app e servidor HTTP ────────────────────────────────
 const app    = express();
@@ -80,6 +81,10 @@ app.get('/demo',         (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'demo.html')));
 app.get('/ats',          (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
+
+// ── Chatbot training (admin) ─────────────────────────────────
+app.get('/admin-chat-training', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin-chat-training.html')));
 
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
@@ -143,6 +148,7 @@ app.use(async (req, res, next) => {
   catch (err) { res.status(503).json({ error: 'Base de dados indisponível' }); }
 });
 
+app.use('/api/chat',      chatRoutes);         // Chatbot IA (público)
 app.use('/api/auth',      authRoutes);
 app.use('/api/growth',    growthRoutes);       // Sitemap, ATS, referral, OG
 app.use('/api/templates', templatesRoutes);    // Templates (GET público, POST protegido)
@@ -280,8 +286,49 @@ async function autoMigrate(pool) {
   }
 }
 
+async function migrateChatKnowledge(pool) {
+  const stmts = [
+    // Criar tabela chat_knowledge se não existir (PostgreSQL)
+    `CREATE TABLE IF NOT EXISTS chat_knowledge (
+       id            SERIAL PRIMARY KEY,
+       section_key   VARCHAR(100) UNIQUE NOT NULL,
+       section_title VARCHAR(200) NOT NULL,
+       content       TEXT,
+       is_active     BOOLEAN DEFAULT TRUE,
+       updated_at    TIMESTAMP DEFAULT NOW()
+     )`,
+    // Secções de conhecimento iniciais
+    `INSERT INTO chat_knowledge (section_key, section_title, content)
+     SELECT 'product_info', 'O que é o CV Generator Pro',
+       'O CV Generator Pro é uma plataforma profissional angolana para criar CVs modernos e otimizados para ATS. Oferecemos mais de 13 templates profissionais, geração de PDF de alta qualidade, análise ATS, e ferramentas de IA para melhorar o CV. Disponível em plano gratuito e plano Premium.'
+     WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'product_info')`,
+    `INSERT INTO chat_knowledge (section_key, section_title, content)
+     SELECT 'cv_tips', 'Dicas para criar um bom CV',
+       E'1. Use verbos de ação no início de cada responsabilidade (ex: "Coordenei", "Implementei", "Aumentei")\n2. Quantifique conquistas sempre que possível (ex: "Aumentei as vendas em 30%")\n3. Adapte o CV a cada vaga, usando as palavras-chave da descrição\n4. Mantenha máximo 2 páginas para a maioria dos candidatos\n5. Inclua um resumo profissional forte no topo\n6. Liste as experiências por ordem cronológica inversa (mais recente primeiro)\n7. Inclua competências técnicas e soft skills relevantes para a vaga'
+     WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'cv_tips')`,
+    `INSERT INTO chat_knowledge (section_key, section_title, content)
+     SELECT 'ats_tips', 'Otimização ATS (Applicant Tracking System)',
+       E'ATS são sistemas automáticos que filtram CVs antes de chegarem ao recrutador. Para otimizar:\n- Use palavras-chave exactas da descrição da vaga\n- Evite tabelas, colunas múltiplas, gráficos e imagens no corpo do CV\n- Use formatos de data padrão (ex: Jan 2022 - Dez 2023)\n- Inclua secções claramente identificadas: Experiência Profissional, Educação, Competências\n- Evite cabeçalhos e rodapés com informação crítica\n- Use fonts simples como Arial, Calibri ou Times New Roman\n- Guarde o ficheiro como PDF (o nosso gerador faz isso automaticamente)'
+     WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'ats_tips')`,
+    `INSERT INTO chat_knowledge (section_key, section_title, content)
+     SELECT 'pricing_info', 'Planos e Preços',
+       E'Plano Gratuito: criar e editar CVs, acesso a templates gratuitos, análise ATS básica, preview online.\nPlano Premium: download de PDF em alta qualidade sem marca de água, acesso a todos os templates premium, análise ATS completa, geração de carta de apresentação com IA, múltiplos CVs ilimitados, suporte prioritário.\nConsulte a página de preços no site para valores actualizados e promoções.'
+     WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'pricing_info')`,
+    `INSERT INTO chat_knowledge (section_key, section_title, content)
+     SELECT 'faq', 'Perguntas Frequentes',
+       E'P: Como faço download do meu CV?\nR: Utilizadores Premium fazem download direto em PDF. Utilizadores gratuitos têm acesso ao preview online.\n\nP: Posso ter múltiplos CVs?\nR: Sim, pode criar vários CVs para diferentes vagas ou sectores.\n\nP: Os meus dados ficam guardados?\nR: Sim, todos os CVs ficam guardados na sua conta e pode editá-los a qualquer momento.\n\nP: O chatbot substitui um consultor de carreira?\nR: Não. O assistente dá dicas gerais. Para orientação personalizada, recomendamos os nossos coaches certificados disponíveis na plataforma.'
+     WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'faq')`,
+  ];
+  for (const stmt of stmts) {
+    try { await pool.request().query(stmt); }
+    catch (e) { console.warn('⚠️  migrateChatKnowledge:', e.message?.slice(0, 120)); }
+  }
+  console.log('✅ chat_knowledge: tabela e dados iniciais verificados');
+}
+
 getPool().then(async (pool) => {
   await autoMigrate(pool);
+  await migrateChatKnowledge(pool);
   // Limpar cache do overview ao reiniciar (garante dados frescos após deploy)
   redisConnector.del('admin:overview').catch(() => {});
   setupCrons(pool);

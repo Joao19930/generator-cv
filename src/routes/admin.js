@@ -698,4 +698,99 @@ router.patch('/payment-requests/:id/reject', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Chatbot Knowledge — CRUD ──────────────────────────────────
+const { invalidateKnowledgeCache } = require('./chat');
+
+// GET /api/admin/chat-knowledge
+router.get('/chat-knowledge', async (req, res) => {
+  try {
+    const r = await req.db.request().query(
+      `SELECT id, section_key, section_title, content, is_active, updated_at
+       FROM chat_knowledge ORDER BY id`
+    );
+    res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PUT /api/admin/chat-knowledge/:key
+router.put('/chat-knowledge/:key', async (req, res) => {
+  try {
+    const { section_title, content, is_active } = req.body;
+    await req.db.request()
+      .input('key',     sql.VarChar, req.params.key)
+      .input('title',   sql.VarChar, section_title)
+      .input('content', sql.VarChar, content || '')
+      .input('active',  sql.Bit,     is_active ? 1 : 0)
+      .query(`UPDATE chat_knowledge
+              SET section_title = @title, content = @content, is_active = @active, updated_at = GETDATE()
+              WHERE section_key = @key`);
+    invalidateKnowledgeCache();
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/admin/chat-knowledge
+router.post('/chat-knowledge', async (req, res) => {
+  try {
+    const { section_key, section_title, content } = req.body;
+    if (!section_key || !section_title) return res.status(400).json({ error: 'section_key e section_title obrigatórios' });
+    await req.db.request()
+      .input('key',     sql.VarChar, section_key)
+      .input('title',   sql.VarChar, section_title)
+      .input('content', sql.VarChar, content || '')
+      .query(`INSERT INTO chat_knowledge (section_key, section_title, content) VALUES (@key, @title, @content)`);
+    invalidateKnowledgeCache();
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/admin/chat-knowledge/:key
+router.delete('/chat-knowledge/:key', async (req, res) => {
+  try {
+    await req.db.request()
+      .input('key', sql.VarChar, req.params.key)
+      .query(`DELETE FROM chat_knowledge WHERE section_key = @key`);
+    invalidateKnowledgeCache();
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/admin/chat-knowledge/generate — gerar conteúdo com IA
+router.post('/chat-knowledge/generate', async (req, res) => {
+  try {
+    const { topic, section_title, existing_content } = req.body;
+    if (!topic) return res.status(400).json({ error: 'topic obrigatório' });
+
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client    = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    const context = existing_content
+      ? `\n\nConteúdo actual (melhora e expande):\n${existing_content}`
+      : '';
+
+    const prompt =
+      `És um especialista em criação de CVs e mercado de trabalho angolano.\n` +
+      `Gera conteúdo claro e prático para uma secção de base de conhecimento de um chatbot sobre CVs.\n\n` +
+      `Título da secção: "${section_title || topic}"\n` +
+      `Tópico a cobrir: ${topic}${context}\n\n` +
+      `Instruções:\n` +
+      `- Escreve em português (PT/AO), tom profissional mas acessível\n` +
+      `- Usa listas numeradas ou com hífen quando adequado\n` +
+      `- Sê concreto e prático, máximo 250 palavras\n` +
+      `- Inclui exemplos específicos para o mercado angolano quando relevante\n` +
+      `- Retorna apenas o texto do conteúdo, sem títulos nem introduções`;
+
+    const r = await client.messages.create({
+      model     : 'claude-haiku-4-5-20251001',
+      max_tokens: 700,
+      messages  : [{ role: 'user', content: prompt }]
+    });
+
+    res.json({ content: r.content[0].text });
+  } catch (e) {
+    console.error('🔴 chat-knowledge/generate:', e.message);
+    res.status(500).json({ error: 'Erro ao gerar conteúdo com IA: ' + e.message });
+  }
+});
+
 module.exports = router;

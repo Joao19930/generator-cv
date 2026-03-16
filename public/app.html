@@ -2483,7 +2483,8 @@ function downloadCoverPdf() {
   };
 
   const printStyle = `<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style>`;
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Carta de Apresentação</title>${printStyle}</head><body>${tpls[coverPdfTemplate]||tpls.classico}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Carta de Apresentação</title>${printStyle}</head><body>${tpls[coverPdfTemplate]||tpls.classico}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script><script src="/chat-widget.js"></script>
+</body></html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url  = URL.createObjectURL(blob);
   const w = window.open(url, '_blank');
@@ -3156,5 +3157,6 @@ async function sendSupportMsg() {
 </script>
 
 <script src="/track.js"></script>
+<script src="/chat-widget.js"></script>
 </body>
 </html>
