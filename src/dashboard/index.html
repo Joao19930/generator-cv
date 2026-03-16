@@ -344,7 +344,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="table-toolbar">
       <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar utilizadores..." oninput="filterUsers(this.value)"></div>
       <div style="display:flex;gap:6px;">
-        <select style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;outline:none;" onchange="filterUsersPlan(this.value)"><option value="">Todos os planos</option><option value="free">Gratuito</option><option value="premium">Premium</option></select>
+        <select style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;outline:none;" onchange="filterUsersPlan(this.value)"><option value="">Todos os planos</option><option value="free">Gratuito</option><option value="semanal">Semanal</option><option value="premium">Premium</option></select>
         <button class="btn btn-ghost btn-sm" onclick="exportUsers()">⬇ Exportar CSV</button>
       </div>
     </div>
@@ -461,42 +461,60 @@ tbody tr:hover{background:#fafafa;}
 <div id="panel-plans" class="panel">
   <div class="panel-hdr"><div><div class="panel-title">Planos & Preços</div><div class="panel-sub">Dois planos activos — activação manual via WhatsApp</div></div></div>
   <div id="alertPlans"></div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:700px;">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+    <a href="/pricing" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#6366f1;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">↗ Ver Página de Preços</a>
+    <a href="https://wa.me/244944524292" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#16A34A;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">💬 Abrir WhatsApp</a>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:800px;">
     <!-- GRÁTIS -->
-    <div style="background:var(--white);border:2px solid #E2E8F0;border-radius:14px;padding:24px;">
-      <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Gratuito</div>
-      <div style="font-size:32px;font-weight:800;margin-bottom:4px;">0 <span style="font-size:14px;font-weight:400;color:#64748B;">Akz</span></div>
-      <div style="font-size:12px;color:#64748B;margin-bottom:16px;">Acesso básico sem custos</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Criar até 2 CVs</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Templates básicos</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Score ATS</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#94A3B8;">✗</span> <span style="color:#94A3B8;">Carta de Apresentação</span></div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#94A3B8;">✗</span> <span style="color:#94A3B8;">Todos os templates</span></div>
+    <div style="background:var(--white);border:2px solid #E2E8F0;border-radius:14px;padding:20px;">
+      <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">🆓 Gratuito</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:4px;">0 <span style="font-size:13px;font-weight:400;color:#64748B;">Kz</span></div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:12px;">Acesso básico sem custos</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Ver templates</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Score ATS básico</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#94A3B8;">✗</span><span style="color:#94A3B8;">Criar/editar CVs</span></div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#94A3B8;">✗</span><span style="color:#94A3B8;">Download PDF</span></div>
       </div>
-      <div style="margin-top:16px;background:#F1F5F9;border-radius:8px;padding:10px;font-size:12px;color:#475569;text-align:center;">
-        <span id="planFreeCount" style="font-weight:700;font-size:16px;">—</span> utilizadores activos
+      <div style="background:#F1F5F9;border-radius:8px;padding:8px;font-size:12px;color:#475569;text-align:center;">
+        <span id="planFreeCount" style="font-weight:800;font-size:15px;">—</span> utilizadores
+      </div>
+    </div>
+    <!-- SEMANAL -->
+    <div style="background:var(--white);border:2px solid #D97706;border-radius:14px;padding:20px;position:relative;">
+      <div style="position:absolute;top:10px;right:10px;background:#D97706;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;">POPULAR</div>
+      <div style="font-size:11px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">⚡ Semanal</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:4px;">3.000 <span style="font-size:13px;font-weight:400;color:#64748B;">Kz</span></div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:12px;">7 dias — via WhatsApp</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Criar e editar CVs</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Download PDF</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Todos os templates</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#94A3B8;">✗</span><span style="color:#94A3B8;">Carta IA</span></div>
+      </div>
+      <div style="background:#FEF3C7;border-radius:8px;padding:8px;font-size:12px;color:#92400E;text-align:center;">
+        <span id="planSemCount" style="font-weight:800;font-size:15px;">—</span> utilizadores
       </div>
     </div>
     <!-- PREMIUM -->
-    <div style="background:var(--white);border:2px solid #7C3AED;border-radius:14px;padding:24px;position:relative;overflow:hidden;">
-      <div style="position:absolute;top:12px;right:12px;background:#7C3AED;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;">ACTIVO</div>
-      <div style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Premium</div>
-      <div style="font-size:32px;font-weight:800;margin-bottom:4px;">5.000 <span style="font-size:14px;font-weight:400;color:#64748B;">Akz</span></div>
-      <div style="font-size:12px;color:#64748B;margin-bottom:16px;">Pagamento via WhatsApp — activação manual</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> CVs ilimitados</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Todos os templates Premium</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Carta de Apresentação IA</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Download PDF</div>
-        <div style="font-size:13px;display:flex;gap:8px;align-items:center;"><span style="color:#16A34A;">✓</span> Melhoria de texto IA</div>
+    <div style="background:var(--white);border:2px solid #6366f1;border-radius:14px;padding:20px;position:relative;">
+      <div style="position:absolute;top:10px;right:10px;background:#6366f1;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;">ACTIVO</div>
+      <div style="font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">👑 Premium</div>
+      <div style="font-size:28px;font-weight:800;margin-bottom:4px;">7.000 <span style="font-size:13px;font-weight:400;color:#64748B;">Kz</span></div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:12px;">30 dias — via WhatsApp</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Tudo do Semanal</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Carta de apresentação IA</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Templates exclusivos</div>
+        <div style="font-size:12px;display:flex;gap:6px;"><span style="color:#16A34A;">✓</span> Suporte prioritário</div>
       </div>
-      <div style="margin-top:16px;background:#F5F3FF;border-radius:8px;padding:10px;font-size:12px;color:#7C3AED;text-align:center;">
-        <span id="planPremCount" style="font-weight:700;font-size:16px;">—</span> utilizadores Premium
+      <div style="background:#EEF2FF;border-radius:8px;padding:8px;font-size:12px;color:#4338CA;text-align:center;">
+        <span id="planPremCount" style="font-weight:800;font-size:15px;">—</span> utilizadores Premium
       </div>
       <a href="https://wa.me/244944524292?text=Activar%20plano%20Premium" target="_blank" rel="noopener"
-         style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;background:#16A34A;color:#fff;border-radius:8px;padding:10px;font-size:13px;font-weight:600;text-decoration:none;">
-        📲 Abrir WhatsApp para pagamentos
+         style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;background:#16A34A;color:#fff;border-radius:8px;padding:9px;font-size:12px;font-weight:700;text-decoration:none;">
+        📲 WhatsApp para pagamentos
       </a>
     </div>
   </div>
@@ -1115,7 +1133,9 @@ function applyStats(d) {
 
 function updatePlanCounts() {
   const free = state.users.filter(u => !u.Plan || u.Plan === 'free' || u.plan === 'free').length;
+  const sem  = state.users.filter(u => (u.Plan||u.plan) === 'semanal').length;
   const prem = state.users.filter(u => (u.Plan||u.plan) === 'premium').length;
+  const elSem = document.getElementById('planSemCount'); if (elSem) elSem.textContent = sem;
   document.getElementById('statUsers').textContent = state.users.length;
   document.getElementById('statPro').textContent   = prem;
   const elFree = document.getElementById('planFree'); if (elFree) elFree.textContent = free;
@@ -1127,20 +1147,60 @@ function updatePlanCounts() {
 }
 
 async function setUserPlan(id, plan) {
-  const label = plan === 'premium' ? 'Activar plano Premium' : 'Revogar plano Premium';
-  if (!confirm(label + '?')) return;
+  const DIAS = { free: 0, semanal: 7, premium: 30 };
+  const LABELS = { free: 'Revogar plano (→ Gratuito)', semanal: 'Activar Plano Semanal (7 dias)', premium: 'Activar Plano Premium (30 dias)' };
+  if (!confirm(LABELS[plan] || plan)) return;
   try {
     const res = await fetch(API + '/api/admin/users/' + id + '/upgrade', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
-      body: JSON.stringify({ plan, days: plan === 'premium' ? 36500 : 0 })
+      body: JSON.stringify({ plan, days: DIAS[plan] ?? 30 })
     });
     if (!res.ok) { const d = await res.json(); alert('Erro: ' + (d.error||'falha')); return; }
     const u = state.users.find(x => String(x.Id||x.id) === String(id));
     if (u) { u.Plan = plan; u.plan = plan; }
     renderUsers(); renderRecentUsers(); updatePlanCounts();
-    showAlert('alertUsers', plan === 'premium' ? '⭐ Plano Premium activado.' : 'Plano revertido para Gratuito.', 'green');
+    const msgs = { free: 'Plano revertido para Gratuito.', semanal: '⚡ Plano Semanal activado (7 dias).', premium: '👑 Plano Premium activado (30 dias).' };
+    showAlert('alertUsers', msgs[plan] || 'Plano actualizado.', 'green');
   } catch { alert('Erro de ligação.'); }
+}
+
+function openPlanPicker(id, currentPlan) {
+  const opts = [
+    { val: 'semanal', label: '⚡ Semanal — 3.000 Kz / 7 dias' },
+    { val: 'premium', label: '👑 Premium — 7.000 Kz / 30 dias' },
+    { val: 'free',    label: '🔓 Gratuito — Sem acesso' },
+  ];
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;';
+  box.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.25);">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;font-family:'Sora',sans-serif;">Alterar Plano</div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:20px;font-family:'Sora',sans-serif;">Plano actual: <strong>${currentPlan || 'free'}</strong></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+        ${opts.map(o => `
+          <button onclick="void 0" data-plan="${o.val}"
+            style="padding:12px 16px;border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+            border:2px solid ${o.val===currentPlan?'#2563EB':'#E2E8F0'};
+            background:${o.val===currentPlan?'#EFF6FF':'#fff'};
+            color:${o.val===currentPlan?'#2563EB':'#0F172A'};">
+            ${o.label}
+          </button>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="ppCancel" style="padding:8px 18px;border-radius:8px;border:1px solid #E2E8F0;background:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(box);
+  box.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.removeChild(box);
+      setUserPlan(id, btn.dataset.plan);
+    });
+  });
+  box.querySelector('#ppCancel').addEventListener('click', () => document.body.removeChild(box));
+  box.addEventListener('click', (e) => { if (e.target === box) document.body.removeChild(box); });
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────
@@ -1215,10 +1275,7 @@ function renderUsers() {
       <td>${date}</td>
       <td><div class="action-btns">
         <button class="btn btn-blue btn-xs" onclick="openUserDrawer('${u.Id||u.id}')">Dashboard</button>
-        ${plan === 'premium'
-          ? `<button class="btn btn-ghost btn-xs" style="color:#DC2626;border-color:#FCA5A5;" onclick="setUserPlan('${u.Id||u.id}','free')">Revogar</button>`
-          : `<button class="btn btn-xs" style="background:#16A34A;color:#fff;border:none;" onclick="setUserPlan('${u.Id||u.id}','premium')">⭐ Premium</button>`
-        }
+        <button class="btn btn-xs" style="background:#6366f1;color:#fff;border:none;" onclick="openPlanPicker('${u.Id||u.id}','${plan}')">✦ Plano</button>
         <button class="btn btn-red btn-xs" onclick="deleteUser('${u.Id||u.id}')">Remover</button>
       </div></td>
     </tr>`;

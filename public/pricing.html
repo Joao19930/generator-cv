@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos & Preços — CV Generator Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #2563EB;
+    --blue-d: #1D4ED8;
+    --indigo: #6366F1;
+    --purple: #7C3AED;
+    --green: #16A34A;
+    --gold: #D97706;
+    --text: #0F172A;
+    --t2: #334155;
+    --t3: #64748B;
+    --t4: #94A3B8;
+    --bg: #F8FAFC;
+    --border: #E2E8F0;
+    --white: #FFFFFF;
+    --rs: 10px;
+    --rl: 16px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Navbar ── */
+  .nav {
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; align-items: center; gap: 8px; }
+  .nav-link { color: var(--t2); text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: var(--rs); transition: all .15s; }
+  .nav-link:hover { background: var(--bg); color: var(--blue); }
+  .nav-btn { padding: 8px 18px; background: var(--blue); color: #fff; border: none; border-radius: var(--rs); font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; transition: background .15s; }
+  .nav-btn:hover { background: var(--blue-d); }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 80px 24px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(99,102,241,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
+    border: 1px solid #C7D2FE;
+    color: var(--indigo);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: .3px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -.5px;
+  }
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--t3);
+    max-width: 520px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+  .hero-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--t3);
+  }
+  .trust-item svg { color: var(--green); }
+
+  /* ── Plans grid ── */
+  .plans-section { padding: 0 24px 80px; }
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── Plan card ── */
+  .plan-card {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    transition: all .25s;
+  }
+  .plan-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,.1); }
+  .plan-card.popular {
+    border-color: var(--blue);
+    box-shadow: 0 8px 32px rgba(37,99,235,.18);
+  }
+  .plan-card.popular:hover { box-shadow: 0 20px 56px rgba(37,99,235,.25); }
+
+  .popular-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--blue), var(--indigo));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+
+  .plan-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .plan-icon.free    { background: #F1F5F9; }
+  .plan-icon.semanal { background: #FEF3C7; }
+  .plan-icon.premium { background: linear-gradient(135deg, #EEF2FF, #F5F3FF); }
+
+  .plan-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .plan-desc {
+    font-size: 13px;
+    color: var(--t3);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .plan-price-wrap { margin-bottom: 24px; }
+  .plan-price {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .plan-price.free-price { font-size: 32px; color: var(--t3); }
+  .plan-currency {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--t3);
+    vertical-align: top;
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .plan-period {
+    font-size: 13px;
+    color: var(--t3);
+    font-weight: 500;
+    margin-top: 4px;
+  }
+  .plan-savings {
+    display: inline-block;
+    background: #DCFCE7;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 6px;
+  }
+
+  .plan-cta {
+    width: 100%;
+    padding: 13px;
+    border-radius: var(--rl);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .cta-free    { background: var(--bg); color: var(--t2); border: 2px solid var(--border); }
+  .cta-free:hover { border-color: var(--blue); color: var(--blue); }
+  .cta-semanal { background: linear-gradient(135deg, #F59E0B, #D97706); color: #fff; box-shadow: 0 4px 16px rgba(217,119,6,.3); }
+  .cta-semanal:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(217,119,6,.4); }
+  .cta-premium { background: linear-gradient(135deg, var(--blue), var(--indigo)); color: #fff; box-shadow: 0 4px 16px rgba(37,99,235,.3); }
+  .cta-premium:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,.4); }
+
+  .plan-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 20px; }
+
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--t2);
+    line-height: 1.4;
+  }
+  .feat-check { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .feat-check.yes { background: #DCFCE7; color: var(--green); }
+  .feat-check.no  { background: #F1F5F9; color: var(--t4); }
+  .feat-check.star{ background: #EEF2FF; color: var(--indigo); }
+
+  /* ── WhatsApp note ── */
+  .wa-note {
+    text-align: center;
+    margin: 32px auto 0;
+    max-width: 480px;
+    font-size: 13px;
+    color: var(--t3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .wa-icon { font-size: 20px; }
+
+  /* ── Features section ── */
+  .features-section {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 72px 24px;
+  }
+  .section-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--indigo);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: -.3px;
+  }
+  .section-sub {
+    text-align: center;
+    font-size: 15px;
+    color: var(--t3);
+    margin-bottom: 48px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .feature-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--rl);
+    padding: 24px;
+    transition: all .2s;
+  }
+  .feature-item:hover { border-color: #C7D2FE; box-shadow: 0 4px 16px rgba(99,102,241,.08); }
+  .feature-emoji { font-size: 28px; margin-bottom: 12px; display: block; }
+  .feature-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .feature-desc { font-size: 12px; color: var(--t3); line-height: 1.6; }
+
+  /* ── Comparison table ── */
+  .compare-section { padding: 72px 24px; }
+  .compare-wrap { max-width: 780px; margin: 0 auto; overflow-x: auto; }
+  .compare-table { width: 100%; border-collapse: collapse; min-width: 560px; }
+  .compare-table th {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid var(--border);
+  }
+  .compare-table th:first-child { text-align: left; }
+  .compare-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--t2);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    vertical-align: middle;
+  }
+  .compare-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .col-popular { background: rgba(37,99,235,.04); }
+  .col-head-popular { color: var(--blue); }
+  .chk-yes { color: var(--green); font-size: 18px; }
+  .chk-no  { color: var(--t4); font-size: 18px; }
+
+  /* ── FAQ ── */
+  .faq-section { background: var(--white); border-top: 1px solid var(--border); padding: 72px 24px; }
+  .faq-wrap { max-width: 640px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    gap: 16px;
+  }
+  .faq-q .faq-arrow { font-size: 18px; flex-shrink: 0; transition: transform .2s; color: var(--t3); }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+  }
+  .faq-item.open .faq-a { max-height: 200px; }
+  .faq-a-inner {
+    padding-bottom: 16px;
+    font-size: 13px;
+    color: var(--t3);
+    line-height: 1.7;
+  }
+
+  /* ── CTA bottom ── */
+  .cta-section {
+    text-align: center;
+    padding: 80px 24px;
+    background: linear-gradient(135deg, var(--blue), var(--indigo));
+    color: #fff;
+  }
+  .cta-section h2 { font-size: clamp(24px, 3vw, 38px); font-weight: 800; margin-bottom: 12px; letter-spacing: -.3px; }
+  .cta-section p  { font-size: 15px; opacity: .85; margin-bottom: 32px; }
+  .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-white  { padding: 13px 28px; background: #fff; color: var(--blue); border: none; border-radius: var(--rl); font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all .2s; }
+  .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  .btn-wa { padding: 13px 28px; background: #25D366; color: #fff; border: none; border-radius: var(--rl); font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all .2s; }
+  .btn-wa:hover { background: #22c55e; transform: translateY(-2px); }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--text);
+    color: rgba(255,255,255,.6);
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+  }
+  .footer a { color: rgba(255,255,255,.8); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 0 16px; }
+    .nav-links .nav-link { display: none; }
+    .hero { padding: 48px 16px 40px; }
+    .plans-section { padding: 0 16px 48px; }
+    .features-section, .compare-section, .faq-section { padding: 48px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="nav">
+  <a href="/" class="nav-logo">CV Generator Pro</a>
+  <div class="nav-links">
+    <a href="/app" class="nav-link">Dashboard</a>
+    <a href="/ats" class="nav-link">Score ATS</a>
+    <a href="/app" class="nav-btn">Começar Grátis</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    Mais de 1.000 profissionais angolanos confiam em nós
+  </div>
+  <h1>Planos simples.<br><span>Resultados profissionais.</span></h1>
+  <p>Cria um CV que se destaca, passa os filtros ATS e abre portas para a tua próxima oportunidade.</p>
+  <div class="hero-trust">
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Sem compromisso
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Activação via WhatsApp
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Suporte em português
+    </div>
+  </div>
+</section>
+
+<!-- Plans -->
+<section class="plans-section">
+  <div class="plans-grid">
+
+    <!-- Plano Gratuito -->
+    <div class="plan-card">
+      <div class="plan-icon free">🆓</div>
+      <div class="plan-name">Gratuito</div>
+      <div class="plan-desc">Para explorar a plataforma e ver como funciona.</div>
+      <div class="plan-price-wrap">
+        <div class="plan-price free-price">0 Kz</div>
+        <div class="plan-period">Para sempre gratuito</div>
+      </div>
+      <a href="/app" class="plan-cta cta-free">Começar Grátis</a>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>
+          <span class="feat-check yes">✓</span>
+          Visualizar templates de CV
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          Analisar score ATS
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          Acesso ao dashboard
+        </li>
+        <li>
+          <span class="feat-check no">✕</span>
+          <span style="color:var(--t4)">Criar ou editar CVs</span>
+        </li>
+        <li>
+          <span class="feat-check no">✕</span>
+          <span style="color:var(--t4)">Download PDF</span>
+        </li>
+        <li>
+          <span class="feat-check no">✕</span>
+          <span style="color:var(--t4)">IA para melhorar textos</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Plano Semanal (Popular) -->
+    <div class="plan-card popular">
+      <div class="popular-badge">⚡ MAIS POPULAR</div>
+      <div class="plan-icon semanal">⚡</div>
+      <div class="plan-name">Semanal</div>
+      <div class="plan-desc">Perfeito para quem está a candidatar-se activamente a vagas.</div>
+      <div class="plan-price-wrap">
+        <div class="plan-price">
+          <span class="plan-currency">Kz</span> 3.000
+        </div>
+        <div class="plan-period">por 7 dias</div>
+        <div class="plan-savings">Ideal para candidaturas urgentes</div>
+      </div>
+      <a href="#" class="plan-cta cta-semanal" onclick="activarPlano('semanal'); return false;">
+        ⚡ Activar Semanal via WhatsApp
+      </a>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>
+          <span class="feat-check yes">✓</span>
+          Criar e editar CVs ilimitados
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          Download PDF sem marca de água
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          Todos os templates incluídos
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          Análise ATS completa
+        </li>
+        <li>
+          <span class="feat-check yes">✓</span>
+          IA para melhorar textos
+        </li>
+        <li>
+          <span class="feat-check no">✕</span>
+          <span style="color:var(--t4)">Carta de apresentação IA</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Plano Premium -->
+    <div class="plan-card">
+      <div class="plan-icon premium">👑</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-desc">Acesso completo a todas as funcionalidades por um mês inteiro.</div>
+      <div class="plan-price-wrap">
+        <div class="plan-price">
+          <span class="plan-currency">Kz</span> 7.000
+        </div>
+        <div class="plan-period">por mês</div>
+        <div class="plan-savings">30 dias completos</div>
+      </div>
+      <a href="#" class="plan-cta cta-premium" onclick="activarPlano('premium'); return false;">
+        👑 Activar Premium via WhatsApp
+      </a>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>
+          <span class="feat-check yes">✓</span>
+          Tudo do plano Semanal
+        </li>
+        <li>
+          <span class="feat-check star">★</span>
+          Carta de apresentação com IA
+        </li>
+        <li>
+          <span class="feat-check star">★</span>
+          Geração automática de resumo
+        </li>
+        <li>
+          <span class="feat-check star">★</span>
+          Sugestões de responsabilidades por IA
+        </li>
+        <li>
+          <span class="feat-check star">★</span>
+          Acesso a templates exclusivos
+        </li>
+        <li>
+          <span class="feat-check star">★</span>
+          Suporte prioritário
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="wa-note">
+    <span class="wa-icon">💬</span>
+    A activação é feita via WhatsApp em minutos. Sem cartão de crédito.
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section">
+  <div class="section-label">Funcionalidades</div>
+  <h2 class="section-title">Tudo o que precisas para o emprego certo</h2>
+  <p class="section-sub">Ferramentas profissionais pensadas para o mercado angolano.</p>
+  <div class="features-grid">
+    <div class="feature-item">
+      <span class="feature-emoji">📄</span>
+      <div class="feature-name">13+ Templates Profissionais</div>
+      <div class="feature-desc">Designs modernos e clássicos optimizados para impressão e visualização digital.</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-emoji">🤖</span>
+      <div class="feature-name">IA para Melhorar Textos</div>
+      <div class="feature-desc">Melhora automaticamente as tuas descrições de experiência com linguagem profissional.</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-emoji">🎯</span>
+      <div class="feature-name">Score ATS</div>
+      <div class="feature-desc">Analisa o teu CV contra a descrição da vaga e mostra o que melhorar.</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-emoji">📥</span>
+      <div class="feature-name">Download PDF de Alta Qualidade</div>
+      <div class="feature-desc">PDF pronto a enviar, sem marcas de água, em alta resolução.</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-emoji">✉️</span>
+      <div class="feature-name">Carta de Apresentação</div>
+      <div class="feature-desc">Gera uma carta profissional personalizada para cada empresa em segundos.</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-emoji">☁️</span>
+      <div class="feature-name">CVs Guardados na Nuvem</div>
+      <div class="feature-desc">Os teus CVs ficam guardados em segurança e acessíveis em qualquer dispositivo.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison table -->
+<section class="compare-section">
+  <div class="section-label">Comparação</div>
+  <h2 class="section-title">Compare os planos</h2>
+  <p class="section-sub">Vê exactamente o que cada plano inclui.</p>
+  <div class="compare-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Funcionalidade</th>
+          <th>Gratuito</th>
+          <th class="col-head-popular">Semanal</th>
+          <th>Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ver templates</td>
+          <td><span class="chk-yes">✓</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Score ATS</td>
+          <td><span class="chk-yes">✓</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Criar e editar CVs</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Download PDF</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Todos os templates</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>IA para textos</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-yes">✓</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Carta de apresentação IA</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Templates exclusivos</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Suporte prioritário</td>
+          <td><span class="chk-no">✕</span></td>
+          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:800">Preço</td>
+          <td style="font-weight:800">Grátis</td>
+          <td class="col-popular" style="font-weight:800;color:var(--blue)">3.000 Kz / 7 dias</td>
+          <td style="font-weight:800">7.000 Kz / mês</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Perguntas frequentes</h2>
+  <div class="faq-wrap">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Como funciona a activação do plano?
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Clica no botão do plano desejado, serás redireccionado para o WhatsApp com uma mensagem pré-preenchida. A nossa equipa confirma o pagamento e activa o teu plano em minutos.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Qual o método de pagamento aceite?
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Aceitamos transferência bancária, Multicaixa Express e pagamento em dinheiro presencial em Luanda. Após a confirmação do pagamento, o plano é activado de imediato.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Posso cancelar a qualquer momento?
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Sim. Os planos têm duração definida (7 dias ou 30 dias) e não renovam automaticamente. Não há cancelamentos — o plano simplesmente termina no final do período.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        O meu CV fica guardado se o plano terminar?
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Sim! O teu CV fica sempre guardado na plataforma. Quando o plano terminar, não podes criar ou editar, mas podes renovar para continuar a trabalhar nos teus CVs.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Qual a diferença entre Semanal e Premium?
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">O Semanal inclui todas as funcionalidades básicas por 7 dias — ideal para candidaturas rápidas. O Premium inclui ferramentas extra de IA (carta de apresentação, geração automática de resumo) e dura 30 dias.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Bottom -->
+<section class="cta-section">
+  <h2>Pronto para criar o teu CV profissional?</h2>
+  <p>Junta-te a milhares de profissionais angolanos que usam o CV Generator Pro.</p>
+  <div class="cta-btns">
+    <a href="/app" class="btn-white">Começar Grátis</a>
+    <a href="#" class="btn-wa" onclick="activarPlano('premium'); return false;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Activar Premium agora
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>© 2025 CV Generator Pro · Luanda, Angola · <a href="/">Início</a> · <a href="/app">Dashboard</a> · <a href="/ats">Score ATS</a></p>
+</footer>
+
+<script>
+  const WA = '244944524292';
+
+  const PLANOS = {
+    semanal: {
+      nome: 'Plano Semanal',
+      preco: '3.000 Kz',
+      msg: 'Olá, quero ativar o Plano Semanal (3.000 Kz / 7 dias) do CV Generator Pro.'
+    },
+    premium: {
+      nome: 'Plano Premium',
+      preco: '7.000 Kz',
+      msg: 'Olá, quero ativar o Plano Premium (7.000 Kz / mês) do CV Generator Pro.'
+    }
+  };
+
+  function activarPlano(tipo) {
+    const p = PLANOS[tipo];
+    if (!p) return;
+    const url = `https://wa.me/${WA}?text=${encodeURIComponent(p.msg)}`;
+    window.open(url, '_blank', 'noopener');
+  }
+
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Highlight current plan if logged in
+  (function () {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      const plan = (u.plan || '').toLowerCase();
+      if (!plan || plan === 'free') return;
+      const map = { semanal: 1, premium: 2 };
+      const idx = map[plan];
+      if (idx === undefined) return;
+      const cards = document.querySelectorAll('.plan-card');
+      if (cards[idx]) {
+        cards[idx].style.outline = '3px solid #16A34A';
+        const badge = document.createElement('div');
+        badge.style.cssText = 'position:absolute;top:-14px;right:16px;background:#16A34A;color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;';
+        badge.textContent = '✓ PLANO ACTUAL';
+        cards[idx].style.position = 'relative';
+        cards[idx].appendChild(badge);
+      }
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>

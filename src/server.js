@@ -81,6 +81,8 @@ app.get('/demo',         (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'demo.html')));
 app.get('/ats',          (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
+app.get('/pricing',      (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'pricing.html')));
 
 // ── Chatbot training (admin) ─────────────────────────────────
 app.get('/admin-chat-training', (req, res) =>
