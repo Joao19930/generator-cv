@@ -226,7 +226,7 @@ async function importJobs(db) {
   }
 }
 
-// ── GET /api/empregos/debug — diagnóstico (remover após teste) ─
+// ── GET /api/empregos/debug — diagnóstico ────────────────────
 router.get('/debug', async (req, res) => {
   const info = {};
   try {
@@ -234,17 +234,12 @@ router.get('/debug', async (req, res) => {
     info.adzuna_key = process.env.ADZUNA_APP_KEY ? '✓ configurado' : '✗ em falta';
     info.jooble_key = process.env.JOOBLE_API_KEY ? '✓ configurado' : '✗ em falta';
     info.country    = process.env.ADZUNA_COUNTRY || 'za (padrão)';
-
     const cnt = await req.db.request().query(`SELECT COUNT(*) AS total FROM jobs`);
     info.total_jobs = parseInt(cnt.recordset[0].total);
-
     const src = await req.db.request().query(`SELECT source, COUNT(*) AS n FROM jobs GROUP BY source`);
     info.by_source = src.recordset;
-
-    const sample = await req.db.request().query(`SELECT id,title,company,city,source,created_at FROM jobs ORDER BY created_at DESC LIMIT 3`);
+    const sample = await req.db.request().query(`SELECT id,title,company,city,source FROM jobs ORDER BY created_at DESC LIMIT 3`);
     info.sample = sample.recordset;
-
-    // Testar chamada Adzuna directamente
     if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_APP_KEY) {
       try {
         const r = await axios.get(
@@ -256,10 +251,61 @@ router.get('/debug', async (req, res) => {
         info.adzuna_api_test = { ok: false, error: e.message };
       }
     }
-  } catch (e) {
-    info.error = e.message;
-  }
+  } catch (e) { info.error = e.message; }
   res.json(info);
+});
+
+// ── POST /api/empregos/importar — trigger manual ──────────────
+router.post('/importar', async (req, res) => {
+  const log = [];
+  try {
+    await migrateTable(req.db);
+    log.push('✓ migração de colunas OK');
+
+    // Apagar vagas importadas anteriores
+    const del = await req.db.request()
+      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble') RETURNING id`).catch(() => ({ recordset: [] }));
+    log.push(`✓ ${del.recordset?.length || 0} vagas antigas apagadas`);
+
+    // Tentar Adzuna
+    const appId  = process.env.ADZUNA_APP_ID;
+    const appKey = process.env.ADZUNA_APP_KEY;
+    const country= process.env.ADZUNA_COUNTRY || 'za';
+
+    if (appId && appKey) {
+      try {
+        const { data } = await axios.get(
+          `https://api.adzuna.com/v1/api/jobs/${country}/search/1`,
+          { params: { app_id: appId, app_key: appKey, results_per_page: 50, content_type: 'application/json' }, timeout: 15000 }
+        );
+        const results = data.results || [];
+        log.push(`✓ Adzuna API: ${results.length} vagas recebidas (total no índice: ${data.count})`);
+        let ok = 0, err = 0;
+        for (const j of results) {
+          try {
+            await insertJob(req.db, {
+              title: j.title, company: j.company?.display_name, city: j.location?.display_name,
+              description: j.description, url: j.redirect_url,
+              salary: j.salary_min ? `${Math.round(j.salary_min).toLocaleString('pt-AO')} Kz` : null,
+              source: 'adzuna', category: j.category?.tag || ''
+            });
+            ok++;
+          } catch (e) { err++; log.push(`  ✗ insert: ${e.message.substring(0, 80)}`); }
+        }
+        log.push(`✓ Inseridas: ${ok} | Erros: ${err}`);
+      } catch (e) {
+        log.push(`✗ Adzuna API erro: ${e.message}`);
+      }
+    } else {
+      log.push('✗ ADZUNA_APP_ID / ADZUNA_APP_KEY não configurados');
+    }
+
+    // Contagem final
+    const cnt = await req.db.request().query(`SELECT COUNT(*) AS total FROM jobs WHERE source='adzuna'`);
+    log.push(`→ Total Adzuna na BD agora: ${parseInt(cnt.recordset[0].total)}`);
+
+  } catch (e) { log.push(`✗ Erro geral: ${e.message}`); }
+  res.json({ log });
 });
 
 module.exports = { router, importJobs, migrateTable };

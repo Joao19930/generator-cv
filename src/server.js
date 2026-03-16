@@ -28,7 +28,7 @@ const growthRoutes    = require('./routes/growth');
 const templatesRoutes = require('./routes/templates');
 const contentRoutes   = require('./routes/content');
 const { router: chatRoutes } = require('./routes/chat');
-const { router: empregosRoutes, importJobs, migrateTable: migrateEmpregos } = require('./routes/empregos');
+const { router: empregosRoutes, importJobs } = require('./routes/empregos');
 
 // ── Criar app e servidor HTTP ────────────────────────────────
 const app    = express();
@@ -340,8 +340,8 @@ getPool().then(async (pool) => {
   // Limpar cache do overview ao reiniciar (garante dados frescos após deploy)
   redisConnector.del('admin:overview').catch(() => {});
   setupCrons(pool);
-  // Importar vagas na primeira execução (depois o cron toma conta a cada 6h)
-  importJobs(pool).catch(() => {});
+  // Importar vagas 10s após arranque (evita falhas de rede no boot)
+  setTimeout(() => importJobs(pool).catch(() => {}), 10000);
   server.listen(PORT, () => {
     console.log(`\n🚀 CV Generator Pro`);
     console.log(`   Local:   http://localhost:${PORT}`);
