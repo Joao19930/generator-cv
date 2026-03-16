@@ -5,6 +5,7 @@
 const cron  = require('node-cron');
 const { sql } = require('../config/database');
 const { smtpConnector, emailConnector, redisConnector } = require('../connectors');
+const { importJobs } = require('../routes/empregos');
 
 // ── Agendar drip e-mails de onboarding ───────────────────────
 const scheduleDrip = async (pool, userId, email, name) => {
@@ -89,6 +90,12 @@ const setupCrons = (pool) => {
 
   // Às 6h: manutenção diária
   cron.schedule('0 6 * * *', () => console.log('Manutenção diária executada'));
+
+  // A cada 6h: importar vagas de emprego
+  cron.schedule('0 */6 * * *', () => {
+    console.log('[empregos] A importar vagas (cron 6h)…');
+    importJobs(pool).catch(e => console.error('[empregos] cron erro:', e.message));
+  });
 
   console.log('CRON Jobs activos');
 };

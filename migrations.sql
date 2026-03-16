@@ -164,6 +164,9 @@ ALTER TABLE jobs ADD COLUMN IF NOT EXISTS description  TEXT;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS start_date   DATE;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url';
+-- Colunas adicionadas em v3 — módulo Empregos (ignoradas se já existirem)
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS salary VARCHAR(100);
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS source VARCHAR(100);
 
 -- ── Testimonials ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS testimonials (

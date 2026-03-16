@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vagas de Emprego — CV Premium</title>
+<meta name="description" content="Encontre oportunidades de emprego e candidate-se rapidamente com o CV Premium.">
+<meta property="og:title" content="Vagas de Emprego — CV Premium">
+<meta property="og:description" content="Encontre oportunidades de emprego e candidate-se rapidamente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#6366f1; --primary-d:#4f46e5; --primary-light:#eef2ff;
+  --bg:#f8fafc; --card:#ffffff; --border:#e2e8f0; --border-light:#f1f5f9;
+  --text:#0f172a; --t2:#334155; --t3:#64748b; --t4:#94a3b8;
+  --green:#10b981; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6;
+  --radius:14px; --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --shadow-hover:0 4px 20px rgba(99,102,241,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── TOP BAR ─────────────────────────────────────────── */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:var(--text);text-decoration:none;}
+.topbar-logo-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;}
+.topbar-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--t3);text-decoration:none;padding:6px 12px;border-radius:8px;transition:background .15s;}
+.topbar-back:hover{background:var(--bg);color:var(--primary);}
+.topbar-sep{flex:1;}
+.topbar-btn{background:var(--primary);color:#fff;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:background .15s;}
+.topbar-btn:hover{background:var(--primary-d);}
+
+/* ── HERO ────────────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,var(--primary) 0%,#7c3aed 100%);padding:52px 24px 40px;text-align:center;color:#fff;}
+.hero h1{font-size:clamp(24px,4vw,36px);font-weight:800;margin-bottom:10px;}
+.hero p{font-size:15px;opacity:.85;margin-bottom:28px;}
+.hero-stats{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+.hero-stat{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;}
+
+/* ── SEARCH BAR ──────────────────────────────────────── */
+.search-wrap{max-width:900px;margin:-24px auto 0;padding:0 16px;position:relative;z-index:10;}
+.search-box{background:#fff;border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.12);padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap;}
+.search-field{flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 12px;}
+.search-field svg{flex-shrink:0;color:var(--t4);}
+.search-field input{border:none;background:none;outline:none;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);width:100%;padding:10px 0;}
+.search-field input::placeholder{color:var(--t4);}
+.remote-toggle{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 14px;cursor:pointer;font-size:13px;color:var(--t2);user-select:none;white-space:nowrap;min-height:40px;}
+.remote-toggle.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+.remote-dot{width:10px;height:10px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .15s;}
+.remote-toggle.active .remote-dot{background:var(--primary);}
+.search-btn{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;}
+.search-btn:hover{background:var(--primary-d);}
+
+/* ── MAIN ────────────────────────────────────────────── */
+.main{max-width:900px;margin:0 auto;padding:36px 16px 60px;}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.results-count{font-size:14px;color:var(--t3);}
+.results-count strong{color:var(--text);}
+
+/* ── JOB CARDS ───────────────────────────────────────── */
+.jobs-list{display:flex;flex-direction:column;gap:12px;}
+.jb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;display:flex;gap:16px;align-items:flex-start;transition:box-shadow .18s,border-color .18s;cursor:pointer;}
+.jb-card:hover{box-shadow:var(--shadow-hover);border-color:var(--primary);}
+.jb-logo{width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;}
+.jb-body{flex:1;min-width:0;}
+.jb-top-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-bottom:6px;}
+.jb-title{font-size:15px;font-weight:700;color:var(--text);}
+.jb-salary{font-size:12px;font-weight:700;color:var(--green);background:#ecfdf5;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.jb-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.jb-company{font-size:13px;font-weight:600;color:var(--t2);}
+.jb-loc{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:3px;}
+.jb-desc{font-size:13px;color:var(--t3);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.jb-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;}
+.jb-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.jb-tag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--border-light);color:var(--t3);}
+.jb-tag-cat{background:var(--primary-light);color:var(--primary);}
+.jb-tag-new{background:#fef3c7;color:#92400e;}
+.jb-btn{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
+.jb-btn:hover{background:var(--primary-d);}
+
+/* ── EMPTY / LOADING ─────────────────────────────────── */
+.jb-empty{text-align:center;padding:64px 24px;color:var(--t3);}
+.jb-empty svg{margin-bottom:16px;opacity:.4;}
+.jb-empty-t{font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px;}
+.jb-empty-s{font-size:13px;}
+.skeleton{background:linear-gradient(90deg,#f0f4f8 25%,#e2e8f0 50%,#f0f4f8 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── PAGINATION ──────────────────────────────────────── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:28px;flex-wrap:wrap;}
+.pg-btn{background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'Sora',sans-serif;font-size:13px;cursor:pointer;color:var(--t2);transition:border-color .15s,color .15s;}
+.pg-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
+.pg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── UPGRADE MODAL ───────────────────────────────────── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:20px;padding:36px 32px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.modal-icon{font-size:40px;margin-bottom:16px;}
+.modal-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px;}
+.modal-sub{font-size:14px;color:var(--t3);line-height:1.6;margin-bottom:24px;}
+.modal-btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;text-decoration:none;padding:14px 24px;border-radius:12px;font-weight:700;font-size:14px;margin-bottom:10px;transition:opacity .15s;}
+.modal-btn-wa:hover{opacity:.9;}
+.modal-btn-cancel{background:none;border:none;font-family:'Sora',sans-serif;font-size:13px;color:var(--t3);cursor:pointer;padding:8px;}
+.modal-btn-cancel:hover{color:var(--text);}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media(max-width:600px){
+  .hero{padding:36px 16px 32px;}
+  .jb-card{flex-direction:column;}
+  .jb-logo{width:40px;height:40px;font-size:15px;}
+  .topbar{padding:0 12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <a class="topbar-logo" href="/">
+    <div class="topbar-logo-dot"></div>
+    CV Premium
+  </a>
+  <div class="topbar-sep"></div>
+  <a class="topbar-back" href="/app">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Painel
+  </a>
+  <a class="topbar-btn" href="/editor">Criar CV</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Vagas de Emprego em Angola</h1>
+  <p>Encontre a oportunidade certa e candidate-se rapidamente com o seu CV profissional.</p>
+  <div class="hero-stats">
+    <span class="hero-stat" id="heroTotal">A carregar…</span>
+    <span class="hero-stat">Actualizado diariamente</span>
+    <span class="hero-stat">Grátis e sem cadastro</span>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <div class="search-field" style="flex:2;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="inpSearch" type="text" placeholder="Pesquisar vaga, empresa…" oninput="debounceFetch()">
+    </div>
+    <div class="search-field" style="flex:1;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <input id="inpCity" type="text" placeholder="Cidade…" oninput="debounceFetch()">
+    </div>
+    <div class="remote-toggle" id="remoteToggle" onclick="toggleRemote()">
+      <div class="remote-dot"></div>
+      Remoto
+    </div>
+    <button class="search-btn" onclick="fetchJobs(1)">Pesquisar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="results-hdr">
+    <div class="results-count" id="resultsCount">&nbsp;</div>
+  </div>
+  <div class="jobs-list" id="jobsList">
+    <!-- skeleton -->
+    <div style="display:flex;flex-direction:column;gap:12px;" id="skeletonWrap">
+      <div style="height:120px;border-radius:14px;" class="skeleton"></div>
+      <div style="height:120px;border-radius:14px;" class="skeleton"></div>
+      <div style="height:120px;border-radius:14px;" class="skeleton"></div>
+      <div style="height:120px;border-radius:14px;" class="skeleton"></div>
+      <div style="height:120px;border-radius:14px;" class="skeleton"></div>
+    </div>
+  </div>
+  <div class="pagination" id="paginationWrap"></div>
+</main>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal-box">
+    <div class="modal-icon">⭐</div>
+    <div class="modal-title">Plano Premium Necessário</div>
+    <div class="modal-sub">Para se candidatar às vagas directamente, active um plano Premium e destaque-se dos outros candidatos com o seu CV profissional.</div>
+    <a class="modal-btn-wa" id="modalWaBtn" href="#" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L0 24l6.293-1.517A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.01-1.375l-.36-.213-3.733.9.946-3.625-.234-.373A9.76 9.76 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+      Ativar Plano Premium
+    </a>
+    <button class="modal-btn-cancel" onclick="closeModal()">Agora não</button>
+  </div>
+</div>
+
+<script src="/upgrade-modal.js"></script>
+<script src="/chat-widget.js"></script>
+<script>
+const API     = '/api/empregos';
+const WA_NUM  = '244944524292';
+const COLORS  = ['#6366f1','#8b5cf6','#ec4899','#06b6d4','#10b981','#f59e0b','#ef4444','#3b82f6','#84cc16','#f97316'];
+
+let currentPage  = 1;
+let totalJobs    = 0;
+let isRemote     = false;
+let debounceTimer = null;
+
+// ── Ler plano do utilizador ────────────────────────────
+function getUserPlan() {
+  try {
+    const u = JSON.parse(localStorage.getItem('cv_user') || '{}');
+    if (u.plan) return u.plan;
+    const tok = localStorage.getItem('cv_token');
+    if (tok) {
+      const p = JSON.parse(atob(tok.split('.')[1]));
+      return (p.plan || 'free').toLowerCase();
+    }
+  } catch (_) {}
+  return 'free';
+}
+function isPaid() { const p = getUserPlan(); return p === 'premium' || p === 'semanal'; }
+
+// ── Toggle remoto ──────────────────────────────────────
+function toggleRemote() {
+  isRemote = !isRemote;
+  document.getElementById('remoteToggle').classList.toggle('active', isRemote);
+  fetchJobs(1);
+}
+
+// ── Debounce input ─────────────────────────────────────
+function debounceFetch() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => fetchJobs(1), 400);
+}
+
+// ── Formatar data relativa ─────────────────────────────
+function timeAgo(d) {
+  if (!d) return '';
+  const diff = Date.now() - new Date(d).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days < 1)  return 'Hoje';
+  if (days === 1) return 'Ontem';
+  if (days < 7)  return `${days} dias`;
+  if (days < 30) return `${Math.floor(days/7)} sem.`;
+  return `${Math.floor(days/30)} mês`;
+}
+
+// ── Renderizar cards ───────────────────────────────────
+function renderCard(j, i) {
+  const color  = COLORS[i % COLORS.length];
+  const init   = (j.company || j.Company || 'E')[0].toUpperCase();
+  const title  = j.title   || j.Title   || 'Vaga';
+  const comp   = j.company || j.Company || 'Empresa';
+  const city   = j.city    || j.City    || '';
+  const country= j.country || j.Country || '';
+  const loc    = [city, country].filter(Boolean).join(', ') || 'Angola';
+  const desc   = j.description || j.Description || '';
+  const salary = j.salary  || j.Salary  || '';
+  const cat    = j.category|| j.Category|| '';
+  const url    = j.url     || j.Url     || '#';
+  const ago    = timeAgo(j.job_date || j.JobDate || j.created_at || j.CreatedAt);
+  const isNew  = ago === 'Hoje' || ago === 'Ontem';
+
+  return `<div class="jb-card" style="animation:fadeIn .3s ease ${i*0.04}s both;">
+    <div class="jb-logo" style="background:${color};">${init}</div>
+    <div class="jb-body">
+      <div class="jb-top-row">
+        <div class="jb-title">${title}</div>
+        ${salary ? `<span class="jb-salary">${salary}</span>` : ''}
+      </div>
+      <div class="jb-meta">
+        <span class="jb-company">${comp}</span>
+        <span class="jb-loc">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${loc}
+        </span>
+        ${ago ? `<span style="font-size:11px;color:var(--t4);">${ago}</span>` : ''}
+      </div>
+      ${desc ? `<div class="jb-desc">${desc}</div>` : ''}
+      <div class="jb-footer">
+        <div class="jb-tags">
+          ${cat ? `<span class="jb-tag jb-tag-cat">${cat}</span>` : ''}
+          ${isNew ? `<span class="jb-tag jb-tag-new">✦ Nova</span>` : ''}
+        </div>
+        <button class="jb-btn" onclick="handleApply(event,'${url.replace(/'/g,"\\'")}')">Ver vaga →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Clicar em "Ver vaga" ───────────────────────────────
+function handleApply(e, url) {
+  e.stopPropagation();
+  if (!isPaid()) {
+    showUpgradeModal();
+    return;
+  }
+  if (url && url !== '#') window.open(url, '_blank', 'noopener');
+}
+
+// ── Modal de upgrade ───────────────────────────────────
+function showUpgradeModal() {
+  const msg  = encodeURIComponent('Olá, quero ativar o Plano Premium (7.000 Kz / mês) do CV Generator Pro.');
+  document.getElementById('modalWaBtn').href = `https://wa.me/${WA_NUM}?text=${msg}`;
+  document.getElementById('upgradeModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('upgradeModal').classList.remove('open');
+}
+document.getElementById('upgradeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── Paginação ──────────────────────────────────────────
+function renderPagination(page, total, limit) {
+  const pages = Math.ceil(total / limit);
+  if (pages <= 1) { document.getElementById('paginationWrap').innerHTML = ''; return; }
+  let html = `<button class="pg-btn" onclick="fetchJobs(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>`;
+  const start = Math.max(1, page - 2);
+  const end   = Math.min(pages, page + 2);
+  for (let p = start; p <= end; p++) {
+    html += `<button class="pg-btn ${p===page?'active':''}" onclick="fetchJobs(${p})">${p}</button>`;
+  }
+  html += `<button class="pg-btn" onclick="fetchJobs(${page+1})" ${page>=pages?'disabled':''}>Seguinte →</button>`;
+  document.getElementById('paginationWrap').innerHTML = html;
+}
+
+// ── Fetch principal ────────────────────────────────────
+async function fetchJobs(page) {
+  currentPage = page || 1;
+  const search = document.getElementById('inpSearch').value.trim();
+  const city   = document.getElementById('inpCity').value.trim();
+  const params = new URLSearchParams({ page: currentPage, limit: 20 });
+  if (search) params.set('search', search);
+  if (city)   params.set('city', city);
+  if (isRemote) params.set('remote', '1');
+
+  // Skeleton
+  document.getElementById('jobsList').innerHTML =
+    `<div id="skeletonWrap" style="display:flex;flex-direction:column;gap:12px;">
+      ${Array(5).fill('<div style="height:120px;border-radius:14px;" class="skeleton"></div>').join('')}
+    </div>`;
+  document.getElementById('paginationWrap').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}?${params}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const jobs = data.jobs || [];
+    totalJobs  = data.total || 0;
+
+    // Hero stats
+    document.getElementById('heroTotal').textContent = `${totalJobs} vaga${totalJobs !== 1 ? 's' : ''} disponível`;
+
+    // Results count
+    const s = search || city ? ` para "${[search,city].filter(Boolean).join(' · ')}"` : '';
+    document.getElementById('resultsCount').innerHTML =
+      `<strong>${totalJobs}</strong> vaga${totalJobs !== 1 ? 's' : ''} encontrada${totalJobs !== 1 ? 's' : ''}${s}`;
+
+    if (!jobs.length) {
+      document.getElementById('jobsList').innerHTML =
+        `<div class="jb-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          <div class="jb-empty-t">Nenhuma vaga encontrada</div>
+          <div class="jb-empty-s">Tente outros termos de pesquisa ou remova os filtros.</div>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('jobsList').innerHTML = jobs.map((j, i) => renderCard(j, i)).join('');
+    renderPagination(currentPage, totalJobs, 20);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (e) {
+    document.getElementById('jobsList').innerHTML =
+      `<div class="jb-empty">
+        <div class="jb-empty-t">Erro ao carregar vagas</div>
+        <div class="jb-empty-s">Verifique a sua ligação e tente novamente.</div>
+        <button class="search-btn" style="margin-top:16px;" onclick="fetchJobs(1)">Tentar novamente</button>
+      </div>`;
+  }
+}
+
+// ── Animação ───────────────────────────────────────────
+const style = document.createElement('style');
+style.textContent = `@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`;
+document.head.appendChild(style);
+
+// ── Init ───────────────────────────────────────────────
+fetchJobs(1);
+</script>
+</body>
+</html>

@@ -28,6 +28,7 @@ const growthRoutes    = require('./routes/growth');
 const templatesRoutes = require('./routes/templates');
 const contentRoutes   = require('./routes/content');
 const { router: chatRoutes } = require('./routes/chat');
+const { router: empregosRoutes, importJobs, migrateTable: migrateEmpregos } = require('./routes/empregos');
 
 // ── Criar app e servidor HTTP ────────────────────────────────
 const app    = express();
@@ -83,6 +84,8 @@ app.get('/ats',          (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
 app.get('/pricing',      (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'pricing.html')));
+app.get('/empregos',     (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'empregos.html')));
 
 // ── Chatbot training (admin) ─────────────────────────────────
 app.get('/admin-chat-training', (req, res) =>
@@ -155,6 +158,7 @@ app.use('/api/auth',      authRoutes);
 app.use('/api/growth',    growthRoutes);       // Sitemap, ATS, referral, OG
 app.use('/api/templates', templatesRoutes);    // Templates (GET público, POST protegido)
 app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testimonials (público)
+app.use('/api/empregos', empregosRoutes);      // Módulo Vagas de Emprego (público)
 
 // ── Rotas protegidas (JWT) ───────────────────────────────────
 app.use('/api/cv',      auth, cvRoutes);
@@ -249,6 +253,8 @@ async function autoMigrate(pool) {
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS start_date   DATE`,
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date     DATE`,
     `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS contact_type VARCHAR(20) DEFAULT 'url'`,
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS salary VARCHAR(100)`,
+    `ALTER TABLE jobs ADD COLUMN IF NOT EXISTS source VARCHAR(100)`,
     `ALTER TABLE coaches ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`,
     `ALTER TABLE templates ADD COLUMN IF NOT EXISTS template_type VARCHAR(20) DEFAULT 'sem_foto'`,
     `ALTER TABLE courses ADD COLUMN IF NOT EXISTS description  TEXT`,
@@ -334,6 +340,8 @@ getPool().then(async (pool) => {
   // Limpar cache do overview ao reiniciar (garante dados frescos após deploy)
   redisConnector.del('admin:overview').catch(() => {});
   setupCrons(pool);
+  // Importar vagas na primeira execução (depois o cron toma conta a cada 6h)
+  importJobs(pool).catch(() => {});
   server.listen(PORT, () => {
     console.log(`\n🚀 CV Generator Pro`);
     console.log(`   Local:   http://localhost:${PORT}`);
