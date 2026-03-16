@@ -479,9 +479,6 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.509A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.368l-.36-.214-3.728.887.919-3.636-.235-.374A9.818 9.818 0 112 12 9.818 9.818 0 0112 21.818z"/></svg>
                 Pagar via WhatsApp
             </button>
-            <button onclick="confirmPaymentDone()" style="width:100%;background:transparent;border:1px solid #333;border-radius:10px;padding:11px;font-size:13px;color:#aaa;cursor:pointer;margin-bottom:8px;">
-                ✅ Já paguei — Descarregar CV
-            </button>
             <button class="btn-cancel" onclick="closePayment()">Cancelar</button>
         </div>
     </div>
@@ -944,47 +941,26 @@
             document.body.appendChild(el);
         }
 
-        function payViaWhatsApp() {
-            var name = (data && data.name) ? data.name : 'utilizador';
-            var msg = encodeURIComponent('Olá! Quero fazer o pagamento para descarregar o meu CV Premium.\nNome: ' + name);
-            window.open('https://wa.me/244944524292?text=' + msg, '_blank');
-        }
-
-        async function confirmPaymentDone() {
+        async function payViaWhatsApp() {
             var token = localStorage.getItem('cv_token');
-            if (!token) {
-                alert('Por favor faz login primeiro para continuar.');
-                window.location.href = '/login';
-                return;
+            var userEmail = '';
+            if (token) {
+                try { var me = await fetch('/api/auth/me', {headers:{Authorization:'Bearer '+token}}); var mu = await me.json(); userEmail = mu.email || ''; } catch(_) {}
             }
-            try {
-                // Verificar se já tem acesso
-                var ar = await fetch('/api/payment/my-access', { headers: { Authorization: 'Bearer ' + token } });
-                var access = await ar.json();
-                if (access.hasFullAccess || access.cvCredits > 0) {
-                    closePayment();
-                    allowDownload();
-                    return;
-                }
-                // Verificar se já tem pedido pendente
-                var pr = await fetch('/api/payment/my-requests', { headers: { Authorization: 'Bearer ' + token } });
-                var pd = await pr.json();
-                var pending = (pd.requests || []).find(function(r) {
-                    return r.Type === 'cv_single' || r.Type === 'week' || r.Type === 'biweek';
-                });
-                if (pending) { closePayment(); showPendingMessage(); return; }
-                // Submeter novo pedido
-                var r = await fetch('/api/payment/request', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ type: 'cv_single', cvId: null })
-                });
-                var d = await r.json();
-                if (!r.ok) throw new Error(d.error || 'Erro ao registar pedido');
+            var name = (data && data.fullName) ? data.fullName : 'utilizador';
+            var msg = encodeURIComponent('Olá! Quero pagar para descarregar o meu CV Premium.\nNome: ' + name + '\nEmail: ' + userEmail + '\nPlano: 1 CV em PDF (1.500 Akz)');
+            window.open('https://wa.me/244944524292?text=' + msg, '_blank');
+            // Submeter pedido ao admin automaticamente
+            if (token) {
+                try {
+                    await fetch('/api/payment/request', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ type: 'cv_single', cvId: null })
+                    });
+                } catch(_) {}
                 closePayment();
                 showPendingMessage();
-            } catch(err) {
-                alert('Erro: ' + err.message);
             }
         }
 
