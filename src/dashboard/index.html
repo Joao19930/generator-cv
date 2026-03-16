@@ -1057,7 +1057,7 @@ async function loadPanelData(id) {
   const h = { headers: { Authorization: 'Bearer ' + TOKEN } };
   try {
     if (id === 'users') {
-      const r = await fetch(API + '/api/admin/users', h);
+      const r = await fetch(API + '/api/admin/users?limit=500', h);
       if (r.ok) { const d = await r.json(); state.users = d.users || []; renderUsers(); updatePlanCounts(); }
     } else if (id === 'cvs') {
       const r = await fetch(API + '/api/cv', h);
