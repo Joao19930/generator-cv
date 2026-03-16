@@ -15,7 +15,7 @@ async function getKnowledge(db) {
   if (_knowledgeCache && now - _knowledgeCacheTs < 5 * 60 * 1000) return _knowledgeCache;
   try {
     const r = await db.request().query(
-      `SELECT section_key, section_title, content FROM chat_knowledge WHERE is_active = 1 ORDER BY id`
+      `SELECT section_key, section_title, content FROM chat_knowledge WHERE is_active = TRUE ORDER BY id`
     );
     _knowledgeCache   = r.recordset;
     _knowledgeCacheTs = now;
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
 
     res.json({ reply: r.content[0].text });
   } catch (e) {
-    console.error('🔴 Chat error:', e.message);
+    console.error('🔴 Chat error:', e.message, e.status || '', e.error || '');
     res.status(500).json({ error: 'Não foi possível processar a mensagem. Tente novamente.' });
   }
 });
