@@ -514,53 +514,62 @@
         function loadCV() {
             var params = new URLSearchParams(window.location.search);
             var cvId   = params.get('cv');
-            if (cvId) {
-                // Buscar CV da API
-                var token = localStorage.getItem('cv_token') || localStorage.getItem('token') || '';
-                var headers = token ? { Authorization: 'Bearer ' + token } : {};
-                fetch('/api/cv/' + cvId, { headers: headers })
-                    .then(function(r){ return r.json(); })
-                    .then(function(cv){
-                        var c = cv.content || cv.Content || {};
-                        // Tentar parse se for string
-                        if (typeof c === 'string') { try { c = JSON.parse(c); } catch(_){} }
-                        // Mapear campos da API → formato data do preview
-                        data = {
-                            fullName  : c.name      || c.fullName  || '',
-                            jobTitle  : c.jobTitle  || '',
-                            summary   : c.summary   || '',
-                            email     : c.email     || '',
-                            phone     : c.phone     || '',
-                            address   : c.address   || '',
-                            linkedin  : c.linkedin  || '',
-                            photo     : c.photoUrl  || c.photo || null,
-                            skills    : c.skills    || [],
-                            languages : c.languages || [],
-                            experience: (c.experiences || c.experience || []).map(function(e){
-                                return { title:e.title||'', company:e.company||'',
-                                    start:e.startDate||e.start||'', end:e.endDate||e.end||'',
-                                    location:e.location||'', description:e.description||'' };
-                            }),
-                            education : (c.education || []).map(function(e){
-                                return { degree:e.degree||e.course||'', institution:e.institution||'',
-                                    start:e.year||e.startDate||'', end:e.endDate||'' };
-                            }),
-                            template  : c.template || 1
-                        };
-                        // Determinar template pelo slug guardado no CV
-                        var tplSlug = (cv.template_name || cv.TemplateName || cv.templateName || c.templateName || '').toLowerCase();
-                        var tplNum  = SLUG_TO_NUM[tplSlug] || parseInt(data.template) || 1;
-                        renderBySlug(tplSlug, tplNum);
-                    })
-                    .catch(function(){ showNoData(); });
-                return;
-            }
-            // Fallback: sessionStorage (usado pelo form.html)
+
+            // sessionStorage tem prioridade — contém dados frescos gravados imediatamente antes do redirect (form.html)
             var raw = sessionStorage.getItem('cvData');
-            if (!raw) { showNoData(); return; }
-            data = JSON.parse(raw);
-            var tplSlug = (data.templateSlug || data.templateName || '').toLowerCase();
-            renderBySlug(tplSlug, parseInt(data.template) || 1);
+            if (raw) {
+                try {
+                    var ss = JSON.parse(raw);
+                    // Só usar se o cvId bater certo (ou não houver cvId na URL)
+                    if (!cvId || String(ss.cvId) === String(cvId)) {
+                        data = ss;
+                        var tplSlug = (data.templateSlug || data.templateName || '').toLowerCase().replace(/\s+/g,'-');
+                        renderBySlug(tplSlug, parseInt(data.template) || 1);
+                        return;
+                    }
+                } catch(_) {}
+            }
+
+            if (!cvId) { showNoData(); return; }
+
+            // Buscar CV da API (acesso directo por URL)
+            var token = localStorage.getItem('cv_token') || localStorage.getItem('token') || '';
+            var headers = token ? { Authorization: 'Bearer ' + token } : {};
+            fetch('/api/cv/' + cvId, { headers: headers })
+                .then(function(r){ return r.json(); })
+                .then(function(cv){
+                    var c = cv.content || cv.Content || {};
+                    if (typeof c === 'string') { try { c = JSON.parse(c); } catch(_){} }
+                    data = {
+                        fullName  : c.name      || c.fullName  || '',
+                        jobTitle  : c.jobTitle  || '',
+                        summary   : c.summary   || '',
+                        email     : c.email     || '',
+                        phone     : c.phone     || '',
+                        address   : c.address   || '',
+                        linkedin  : c.linkedin  || '',
+                        photo     : c.photoUrl  || c.photo || null,
+                        skills    : c.skills    || [],
+                        languages : c.languages || [],
+                        experience: (c.experiences || c.experience || []).map(function(e){
+                            return { title:e.title||'', company:e.company||'',
+                                start:e.startDate||e.start||'', end:e.endDate||e.end||'',
+                                location:e.location||'', description:e.description||'' };
+                        }),
+                        education : (c.education || []).map(function(e){
+                            return { degree:e.degree||e.course||'', institution:e.institution||'',
+                                start:e.year||e.startDate||'', end:e.endDate||'' };
+                        }),
+                        template  : c.template || 1
+                    };
+                    // Slug: tenta todas as fontes possíveis
+                    var tplSlug = (cv.template_name || cv.TemplateName || cv.templateName ||
+                                   c.templateSlug  || c.templateName  || '')
+                                  .toLowerCase().replace(/\s+/g,'-');
+                    var tplNum  = SLUG_TO_NUM[tplSlug] || parseInt(data.template) || 1;
+                    renderBySlug(tplSlug, tplNum);
+                })
+                .catch(function(){ showNoData(); });
         }
 
         function showNoData() {
@@ -574,25 +583,38 @@
             renderTemplate(fallbackNum || 1);
         }
 
+        // Mapa slug → função: inclui variantes com e sem prefixo cf-/sf-
+        var SLUG_FN_MAP = [
+            { keys: ['cf-executivo-escuro','executivo-escuro','executivo escuro'],  fn: function(){ return tmplCfExecutivoEscuro(); } },
+            { keys: ['cf-gradiente-roxo','gradiente-roxo','gradiente roxo'],        fn: function(){ return tmplCfGradienteRoxo(); } },
+            { keys: ['cf-verde-profissional','verde-profissional','verde profissional'], fn: function(){ return tmplCfVerdeProfissional(); } },
+            { keys: ['cf-teal-moderno','teal-moderno','teal moderno'],              fn: function(){ return tmplCfTealModerno(); } },
+            { keys: ['cf-coral-criativo','coral-criativo','coral criativo'],        fn: function(){ return tmplCfCoralCriativo(); } },
+            { keys: ['cf-classico-azul','classico-azul','classico azul','clássico azul','clássico-azul'], fn: function(){ return tmpl1(); } },
+            { keys: ['sf-corporate-azul','corporate-azul','corporate azul'],        fn: function(){ return tmplSfCorporateAzul(); } },
+            { keys: ['sf-cinza-tecnico','cinza-tecnico','cinza tecnico','cinza técnico'], fn: function(){ return tmplSfCinzaTecnico(); } },
+            { keys: ['sf-verde-academico','verde-academico','verde academico','verde académico'], fn: function(){ return tmplSfVerdeAcademico(); } },
+            { keys: ['sf-laranja-criativo','laranja-criativo','laranja criativo'],  fn: function(){ return tmplSfLaranjaCriativo(); } },
+            { keys: ['sf-navy-executivo','navy-executivo','navy executivo'],        fn: function(){ return tmplSfNavyExecutivo(); } },
+            { keys: ['sf-minimalista-clean','minimalista-clean','minimalista clean','minimalista'], fn: function(){ return tmpl7(); } },
+            { keys: ['ats-simples','ats simples','ats-profissional','ats profissional','ats-executivo','ats executivo','ats'], fn: function(){ return tmplAts(); } }
+        ];
+
         function renderCustomSlug(slug) {
-            var fn = {
-                'cf-executivo-escuro' : tmplCfExecutivoEscuro,
-                'cf-gradiente-roxo'   : tmplCfGradienteRoxo,
-                'cf-verde-profissional': tmplCfVerdeProfissional,
-                'cf-teal-moderno'     : tmplCfTealModerno,
-                'cf-coral-criativo'   : tmplCfCoralCriativo,
-                'sf-corporate-azul'   : tmplSfCorporateAzul,
-                'sf-cinza-tecnico'    : tmplSfCinzaTecnico,
-                'sf-verde-academico'  : tmplSfVerdeAcademico,
-                'sf-laranja-criativo' : tmplSfLaranjaCriativo,
-                'sf-navy-executivo'   : tmplSfNavyExecutivo,
-                'ats-simples'         : tmplAts,
-                'ats-profissional'    : tmplAts,
-                'ats-executivo'       : tmplAts
-            }[slug];
-            if (!fn) return false;
-            document.getElementById('cvContent').innerHTML = fn();
-            return true;
+            if (!slug) return false;
+            var s = slug.toLowerCase().replace(/\s+/g,'-');
+            for (var i = 0; i < SLUG_FN_MAP.length; i++) {
+                var entry = SLUG_FN_MAP[i];
+                // Match exacto ou parcial
+                var match = entry.keys.some(function(k){
+                    return s === k || s.indexOf(k) !== -1 || k.indexOf(s) !== -1;
+                });
+                if (match) {
+                    document.getElementById('cvContent').innerHTML = entry.fn();
+                    return true;
+                }
+            }
+            return false;
         }
 
         /* ── Helpers partilhados inline ─────────────────────── */

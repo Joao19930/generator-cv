@@ -961,8 +961,11 @@ function renderTemplates(list) {
   });
 }
 
+let selectedTplSlug = '';
+
 function selectTemplate(t) {
-  selectedTplId = t.Id;
+  selectedTplId   = t.Id;
+  selectedTplSlug = t.Slug || t.slug || '';
   document.getElementById('selectedTemplate').value = t.Id;
   document.getElementById('selectedTplName').textContent = t.Name;
   document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('sel'));
@@ -1060,6 +1063,7 @@ function generateCV() {
     photo:      photoEl ? photoEl.src : null,
     template:   selectedTplId,
     templateName: tpl ? tpl.Name : '',
+    templateSlug: selectedTplSlug || (tpl ? (tpl.Slug || tpl.slug || '') : ''),
     cvId
   };
 
@@ -1070,7 +1074,7 @@ function generateCV() {
     fetch(`${API}/cv/${cvId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ title: fullName, contentJson: cvData, templateId: selectedTplId, templateName: cvData.templateName })
+      body: JSON.stringify({ title: fullName, contentJson: cvData, templateId: selectedTplId, templateName: cvData.templateSlug || cvData.templateName })
     }).catch(() => {});
   }
 
