@@ -456,37 +456,316 @@ router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) 
 
 // ── Helper: construir HTML do CV ─────────────────────────────
 function buildCVHtml(content, templateName) {
-  const { name='', jobTitle='', summary='', email='', phone='', address='',
-          experiences=[], education=[], skills=[], languages=[], photoUrl='' } = content;
+  const {
+    name='', jobTitle='', summary='', email='', phone='', address='',
+    linkedin='', website='',
+    experiences=[], education=[], skills=[], languages=[], photoUrl=''
+  } = content;
 
-  const nl2br = t => (t||'').replace(/\n/g, '<br>');
-  const expHtml = experiences.map(e =>
-    `<div class="exp"><h4>${e.title} — ${e.company}</h4><span>${e.startDate} – ${e.endDate || 'Presente'}</span><p>${nl2br(e.description)}</p></div>`).join('');
-  const eduHtml = education.map(e =>
-    `<div class="edu"><h4>${e.degree} — ${e.institution}</h4><span>${e.year}</span></div>`).join('');
-  const skillHtml = skills.map(s => `<span class="tag">${s}</span>`).join('');
+  const slug = (templateName || '').toLowerCase().replace(/\s+/g,'-');
+  const nl2br = t => (t||'').replace(/\n/g,'<br>');
+  const esc   = t => String(t||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
+  // contact line helper
+  const contacts = [email, phone, address, linkedin, website].filter(Boolean);
+  const contactLine = contacts.map(c => esc(c)).join(' &nbsp;·&nbsp; ');
+
+  // experience / education blocks helpers (reused across templates)
+  const expBlocks = (titleColor='#1e293b', metaColor='#64748b', dotColor='#2563eb') =>
+    experiences.map(e => `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:${titleColor};">${esc(e.title)}${e.company ? ` — ${esc(e.company)}` : ''}</div>
+        <div style="font-size:11px;color:${metaColor};margin:2px 0 6px;">${esc(e.startDate||'')}${e.endDate ? ` – ${esc(e.endDate)}` : ' – Presente'}</div>
+        ${e.description ? `<div style="font-size:11.5px;color:#475569;line-height:1.6;">${nl2br(esc(e.description))}</div>` : ''}
+      </div>`).join('');
+
+  const eduBlocks = (titleColor='#1e293b', metaColor='#64748b') =>
+    education.map(e => `
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12.5px;font-weight:700;color:${titleColor};">${esc(e.degree||e.course||'')}${e.institution ? ` — ${esc(e.institution)}` : ''}</div>
+        <div style="font-size:11px;color:${metaColor};">${esc(e.year||e.startDate||'')}</div>
+      </div>`).join('');
+
+  const skillTags = (bg='#e0e7ff', color='#3730a3') =>
+    skills.map(s => `<span style="background:${bg};color:${color};padding:3px 10px;border-radius:12px;font-size:10.5px;display:inline-block;margin:2px;">${esc(s)}</span>`).join('');
+
+  const langList = () =>
+    languages.map(l => `<div style="font-size:11.5px;color:#475569;margin-bottom:4px;">
+      ${esc(l.language||l)} ${l.level ? `<span style="color:#94a3b8;">— ${esc(l.level)}</span>` : ''}
+    </div>`).join('');
+
+  const secHeader = (txt, color='#2563eb') =>
+    `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${color};border-bottom:2px solid ${color};padding-bottom:4px;margin:18px 0 10px;">${txt}</div>`;
+
+  const secHeaderLine = (txt, color='#1e293b') =>
+    `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${color};border-left:3px solid ${color};padding-left:8px;margin:16px 0 10px;">${txt}</div>`;
+
+  // ── Template: ATS (ats-simples, ats-profissional, ats-executivo) ──────
+  if (slug.includes('ats')) {
+    const isExec = slug.includes('executivo');
+    const isPro  = slug.includes('profissional');
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#111;background:#fff;padding:32px 36px;}</style>
+    </head><body>
+    ${isExec
+      ? `<div style="border:1.5px solid #cbd5e1;padding:16px 20px;margin-bottom:16px;border-radius:3px;">
+           <div style="font-size:22px;font-weight:800;color:#0f172a;">${esc(name)}</div>
+           <div style="font-size:13px;color:#334155;margin:4px 0;">${esc(jobTitle)}</div>
+           <div style="font-size:11px;color:#475569;margin-top:6px;">${contactLine}</div>
+         </div>`
+      : `<div style="margin-bottom:16px;${isPro ? 'border-bottom:1.5px solid #9ca3af;padding-bottom:12px;' : ''}">
+           <div style="font-size:24px;font-weight:800;color:#0f172a;">${esc(name)}</div>
+           <div style="font-size:13px;color:#374151;margin:4px 0;">${esc(jobTitle)}</div>
+           <div style="font-size:11px;color:#6b7280;margin-top:6px;">${contactLine}</div>
+         </div>`}
+    ${summary ? `${secHeader('Resumo Profissional','#0f172a')}<p style="font-size:12px;color:#374151;line-height:1.7;">${nl2br(esc(summary))}</p>` : ''}
+    ${experiences.length ? `${secHeader('Experiência Profissional','#0f172a')}${expBlocks('#0f172a','#6b7280','#0f172a')}` : ''}
+    ${education.length   ? `${secHeader('Formação Académica','#0f172a')}${eduBlocks('#0f172a','#6b7280')}` : ''}
+    ${skills.length      ? `${secHeader('Competências','#0f172a')}
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${skills.map(s=>`<span style="border:1px solid #cbd5e1;padding:3px 10px;border-radius:3px;font-size:11px;color:#1e293b;">${esc(s)}</span>`).join('')}
+      </div>` : ''}
+    ${languages.length   ? `${secHeader('Línguas','#0f172a')}${langList()}` : ''}
+    </body></html>`;
+  }
+
+  // ── Template: cf-executivo-escuro (navy escuro + foto) ────────────────
+  if (slug.includes('executivo-escuro')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:#0f172a;padding:32px 36px;display:flex;align-items:center;gap:24px;">
+      ${photoUrl ? `<img src="${photoUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #3b82f6;flex-shrink:0;">` : ''}
+      <div>
+        <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-.3px;">${esc(name)}</div>
+        <div style="font-size:14px;color:#93c5fd;margin:4px 0 10px;">${esc(jobTitle)}</div>
+        <div style="font-size:11px;color:#94a3b8;">${contactLine}</div>
+      </div>
+    </div>
+    <div style="padding:28px 36px;">
+      ${summary ? `${secHeader('Sobre Mim','#1d4ed8')}<p style="font-size:12px;line-height:1.7;color:#334155;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#1d4ed8')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#1d4ed8')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#1d4ed8')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#dbeafe','#1d4ed8')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#1d4ed8')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: cf-gradiente-roxo (purple gradient + foto centrada) ─────
+  if (slug.includes('gradiente-roxo')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px;text-align:center;">
+      ${photoUrl ? `<img src="${photoUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);margin:0 auto 12px;display:block;">` : ''}
+      <div style="font-size:26px;font-weight:800;color:#fff;">${esc(name)}</div>
+      <div style="font-size:13px;color:#c4b5fd;margin:4px 0 10px;">${esc(jobTitle)}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.7);">${contactLine}</div>
+    </div>
+    <div style="padding:28px 36px;">
+      ${summary ? `${secHeader('Resumo','#4f46e5')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#4f46e5')}${expBlocks('#1e293b','#6b7280','#4f46e5')}` : ''}
+      ${education.length   ? `${secHeader('Formação','#4f46e5')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#4f46e5')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#ede9fe','#4f46e5')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#4f46e5')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: cf-verde-profissional (verde + foto) ────────────────────
+  if (slug.includes('verde-profissional')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:#15803d;padding:30px 36px;display:flex;align-items:center;gap:22px;">
+      ${photoUrl ? `<img src="${photoUrl}" style="width:85px;height:85px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);flex-shrink:0;">` : ''}
+      <div>
+        <div style="font-size:25px;font-weight:800;color:#fff;">${esc(name)}</div>
+        <div style="font-size:13px;color:#bbf7d0;margin:4px 0 8px;">${esc(jobTitle)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.75);">${contactLine}</div>
+      </div>
+    </div>
+    <div style="padding:28px 36px;">
+      ${summary ? `${secHeader('Resumo','#15803d')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#15803d')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#15803d')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#15803d')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#dcfce7','#15803d')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#15803d')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: cf-teal-moderno (teal sidebar + foto) ───────────────────
+  if (slug.includes('teal-moderno')) {
+    const sideSkills = skills.map(s => `<div style="font-size:11px;color:rgba(255,255,255,.85);margin-bottom:5px;">• ${esc(s)}</div>`).join('');
+    const sideLang   = languages.map(l => `<div style="font-size:11px;color:rgba(255,255,255,.85);margin-bottom:5px;">${esc(l.language||l)}${l.level?` (${esc(l.level)})`:''}</div>`).join('');
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    </head><body>
+    <div style="width:220px;background:#0d9488;padding:28px 20px;flex-shrink:0;">
+      ${photoUrl ? `<img src="${photoUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);display:block;margin:0 auto 16px;">` : ''}
+      <div style="font-size:17px;font-weight:800;color:#fff;margin-bottom:4px;text-align:center;">${esc(name)}</div>
+      <div style="font-size:11px;color:#99f6e4;text-align:center;margin-bottom:18px;">${esc(jobTitle)}</div>
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:6px;">Contacto</div>
+      ${contacts.map(c=>`<div style="font-size:10.5px;color:rgba(255,255,255,.8);margin-bottom:5px;">${esc(c)}</div>`).join('')}
+      ${skills.length ? `<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin:14px 0 6px;">Competências</div>${sideSkills}` : ''}
+      ${languages.length ? `<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin:14px 0 6px;">Línguas</div>${sideLang}` : ''}
+    </div>
+    <div style="flex:1;padding:28px 28px;">
+      ${summary ? `${secHeaderLine('Resumo','#0d9488')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeaderLine('Experiência','#0d9488')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeaderLine('Formação','#0d9488')}${eduBlocks()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: cf-coral-criativo (coral/rose centrado + foto) ─────────
+  if (slug.includes('coral-criativo')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:#be185d;padding:28px 36px;display:flex;align-items:center;gap:22px;">
+      ${photoUrl ? `<img src="${photoUrl}" style="width:85px;height:85px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.35);flex-shrink:0;">` : ''}
+      <div>
+        <div style="font-size:25px;font-weight:800;color:#fff;">${esc(name)}</div>
+        <div style="font-size:13px;color:#fbcfe8;margin:4px 0 8px;">${esc(jobTitle)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);">${contactLine}</div>
+      </div>
+    </div>
+    <div style="padding:28px 36px;">
+      ${summary ? `${secHeader('Resumo','#be185d')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#be185d')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#be185d')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#be185d')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#fce7f3','#be185d')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#be185d')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-corporate-azul (barra azul topo, 2 colunas) ─────────
+  if (slug.includes('corporate-azul')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:#1d4ed8;height:8px;"></div>
+    <div style="padding:28px 36px 16px;">
+      <div style="font-size:26px;font-weight:800;color:#0f172a;">${esc(name)}</div>
+      <div style="font-size:13px;color:#1d4ed8;font-weight:600;margin:4px 0 8px;">${esc(jobTitle)}</div>
+      <div style="font-size:11px;color:#64748b;">${contactLine}</div>
+    </div>
+    <div style="height:1px;background:#e2e8f0;margin:0 36px;"></div>
+    <div style="padding:16px 36px;">
+      ${summary ? `${secHeader('Resumo Profissional','#1d4ed8')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#1d4ed8')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#1d4ed8')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#1d4ed8')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#dbeafe','#1d4ed8')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#1d4ed8')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-cinza-tecnico (sidebar cinza clara) ─────────────────
+  if (slug.includes('cinza-tecnico')) {
+    const sideContent = `
+      <div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin-bottom:6px;">Contacto</div>
+      ${contacts.map(c=>`<div style="font-size:10.5px;color:#374151;margin-bottom:5px;">${esc(c)}</div>`).join('')}
+      ${skills.length ? `<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin:14px 0 6px;">Competências</div>
+        ${skills.map(s=>`<div style="font-size:11px;color:#374151;margin-bottom:4px;">▪ ${esc(s)}</div>`).join('')}` : ''}
+      ${languages.length ? `<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin:14px 0 6px;">Línguas</div>${langList()}` : ''}
+    `;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    </head><body>
+    <div style="width:210px;background:#f1f5f9;padding:28px 18px;flex-shrink:0;border-right:1px solid #e2e8f0;">
+      <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">${esc(name)}</div>
+      <div style="font-size:11px;color:#475569;margin-bottom:18px;">${esc(jobTitle)}</div>
+      ${sideContent}
+    </div>
+    <div style="flex:1;padding:28px 28px;">
+      ${summary ? `${secHeaderLine('Resumo','#334155')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeaderLine('Experiência','#334155')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeaderLine('Formação','#334155')}${eduBlocks()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-verde-academico (cabeçalho verde centrado) ──────────
+  if (slug.includes('verde-academico')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Georgia',serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="text-align:center;padding:28px 36px 16px;border-bottom:2px solid #15803d;">
+      <div style="font-size:24px;font-weight:700;color:#0f172a;letter-spacing:.3px;">${esc(name)}</div>
+      <div style="font-size:13px;color:#15803d;margin:5px 0 8px;">${esc(jobTitle)}</div>
+      <div style="font-size:11px;color:#64748b;">${contactLine}</div>
+    </div>
+    <div style="padding:20px 48px;">
+      ${summary ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:16px 0 8px;">Resumo</div><p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:18px 0 8px;">Experiência</div>${expBlocks('#0f172a','#64748b')}` : ''}
+      ${education.length   ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:18px 0 8px;">Formação</div>${eduBlocks()}` : ''}
+      ${skills.length      ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:18px 0 8px;">Competências</div><div style="display:flex;flex-wrap:wrap;">${skillTags('#dcfce7','#15803d')}</div>` : ''}
+      ${languages.length   ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:18px 0 8px;">Línguas</div>${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-laranja-criativo (faixa laranja esquerda) ───────────
+  if (slug.includes('laranja-criativo')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    </head><body>
+    <div style="width:6px;background:linear-gradient(180deg,#ea580c,#f97316);flex-shrink:0;"></div>
+    <div style="flex:1;padding:32px 36px;">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:26px;font-weight:800;color:#0f172a;">${esc(name)}</div>
+        <div style="font-size:13px;color:#ea580c;font-weight:600;margin:4px 0 8px;">${esc(jobTitle)}</div>
+        <div style="font-size:11px;color:#64748b;">${contactLine}</div>
+      </div>
+      ${summary ? `${secHeader('Resumo','#ea580c')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#ea580c')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#ea580c')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#ea580c')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#ffedd5','#ea580c')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#ea580c')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-navy-executivo (navy centrado, sem foto) ─────────────
+  if (slug.includes('navy-executivo')) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    </head><body>
+    <div style="background:#0f172a;padding:28px 36px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:.5px;">${esc(name)}</div>
+      <div style="font-size:13px;color:#93c5fd;margin:5px 0 10px;">${esc(jobTitle)}</div>
+      <div style="font-size:11px;color:#94a3b8;">${contactLine}</div>
+    </div>
+    <div style="padding:24px 36px;">
+      ${summary ? `${secHeader('Resumo','#1d4ed8')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+      ${experiences.length ? `${secHeader('Experiência','#1d4ed8')}${expBlocks()}` : ''}
+      ${education.length   ? `${secHeader('Formação','#1d4ed8')}${eduBlocks()}` : ''}
+      ${skills.length      ? `${secHeader('Competências','#1d4ed8')}<div style="display:flex;flex-wrap:wrap;">${skillTags('#dbeafe','#1d4ed8')}</div>` : ''}
+      ${languages.length   ? `${secHeader('Línguas','#1d4ed8')}${langList()}` : ''}
+    </div></body></html>`;
+  }
+
+  // ── Template: sf-minimalista-clean / cf-classico-azul (default) ──────
+  // Também serve como fallback para qualquer slug não reconhecido
+  const accentColor = slug.includes('minimalista') ? '#2563eb' : '#2563eb';
+  const hasPhoto = photoUrl && (slug.includes('cf-') || slug.includes('classico') || slug.includes('com_foto'));
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>
-    body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:20px}
-    h1{font-size:22px;margin:0} h2{font-size:14px;border-bottom:2px solid #2563eb;padding-bottom:4px;color:#2563eb}
-    h3{font-size:13px;margin:0;color:#555} h4{margin:0 0 2px}
-    .header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
-    .photo{width:80px;height:80px;border-radius:50%;object-fit:cover}
-    .contact{font-size:11px;color:#555} .tag{background:#e0e7ff;padding:2px 8px;border-radius:12px;margin:2px;font-size:11px;display:inline-block}
-    .exp,.edu{margin-bottom:10px} span{font-size:11px;color:#777}
-    section{margin-bottom:14px}
-  </style></head><body>
-  <div class="header">
-    ${photoUrl ? `<img class="photo" src="${photoUrl}" />` : ''}
-    <div><h1>${name}</h1><h3>${jobTitle}</h3>
-    <div class="contact">${email} ${phone ? '| '+phone : ''} ${address ? '| '+address : ''}</div></div>
+  <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+  </head><body>
+  <div style="border-top:5px solid ${accentColor};padding:28px 36px 16px;">
+    <div style="display:flex;align-items:center;gap:20px;">
+      ${hasPhoto ? `<img src="${photoUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : ''}
+      <div>
+        <div style="font-size:24px;font-weight:800;color:#0f172a;">${esc(name)}</div>
+        <div style="font-size:13px;color:${accentColor};font-weight:600;margin:4px 0 8px;">${esc(jobTitle)}</div>
+        <div style="font-size:11px;color:#64748b;">${contactLine}</div>
+      </div>
+    </div>
   </div>
-  ${summary ? `<section><h2>Resumo</h2><p>${nl2br(summary)}</p></section>` : ''}
-  ${experiences.length ? `<section><h2>Experiência</h2>${expHtml}</section>` : ''}
-  ${education.length   ? `<section><h2>Educação</h2>${eduHtml}</section>`   : ''}
-  ${skills.length      ? `<section><h2>Competências</h2>${skillHtml}</section>` : ''}
-  </body></html>`;
+  <div style="padding:8px 36px 28px;">
+    ${summary ? `${secHeader('Resumo','#2563eb')}<p style="font-size:12px;line-height:1.7;color:#374151;">${nl2br(esc(summary))}</p>` : ''}
+    ${experiences.length ? `${secHeader('Experiência','#2563eb')}${expBlocks()}` : ''}
+    ${education.length   ? `${secHeader('Formação','#2563eb')}${eduBlocks()}` : ''}
+    ${skills.length      ? `${secHeader('Competências','#2563eb')}<div style="display:flex;flex-wrap:wrap;">${skillTags()}</div>` : ''}
+    ${languages.length   ? `${secHeader('Línguas','#2563eb')}${langList()}` : ''}
+  </div></body></html>`;
 }
 
 function generateSummaryLocal(name, jobTitle, experiences) {
