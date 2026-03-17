@@ -106,15 +106,18 @@ router.post('/start', auth, async (req, res) => {
     }
     if (!tpl) return res.status(404).json({ error: 'Nenhum template disponível.' });
 
+    const tplSlugToSave = tplSlug || (tpl.Slug || tpl.slug || '');
+    const tplNameToSave = tplSlugToSave || (tpl.Name || tpl.name || '');
     const cvTitle = title || `Meu CV — ${tpl.Name || tpl.name}`;
     const slug = cvTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') + '-' + Date.now();
     const result = await pool.request()
-      .input('userId',     sql.Int,      req.user.id)
-      .input('templateId', sql.Int,      parseInt(templateId))
-      .input('title',      sql.NVarChar, cvTitle)
-      .input('slug',       sql.NVarChar, slug)
-      .query(`INSERT INTO cvs (user_id, template_id, title, slug, created_at, updated_at)
-              VALUES (@userId, @templateId, @title, @slug, NOW(), NOW()) RETURNING id`);
+      .input('userId',       sql.Int,      req.user.id)
+      .input('templateId',   sql.Int,      parseInt(templateId) || (tpl.Id || tpl.id))
+      .input('templateName', sql.NVarChar, tplNameToSave)
+      .input('title',        sql.NVarChar, cvTitle)
+      .input('slug',         sql.NVarChar, slug)
+      .query(`INSERT INTO cvs (user_id, template_id, template_name, title, slug, created_at, updated_at)
+              VALUES (@userId, @templateId, @templateName, @title, @slug, NOW(), NOW()) RETURNING id`);
 
     const cvId = result.recordset[0].Id || result.recordset[0].id;
     res.status(201).json({ message: 'CV iniciado com sucesso.', cvId, templateId: parseInt(templateId), editorUrl: `/editor?cv=${cvId}&template=${templateId}` });

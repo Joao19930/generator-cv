@@ -111,7 +111,18 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
       return res.status(402).json({ error: 'Limite atingido. Faça upgrade para Premium.', upgrade: `${process.env.APP_URL}/pricing` });
 
     const content = JSON.parse(cv.ContentJson || '{}');
-    const html    = buildCVHtml(content, cv.TemplateName);
+
+    // Se template_name estiver vazio, tenta obter o slug da tabela templates
+    let tplName = cv.TemplateName || cv.template_name || '';
+    if (!tplName && (cv.TemplateId || cv.template_id)) {
+      const tplRow = (await req.db.request()
+        .input('tid', sql.Int, cv.TemplateId || cv.template_id)
+        .query('SELECT slug, name FROM templates WHERE id = @tid')).recordset[0];
+      if (tplRow) tplName = tplRow.slug || tplRow.Slug || tplRow.name || tplRow.Name || '';
+    }
+    console.log('[PDF] cv_id=%d template_name="%s" resolved="%s"', cv.Id || cv.id, cv.TemplateName, tplName);
+
+    const html = buildCVHtml(content, tplName);
     const pdfBuf  = await pdfConnector.fromHTML(html);
 
     // Upload para S3
@@ -462,7 +473,10 @@ function buildCVHtml(content, templateName) {
     experiences=[], education=[], skills=[], languages=[], photoUrl=''
   } = content;
 
-  const slug = (templateName || '').toLowerCase().replace(/\s+/g,'-');
+  // Normalizar: aceita slug directo ('cf-executivo-escuro') ou nome legível ('Executivo Escuro')
+  // Também lê do campo content.template se templateName estiver vazio
+  const rawTpl = templateName || content.template || content.templateName || '';
+  const slug = rawTpl.toLowerCase().replace(/\s+/g,'-');
   const nl2br = t => (t||'').replace(/\n/g,'<br>');
   const esc   = t => String(t||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
