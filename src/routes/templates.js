@@ -78,16 +78,34 @@ router.get('/:id', async (req, res) => {
 // ── POST /api/templates/start ─────────────────────────────────
 router.post('/start', auth, async (req, res) => {
   try {
-    const { templateId, title } = req.body;
-    if (!templateId) return res.status(400).json({ error: 'templateId é obrigatório.' });
+    const { templateId, slug: tplSlug, title } = req.body;
 
     const pool = req.db;
-    const tpl = (await pool.request()
-      .input('id', sql.Int, parseInt(templateId))
-      .query('SELECT id, name, is_premium FROM templates WHERE id = @id AND active = TRUE'))
-      .recordset[0];
+    let tpl = null;
 
-    if (!tpl) return res.status(404).json({ error: 'Template não encontrado.' });
+    // Tenta por id numérico
+    const numId = parseInt(templateId);
+    if (!isNaN(numId)) {
+      tpl = (await pool.request()
+        .input('id', sql.Int, numId)
+        .query('SELECT id, name, is_premium FROM templates WHERE id = @id AND active = TRUE'))
+        .recordset[0];
+    }
+    // Fallback por slug (curated templates ainda não na BD ou id inválido)
+    if (!tpl && tplSlug) {
+      tpl = (await pool.request()
+        .input('slug', sql.NVarChar, tplSlug)
+        .query('SELECT id, name, is_premium FROM templates WHERE slug = @slug AND active = TRUE'))
+        .recordset[0];
+    }
+    // Se mesmo assim não encontrou, cria CV com template genérico
+    if (!tpl) {
+      tpl = (await pool.request()
+        .query('SELECT id, name, is_premium FROM templates WHERE active = TRUE ORDER BY is_premium ASC, id ASC LIMIT 1'))
+        .recordset[0];
+    }
+    if (!tpl) return res.status(404).json({ error: 'Nenhum template disponível.' });
+
     if ((tpl.IsPremium || tpl.is_premium) && !isPro(req.user)) {
       return res.status(403).json({ error: 'Template premium. Faça upgrade para Pro.', upgradeUrl: '/checkout/pro' });
     }

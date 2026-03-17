@@ -3120,12 +3120,12 @@ async function startCV(t) {
     const res = await fetch(`${API}/templates/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ templateId })
+      body: JSON.stringify({ templateId, slug: t.slug })
     });
     const d = await res.json();
-    if (!res.ok) { if (d.upgrade) { location.href = '/checkout/pro'; return; } alert(d.error || 'Erro ao criar CV.'); return; }
+    if (!res.ok) { if (d.upgrade || d.upgradeUrl) { location.href = '/checkout/pro'; return; } alert(d.error || 'Erro ao criar CV.'); return; }
     location.href = `/editor?cv=${d.cvId}`;
-  } catch(_) { location.href = `/editor?template=${t.slug}`; }
+  } catch(_) { location.href = `/editor?template=${t.slug || ''}`; }
 }
 
 /* ── CV ACTIONS ────────────────────────────────── */
