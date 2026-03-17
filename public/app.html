@@ -1216,17 +1216,17 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
+    <div id="modalTypeBtns" style="display:flex;gap:6px;padding:10px 22px 0;flex-shrink:0;">
+      <button type="button" class="modal-type-btn active" data-type="" onclick="filterModalByType('',this)">🗂 Todos</button>
+      <button type="button" class="modal-type-btn" data-type="com_foto" onclick="filterModalByType('com_foto',this)">🖼 Com Foto</button>
+      <button type="button" class="modal-type-btn" data-type="sem_foto" onclick="filterModalByType('sem_foto',this)">📄 Sem Foto</button>
+      <button type="button" class="modal-type-btn" data-type="ats" onclick="filterModalByType('ats',this)">🎯 ATS</button>
+    </div>
     <div class="modal-body">
       <div id="modalNotice" class="notice notice-gold" style="display:none;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
         <strong style="margin-right:4px">1 template grátis</strong> disponível. Os restantes requerem plano Pro.
         <a href="https://wa.me/244944524292?text=Olá!%20Gostaria%20de%20activar%20o%20Plano%20Pro%20do%20CV%20Premium." target="_blank" rel="noopener">Upgrade →</a>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;" id="modalTypeBtns">
-        <button type="button" class="modal-type-btn active" data-type="" onclick="filterModalByType('',this)">🗂 Todos</button>
-        <button type="button" class="modal-type-btn" data-type="com_foto" onclick="filterModalByType('com_foto',this)">🖼 Com Foto</button>
-        <button type="button" class="modal-type-btn" data-type="sem_foto" onclick="filterModalByType('sem_foto',this)">📄 Sem Foto</button>
-        <button type="button" class="modal-type-btn" data-type="ats" onclick="filterModalByType('ats',this)">🎯 ATS</button>
       </div>
       <div class="cat-tabs" id="modalCatTabs" style="margin-bottom:14px;"></div>
       <div class="modal-tpl-grid" id="modalGrid"></div>
@@ -1241,6 +1241,24 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 <script>
 const API = '/api';
 let userPlan = 'free', userInfo = {}, allCVs = [], allTpls = [], allJobs = [], allCourses = [], allCoaches = [], allTestis = [], selTpl = null;
+
+const CURATED_TPLS = [
+  {id:'cf1',name:'Clássico Azul',slug:'cf-classico-azul',tplType:'com_foto',cat:'Com Foto',color:'blue',premium:false},
+  {id:'cf2',name:'Executivo Escuro',slug:'cf-executivo-escuro',tplType:'com_foto',cat:'Com Foto',color:'navy',premium:true},
+  {id:'cf3',name:'Gradiente Roxo',slug:'cf-gradiente-roxo',tplType:'com_foto',cat:'Com Foto',color:'purple',premium:true},
+  {id:'cf4',name:'Verde Profissional',slug:'cf-verde-profissional',tplType:'com_foto',cat:'Com Foto',color:'green',premium:true},
+  {id:'cf5',name:'Teal Moderno',slug:'cf-teal-moderno',tplType:'com_foto',cat:'Com Foto',color:'teal',premium:true},
+  {id:'cf6',name:'Coral Criativo',slug:'cf-coral-criativo',tplType:'com_foto',cat:'Com Foto',color:'pink',premium:true},
+  {id:'sf1',name:'Minimalista Clean',slug:'sf-minimalista-clean',tplType:'sem_foto',cat:'Sem Foto',color:'blue',premium:false},
+  {id:'sf2',name:'Corporate Azul',slug:'sf-corporate-azul',tplType:'sem_foto',cat:'Sem Foto',color:'blue',premium:true},
+  {id:'sf3',name:'Cinza Técnico',slug:'sf-cinza-tecnico',tplType:'sem_foto',cat:'Sem Foto',color:'dark',premium:true},
+  {id:'sf4',name:'Verde Académico',slug:'sf-verde-academico',tplType:'sem_foto',cat:'Sem Foto',color:'green',premium:true},
+  {id:'sf5',name:'Laranja Criativo',slug:'sf-laranja-criativo',tplType:'sem_foto',cat:'Sem Foto',color:'orange',premium:true},
+  {id:'sf6',name:'Navy Executivo',slug:'sf-navy-executivo',tplType:'sem_foto',cat:'Sem Foto',color:'navy',premium:true},
+  {id:'ats1',name:'ATS Simples',slug:'ats-simples',tplType:'ats',cat:'ATS',color:'dark',premium:false},
+  {id:'ats2',name:'ATS Profissional',slug:'ats-profissional',tplType:'ats',cat:'ATS',color:'dark',premium:false},
+  {id:'ats3',name:'ATS Executivo',slug:'ats-executivo',tplType:'ats',cat:'ATS',color:'dark',premium:false},
+];
 
 const PAL = {
   blue:  '#2563EB', navy:  '#1E3A8A', dark:  '#334155',
@@ -1634,6 +1652,209 @@ function paper(color, small, tpl) {
           </div>`).join('')}
       </div>`;
     }
+  /* ══ 0b. CURATED COM_FOTO ══ */
+  } else if (atsSlug === 'cf-executivo-escuro') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="background:#0f172a;padding:${f(6)} ${f(6)};display:flex;align-items:center;gap:${f(5)};">
+        ${AVT(24,'#1e3a5f')}
+        <div style="flex:1;">
+          <div style="font-size:${f(12)};font-weight:800;color:#fff;letter-spacing:-.3px;">Carlos Mendes</div>
+          <div style="font-size:${f(5.5)};color:#94a3b8;margin:${f(1.5)} 0 ${f(3)};">${prof}</div>
+          <div style="display:flex;gap:${f(5)};">${['+244 923 456 789','carlos@email.com'].map(x=>`<span style="font-size:${f(4)};color:#475569;">${x}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div style="flex:1;padding:${f(5)} ${f(6)};overflow:hidden;">
+        ${SECL('EXPERIÊNCIA')}
+        ${JOB('Director Executivo','Angola Capital','2020–Presente',['Gestão portfolio 45M USD, equipa 15 séniors','Crescimento receitas 52% em 3 anos consecutivos'])}
+        ${JOB('CFO','MegaBank Angola','2016–2020',['Reestruturação financeira poupando 8M USD/ano'])}
+        ${SECL('COMPETÊNCIAS')}
+        <div style="display:flex;flex-wrap:wrap;gap:${f(3)};margin-top:${f(2)};">${['M&A','DCF','Bloomberg','Excel','Liderança'].map(x=>`<span style="font-size:${f(4.5)};color:#334155;background:#f1f5f9;border:1px solid #e2e8f0;padding:${f(1.5)} ${f(5)};border-radius:3px;">${x}</span>`).join('')}</div>
+        ${SECL('FORMAÇÃO')}
+        ${JOB('MBA Finanças','Nova SBE Lisboa','2014–2016',[])}
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'cf-gradiente-roxo') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:${f(7)} ${f(6)} ${f(5)};display:flex;flex-direction:column;align-items:center;">
+        ${AVT(26,'rgba(255,255,255,.2)')}
+        <div style="font-size:${f(12)};font-weight:800;color:#fff;margin-top:${f(3)};text-align:center;letter-spacing:-.2px;">Carlos Mendes</div>
+        <div style="font-size:${f(5.5)};color:rgba(255,255,255,.75);margin-top:${f(1)};">${prof}</div>
+        <div style="display:flex;gap:${f(5)};margin-top:${f(2)};">${['carlos@email.com','+244 923 456 789'].map(x=>`<span style="font-size:${f(4)};color:rgba(255,255,255,.6);">${x}</span>`).join('')}</div>
+      </div>
+      <div style="flex:1;padding:${f(5)} ${f(6)};display:grid;grid-template-columns:3fr 2fr;gap:${f(5)};overflow:hidden;">
+        <div>${SEC('EXPERIÊNCIA','#7c3aed')}${JOB('Consultor Sénior','McKinsey Angola','2021–Pres',['20+ projectos transformação digital','Equipa 10 consultores séniors'])}${JOB('Analista Strategy','BCG','2018–2021',['85 clientes Fortune 500'])}${SEC('FORMAÇÃO','#7c3aed')}${JOB('MBA','ISTM Luanda','2016–2018',[])}</div>
+        <div>${SEC('SKILLS','#7c3aed')}${SKILL('Estratégia',92,'#1e293b','#7c3aed','#f5f3ff')}${SKILL('Analytics',85,'#1e293b','#7c3aed','#f5f3ff')}${SKILL('Excel',88,'#1e293b','#7c3aed','#f5f3ff')}${SKILL('PowerPoint',80,'#1e293b','#7c3aed','#f5f3ff')}${SEC('IDIOMAS','#7c3aed')}${SKILL('Português',100,'#1e293b','#7c3aed','#f5f3ff')}${SKILL('Inglês',90,'#1e293b','#7c3aed','#f5f3ff')}</div>
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'cf-teal-moderno') {
+    inner = `<div style="display:flex;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="width:30%;background:#0d9488;padding:${f(6)} ${f(4)};display:flex;flex-direction:column;align-items:center;overflow:hidden;flex-shrink:0;">
+        ${AVT(22,'rgba(255,255,255,.2)')}
+        <div style="font-size:${f(7)};font-weight:800;color:#fff;text-align:center;margin-top:${f(3)};margin-bottom:${f(1)};line-height:1.2;">Carlos<br>Mendes</div>
+        <div style="font-size:${f(4.5)};color:rgba(255,255,255,.7);text-align:center;margin-bottom:${f(4)};">${prof}</div>
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin-bottom:${f(4)};"></div>
+        ${SECSB('CONTACTO')}${CT('+244 923 456 789','rgba(255,255,255,.65)')}${CT('carlos@email.com','rgba(255,255,255,.55)')}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${f(4)} 0;"></div>
+        ${SECSB('SKILLS')}${SKILLS('React',90)}${SKILLS('Node.js',82)}${SKILLS('Python',75)}${SKILLS('SQL',88)}
+        <div style="height:1px;background:rgba(255,255,255,.2);width:100%;margin:${f(4)} 0;"></div>
+        ${SECSB('IDIOMAS')}${SKILLS('Português',100)}${SKILLS('Inglês',85)}
+      </div>
+      <div style="flex:1;padding:${f(7)} ${f(5)};overflow:hidden;">
+        <div style="font-size:${f(13)};font-weight:800;color:#0f172a;margin-bottom:${f(2)};">Carlos Mendes</div>
+        <div style="font-size:${f(6.5)};color:#0d9488;font-weight:700;margin-bottom:${f(4)};">${prof}</div>
+        <div style="height:${f(2)};background:#0d9488;margin-bottom:${f(4)};border-radius:1px;width:${f(20)};"></div>
+        ${JOB('Engenheiro Sénior','TechCorp Angola','2021–Presente',['APIs REST 99.9% uptime','Migração microserviços — 60% escalabilidade','Mentoria de 4 engenheiros juniors'])}
+        ${JOB('Dev. Full-Stack','StartupHub','2018–2021',['Plataforma SaaS 50k utilizadores','Integração Stripe, PayPal e M-Pesa'])}
+        ${SEC('FORMAÇÃO','#0d9488')}${JOB('Lic. Eng. Informática','UAN','2011–2015',[])}
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'cf-coral-criativo') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="background:#e11d48;padding:${f(8)} ${f(6)} ${f(6)};text-align:center;">
+        <div style="width:${f(22)};height:${f(22)};border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:${f(9)};font-weight:800;color:#fff;margin:0 auto ${f(3)};">${(prof[0]||'C').toUpperCase()}</div>
+        <div style="font-size:${f(13)};font-weight:800;color:#fff;letter-spacing:-.3px;">Carlos Mendes</div>
+        <div style="font-size:${f(5.5)};color:rgba(255,255,255,.8);margin:${f(2)} 0 ${f(3)};">${prof}</div>
+        <div style="display:flex;justify-content:center;gap:${f(6)};">${['carlos@email.com','+244 923 456 789'].map(x=>`<span style="font-size:${f(4)};color:rgba(255,255,255,.7);">${x}</span>`).join('')}</div>
+      </div>
+      <div style="flex:1;padding:${f(5)} ${f(6)};display:grid;grid-template-columns:3fr 2fr;gap:${f(5)};overflow:hidden;">
+        <div>${SEC('EXPERIÊNCIA','#e11d48')}${JOB('Creative Director','Studio Angola','2021–Pres',['60+ campanhas nacionais','Equipa 8 criativos e motion designers'])}${JOB('Designer Sénior','Brand Agency','2018–2021',['Rebranding 15 marcas empresariais'])}${SEC('FORMAÇÃO','#e11d48')}${JOB('Lic. Design','ESBAL Luanda','2015–2019',[])}</div>
+        <div>${SEC('TOOLS','#e11d48')}${SKILL('Figma',96,'#1e293b','#e11d48','#fff1f2')}${SKILL('Illustrator',90,'#1e293b','#e11d48','#fff1f2')}${SKILL('Photoshop',88,'#1e293b','#e11d48','#fff1f2')}${SKILL('AfterEffects',75,'#1e293b','#e11d48','#fff1f2')}${SEC('IDIOMAS','#e11d48')}${SKILL('Português',100,'#1e293b','#e11d48','#fff1f2')}${SKILL('Inglês',82,'#1e293b','#e11d48','#fff1f2')}</div>
+      </div>
+    </div>`;
+
+  /* ══ 0c. CURATED SEM_FOTO ══ */
+  } else if (atsSlug === 'sf-minimalista-clean') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;padding:${f(7)};box-sizing:border-box;overflow:hidden;">
+      <div style="padding-bottom:${f(5)};margin-bottom:${f(4)};border-bottom:${f(2)} solid ${c};">
+        <div style="font-size:${f(14)};font-weight:800;color:#0f172a;letter-spacing:-.5px;margin-bottom:${f(1.5)};">Carlos Mendes</div>
+        <div style="font-size:${f(7)};color:${c};font-weight:700;margin-bottom:${f(3)};">${prof}</div>
+        <div style="display:flex;gap:${f(6)};">${['+244 923 456 789','carlos@email.com','Luanda'].map(x=>`<span style="font-size:${f(4.5)};color:#64748b;">${x}</span>`).join('')}</div>
+      </div>
+      <div style="display:flex;gap:${f(8)};flex:1;overflow:hidden;">
+        <div style="flex:3;overflow:hidden;">
+          ${SECL('EXPERIÊNCIA')}${JOB('Analista Sénior','DataTech Angola','2021–Presente',['Dashboards Power BI 200+ utilizadores','Modelação preditiva Python — custos -18%'])}
+          ${JOB('Business Analyst','Consultoria ABC','2018–2021',['Relatórios executivos semanais C-Suite','Automatização 30+ processos via scripts'])}
+          ${SECL('FORMAÇÃO')}${JOB('Lic. Eng. Informática','UAN','2011–2015',[])}
+        </div>
+        <div style="flex:2;overflow:hidden;">${SECL('SKILLS')}${SKILL('Python',90)}${SKILL('Power BI',85)}${SKILL('Excel',88)}${SKILL('SQL',82)}${SECL('IDIOMAS')}${SKILL('Português',100)}${SKILL('Inglês',82)}</div>
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'sf-corporate-azul') {
+    const cc='#1d4ed8';
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="background:${cc};padding:${f(6)} ${f(7)};">
+        <div style="font-size:${f(13)};font-weight:800;color:#fff;letter-spacing:-.3px;">Carlos Mendes</div>
+        <div style="font-size:${f(6)};color:#bfdbfe;margin-top:${f(1.5)};">${prof}</div>
+        <div style="display:flex;gap:${f(5)};margin-top:${f(2)};">${['+244 923 456 789','carlos@email.com','Luanda'].map(x=>`<span style="font-size:${f(4)};color:#93c5fd;">${x}</span>`).join('')}</div>
+      </div>
+      <div style="flex:1;padding:${f(5)} ${f(7)};overflow:hidden;display:grid;grid-template-columns:3fr 2fr;gap:${f(6)};">
+        <div>
+          <div style="font-size:${f(5.5)};font-weight:800;color:${cc};text-transform:uppercase;letter-spacing:.8px;border-bottom:2px solid ${cc};padding-bottom:${f(2)};margin-bottom:${f(4)};margin-top:${f(4)};">Experiência</div>
+          ${JOB('Director Comercial','Angola Corp','2020–Presente',['Crescimento 45% nas vendas anuais','Gestão de 20 comerciais'])}
+          ${JOB('Gestor de Contas','Premium Lda','2017–2020',['Portfolio 30 clientes institucionais'])}
+          ${JOB('Comercial Sénior','StartBiz','2014–2017',['Top Performer 3 anos consecutivos'])}
+        </div>
+        <div>
+          <div style="font-size:${f(5.5)};font-weight:800;color:${cc};text-transform:uppercase;letter-spacing:.8px;border-bottom:2px solid ${cc};padding-bottom:${f(2)};margin-bottom:${f(4)};margin-top:${f(4)};">Competências</div>
+          ${SKILL('Negociação',92,'#1e293b',cc,'#eff6ff')}${SKILL('CRM',85,'#1e293b',cc,'#eff6ff')}${SKILL('Liderança',88,'#1e293b',cc,'#eff6ff')}${SKILL('Excel',80,'#1e293b',cc,'#eff6ff')}
+          <div style="font-size:${f(5.5)};font-weight:800;color:${cc};text-transform:uppercase;border-bottom:2px solid ${cc};padding-bottom:${f(2)};margin-bottom:${f(3)};margin-top:${f(5)};">Formação</div>
+          ${JOB('Lic. Gestão','UAN','2010–2014',[])}${JOB('MBA','ISTM','2015–2017',[])}
+        </div>
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'sf-cinza-tecnico') {
+    inner = `<div style="display:flex;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="width:32%;background:#f1f5f9;padding:${f(7)} ${f(4)};display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;border-right:1px solid #e2e8f0;">
+        <div style="font-size:${f(7)};font-weight:800;color:#0f172a;margin-bottom:${f(1)};line-height:1.2;">Carlos<br>Mendes</div>
+        <div style="font-size:${f(4.5)};color:${c};font-weight:700;margin-bottom:${f(5)};">${prof}</div>
+        <div style="font-size:${f(5)};font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.7px;margin-bottom:${f(3)};">CONTACTO</div>
+        ${['+244 923 456 789','carlos@email.com','Luanda, Angola'].map(x=>`<div style="font-size:${f(4.5)};color:#64748b;margin-bottom:${f(3)};">${x}</div>`).join('')}
+        <div style="height:1px;background:#e2e8f0;margin:${f(5)} 0;"></div>
+        <div style="font-size:${f(5)};font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.7px;margin-bottom:${f(3)};">SKILLS</div>
+        ${SKILL('Python',90,'#1e293b',c,'#e2e8f0')}${SKILL('SQL',85,'#1e293b',c,'#e2e8f0')}${SKILL('Docker',80,'#1e293b',c,'#e2e8f0')}${SKILL('Linux',75,'#1e293b',c,'#e2e8f0')}${SKILL('AWS',70,'#1e293b',c,'#e2e8f0')}
+        <div style="height:1px;background:#e2e8f0;margin:${f(5)} 0;"></div>
+        <div style="font-size:${f(5)};font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.7px;margin-bottom:${f(3)};">IDIOMAS</div>
+        ${SKILL('Português',100,'#1e293b',c,'#e2e8f0')}${SKILL('Inglês',82,'#1e293b',c,'#e2e8f0')}
+      </div>
+      <div style="flex:1;padding:${f(7)} ${f(5)};overflow:hidden;">
+        ${SECL('EXPERIÊNCIA')}
+        ${JOB('DevOps Engineer','TechCorp Angola','2021–Presente',['Infra cloud 100+ microserviços','CI/CD reduzindo deploy time 70%','Monitorização Prometheus e Grafana'])}
+        ${JOB('SRE / Systems Admin','NetSystems','2018–2021',['99.98% uptime sistemas críticos','Automação 40+ tarefas com Ansible'])}
+        ${JOB('Técnico TI','Angola Telecom','2015–2018',['Suporte nível 3 para 500+ utilizadores'])}
+        ${SECL('FORMAÇÃO')}${JOB('Lic. Eng. Informática','UAN','2011–2015',[])}${JOB('Pós-Grad. Cloud','ISCTE','2016–2018',[])}
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'sf-verde-academico') {
+    const gg='#16a34a';
+    inner = `<div style="display:flex;flex-direction:column;height:100%;padding:${f(7)};box-sizing:border-box;overflow:hidden;">
+      <div style="text-align:center;padding-bottom:${f(5)};margin-bottom:${f(4)};border-bottom:2px solid ${gg};">
+        <div style="width:${f(14)};height:${f(2.5)};background:${gg};border-radius:1px;margin:0 auto ${f(3)};"></div>
+        <div style="font-size:${f(14)};font-weight:800;color:#0f172a;letter-spacing:-.5px;margin-bottom:${f(2)};">Carlos Mendes</div>
+        <div style="font-size:${f(7)};color:${gg};font-weight:700;margin-bottom:${f(3)};">${prof}</div>
+        <div style="display:flex;justify-content:center;gap:${f(6)};">${['+244 923 456 789','carlos@email.com','Luanda'].map(x=>`<span style="font-size:${f(4.5)};color:#64748b;">${x}</span>`).join('')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:${f(7)};flex:1;overflow:hidden;">
+        <div style="overflow:hidden;">
+          ${SECC('EXPERIÊNCIA',gg)}${JOB('Consultor Financeiro Sr.','Elite Partners','2021–Presente',['Assessoria 15+ clientes 50M+ USD activos','Estruturação M&A 120M USD total'])}
+          ${JOB('Gestor de Contas','Premier Corp','2018–2021',['Portfolio 25 clientes institucionais','Crescimento 35% em 3 anos'])}
+          ${SECC('FORMAÇÃO',gg)}${JOB('MBA Finanças','Nova SBE','2016–2018',[])}${JOB('Lic. Economia','UAN','2011–2015',[])}
+        </div>
+        <div style="overflow:hidden;border-left:1px solid #d1fae5;padding-left:${f(6)};">
+          ${SECC('SKILLS',gg)}${SKILL('Análise Fin.',92,'#1e293b',gg,'#f0fdf4')}${SKILL('Excel',88,'#1e293b',gg,'#f0fdf4')}${SKILL('Bloomberg',75,'#1e293b',gg,'#f0fdf4')}${SKILL('Negociação',85,'#1e293b',gg,'#f0fdf4')}
+          ${SECC('IDIOMAS',gg)}${SKILL('Português',100,'#1e293b',gg,'#f0fdf4')}${SKILL('Inglês',90,'#1e293b',gg,'#f0fdf4')}${SKILL('Francês',62,'#1e293b',gg,'#f0fdf4')}
+        </div>
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'sf-laranja-criativo') {
+    const oo='#ea580c';
+    inner = `<div style="display:flex;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="width:${f(6)};background:${oo};flex-shrink:0;"></div>
+      <div style="flex:1;padding:${f(7)} ${f(6)};overflow:hidden;">
+        <div style="margin-bottom:${f(4)};">
+          <div style="font-size:${f(14)};font-weight:800;color:#0f172a;letter-spacing:-.4px;margin-bottom:${f(1.5)};">Carlos Mendes</div>
+          <div style="font-size:${f(7)};color:${oo};font-weight:700;margin-bottom:${f(3)};">${prof}</div>
+          <div style="display:flex;gap:${f(5)};">${['+244 923 456 789','carlos@email.com'].map(x=>`<span style="font-size:${f(4.5)};color:#64748b;">${x}</span>`).join('')}</div>
+        </div>
+        <div style="height:2px;background:${oo};margin-bottom:${f(4)};"></div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:${f(6)};overflow:hidden;">
+          <div>${SEC('EXPERIÊNCIA',oo)}${JOB('Creative Director','Studio Angola','2021–Pres',['60+ campanhas alto impacto','Equipa 8 criativos e motion designers'])}${JOB('Designer Sénior','Brand Agency','2018–2021',['Rebranding 15 marcas empresariais'])}${JOB('Designer','Agência Criativa','2015–2018',['12 websites e identidades visuais'])}</div>
+          <div>${SEC('TOOLS',oo)}${SKILL('Figma',96,'#1e293b',oo,'#fff7ed')}${SKILL('Illustrator',90,'#1e293b',oo,'#fff7ed')}${SKILL('Photoshop',88,'#1e293b',oo,'#fff7ed')}${SKILL('Cinema4D',72,'#1e293b',oo,'#fff7ed')}${SEC('FORMAÇÃO',oo)}${JOB('Design Comm.','ESBAL','2015–2019',[])}</div>
+        </div>
+      </div>
+    </div>`;
+
+  } else if (atsSlug === 'sf-navy-executivo') {
+    inner = `<div style="display:flex;flex-direction:column;height:100%;margin:-${f(6)};overflow:hidden;">
+      <div style="background:#1e3a8a;padding:${f(7)} ${f(7)};">
+        <div style="font-size:${f(14)};font-weight:800;color:#fff;letter-spacing:-.4px;text-align:center;">Carlos Mendes</div>
+        <div style="font-size:${f(6.5)};color:#93c5fd;margin:${f(2)} 0;text-align:center;font-weight:600;">${prof}</div>
+        <div style="height:1px;background:rgba(255,255,255,.2);margin:${f(3)} 0;"></div>
+        <div style="display:flex;justify-content:center;gap:${f(6)};">${['+244 923 456 789','carlos@email.com','Luanda'].map(x=>`<span style="font-size:${f(4)};color:#bfdbfe;">${x}</span>`).join('')}</div>
+      </div>
+      <div style="flex:1;padding:${f(5)} ${f(7)};overflow:hidden;display:grid;grid-template-columns:3fr 2fr;gap:${f(6)};">
+        <div>
+          ${SECL('EXPERIÊNCIA','#1e3a8a')}
+          ${JOB('Director Executivo','Angola Capital','2020–Presente',['Portfolio 45M USD, equipa 15 séniors','Crescimento 52% em 3 anos','IPO avaliado 120M USD'])}
+          ${JOB('CFO','MegaBank Angola','2016–2020',['Reestruturação financeira poupando 8M USD/ano'])}
+          ${JOB('Controller','TechGroup','2013–2016',['Implementação ERP SAP 5 subsidiárias'])}
+          ${SECL('FORMAÇÃO','#1e3a8a')}${JOB('MBA Finanças','Nova SBE','2014–2016',[])}
+        </div>
+        <div>
+          ${SECL('COMPETÊNCIAS','#1e3a8a')}
+          ${SKILL('Estratégia',92,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('M&A',88,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('DCF',85,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('Bloomberg',80,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('Liderança',90,'#1e293b','#1e3a8a','#eff6ff')}
+          ${SECL('IDIOMAS','#1e3a8a')}
+          ${SKILL('Português',100,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('Inglês',92,'#1e293b','#1e3a8a','#eff6ff')}${SKILL('Francês',65,'#1e293b','#1e3a8a','#eff6ff')}
+        </div>
+      </div>
+    </div>`;
+
   /* ══ 1. MODERNO / PROFISSIONAL / CLÁSSICO ══ */
   } else if (['moderno','profissional','clássico','classico'].includes(style) || style === '') {
     inner = `<div style="display:flex;height:100%;margin:-${f(6)};overflow:hidden;">
@@ -2007,9 +2228,12 @@ function filterModalByType(type, btn) {
 }
 
 function applyModalFilters() {
-  let list = allTpls;
-  if (modalCurrentType) list = list.filter(t => t.tplType === modalCurrentType);
-  // Rebuild cat tabs with the filtered list
+  // Use curated templates; resolve real DB ids by slug when available
+  const base = CURATED_TPLS.map(t => {
+    const real = allTpls.find(r => r.slug === t.slug);
+    return real ? {...t, id: real.id} : t;
+  });
+  let list = modalCurrentType ? base.filter(t => t.tplType === modalCurrentType) : base;
   const cats = ['Todos', ...new Set(list.map(t => t.cat).filter(Boolean))];
   const tabEl = document.getElementById('modalCatTabs'); tabEl.innerHTML = '';
   cats.forEach((c, i) => {
@@ -2886,11 +3110,17 @@ async function goToEditor() {
 
 async function startCV(t) {
   const token = localStorage.getItem('cv_token');
+  // For curated templates with short IDs, look up real DB id by slug
+  let templateId = t.id;
+  if (typeof t.id === 'string' && t.id.length <= 4) {
+    const real = allTpls.find(r => r.slug === t.slug);
+    if (real) templateId = real.id;
+  }
   try {
     const res = await fetch(`${API}/templates/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ templateId: t.id })
+      body: JSON.stringify({ templateId })
     });
     const d = await res.json();
     if (!res.ok) { if (d.upgrade) { location.href = '/checkout/pro'; return; } alert(d.error || 'Erro ao criar CV.'); return; }

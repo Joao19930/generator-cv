@@ -29,6 +29,7 @@ const templatesRoutes = require('./routes/templates');
 const contentRoutes   = require('./routes/content');
 const { router: chatRoutes } = require('./routes/chat');
 const { router: empregosRoutes, importJobs } = require('./routes/empregos');
+const aiRoutes        = require('./routes/ai');
 
 // ── Criar app e servidor HTTP ────────────────────────────────
 const app    = express();
@@ -74,7 +75,8 @@ const noCache = (res) => res.setHeader('Cache-Control', 'no-store');
 app.get('/app',        (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'app.html')); });
 app.get('/dashboard',  (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'dashboard.html')); });
 app.get('/definicoes', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'definicoes.html')); });
-app.get('/editor',     (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'form.html')); });
+app.get('/editor',     (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'editor-app', 'index.html')); });
+app.get('/editor-classic', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'form.html')); });
 app.get('/preview',    (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'preview.html')); });
 app.get('/free',       (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'free.html')); });
 app.get('/free-preview', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'free-preview.html')); });
@@ -159,6 +161,7 @@ app.use('/api/growth',    growthRoutes);       // Sitemap, ATS, referral, OG
 app.use('/api/templates', templatesRoutes);    // Templates (GET público, POST protegido)
 app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testimonials (público)
 app.use('/api/empregos', empregosRoutes);      // Módulo Vagas de Emprego (público)
+app.use('/api/ai',      aiRoutes);            // AI Copiloto — streaming proxy Anthropic
 
 // ── Rotas protegidas (JWT) ───────────────────────────────────
 app.use('/api/cv',      auth, cvRoutes);
@@ -269,6 +272,20 @@ async function autoMigrate(pool) {
     `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at)
      SELECT 'ATS Executivo', 'ats-executivo', 'ATS', FALSE, 'ats', TRUE, NOW()
      WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug = 'ats-executivo')`,
+    // 6 templates Com Foto
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Clássico Azul','cf-classico-azul','Com Foto',FALSE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-classico-azul')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Executivo Escuro','cf-executivo-escuro','Com Foto',TRUE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-executivo-escuro')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Gradiente Roxo','cf-gradiente-roxo','Com Foto',TRUE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-gradiente-roxo')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Verde Profissional','cf-verde-profissional','Com Foto',TRUE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-verde-profissional')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Teal Moderno','cf-teal-moderno','Com Foto',TRUE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-teal-moderno')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Coral Criativo','cf-coral-criativo','Com Foto',TRUE,'com_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='cf-coral-criativo')`,
+    // 6 templates Sem Foto
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Minimalista Clean','sf-minimalista-clean','Sem Foto',FALSE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-minimalista-clean')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Corporate Azul','sf-corporate-azul','Sem Foto',TRUE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-corporate-azul')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Cinza Técnico','sf-cinza-tecnico','Sem Foto',TRUE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-cinza-tecnico')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Verde Académico','sf-verde-academico','Sem Foto',TRUE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-verde-academico')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Laranja Criativo','sf-laranja-criativo','Sem Foto',TRUE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-laranja-criativo')`,
+    `INSERT INTO templates (name, slug, category, is_premium, template_type, active, created_at) SELECT 'Navy Executivo','sf-navy-executivo','Sem Foto',TRUE,'sem_foto',TRUE,NOW() WHERE NOT EXISTS (SELECT 1 FROM templates WHERE slug='sf-navy-executivo')`,
     `CREATE TABLE IF NOT EXISTS page_views (
       id         SERIAL PRIMARY KEY,
       page       VARCHAR(100) NOT NULL,
