@@ -106,10 +106,6 @@ router.post('/start', auth, async (req, res) => {
     }
     if (!tpl) return res.status(404).json({ error: 'Nenhum template disponível.' });
 
-    if ((tpl.IsPremium || tpl.is_premium) && !isPro(req.user)) {
-      return res.status(403).json({ error: 'Template premium. Faça upgrade para Pro.', upgradeUrl: '/checkout/pro' });
-    }
-
     const cvTitle = title || `Meu CV — ${tpl.Name || tpl.name}`;
     const slug = cvTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') + '-' + Date.now();
     const result = await pool.request()
