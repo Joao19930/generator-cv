@@ -24,6 +24,13 @@
   // ── Obter plano atual ──────────────────────────────────────
   function getUserPlan() {
     try {
+      // Lê do JWT cv_token (chave usada pela app)
+      const token = localStorage.getItem('cv_token') || localStorage.getItem('token');
+      if (token) {
+        const p = JSON.parse(atob(token.split('.')[1]));
+        return (p.plan || 'free').toLowerCase();
+      }
+      // Fallback: objeto user em localStorage
       const u = JSON.parse(localStorage.getItem('user') || '{}');
       return (u.plan || 'free').toLowerCase();
     } catch { return 'free'; }
@@ -31,13 +38,13 @@
 
   function isPaid() {
     const p = getUserPlan();
-    return p === 'premium' || p === 'semanal';
+    return p === 'premium' || p === 'semanal' || p === 'pro';
   }
 
   // Atualizar plano via /api/auth/me (garante dados frescos)
   async function refreshPlan() {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('cv_token') || localStorage.getItem('token');
       if (!token) return;
       const r = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) return;
@@ -312,90 +319,6 @@
     }
   }
 
-  // ── Bloqueio no editor ─────────────────────────────────────
-  function blockEditor() {
-    if (isPaid()) return;
-    if (!window.location.pathname.startsWith('/editor')) return;
-
-    function showBlock() {
-      if (document.getElementById('upg-editor-block')) return;
-      const block = document.createElement('div');
-      block.id = 'upg-editor-block';
-      block.innerHTML = `
-        <div id="upg-editor-box">
-          <div class="lock">🔒</div>
-          <h2>Esta funcionalidade é Premium</h2>
-          <p>Para criar e editar CVs profissionais precisas de um plano activo.<br>
-             Activa a partir de <strong>3.000 Kz</strong> e começa em minutos via WhatsApp.</p>
-          <div class="upg-editor-btns">
-            <a class="upg-editor-btn upg-eb-semanal"
-               href="https://wa.me/${WA}?text=${encodeURIComponent(PLANOS.semanal.msg)}"
-               target="_blank" rel="noopener">
-              ⚡ Activar Semanal — 3.000 Kz / 7 dias
-            </a>
-            <a class="upg-editor-btn upg-eb-premium"
-               href="https://wa.me/${WA}?text=${encodeURIComponent(PLANOS.premium.msg)}"
-               target="_blank" rel="noopener">
-              👑 Activar Premium — 7.000 Kz / mês
-            </a>
-            <button class="upg-editor-btn upg-eb-back" onclick="history.back()">
-              ← Voltar ao dashboard
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(block);
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', showBlock);
-    } else {
-      showBlock();
-    }
-  }
-
-  // ── Interceptar botões "Criar CV" para utilizadores free ──
-  function interceptCreateButtons() {
-    if (isPaid()) return;
-
-    function patchButtons() {
-      // Botões que levam para /editor (criar novo CV)
-      document.querySelectorAll('a[href*="/editor"], a[href*="editor"]').forEach(a => {
-        if (a.dataset.upgPatched) return;
-        a.dataset.upgPatched = '1';
-        a.addEventListener('click', (e) => {
-          if (!isPaid()) {
-            e.preventDefault();
-            openModal('Para criar e editar CVs profissionais precisas de um plano activo.');
-          }
-        });
-      });
-
-      // Botões com texto "Criar" ou "Novo CV"
-      document.querySelectorAll('button, .btn, [role="button"]').forEach(btn => {
-        if (btn.dataset.upgPatched) return;
-        const txt = (btn.textContent || '').toLowerCase();
-        if (txt.includes('criar') || txt.includes('novo cv') || txt.includes('new cv') || txt.includes('começar cv')) {
-          btn.dataset.upgPatched = '1';
-          const original = btn.onclick;
-          btn.addEventListener('click', (e) => {
-            if (!isPaid()) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              openModal('Para criar e editar CVs profissionais precisas de um plano activo.');
-            }
-          }, true);
-        }
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => setTimeout(patchButtons, 800));
-    } else {
-      setTimeout(patchButtons, 800);
-    }
-  }
-
   // ── API pública ────────────────────────────────────────────
   window.UpgradeSystem = {
     show  : openModal,
@@ -411,8 +334,6 @@
     buildModal();
     refreshPlan().then(() => {
       injectBanner();
-      blockEditor();
-      interceptCreateButtons();
     });
   }
 
