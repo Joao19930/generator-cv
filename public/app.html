@@ -2172,15 +2172,19 @@ function filterCVs(q) {
 
 /* ── TEMPLATE RENDERING ────────────────────────── */
 function tplCard(t, small) {
-  const locked = t.premium && userPlan === 'free';
-  return `<div class="tpl-card" onclick="${locked ? "location.href='/checkout/pro'" : `startCV(${JSON.stringify(t).replace(/"/g,"'")})`}">
+  const tJson = JSON.stringify(t).replace(/"/g,"'");
+  return `<div class="tpl-card" onclick="tplCardClick(${tJson})">
     <div class="tpl-thumb">${paper(t.color, small, t)}
       <span class="tpl-bdg ${t.premium ? 'bdg-pro' : 'bdg-free'}">${t.premium ? 'PRO' : 'GRÁTIS'}</span>
-      ${locked ? `<div class="lock-ic"><svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>` : ''}
-      <div class="tpl-hover"><button class="tpl-use-btn">${locked ? '🔒 Upgrade' : 'Usar →'}</button></div>
+      ${t.premium ? `<div class="lock-ic"><svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>` : ''}
+      <div class="tpl-hover"><button class="tpl-use-btn">${t.premium ? '🔒 Upgrade' : 'Usar →'}</button></div>
     </div>
     <div class="tpl-info"><div class="tpl-name">${t.name}</div><div class="tpl-cat">${t.cat}</div></div>
   </div>`;
+}
+function tplCardClick(t) {
+  if (t.premium && userPlan === 'free') { location.href = '/checkout/pro'; return; }
+  startCV(t);
 }
 
 function renderFeaturedTpls() {
@@ -2264,15 +2268,14 @@ function fillModalGrid(list) {
   const g = document.getElementById('modalGrid'); g.innerHTML = '';
   selTpl = null; document.getElementById('goBtn').disabled = true;
   list.forEach(t => {
-    const locked = t.premium && userPlan === 'free';
     const el = document.createElement('div');
     el.className = 'm-tpl';
     el.innerHTML = `<div style="aspect-ratio:.707;position:relative;">${paper(t.color, true, t)}
       <span class="tpl-bdg ${t.premium?'bdg-pro':'bdg-free'}" style="top:5px;left:5px;font-size:7px">${t.premium?'PRO':'GRÁTIS'}</span>
-      ${locked?`<div class="lock-ic" style="top:5px;right:5px;width:18px;height:18px"><svg width="7" height="7" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>`:''}</div>
+      ${t.premium?`<div class="lock-ic" style="top:5px;right:5px;width:18px;height:18px"><svg width="7" height="7" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>`:''}</div>
       <div class="m-name">${t.name}</div>`;
     el.onclick = () => {
-      if (locked) { location.href = '/checkout/pro'; return; }
+      if (t.premium && userPlan === 'free') { location.href = '/checkout/pro'; return; }
       document.querySelectorAll('.m-tpl').forEach(m => m.classList.remove('sel'));
       el.classList.add('sel'); selTpl = t;
       document.getElementById('goBtn').disabled = false;
