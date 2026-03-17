@@ -502,14 +502,301 @@
     <script>
         var data = {};
 
+        // Mapa slug → número do template antigo (tmpl1…13)
+        var SLUG_TO_NUM = {
+            'cf-classico-azul':1, 'cf-executivo-escuro':4, 'cf-gradiente-roxo':5,
+            'cf-verde-profissional':2, 'cf-teal-moderno':6, 'cf-coral-criativo':3,
+            'sf-minimalista-clean':7, 'sf-corporate-azul':8, 'sf-cinza-tecnico':9,
+            'sf-verde-academico':10, 'sf-laranja-criativo':11, 'sf-navy-executivo':12,
+            'ats-simples':13, 'ats-profissional':13, 'ats-executivo':13
+        };
+
         function loadCV() {
-            var raw = sessionStorage.getItem('cvData');
-            if (!raw) {
-                document.getElementById('cvContent').innerHTML = '<div style="padding:60px;text-align:center;color:#999;font-family:Calibri,Trebuchet MS,sans-serif"><h3 style="margin-bottom:10px">Nenhum dado encontrado</h3><p>Por favor <a href="form.html" style="color:#c9a96e">preenche o formulário</a> primeiro.</p></div>';
+            var params = new URLSearchParams(window.location.search);
+            var cvId   = params.get('cv');
+            if (cvId) {
+                // Buscar CV da API
+                var token = localStorage.getItem('cv_token') || localStorage.getItem('token') || '';
+                var headers = token ? { Authorization: 'Bearer ' + token } : {};
+                fetch('/api/cv/' + cvId, { headers: headers })
+                    .then(function(r){ return r.json(); })
+                    .then(function(cv){
+                        var c = cv.content || cv.Content || {};
+                        // Tentar parse se for string
+                        if (typeof c === 'string') { try { c = JSON.parse(c); } catch(_){} }
+                        // Mapear campos da API → formato data do preview
+                        data = {
+                            fullName  : c.name      || c.fullName  || '',
+                            jobTitle  : c.jobTitle  || '',
+                            summary   : c.summary   || '',
+                            email     : c.email     || '',
+                            phone     : c.phone     || '',
+                            address   : c.address   || '',
+                            linkedin  : c.linkedin  || '',
+                            photo     : c.photoUrl  || c.photo || null,
+                            skills    : c.skills    || [],
+                            languages : c.languages || [],
+                            experience: (c.experiences || c.experience || []).map(function(e){
+                                return { title:e.title||'', company:e.company||'',
+                                    start:e.startDate||e.start||'', end:e.endDate||e.end||'',
+                                    location:e.location||'', description:e.description||'' };
+                            }),
+                            education : (c.education || []).map(function(e){
+                                return { degree:e.degree||e.course||'', institution:e.institution||'',
+                                    start:e.year||e.startDate||'', end:e.endDate||'' };
+                            }),
+                            template  : c.template || 1
+                        };
+                        // Determinar template pelo slug guardado no CV
+                        var tplSlug = (cv.template_name || cv.TemplateName || cv.templateName || c.templateName || '').toLowerCase();
+                        var tplNum  = SLUG_TO_NUM[tplSlug] || parseInt(data.template) || 1;
+                        renderBySlug(tplSlug, tplNum);
+                    })
+                    .catch(function(){ showNoData(); });
                 return;
             }
+            // Fallback: sessionStorage (usado pelo form.html)
+            var raw = sessionStorage.getItem('cvData');
+            if (!raw) { showNoData(); return; }
             data = JSON.parse(raw);
-            renderTemplate(parseInt(data.template) || 1);
+            var tplSlug = (data.templateSlug || data.templateName || '').toLowerCase();
+            renderBySlug(tplSlug, parseInt(data.template) || 1);
+        }
+
+        function showNoData() {
+            document.getElementById('cvContent').innerHTML = '<div style="padding:60px;text-align:center;color:#999;font-family:Calibri,Trebuchet MS,sans-serif"><h3 style="margin-bottom:10px">Nenhum dado encontrado</h3><p>Por favor <a href="/editor" style="color:#c9a96e">preenche o formulário</a> primeiro.</p></div>';
+        }
+
+        function renderBySlug(slug, fallbackNum) {
+            // Templates com design personalizado por slug
+            if (slug && renderCustomSlug(slug)) return;
+            // Fallback para templates numerados antigos
+            renderTemplate(fallbackNum || 1);
+        }
+
+        function renderCustomSlug(slug) {
+            var fn = {
+                'cf-executivo-escuro' : tmplCfExecutivoEscuro,
+                'cf-gradiente-roxo'   : tmplCfGradienteRoxo,
+                'cf-verde-profissional': tmplCfVerdeProfissional,
+                'cf-teal-moderno'     : tmplCfTealModerno,
+                'cf-coral-criativo'   : tmplCfCoralCriativo,
+                'sf-corporate-azul'   : tmplSfCorporateAzul,
+                'sf-cinza-tecnico'    : tmplSfCinzaTecnico,
+                'sf-verde-academico'  : tmplSfVerdeAcademico,
+                'sf-laranja-criativo' : tmplSfLaranjaCriativo,
+                'sf-navy-executivo'   : tmplSfNavyExecutivo,
+                'ats-simples'         : tmplAts,
+                'ats-profissional'    : tmplAts,
+                'ats-executivo'       : tmplAts
+            }[slug];
+            if (!fn) return false;
+            document.getElementById('cvContent').innerHTML = fn();
+            return true;
+        }
+
+        /* ── Helpers partilhados inline ─────────────────────── */
+        function inlineSec(txt, color) {
+            return '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px;color:'+color+';border-bottom:2px solid '+color+';padding-bottom:3px;margin:16px 0 9px;">'+txt+'</div>';
+        }
+        function inlineSecBar(txt, color) {
+            return '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px;color:'+color+';border-left:3px solid '+color+';padding-left:7px;margin:14px 0 9px;">'+txt+'</div>';
+        }
+        function inlineExp(titleC, metaC) {
+            if (!data.experience || !data.experience.length) return '<p style="color:#aaa;font-size:12px">Sem experiência adicionada.</p>';
+            return data.experience.map(function(e){
+                var period = [e.start, e.end||'Presente'].filter(Boolean).join(' – ');
+                return '<div style="margin-bottom:11px;">'+
+                    '<div style="font-size:13px;font-weight:700;color:'+(titleC||'#1e293b')+';">'+esc(e.title)+(e.company?(' — '+esc(e.company)):'')+'</div>'+
+                    '<div style="font-size:11px;color:'+(metaC||'#64748b')+';margin:2px 0 5px;">'+esc(period)+'</div>'+
+                    (e.description?'<div style="font-size:11.5px;color:#475569;line-height:1.6;">'+descHTML(e.description)+'</div>':'')+
+                    '</div>';
+            }).join('');
+        }
+        function inlineEdu() {
+            if (!data.education || !data.education.length) return '';
+            return data.education.map(function(e){
+                return '<div style="margin-bottom:9px;">'+
+                    '<div style="font-size:12.5px;font-weight:700;color:#1e293b;">'+esc(e.degree)+(e.institution?(' — '+esc(e.institution)):'')+'</div>'+
+                    '<div style="font-size:11px;color:#64748b;">'+esc(e.start)+'</div>'+
+                    '</div>';
+            }).join('');
+        }
+        function inlineSkillTags(bg, color) {
+            if (!data.skills || !data.skills.length) return '';
+            return data.skills.map(function(s){
+                return '<span style="background:'+(bg||'#e0e7ff')+';color:'+(color||'#3730a3')+';padding:3px 9px;border-radius:12px;font-size:10.5px;display:inline-block;margin:2px;">'+esc(s)+'</span>';
+            }).join('');
+        }
+        function inlineContacts(color) {
+            var items = [];
+            if (data.email)    items.push(esc(data.email));
+            if (data.phone)    items.push(esc(data.phone));
+            if (data.address)  items.push(esc(data.address));
+            if (data.linkedin) items.push(esc(data.linkedin));
+            return items.map(function(i){ return '<span style="color:'+(color||'#94a3b8')+';font-size:11px;margin:0 5px;">'+i+'</span>'; }).join(' · ');
+        }
+
+        /* ── Novos templates por slug ──────────────────────── */
+        function tmplCfExecutivoEscuro() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:#0f172a;padding:30px 36px;display:flex;align-items:center;gap:22px;">'+
+                (data.photo?'<img src="'+data.photo+'" style="width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid #3b82f6;flex-shrink:0;">':'')+
+                '<div><div style="font-size:25px;font-weight:800;color:#fff;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#93c5fd;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('rgba(255,255,255,.7)')+'</div></div></div>'+
+                '<div style="padding:24px 36px;">'+
+                (data.summary?inlineSec('Sobre Mim','#1d4ed8')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#1d4ed8')+inlineExp()+
+                inlineSec('Formação','#1d4ed8')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#1d4ed8')+'<div>'+inlineSkillTags('#dbeafe','#1d4ed8')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplCfGradienteRoxo() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:30px;text-align:center;">'+
+                (data.photo?'<img src="'+data.photo+'" style="width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.35);display:block;margin:0 auto 12px;">':'')+
+                '<div style="font-size:25px;font-weight:800;color:#fff;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#c4b5fd;margin:4px 0 10px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('rgba(255,255,255,.7)')+'</div></div>'+
+                '<div style="padding:24px 36px;">'+
+                (data.summary?inlineSec('Resumo','#4f46e5')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#4f46e5')+inlineExp()+
+                inlineSec('Formação','#4f46e5')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#4f46e5')+'<div>'+inlineSkillTags('#ede9fe','#4f46e5')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplCfVerdeProfissional() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:#15803d;padding:30px 36px;display:flex;align-items:center;gap:22px;">'+
+                (data.photo?'<img src="'+data.photo+'" style="width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.35);flex-shrink:0;">':'')+
+                '<div><div style="font-size:25px;font-weight:800;color:#fff;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#bbf7d0;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('rgba(255,255,255,.75)')+'</div></div></div>'+
+                '<div style="padding:24px 36px;">'+
+                (data.summary?inlineSec('Resumo','#15803d')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#15803d')+inlineExp()+
+                inlineSec('Formação','#15803d')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#15803d')+'<div>'+inlineSkillTags('#dcfce7','#15803d')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplCfTealModerno() {
+            var sideSkills = (data.skills||[]).map(function(s){ return '<div style="font-size:11px;color:rgba(255,255,255,.85);margin-bottom:5px;">• '+esc(s)+'</div>'; }).join('');
+            var sideLangs  = (data.languages||[]).map(function(l){ return '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-bottom:4px;">'+esc(l.language||l)+(l.level?' ('+esc(l.level)+')':'')+'</div>'; }).join('');
+            return '<div style="font-family:Arial,sans-serif;background:#fff;display:flex;min-height:900px;">'+
+                '<div style="width:210px;background:#0d9488;padding:26px 18px;flex-shrink:0;">'+
+                (data.photo?'<img src="'+data.photo+'" style="width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);display:block;margin:0 auto 14px;">':'')+
+                '<div style="font-size:16px;font-weight:800;color:#fff;text-align:center;margin-bottom:3px;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:11px;color:#99f6e4;text-align:center;margin-bottom:16px;">'+esc(data.jobTitle)+'</div>'+
+                '<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:5px;">Contacto</div>'+
+                [data.email,data.phone,data.address].filter(Boolean).map(function(c){ return '<div style="font-size:10.5px;color:rgba(255,255,255,.8);margin-bottom:4px;">'+esc(c)+'</div>'; }).join('')+
+                (sideSkills?'<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin:12px 0 5px;">Competências</div>'+sideSkills:'')+
+                (sideLangs?'<div style="font-size:9px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.6);letter-spacing:1px;margin:12px 0 5px;">Línguas</div>'+sideLangs:'')+
+                '</div>'+
+                '<div style="flex:1;padding:26px 26px;">'+
+                (data.summary?inlineSecBar('Resumo','#0d9488')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSecBar('Experiência','#0d9488')+inlineExp()+
+                inlineSecBar('Formação','#0d9488')+inlineEdu()+
+                '</div></div>';
+        }
+        function tmplCfCoralCriativo() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:#be185d;padding:30px 36px;display:flex;align-items:center;gap:22px;">'+
+                (data.photo?'<img src="'+data.photo+'" style="width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);flex-shrink:0;">':'')+
+                '<div><div style="font-size:25px;font-weight:800;color:#fff;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#fbcfe8;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('rgba(255,255,255,.75)')+'</div></div></div>'+
+                '<div style="padding:24px 36px;">'+
+                (data.summary?inlineSec('Resumo','#be185d')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#be185d')+inlineExp()+
+                inlineSec('Formação','#be185d')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#be185d')+'<div>'+inlineSkillTags('#fce7f3','#be185d')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplSfCorporateAzul() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:#1d4ed8;height:7px;"></div>'+
+                '<div style="padding:26px 36px 14px;">'+
+                '<div style="font-size:25px;font-weight:800;color:#0f172a;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#1d4ed8;font-weight:600;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('#64748b')+'</div></div>'+
+                '<div style="height:1px;background:#e2e8f0;margin:0 36px;"></div>'+
+                '<div style="padding:14px 36px 24px;">'+
+                (data.summary?inlineSec('Resumo Profissional','#1d4ed8')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#1d4ed8')+inlineExp()+
+                inlineSec('Formação','#1d4ed8')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#1d4ed8')+'<div>'+inlineSkillTags('#dbeafe','#1d4ed8')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplSfCinzaTecnico() {
+            var sideContent = '<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin-bottom:5px;">Contacto</div>'+
+                [data.email,data.phone,data.address].filter(Boolean).map(function(c){ return '<div style="font-size:10.5px;color:#374151;margin-bottom:5px;">'+esc(c)+'</div>'; }).join('')+
+                (data.skills&&data.skills.length?'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin:12px 0 5px;">Competências</div>'+data.skills.map(function(s){ return '<div style="font-size:11px;color:#374151;margin-bottom:4px;">▪ '+esc(s)+'</div>'; }).join(''):'')+
+                (data.languages&&data.languages.length?'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin:12px 0 5px;">Línguas</div>'+data.languages.map(function(l){ return '<div style="font-size:11px;color:#374151;margin-bottom:4px;">'+esc(l.language||l)+'</div>'; }).join(''):'')+
+                '';
+            return '<div style="font-family:Arial,sans-serif;background:#fff;display:flex;min-height:900px;">'+
+                '<div style="width:200px;background:#f1f5f9;padding:26px 16px;flex-shrink:0;border-right:1px solid #e2e8f0;">'+
+                '<div style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:4px;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:11px;color:#475569;margin-bottom:16px;">'+esc(data.jobTitle)+'</div>'+
+                sideContent+'</div>'+
+                '<div style="flex:1;padding:26px 26px;">'+
+                (data.summary?inlineSecBar('Resumo','#334155')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSecBar('Experiência','#334155')+inlineExp()+
+                inlineSecBar('Formação','#334155')+inlineEdu()+
+                '</div></div>';
+        }
+        function tmplSfVerdeAcademico() {
+            return '<div style="font-family:Georgia,serif;background:#fff;">'+
+                '<div style="text-align:center;padding:26px 48px 14px;border-bottom:2px solid #15803d;">'+
+                '<div style="font-size:24px;font-weight:700;color:#0f172a;letter-spacing:.3px;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#15803d;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('#64748b')+'</div></div>'+
+                '<div style="padding:18px 48px 24px;">'+
+                (data.summary?'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:14px 0 7px;">Resumo</div><p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:14px 0 7px;">Experiência</div>'+inlineExp()+
+                '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:14px 0 7px;">Formação</div>'+inlineEdu()+
+                (data.skills&&data.skills.length?'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;margin:14px 0 7px;">Competências</div><div>'+inlineSkillTags('#dcfce7','#15803d')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplSfLaranjaCriativo() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;display:flex;min-height:900px;">'+
+                '<div style="width:6px;background:linear-gradient(180deg,#ea580c,#f97316);flex-shrink:0;"></div>'+
+                '<div style="flex:1;padding:30px 36px;">'+
+                '<div style="font-size:25px;font-weight:800;color:#0f172a;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#ea580c;font-weight:600;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div style="margin-bottom:14px;">'+inlineContacts('#64748b')+'</div>'+
+                (data.summary?inlineSec('Resumo','#ea580c')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#ea580c')+inlineExp()+
+                inlineSec('Formação','#ea580c')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#ea580c')+'<div>'+inlineSkillTags('#ffedd5','#ea580c')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplSfNavyExecutivo() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;">'+
+                '<div style="background:#0f172a;padding:28px 36px;text-align:center;">'+
+                '<div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:.4px;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#93c5fd;margin:5px 0 10px;">'+esc(data.jobTitle)+'</div>'+
+                '<div>'+inlineContacts('rgba(255,255,255,.7)')+'</div></div>'+
+                '<div style="padding:24px 36px;">'+
+                (data.summary?inlineSec('Resumo','#1d4ed8')+'<p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                inlineSec('Experiência','#1d4ed8')+inlineExp()+
+                inlineSec('Formação','#1d4ed8')+inlineEdu()+
+                (data.skills&&data.skills.length?inlineSec('Competências','#1d4ed8')+'<div>'+inlineSkillTags('#dbeafe','#1d4ed8')+'</div>':'')+
+                '</div></div>';
+        }
+        function tmplAts() {
+            return '<div style="font-family:Arial,sans-serif;background:#fff;padding:32px 40px;">'+
+                '<div style="margin-bottom:16px;">'+
+                '<div style="font-size:24px;font-weight:800;color:#0f172a;">'+esc(data.fullName)+'</div>'+
+                '<div style="font-size:13px;color:#374151;margin:4px 0 8px;">'+esc(data.jobTitle)+'</div>'+
+                '<div style="height:1px;background:#9ca3af;margin-bottom:6px;"></div>'+
+                '<div style="font-size:11px;color:#6b7280;">'+[data.email,data.phone,data.address].filter(Boolean).map(esc).join(' | ')+'</div>'+
+                '</div>'+
+                (data.summary?'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#0f172a;border-bottom:1.5px solid #0f172a;padding-bottom:2px;margin:14px 0 8px;">RESUMO PROFISSIONAL</div><p style="font-size:12px;line-height:1.7;color:#374151;">'+esc(data.summary)+'</p>':'')+
+                '<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#0f172a;border-bottom:1.5px solid #0f172a;padding-bottom:2px;margin:14px 0 8px;">EXPERIÊNCIA PROFISSIONAL</div>'+inlineExp('#0f172a','#6b7280')+
+                '<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#0f172a;border-bottom:1.5px solid #0f172a;padding-bottom:2px;margin:14px 0 8px;">FORMAÇÃO ACADÉMICA</div>'+inlineEdu()+
+                (data.skills&&data.skills.length?'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#0f172a;border-bottom:1.5px solid #0f172a;padding-bottom:2px;margin:14px 0 8px;">COMPETÊNCIAS</div><div>'+data.skills.map(function(s){ return '<span style="border:1px solid #cbd5e1;padding:2px 8px;border-radius:3px;font-size:11px;color:#1e293b;display:inline-block;margin:2px;">'+esc(s)+'</span>'; }).join('')+'</div>':'')+
+                '</div>';
         }
 
         /* ---- HELPERS ---- */
