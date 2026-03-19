@@ -93,6 +93,19 @@
         .btn-generate:disabled { opacity: .5; cursor: not-allowed; }
         .submit-note { color: #555; font-size: 13px; margin-top: 12px; }
 
+        /* ── Botões IA ───────────────────────────────── */
+        .ai-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,169,110,.12); border: 1px solid rgba(201,169,110,.4); color: #c9a96e; padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s; margin-top: 8px; white-space: nowrap; }
+        .ai-btn:hover:not(:disabled) { background: rgba(201,169,110,.22); border-color: #c9a96e; }
+        .ai-btn:disabled { opacity: .45; cursor: not-allowed; }
+        .ai-btn .ai-spin { display: inline-block; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ai-suggestion-box { background: rgba(201,169,110,.07); border: 1px solid rgba(201,169,110,.25); border-radius: 8px; padding: 14px 16px; margin-top: 10px; font-size: 13px; color: #ddd; line-height: 1.7; display: none; }
+        .ai-suggestion-box.show { display: block; }
+        .ai-suggestion-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .ai-use-btn { background: #c9a96e; color: #000; border: none; border-radius: 6px; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .ai-dismiss-btn { background: none; border: 1px solid #333; color: #555; border-radius: 6px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .ai-dismiss-btn:hover { border-color: #555; color: #aaa; }
+
         /* TABS */
         .tab-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
         .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #666; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'Inter', sans-serif; font-weight: 600; transition: all .2s; }
@@ -214,7 +227,21 @@
                 <div class="form-group"><label>LinkedIn</label><input type="text" id="linkedin" placeholder="linkedin.com/in/joaosilva"></div>
             </div>
             <div class="form-row full">
-                <div class="form-group"><label>Resumo Profissional *</label><textarea id="summary" placeholder="Escreve um resumo sobre ti, as tuas competências e objectivos..."></textarea></div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;justify-content:space-between">
+                        Resumo Profissional *
+                        <button class="ai-btn" id="btnAiSummary" onclick="aiGenerateSummary()" type="button">✨ Gerar com IA</button>
+                    </label>
+                    <textarea id="summary" placeholder="Escreve um resumo sobre ti, as tuas competências e objectivos..."></textarea>
+                    <div class="ai-suggestion-box" id="aiSummaryBox">
+                        <div id="aiSummaryText"></div>
+                        <div class="ai-suggestion-actions">
+                            <button class="ai-use-btn" onclick="aiUseSummary()">✓ Usar este resumo</button>
+                            <button class="ai-btn" onclick="aiGenerateSummary()" type="button" style="margin-top:0">↻ Gerar outro</button>
+                            <button class="ai-dismiss-btn" onclick="document.getElementById('aiSummaryBox').classList.remove('show')">Fechar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-row full">
                 <div class="form-group">
@@ -246,7 +273,21 @@
                         <div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda, Angola"></div>
                     </div>
                     <div class="form-row full">
-                        <div class="form-group"><label>Descrição</label><textarea placeholder="Descreve as tuas funções e realizações..."></textarea></div>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;justify-content:space-between">
+                                Descrição
+                                <button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button>
+                            </label>
+                            <textarea placeholder="Descreve as tuas funções e realizações..."></textarea>
+                            <div class="ai-suggestion-box">
+                                <div class="ai-resp-text"></div>
+                                <div class="ai-suggestion-actions">
+                                    <button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar estas funções</button>
+                                    <button class="ai-btn" onclick="aiGenerateResponsibilities(this.closest('.item-card').querySelector('.ai-btn'))" type="button" style="margin-top:0">↻ Gerar outras</button>
+                                    <button class="ai-dismiss-btn" onclick="this.closest('.ai-suggestion-box').classList.remove('show')">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -669,7 +710,16 @@
                 '<div class="form-group"><label>Data Início</label><input type="text" placeholder="Jan 2020" value="' + esc(d.start||d.startDate||'') + '"></div>' +
                 '<div class="form-group"><label>Data Fim</label><input type="text" placeholder="Presente" value="' + esc(d.end||d.endDate||'') + '"></div>' +
                 '<div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda" value="' + esc(d.location||'') + '"></div></div>' +
-                '<div class="form-row full"><div class="form-group"><label>Descrição</label><textarea placeholder="Descrição...">' + esc(d.description||'') + '</textarea></div></div></div>';
+                '<div class="form-row full"><div class="form-group">' +
+                '<label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
+                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button></label>' +
+                '<textarea placeholder="Descrição...">' + esc(d.description||'') + '</textarea>' +
+                '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
+                '<div class="ai-suggestion-actions">' +
+                '<button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar estas funções</button>' +
+                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this.closest(\'.item-card\').querySelector(\'.ai-btn\'))" type="button" style="margin-top:0">↻ Gerar outras</button>' +
+                '<button class="ai-dismiss-btn" onclick="this.closest(\'.ai-suggestion-box\').classList.remove(\'show\')">Fechar</button>' +
+                '</div></div></div></div></div>';
             document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -765,7 +815,16 @@
                 '<div class="form-row three"><div class="form-group"><label>Data Início</label><input type="text" placeholder="Jan 2020"></div>' +
                 '<div class="form-group"><label>Data Fim</label><input type="text" placeholder="Presente"></div>' +
                 '<div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda"></div></div>' +
-                '<div class="form-row full"><div class="form-group"><label>Descrição</label><textarea placeholder="Descrição..."></textarea></div></div></div>';
+                '<div class="form-row full"><div class="form-group">' +
+                '<label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
+                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button></label>' +
+                '<textarea placeholder="Descrição..."></textarea>' +
+                '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
+                '<div class="ai-suggestion-actions">' +
+                '<button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar estas funções</button>' +
+                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this.closest(\'.item-card\').querySelector(\'.ai-btn\'))" type="button" style="margin-top:0">↻ Gerar outras</button>' +
+                '<button class="ai-dismiss-btn" onclick="this.closest(\'.ai-suggestion-box\').classList.remove(\'show\')">Fechar</button>' +
+                '</div></div></div></div></div>';
             document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -1339,6 +1398,99 @@
 
         // Mostrar wizard após 800ms se CV está vazio
         setTimeout(showWizard, 800);
+
+        // ══════════════════════════════════════════════
+        // FUNÇÕES IA — RESUMO + RESPONSABILIDADES
+        // ══════════════════════════════════════════════
+
+        function aiGenerateSummary() {
+            var btn = document.getElementById('btnAiSummary');
+            var name = (document.getElementById('fullName').value || '').trim();
+            var jobTitle = (document.getElementById('jobTitle').value || '').trim();
+            if (!jobTitle) { showToast('Preenche o Título Profissional primeiro'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
+
+            // Recolher experiências existentes para contexto
+            var expCards = document.querySelectorAll('[id^="exp-"]');
+            var expList = [];
+            expCards.forEach(function(card) {
+                var inputs = card.querySelectorAll('input');
+                if (inputs[0] && inputs[0].value.trim()) expList.push(inputs[0].value + (inputs[1] ? ' na ' + inputs[1].value : ''));
+            });
+
+            fetch(API + '/cv/generate-summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ name: name || jobTitle, jobTitle: jobTitle, experiences: expList.join(', ') || '' })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var box = document.getElementById('aiSummaryBox');
+                document.getElementById('aiSummaryText').textContent = d.summary || d.error || 'Erro ao gerar resumo';
+                box.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '✨ Gerar com IA';
+            })
+            .catch(function() {
+                showToast('Erro ao contactar IA. Tenta novamente.');
+                btn.disabled = false;
+                btn.innerHTML = '✨ Gerar com IA';
+            });
+        }
+
+        function aiUseSummary() {
+            var text = document.getElementById('aiSummaryText').textContent;
+            document.getElementById('summary').value = text;
+            document.getElementById('aiSummaryBox').classList.remove('show');
+            updateCompletion();
+            scheduleAutoSave();
+            schedulePreview();
+        }
+
+        function aiGenerateResponsibilities(triggerBtn) {
+            var card = triggerBtn.closest('.item-card');
+            if (!card) return;
+            var inputs = card.querySelectorAll('input');
+            var jobTitle = (inputs[0] && inputs[0].value.trim()) ? inputs[0].value.trim() : (document.getElementById('jobTitle').value || '').trim();
+            if (!jobTitle) { showToast('Preenche o cargo nesta experiência primeiro'); return; }
+
+            triggerBtn.disabled = true;
+            triggerBtn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
+
+            fetch(API + '/cv/generate-responsibilities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ jobTitle: jobTitle })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var box = card.querySelector('.ai-suggestion-box');
+                var textEl = card.querySelector('.ai-resp-text');
+                textEl.textContent = d.responsibilities || d.error || 'Erro ao gerar';
+                box.classList.add('show');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugerir funções';
+            })
+            .catch(function() {
+                showToast('Erro ao contactar IA. Tenta novamente.');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugerir funções';
+            });
+        }
+
+        function aiUseResponsibilities(useBtn) {
+            var box = useBtn.closest('.ai-suggestion-box');
+            var card = useBtn.closest('.item-card');
+            var text = box.querySelector('.ai-resp-text').textContent;
+            var textarea = card.querySelector('textarea');
+            if (textarea) textarea.value = text;
+            box.classList.remove('show');
+            updateCompletion();
+            scheduleAutoSave();
+            schedulePreview();
+        }
     </script>
 </body>
 </html>
