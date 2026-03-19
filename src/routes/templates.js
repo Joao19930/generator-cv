@@ -106,6 +106,18 @@ router.post('/start', auth, async (req, res) => {
     }
     if (!tpl) return res.status(404).json({ error: 'Nenhum template disponível.' });
 
+    // ── Limite de 3 CVs para plano free ──────────────────────
+    const plan = (req.user.plan || 'free').toLowerCase();
+    if (plan === 'free') {
+      const countResult = await pool.request()
+        .input('userId', sql.Int, req.user.id)
+        .query('SELECT COUNT(*) AS total FROM cvs WHERE user_id = @userId');
+      const total = countResult.recordset[0].total || countResult.recordset[0].Total || 0;
+      if (parseInt(total) >= 3) {
+        return res.status(403).json({ error: 'Atingiste o limite de 3 CVs gratuitos. Faz upgrade para criares mais.', limitReached: true });
+      }
+    }
+
     const tplSlugToSave = tplSlug || (tpl.Slug || tpl.slug || '');
     const tplNameToSave = tplSlugToSave || (tpl.Name || tpl.name || '');
     const cvTitle = title || `Meu CV — ${tpl.Name || tpl.name}`;

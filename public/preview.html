@@ -1209,21 +1209,8 @@
         }
 
         async function showPayment() {
-            var token = localStorage.getItem('cv_token');
-            if (token) {
-                try {
-                    var ar = await fetch('/api/payment/my-access', { headers: { Authorization: 'Bearer ' + token } });
-                    var access = await ar.json();
-                    if (access.hasFullAccess || access.cvCredits > 0) { allowDownload(); return; }
-                    var pr = await fetch('/api/payment/my-requests', { headers: { Authorization: 'Bearer ' + token } });
-                    var pd = await pr.json();
-                    var pending = (pd.requests || []).find(function(r) {
-                        return r.Type === 'cv_single' || r.Type === 'week' || r.Type === 'biweek';
-                    });
-                    if (pending) { showPendingMessage(); return; }
-                } catch(_) {}
-            }
-            document.getElementById('paymentOverlay').classList.add('active');
+            // Download gratuito para todos os utilizadores
+            allowDownload();
         }
 
         function closePayment() {

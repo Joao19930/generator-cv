@@ -106,10 +106,6 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
       .query('SELECT * FROM cvs WHERE id = @id AND user_id = @userId')).recordset[0];
     if (!cv) return res.status(404).json({ error: 'CV não encontrado' });
 
-    // Verificar limite free (max 1 download sem marca d'água)
-    if (req.user.plan === 'free' && cv.DownloadCount >= 1)
-      return res.status(402).json({ error: 'Limite atingido. Faça upgrade para Premium.', upgrade: `${process.env.APP_URL}/pricing` });
-
     const content = JSON.parse(cv.ContentJson || '{}');
 
     // Se template_name estiver vazio, tenta obter o slug da tabela templates

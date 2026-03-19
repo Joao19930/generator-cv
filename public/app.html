@@ -3121,7 +3121,7 @@ async function startCV(t) {
       body: JSON.stringify({ templateId, slug: t.slug })
     });
     const d = await res.json();
-    if (!res.ok) { if (d.upgrade || d.upgradeUrl) { location.href = '/checkout/pro'; return; } alert(d.error || 'Erro ao criar CV.'); return; }
+    if (!res.ok) { if (d.limitReached) { showLimitModal(); return; } alert(d.error || 'Erro ao criar CV.'); return; }
     location.href = `/editor?cv=${d.cvId}`;
   } catch(_) { location.href = `/editor?template=${t.slug || ''}`; }
 }
@@ -3435,6 +3435,18 @@ async function sendSupportMsg() {
   } catch(_) { alert('Erro de ligação.'); }
 }
 </script>
+
+<!-- Modal: limite de 3 CVs gratuitos -->
+<div id="limitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;align-items:center;justify-content:center">
+  <div style="background:#111;border:1px solid #2a2a2a;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;font-family:'Inter',sans-serif">
+    <div style="font-size:40px;margin-bottom:16px">📄</div>
+    <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Limite de <span style="color:#c9a96e">3 CVs</span> atingido</h2>
+    <p style="color:#666;font-size:14px;line-height:1.7;margin-bottom:24px">O plano gratuito inclui até <strong style="color:#ddd">3 CVs</strong>.<br>Faz upgrade para criar CVs ilimitados, aceder a mais templates e descarregar PDFs sem restrições.</p>
+    <a href="/pricing" style="display:block;background:#c9a96e;color:#000;font-weight:700;font-size:15px;padding:14px 0;border-radius:10px;text-decoration:none;margin-bottom:12px">Ver Planos Premium</a>
+    <button onclick="document.getElementById('limitModal').style.display='none'" style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif">Fechar</button>
+  </div>
+</div>
+<script>function showLimitModal(){ document.getElementById('limitModal').style.display='flex'; }</script>
 
 <script src="/track.js"></script>
 <script src="/upgrade-modal.js"></script>
