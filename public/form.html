@@ -14,10 +14,52 @@
         .nav-right { display: flex; align-items: center; gap: 14px; }
         .nav-right a { color: #666; font-size: 13px; text-decoration: none; border: 1px solid #2a2a2a; padding: 7px 14px; border-radius: 7px; transition: all .2s; }
         .nav-right a:hover { border-color: #c9a96e; color: #c9a96e; }
-        .container { max-width: 900px; margin: 0 auto; padding: 120px 20px 60px; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 120px 24px 60px; }
         .page-title { text-align: center; font-size: 36px; font-weight: 800; margin-bottom: 8px; }
         .page-title span { color: #c9a96e; }
-        .page-sub { text-align: center; color: #666; margin-bottom: 50px; font-size: 15px; }
+        .page-sub { text-align: center; color: #666; margin-bottom: 40px; font-size: 15px; }
+
+        /* ── 2-column editor layout ─────────────────── */
+        .editor-layout { display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; }
+        .form-col { min-width: 0; }
+        .sidebar-col { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ── Sidebar cards ─────────────────────────── */
+        .sidebar-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+        .sidebar-card h4 { font-size: 14px; font-weight: 700; color: #c9a96e; margin-bottom: 18px; letter-spacing: .5px; text-transform: uppercase; }
+
+        /* Progress ring */
+        .progress-ring-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .ring-svg { transform: rotate(-90deg); }
+        .ring-track { fill: none; stroke: #222; stroke-width: 8; }
+        .ring-fill  { fill: none; stroke: #c9a96e; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+        .ring-label { position: absolute; font-size: 22px; font-weight: 800; color: #c9a96e; }
+        .ring-wrap-inner { position: relative; display: flex; align-items: center; justify-content: center; }
+        .ring-sub { font-size: 12px; color: #555; margin-top: 8px; }
+
+        /* Section checklist */
+        .section-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #1a1a1a; }
+        .section-item:last-child { border-bottom: none; }
+        .section-item-left { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #aaa; }
+        .section-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; flex-shrink: 0; transition: background .3s; }
+        .section-dot.ok { background: #22c55e; }
+        .section-check { font-size: 14px; }
+        .section-pct { font-size: 11px; color: #555; }
+
+        /* Jobs list */
+        .job-item { padding: 12px 0; border-bottom: 1px solid #1a1a1a; cursor: pointer; }
+        .job-item:last-child { border-bottom: none; }
+        .job-item:hover .job-title { color: #c9a96e; }
+        .job-title { font-size: 13px; font-weight: 600; color: #ddd; margin-bottom: 3px; transition: color .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .job-meta { font-size: 11px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .job-empty { font-size: 12px; color: #444; text-align: center; padding: 16px 0; }
+        .job-loading { font-size: 12px; color: #555; text-align: center; padding: 12px 0; }
+        .jobs-hint { font-size: 11px; color: #444; margin-bottom: 12px; }
+
+        @media (max-width: 900px) {
+            .editor-layout { grid-template-columns: 1fr; }
+            .sidebar-col { position: static; }
+        }
         .form-section { background: #111; border: 1px solid #222; border-radius: 16px; padding: 40px; margin-bottom: 24px; }
         .form-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 24px; color: #c9a96e; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -78,6 +120,7 @@
             .form-row.three { grid-template-columns: 1fr 1fr; }
             .templates-scroll { grid-template-columns: repeat(2, 1fr); }
             .page-title { font-size: 26px; }
+            .editor-layout { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -94,6 +137,8 @@
         <h1 class="page-title">Edita o teu <span>CV Premium</span></h1>
         <p class="page-sub">Preenche os campos abaixo e gera o teu currículo profissional</p>
 
+        <div class="editor-layout">
+        <div class="form-col">
         <!-- DADOS PESSOAIS -->
         <div class="form-section">
             <h3>Dados Pessoais</h3>
@@ -322,6 +367,63 @@
             <button class="btn-generate" id="btnGenerate" onclick="generateCV()">Gerar o meu CV</button>
             <p class="submit-note" id="submitNote">Preenche os campos e escolhe um modelo</p>
         </div>
+        </div><!-- /form-col -->
+
+        <!-- SIDEBAR -->
+        <div class="sidebar-col">
+
+            <!-- Completion Dashboard -->
+            <div class="sidebar-card">
+                <h4>Progresso do CV</h4>
+                <div class="progress-ring-wrap">
+                    <div class="ring-wrap-inner">
+                        <svg class="ring-svg" width="96" height="96" viewBox="0 0 96 96">
+                            <circle class="ring-track" cx="48" cy="48" r="40"/>
+                            <circle class="ring-fill" id="ringFill" cx="48" cy="48" r="40"
+                                stroke-dasharray="251.2"
+                                stroke-dashoffset="251.2"/>
+                        </svg>
+                        <span class="ring-label" id="ringPct">0%</span>
+                    </div>
+                    <div class="ring-sub" id="ringSub">Começa a preencher</div>
+                </div>
+                <div id="sectionChecklist">
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-pessoal"></span>Dados Pessoais</div>
+                        <span class="section-pct" id="pct-pessoal">0%</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-experiencia"></span>Experiência</div>
+                        <span class="section-pct" id="pct-experiencia">–</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-formacao"></span>Formação</div>
+                        <span class="section-pct" id="pct-formacao">–</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-competencias"></span>Competências</div>
+                        <span class="section-pct" id="pct-competencias">–</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-idiomas"></span>Idiomas</div>
+                        <span class="section-pct" id="pct-idiomas">–</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-modelo"></span>Modelo</div>
+                        <span class="section-pct" id="pct-modelo">–</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compatible Jobs -->
+            <div class="sidebar-card">
+                <h4>Vagas Compatíveis</h4>
+                <div class="jobs-hint" id="jobsHint">Preenche o título profissional para ver vagas</div>
+                <div id="jobsList"><div class="job-empty">Nenhuma vaga carregada</div></div>
+            </div>
+
+        </div><!-- /sidebar-col -->
+        </div><!-- /editor-layout -->
     </div>
 
     <div id="toast"></div>
@@ -696,6 +798,181 @@
             t.textContent = msg;
             t.classList.add('show');
             setTimeout(function() { t.classList.remove('show'); }, 3000);
+        }
+
+        // ── CV Completion Dashboard ───────────────────
+        var RING_CIRC = 251.2; // 2 * PI * 40
+
+        function calcCompletion() {
+            var scores = {};
+
+            // Dados Pessoais (6 campos: name, jobTitle, email, phone, address, summary — each 1/6)
+            var pessoalFields = ['fullName','jobTitle','email','phone','address','summary'];
+            var pessoalFilled = pessoalFields.filter(function(f) {
+                var el = document.getElementById(f); return el && el.value.trim().length > 0;
+            }).length;
+            scores.pessoal = Math.round(pessoalFilled / pessoalFields.length * 100);
+
+            // Experiência — filled if at least 1 card with title
+            var expCards = document.querySelectorAll('[id^="exp-"]');
+            var hasExp = false;
+            expCards.forEach(function(card) { var ins = card.querySelectorAll('input'); if (ins[0] && ins[0].value.trim()) hasExp = true; });
+            scores.experiencia = hasExp ? 100 : 0;
+
+            // Formação
+            var eduCards = document.querySelectorAll('[id^="edu-"]');
+            var hasEdu = false;
+            eduCards.forEach(function(card) { var ins = card.querySelectorAll('input'); if (ins[0] && ins[0].value.trim()) hasEdu = true; });
+            scores.formacao = hasEdu ? 100 : 0;
+
+            // Competências
+            scores.competencias = skills.length > 0 ? Math.min(100, skills.length * 20) : 0;
+
+            // Idiomas
+            var langRows = document.querySelectorAll('[id^="lang-"]');
+            var hasLang = false;
+            langRows.forEach(function(row) { var inp = row.querySelector('input'); if (inp && inp.value.trim()) hasLang = true; });
+            scores.idiomas = hasLang ? 100 : 0;
+
+            // Modelo
+            scores.modelo = (document.getElementById('selectedSlug').value || document.getElementById('selectedTemplate').value) ? 100 : 0;
+
+            // Weighted overall: pessoal 35%, exp 25%, formacao 15%, competencias 10%, idiomas 5%, modelo 10%
+            var weights = { pessoal: 0.35, experiencia: 0.25, formacao: 0.15, competencias: 0.10, idiomas: 0.05, modelo: 0.10 };
+            var total = 0;
+            Object.keys(weights).forEach(function(k) { total += (scores[k] || 0) * weights[k]; });
+            scores.total = Math.round(total);
+            return scores;
+        }
+
+        function updateCompletion() {
+            var s = calcCompletion();
+
+            // Ring
+            var offset = RING_CIRC - (s.total / 100) * RING_CIRC;
+            document.getElementById('ringFill').setAttribute('stroke-dashoffset', offset.toFixed(1));
+            document.getElementById('ringPct').textContent = s.total + '%';
+            var subs = ['Começa a preencher', 'Bom começo!', 'A tomar forma!', 'Quase lá!', 'CV completo!'];
+            var subIdx = Math.min(4, Math.floor(s.total / 25));
+            document.getElementById('ringSub').textContent = subs[subIdx];
+
+            // Dots + pcts
+            var sections = ['pessoal','experiencia','formacao','competencias','idiomas','modelo'];
+            sections.forEach(function(k) {
+                var dot = document.getElementById('dot-' + k);
+                var pct = document.getElementById('pct-' + k);
+                if (dot) { dot.classList.toggle('ok', s[k] === 100); }
+                if (pct) { pct.textContent = s[k] + '%'; }
+            });
+        }
+
+        // Attach listeners to all form inputs for real-time update
+        function attachCompletionListeners() {
+            var fields = ['fullName','jobTitle','email','phone','address','linkedin','summary'];
+            fields.forEach(function(f) {
+                var el = document.getElementById(f);
+                if (el) el.addEventListener('input', function() {
+                    updateCompletion();
+                    if (f === 'jobTitle') debounceJobs();
+                });
+            });
+            // Delegate for dynamic cards
+            document.getElementById('experienceContainer').addEventListener('input', updateCompletion);
+            document.getElementById('educationContainer').addEventListener('input', updateCompletion);
+            document.getElementById('languagesContainer').addEventListener('input', updateCompletion);
+        }
+        attachCompletionListeners();
+
+        // Patch addSkill / removeSkill to update completion
+        var _origAddSkill = addSkill;
+        addSkill = function() { _origAddSkill(); updateCompletion(); };
+        var _origRemoveSkill = removeSkill;
+        removeSkill = function(i) { _origRemoveSkill(i); updateCompletion(); };
+
+        // Patch selectTemplate to update completion
+        var _origSelectTemplate = selectTemplate;
+        selectTemplate = function(el, id, slug) { _origSelectTemplate(el, id, slug); updateCompletion(); };
+
+        updateCompletion();
+
+        // ── Compatible Jobs ───────────────────────────
+        var allJobs = null;
+        var jobsLoading = false;
+
+        function loadAllJobs(cb) {
+            if (allJobs !== null) { cb(allJobs); return; }
+            if (jobsLoading) { setTimeout(function() { loadAllJobs(cb); }, 300); return; }
+            jobsLoading = true;
+            fetch(API + '/content/jobs', { headers: token ? { Authorization: 'Bearer ' + token } : {} })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    allJobs = Array.isArray(data) ? data : (data.jobs || data.data || []);
+                    jobsLoading = false;
+                    cb(allJobs);
+                })
+                .catch(function() { allJobs = []; jobsLoading = false; cb([]); });
+        }
+
+        function renderJobs(jobs) {
+            var list = document.getElementById('jobsList');
+            var hint = document.getElementById('jobsHint');
+            if (!jobs || !jobs.length) {
+                list.innerHTML = '<div class="job-empty">Nenhuma vaga encontrada para este cargo</div>';
+                hint.style.display = 'none';
+                return;
+            }
+            hint.style.display = 'none';
+            var html = '';
+            jobs.slice(0, 6).forEach(function(j) {
+                var title   = j.title || j.Title || j.job_title || '';
+                var company = j.company || j.Company || j.company_name || '';
+                var city    = j.city || j.City || j.location || j.Location || '';
+                var country = j.country || j.Country || '';
+                var url     = j.url || j.Url || j.link || j.apply_url || '#';
+                var loc = [city, country].filter(Boolean).join(', ');
+                html += '<div class="job-item" onclick="window.open(\'' + esc(url) + '\',\'_blank\')">' +
+                    '<div class="job-title">' + esc(title) + '</div>' +
+                    '<div class="job-meta">' + esc(company) + (loc ? ' · ' + esc(loc) : '') + '</div>' +
+                    '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        function filterJobs(query) {
+            if (!query || query.length < 2) {
+                document.getElementById('jobsHint').style.display = '';
+                document.getElementById('jobsHint').textContent = 'Preenche o título profissional para ver vagas';
+                document.getElementById('jobsList').innerHTML = '<div class="job-empty">–</div>';
+                return;
+            }
+            document.getElementById('jobsList').innerHTML = '<div class="job-loading">A carregar vagas...</div>';
+            loadAllJobs(function(jobs) {
+                var q = query.toLowerCase();
+                var words = q.split(/\s+/).filter(Boolean);
+                var filtered = jobs.filter(function(j) {
+                    var t = (j.title || j.Title || j.job_title || '').toLowerCase();
+                    var d = (j.description || j.Description || '').toLowerCase();
+                    return words.some(function(w) { return t.indexOf(w) !== -1 || d.indexOf(w) !== -1; });
+                });
+                // Sort by relevance: title match scores higher
+                filtered.sort(function(a, b) {
+                    var ta = (a.title || a.Title || '').toLowerCase();
+                    var tb = (b.title || b.Title || '').toLowerCase();
+                    var sa = words.some(function(w) { return ta.indexOf(w) !== -1; }) ? 1 : 0;
+                    var sb = words.some(function(w) { return tb.indexOf(w) !== -1; }) ? 1 : 0;
+                    return sb - sa;
+                });
+                renderJobs(filtered);
+            });
+        }
+
+        var jobsDebounceTimer = null;
+        function debounceJobs() {
+            clearTimeout(jobsDebounceTimer);
+            jobsDebounceTimer = setTimeout(function() {
+                var q = (document.getElementById('jobTitle').value || '').trim();
+                filterJobs(q);
+            }, 500);
         }
     </script>
 </body>
