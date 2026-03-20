@@ -1412,23 +1412,50 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
 
-            // Recolher experiências existentes para contexto
+            // Recolher experiências para contexto
             var expCards = document.querySelectorAll('[id^="exp-"]');
             var expList = [];
+            var earliestStart = '', latestEnd = '';
             expCards.forEach(function(card) {
                 var inputs = card.querySelectorAll('input');
-                if (inputs[0] && inputs[0].value.trim()) expList.push(inputs[0].value + (inputs[1] ? ' na ' + inputs[1].value : ''));
+                if (inputs[0] && inputs[0].value.trim()) {
+                    expList.push(inputs[0].value + (inputs[1] && inputs[1].value ? ' na ' + inputs[1].value : ''));
+                    if (inputs[2] && inputs[2].value) earliestStart = inputs[2].value;
+                    if (inputs[3] && inputs[3].value) latestEnd = inputs[3].value;
+                }
             });
+
+            // Calcular anos de experiência aproximados
+            var yearsExp = '';
+            if (earliestStart) {
+                var startYear = parseInt(earliestStart.match(/\d{4}/) || [new Date().getFullYear()]);
+                var endYear = latestEnd && latestEnd.toLowerCase() !== 'presente' ? parseInt(latestEnd.match(/\d{4}/) || [new Date().getFullYear()]) : new Date().getFullYear();
+                var diff = endYear - startYear;
+                if (diff > 0) yearsExp = diff + ' anos';
+            }
+
+            // Recolher competências
+            var skillsEl = document.getElementById('skills');
+            var skills = skillsEl ? skillsEl.value.trim() : '';
 
             fetch(API + '/cv/generate-summary', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-                body: JSON.stringify({ name: name || jobTitle, jobTitle: jobTitle, experiences: expList.join(', ') || '' })
+                body: JSON.stringify({
+                    name: name || jobTitle,
+                    jobTitle: jobTitle,
+                    experiences: expList.join('; ') || '',
+                    skills: skills,
+                    yearsExp: yearsExp
+                })
             })
             .then(function(r) { return r.json(); })
             .then(function(d) {
+                var text = d.summary || d.error || 'Erro ao gerar resumo';
                 var box = document.getElementById('aiSummaryBox');
-                document.getElementById('aiSummaryText').textContent = d.summary || d.error || 'Erro ao gerar resumo';
+                var el = document.getElementById('aiSummaryText');
+                el.setAttribute('data-raw', text);
+                el.innerHTML = text.replace(/\n/g, '<br>');
                 box.classList.add('show');
                 btn.disabled = false;
                 btn.innerHTML = '✨ Gerar com IA';
@@ -1441,7 +1468,8 @@
         }
 
         function aiUseSummary() {
-            var text = document.getElementById('aiSummaryText').textContent;
+            var el = document.getElementById('aiSummaryText');
+            var text = el.getAttribute('data-raw') || el.textContent;
             document.getElementById('summary').value = text;
             document.getElementById('aiSummaryBox').classList.remove('show');
             updateCompletion();
@@ -1453,8 +1481,23 @@
             var card = triggerBtn.closest('.item-card');
             if (!card) return;
             var inputs = card.querySelectorAll('input');
+            // inputs[0]=Cargo, inputs[1]=Empresa, inputs[2]=Data Início, inputs[3]=Data Fim, inputs[4]=Localização
             var jobTitle = (inputs[0] && inputs[0].value.trim()) ? inputs[0].value.trim() : (document.getElementById('jobTitle').value || '').trim();
             if (!jobTitle) { showToast('Preenche o cargo nesta experiência primeiro'); return; }
+
+            var company = (inputs[1] && inputs[1].value.trim()) || '';
+            var startDate = (inputs[2] && inputs[2].value.trim()) || '';
+            var endDate = (inputs[3] && inputs[3].value.trim()) || '';
+
+            // Calcular anos de experiência nesta função
+            var yearsExp = '';
+            if (startDate) {
+                var sy = parseInt((startDate.match(/\d{4}/) || [new Date().getFullYear()])[0]);
+                var ey = endDate && endDate.toLowerCase() !== 'presente' ? parseInt((endDate.match(/\d{4}/) || [new Date().getFullYear()])[0]) : new Date().getFullYear();
+                var diff = ey - sy;
+                if (diff > 0) yearsExp = diff + ' anos nesta função';
+                else if (diff === 0) yearsExp = 'menos de 1 ano nesta função';
+            }
 
             triggerBtn.disabled = true;
             triggerBtn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
@@ -1462,13 +1505,22 @@
             fetch(API + '/cv/generate-responsibilities', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-                body: JSON.stringify({ jobTitle: jobTitle })
+                body: JSON.stringify({ jobTitle: jobTitle, company: company, yearsExp: yearsExp })
             })
             .then(function(r) { return r.json(); })
             .then(function(d) {
+                var text = d.responsibilities || d.error || 'Erro ao gerar';
                 var box = card.querySelector('.ai-suggestion-box');
                 var textEl = card.querySelector('.ai-resp-text');
-                textEl.textContent = d.responsibilities || d.error || 'Erro ao gerar';
+                textEl.setAttribute('data-raw', text);
+                // Renderiza cada bullet numa linha com destaque
+                var lines = text.split('\n').filter(function(l) { return l.trim(); });
+                textEl.innerHTML = lines.map(function(line) {
+                    var clean = line.replace(/^[•\-]\s*/, '');
+                    var verb = clean.match(/^(\w+)/);
+                    if (verb) clean = '<strong>' + verb[1] + '</strong>' + clean.slice(verb[1].length);
+                    return '<div style="padding:4px 0;border-bottom:1px solid rgba(201,169,110,0.15);line-height:1.5">• ' + clean + '</div>';
+                }).join('');
                 box.classList.add('show');
                 triggerBtn.disabled = false;
                 triggerBtn.innerHTML = '✨ Sugerir funções';
@@ -1483,7 +1535,8 @@
         function aiUseResponsibilities(useBtn) {
             var box = useBtn.closest('.ai-suggestion-box');
             var card = useBtn.closest('.item-card');
-            var text = box.querySelector('.ai-resp-text').textContent;
+            var textEl = box.querySelector('.ai-resp-text');
+            var text = textEl.getAttribute('data-raw') || textEl.textContent;
             var textarea = card.querySelector('textarea');
             if (textarea) textarea.value = text;
             box.classList.remove('show');

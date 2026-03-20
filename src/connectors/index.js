@@ -153,16 +153,55 @@ const openaiConnector = {
     const prompt = `Escreve uma carta de apresentação profissional do tipo "${typeLabels[type]||'candidatura'}" em português de Angola (formal mas directo).\n\nCandidato: ${name}\nCargo: ${role}${company?'\nEmpresa: '+company:''}${years?'\nExperiência: '+years:''}${skills?'\nCompetências/conquistas: '+skills:''}\n\nEstrutura: saudação, parágrafo de motivação, parágrafo de valor concreto, fecho com disponibilidade, despedida com o nome.\nMáximo 320 palavras. Devolve apenas o texto da carta.`;
     return claudeAsk(prompt, 800);
   },
-  generateSummary: async (name, jobTitle, experiences) => {
-    return claudeAsk(`Crie um resumo profissional de 4 linhas focado em ATS para ${name}, cargo ${jobTitle}, em português angolano. Experiências: ${experiences}. Retorne apenas o texto do resumo.`);
+  generateSummary: async (name, jobTitle, experiences, skills, sector, yearsExp) => {
+    const contextParts = [];
+    if (experiences) contextParts.push(`Experiências anteriores: ${experiences}`);
+    if (skills) contextParts.push(`Competências-chave: ${skills}`);
+    if (sector) contextParts.push(`Sector: ${sector}`);
+    if (yearsExp) contextParts.push(`Anos de experiência: ${yearsExp}`);
+    const context = contextParts.join('\n');
+    const prompt = `Escreve um resumo profissional de alto impacto para um CV, em português de Angola (formal e directo).
+
+Candidato: ${name || jobTitle}
+Cargo: ${jobTitle}
+${context}
+
+Requisitos obrigatórios:
+- 3 a 4 frases densas, sem introduções genéricas ("Sou um profissional…" é proibido)
+- Começa directamente com uma declaração de valor: anos de experiência, sector e especialização
+- Segunda frase: menciona 2-3 competências técnicas ou realizações concretas e mensuráveis
+- Terceira frase: aborda impacto gerado (crescimento, eficiência, liderança, receita, etc.)
+- Última frase: menciona ambição/objectivo profissional alinhado com o cargo
+- Usar verbos de acção fortes (liderou, desenvolveu, implementou, optimizou, geriu…)
+- Incluir palavras-chave ATS do sector
+- Tom: confiante, específico, sem clichés
+
+Devolve APENAS o texto do resumo, sem títulos, sem aspas, sem comentários.`;
+    return claudeAsk(prompt, 600);
   },
   atsScore: async (cvText, jobDescription) => {
     const raw = await claudeAsk(`Analise a compatibilidade ATS. CV: "${cvText}". VAGA: "${jobDescription}". Retorne APENAS JSON válido sem markdown: {"score":0-100,"keywords_missing":[],"suggestions":[]}`, 512);
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     return JSON.parse(jsonMatch ? jsonMatch[0] : raw);
   },
-  generateResponsibilities: async (jobTitle) => {
-    return claudeAsk(`Lista 6 responsabilidades profissionais típicas para o cargo "${jobTitle}" em português angolano. Formato: cada linha começa com "• " e é concisa (máx 12 palavras). Retorna apenas as 6 linhas, sem introdução.`, 400);
+  generateResponsibilities: async (jobTitle, company, sector, yearsExp) => {
+    const contextParts = [];
+    if (company) contextParts.push(`Empresa: ${company}`);
+    if (sector) contextParts.push(`Sector: ${sector}`);
+    if (yearsExp) contextParts.push(`Nível de senioridade: ${yearsExp} anos de experiência`);
+    const context = contextParts.length ? '\n' + contextParts.join('\n') : '';
+    const prompt = `Escreve 6 bullet points de responsabilidades e conquistas profissionais para o cargo "${jobTitle}" num CV, em português de Angola.${context}
+
+Requisitos obrigatórios para cada bullet point:
+- Começa com um verbo de acção forte no passado ou presente (Liderou, Desenvolveu, Implementou, Geriu, Optimizou, Coordenou, Reduziu, Aumentou, Garantiu, Supervisionou…)
+- Inclui contexto específico: o quê, como e/ou resultado mensurável (ex: "Reduziu o tempo de entrega em 30% através da automatização de processos")
+- Mistura responsabilidades do dia-a-dia com conquistas com impacto real
+- Evitar linguagem vaga como "responsável por", "encarregue de", "ajudou a"
+- Comprimento ideal: 15-25 palavras por bullet
+- Últimos 2 bullets devem mostrar conquistas mensuráveis ou de liderança
+
+Formato: cada linha começa com "• " sem numeração. Devolve apenas as 6 linhas, sem introdução nem conclusão.`;
+    return claudeAsk(prompt, 550);
   }
 };
 

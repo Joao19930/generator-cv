@@ -372,10 +372,10 @@ ${name}`
 
 // ── POST /api/cv/generate-summary — IA: gerar resumo ────────
 router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
-  const { name, jobTitle, experiences } = req.body;
+  const { name, jobTitle, experiences, skills, sector, yearsExp } = req.body;
   try {
     let summary;
-    try { summary = await openaiConnector.generateSummary(name, jobTitle, experiences); }
+    try { summary = await openaiConnector.generateSummary(name, jobTitle, experiences, skills, sector, yearsExp); }
     catch { summary = generateSummaryLocal(name, jobTitle, experiences); }
     res.json({ summary });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -383,11 +383,11 @@ router.post('/generate-summary', auth, toolLimiter, async (req, res) => {
 
 // ── POST /api/cv/generate-responsibilities — IA: sugerir responsabilidades ──
 router.post('/generate-responsibilities', auth, toolLimiter, async (req, res) => {
-  const { jobTitle } = req.body;
+  const { jobTitle, company, sector, yearsExp } = req.body;
   if (!jobTitle) return res.status(400).json({ error: 'jobTitle é obrigatório' });
   try {
     let responsibilities;
-    try { responsibilities = await openaiConnector.generateResponsibilities(jobTitle); }
+    try { responsibilities = await openaiConnector.generateResponsibilities(jobTitle, company, sector, yearsExp); }
     catch { responsibilities = generateResponsibilitiesLocal(jobTitle); }
     res.json({ responsibilities });
   } catch (err) { res.status(500).json({ error: err.message }); }
