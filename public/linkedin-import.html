@@ -7,99 +7,119 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
-.logo { font-size:22px; font-weight:800; text-decoration:none; color:#fff; position:fixed; top:24px; left:36px; }
+body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 24px 60px; }
+.logo { font-size:22px; font-weight:800; text-decoration:none; color:#fff; position:fixed; top:24px; left:36px; z-index:10; }
 .logo span { color:#c9a96e; }
-.back { position:fixed; top:24px; right:36px; color:#555; font-size:13px; text-decoration:none; border:1px solid #222; padding:8px 16px; border-radius:8px; }
+.back { position:fixed; top:24px; right:36px; color:#555; font-size:13px; text-decoration:none; border:1px solid #222; padding:8px 16px; border-radius:8px; z-index:10; }
 .back:hover { border-color:#c9a96e; color:#c9a96e; }
 
-/* Wizard container */
-.wizard { width:100%; max-width:560px; }
-.wizard-header { text-align:center; margin-bottom:40px; }
-.wizard-header h1 { font-size:28px; font-weight:800; margin-bottom:8px; }
+.wizard { width:100%; max-width:600px; margin-top:60px; }
+.wizard-header { text-align:center; margin-bottom:36px; }
+.wizard-header h1 { font-size:26px; font-weight:800; margin-bottom:8px; }
 .wizard-header h1 span { color:#c9a96e; }
 .wizard-header p { color:#555; font-size:14px; }
 
-/* Progress steps */
-.steps { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:40px; }
-.step-item { display:flex; align-items:center; gap:10px; }
-.step-circle { width:32px; height:32px; border-radius:50%; border:2px solid #333; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#555; transition:all .3s; flex-shrink:0; }
+/* Steps */
+.steps { display:flex; align-items:center; justify-content:center; margin-bottom:36px; }
+.step-item { display:flex; align-items:center; gap:8px; }
+.step-circle { width:30px; height:30px; border-radius:50%; border:2px solid #333; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#555; transition:all .3s; flex-shrink:0; }
 .step-circle.active { border-color:#c9a96e; color:#c9a96e; background:rgba(201,169,110,.1); }
 .step-circle.done { border-color:#22c55e; background:#22c55e; color:#000; }
-.step-label { font-size:12px; color:#555; font-weight:600; }
+.step-label { font-size:11px; color:#555; font-weight:600; white-space:nowrap; }
 .step-label.active { color:#c9a96e; }
 .step-label.done { color:#22c55e; }
-.step-line { width:48px; height:1px; background:#222; margin:0 8px; }
+.step-line { width:36px; height:1px; background:#222; margin:0 6px; flex-shrink:0; }
 .step-line.done { background:#22c55e; }
 
-/* Cards */
-.card { background:#111; border:1px solid #222; border-radius:16px; padding:32px; margin-bottom:20px; }
-
-/* Step panels */
+/* Card */
+.card { background:#111; border:1px solid #222; border-radius:16px; padding:28px; margin-bottom:16px; }
 .step-panel { display:none; }
 .step-panel.active { display:block; }
 
 /* Profile preview */
-.profile-preview { display:flex; align-items:center; gap:16px; padding:16px; background:#1a1a1a; border-radius:12px; margin-bottom:24px; }
-.profile-avatar { width:64px; height:64px; border-radius:50%; background:#222; border:2px solid #333; object-fit:cover; flex-shrink:0; font-size:24px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.profile-preview { display:flex; align-items:center; gap:16px; padding:14px 16px; background:#1a1a1a; border-radius:12px; margin-bottom:22px; }
+.profile-avatar { width:56px; height:56px; border-radius:50%; background:#222; border:2px solid #333; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; overflow:hidden; }
 .profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-.profile-info h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
-.profile-info p { font-size:13px; color:#555; }
-.linkedin-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(10,102,194,.2); border:1px solid rgba(10,102,194,.4); color:#60a5fa; font-size:11px; padding:4px 10px; border-radius:20px; margin-top:6px; }
+.profile-info h3 { font-size:15px; font-weight:700; margin-bottom:3px; }
+.profile-info p { font-size:12px; color:#555; }
+.li-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(10,102,194,.15); border:1px solid rgba(10,102,194,.35); color:#60a5fa; font-size:10px; padding:3px 8px; border-radius:20px; margin-top:5px; }
 
-/* Form groups */
-.form-group { margin-bottom:18px; }
-.form-group label { display:block; font-size:13px; color:#aaa; margin-bottom:8px; font-weight:500; }
-.form-group input, .form-group textarea, .form-group select { width:100%; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:12px 16px; color:#fff; font-size:14px; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:#c9a96e; }
-.form-group textarea { resize:vertical; min-height:90px; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* Forms */
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; color:#aaa; margin-bottom:7px; font-weight:600; }
+.form-group input, .form-group textarea, .form-group select { width:100%; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:11px 14px; color:#fff; font-size:13px; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+.form-group input:focus, .form-group textarea:focus { border-color:#c9a96e; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-/* Skills input */
-.skills-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; min-height:32px; }
-.skill-tag { background:rgba(201,169,110,.12); border:1px solid #c9a96e; color:#c9a96e; padding:5px 12px; border-radius:50px; font-size:12px; display:flex; align-items:center; gap:6px; }
-.skill-tag button { background:none; border:none; color:#c9a96e; cursor:pointer; font-size:14px; line-height:1; padding:0; }
-.skills-input-row { display:flex; gap:10px; }
-.skills-input-row input { flex:1; }
-.btn-add-skill { background:#c9a96e; color:#000; border:none; border-radius:8px; padding:10px 18px; cursor:pointer; font-weight:700; font-size:13px; font-family:'Inter',sans-serif; white-space:nowrap; }
+/* Paste box */
+.paste-box { background:#0d0d0d; border:1.5px dashed #2a2a2a; border-radius:12px; padding:20px; margin-bottom:20px; }
+.paste-box textarea { background:#111; border:1px solid #2a2a2a; border-radius:8px; width:100%; min-height:220px; resize:vertical; color:#ccc; font-size:13px; font-family:'Inter',sans-serif; padding:14px; outline:none; line-height:1.6; }
+.paste-box textarea:focus { border-color:#c9a96e; }
+.paste-instructions { margin-bottom:14px; }
+.paste-instructions h4 { font-size:14px; font-weight:700; color:#fff; margin-bottom:10px; }
+.paste-step { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; font-size:13px; color:#888; line-height:1.5; }
+.paste-step-n { width:22px; height:22px; border-radius:50%; background:#1a1a1a; border:1px solid #333; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c9a96e; flex-shrink:0; margin-top:1px; }
 
-/* AI suggestion */
-.ai-box { background:rgba(201,169,110,.07); border:1px solid rgba(201,169,110,.25); border-radius:10px; padding:16px; margin-top:12px; }
-.ai-box-title { font-size:12px; color:#c9a96e; font-weight:700; margin-bottom:8px; letter-spacing:.5px; text-transform:uppercase; }
-.ai-box-text { font-size:13px; color:#ddd; line-height:1.7; white-space:pre-line; }
-.ai-box-actions { display:flex; gap:10px; margin-top:12px; }
-.btn-use { background:#c9a96e; color:#000; border:none; border-radius:6px; padding:8px 18px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
-.btn-regen { background:none; border:1px solid #333; color:#aaa; border-radius:6px; padding:8px 14px; font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; }
-.btn-regen:hover { border-color:#c9a96e; color:#c9a96e; }
+/* AI parse result */
+.parse-result { background:rgba(34,197,94,.05); border:1px solid rgba(34,197,94,.2); border-radius:10px; padding:16px; margin-bottom:16px; display:none; }
+.parse-result-title { font-size:12px; color:#22c55e; font-weight:700; margin-bottom:10px; letter-spacing:.5px; }
+.parse-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.parse-tag { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:6px; padding:5px 10px; font-size:11px; color:#aaa; }
+.parse-tag strong { color:#fff; }
+
+/* Skills */
+.skills-wrap { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:9px; min-height:28px; }
+.skill-tag { background:rgba(201,169,110,.1); border:1px solid #c9a96e; color:#c9a96e; padding:4px 11px; border-radius:50px; font-size:12px; display:flex; align-items:center; gap:5px; }
+.skill-tag button { background:none; border:none; color:#c9a96e; cursor:pointer; font-size:13px; line-height:1; }
+.skills-row { display:flex; gap:8px; }
+.skills-row input { flex:1; }
+.btn-add-skill { background:#c9a96e; color:#000; border:none; border-radius:7px; padding:9px 16px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
+
+/* Exp card */
+.exp-card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:14px; margin-bottom:10px; position:relative; }
+.exp-card-remove { position:absolute; top:10px; right:10px; background:rgba(255,50,50,.1); color:#ff6666; border:none; border-radius:5px; padding:3px 9px; font-size:11px; cursor:pointer; }
+.exp-card .form-row { margin-bottom:8px; }
+.exp-card .form-group { margin-bottom:8px; }
+.exp-card .form-group:last-child { margin-bottom:0; }
+
+/* AI box */
+.ai-box { background:rgba(201,169,110,.06); border:1px solid rgba(201,169,110,.2); border-radius:9px; padding:14px; margin-top:10px; display:none; }
+.ai-box-title { font-size:11px; color:#c9a96e; font-weight:700; margin-bottom:7px; letter-spacing:.5px; text-transform:uppercase; }
+.ai-box-text { font-size:13px; color:#ddd; line-height:1.65; white-space:pre-line; }
+.ai-box-actions { display:flex; gap:8px; margin-top:10px; }
+.btn-use { background:#c9a96e; color:#000; border:none; border-radius:6px; padding:7px 16px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+.btn-regen { background:none; border:1px solid #333; color:#888; border-radius:6px; padding:7px 12px; font-size:12px; cursor:pointer; font-family:'Inter',sans-serif; }
 
 /* Template grid */
-.tpl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:4px; }
+.tpl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 .tpl-card { border:2px solid #222; border-radius:10px; overflow:hidden; cursor:pointer; transition:all .2s; }
 .tpl-card:hover, .tpl-card.selected { border-color:#c9a96e; transform:translateY(-2px); }
-.tpl-preview { height:90px; }
-.tpl-name { background:#1a1a1a; padding:8px; font-size:11px; text-align:center; color:#666; font-weight:600; }
+.tpl-preview { height:88px; }
+.tpl-name { background:#1a1a1a; padding:7px; font-size:10px; text-align:center; color:#666; font-weight:600; }
 .tpl-card.selected .tpl-name { color:#c9a96e; }
 
 /* Buttons */
-.btn-primary { width:100%; background:#c9a96e; color:#000; border:none; padding:16px; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .2s; margin-top:8px; }
+.btn-primary { width:100%; background:#c9a96e; color:#000; border:none; padding:15px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; margin-top:10px; transition:opacity .2s; }
 .btn-primary:hover { opacity:.9; }
 .btn-primary:disabled { opacity:.45; cursor:not-allowed; }
-.btn-secondary { width:100%; background:none; border:1px solid #333; color:#666; padding:14px; border-radius:10px; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; margin-top:8px; }
+.btn-secondary { width:100%; background:none; border:1px solid #2a2a2a; color:#555; padding:13px; border-radius:10px; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; margin-top:8px; }
 .btn-secondary:hover { border-color:#555; color:#aaa; }
-
-/* AI loading */
-.ai-loading { display:flex; align-items:center; gap:10px; color:#c9a96e; font-size:13px; padding:12px 0; }
-.ai-spin { animation:spin .7s linear infinite; font-size:16px; }
+.btn-ai { display:inline-flex; align-items:center; gap:5px; background:rgba(201,169,110,.1); border:1px solid rgba(201,169,110,.35); color:#c9a96e; padding:5px 12px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+.btn-ai:disabled { opacity:.4; cursor:not-allowed; }
+.ai-spin { animation:spin .7s linear infinite; display:inline-block; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* Toast */
-#toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:12px 24px; border-radius:10px; font-size:14px; border:1px solid #333; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; }
+/* Section label row */
+.section-label-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.section-label-row span { font-size:13px; font-weight:700; color:#ddd; }
+
+#toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:11px 22px; border-radius:9px; font-size:13px; border:1px solid #333; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; }
 #toast.show { opacity:1; }
 
-@media(max-width:600px) {
+@media(max-width:580px) {
   .form-row { grid-template-columns:1fr; }
   .tpl-grid { grid-template-columns:repeat(2,1fr); }
-  .logo, .back { position:static; margin-bottom:8px; }
+  .logo, .back { position:static; }
   body { justify-content:flex-start; padding-top:20px; }
 }
 </style>
@@ -112,28 +132,21 @@ body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-heigh
 <div class="wizard">
   <div class="wizard-header">
     <h1>Importar do <span>LinkedIn</span></h1>
-    <p>Cria um CV poderoso em 3 passos com os teus dados do LinkedIn</p>
+    <p>O teu CV profissional criado a partir do teu perfil LinkedIn em minutos</p>
   </div>
 
   <!-- Progress -->
   <div class="steps">
-    <div class="step-item">
-      <div class="step-circle active" id="sc0">1</div>
-      <div class="step-label active" id="sl0">Perfil</div>
-    </div>
+    <div class="step-item"><div class="step-circle active" id="sc0">1</div><div class="step-label active" id="sl0">Perfil</div></div>
     <div class="step-line" id="line01"></div>
-    <div class="step-item">
-      <div class="step-circle" id="sc1">2</div>
-      <div class="step-label" id="sl1">Detalhes</div>
-    </div>
+    <div class="step-item"><div class="step-circle" id="sc1">2</div><div class="step-label" id="sl1">LinkedIn</div></div>
     <div class="step-line" id="line12"></div>
-    <div class="step-item">
-      <div class="step-circle" id="sc2">3</div>
-      <div class="step-label" id="sl2">Template</div>
-    </div>
+    <div class="step-item"><div class="step-circle" id="sc2">3</div><div class="step-label" id="sl2">Detalhes</div></div>
+    <div class="step-line" id="line23"></div>
+    <div class="step-item"><div class="step-circle" id="sc3">4</div><div class="step-label" id="sl3">Template</div></div>
   </div>
 
-  <!-- STEP 0: Perfil importado -->
+  <!-- STEP 0: Dados básicos OAuth -->
   <div class="step-panel active" id="panel0">
     <div class="card">
       <div class="profile-preview">
@@ -141,52 +154,73 @@ body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-heigh
         <div class="profile-info">
           <h3 id="importedName">—</h3>
           <p id="importedEmail">—</p>
-          <div class="linkedin-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <div class="li-badge">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             Importado do LinkedIn
           </div>
         </div>
       </div>
-
       <div class="form-row">
-        <div class="form-group">
-          <label>Nome Completo</label>
-          <input type="text" id="f_name" placeholder="Nome completo">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="f_email" placeholder="email@exemplo.com">
-        </div>
+        <div class="form-group"><label>Nome Completo</label><input type="text" id="f_name" placeholder="Nome completo"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f_email" placeholder="email@exemplo.com"></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Telefone</label>
-          <input type="text" id="f_phone" placeholder="+244 900 000 000">
-        </div>
-        <div class="form-group">
-          <label>Localização</label>
-          <input type="text" id="f_address" placeholder="Ex: Luanda, Angola">
-        </div>
+        <div class="form-group"><label>Telefone</label><input type="text" id="f_phone" placeholder="+244 900 000 000"></div>
+        <div class="form-group"><label>Localização</label><input type="text" id="f_address" placeholder="Luanda, Angola"></div>
       </div>
-      <div class="form-group">
-        <label>LinkedIn (URL do perfil)</label>
-        <input type="text" id="f_linkedin" placeholder="linkedin.com/in/o-teu-perfil">
-      </div>
-
+      <div class="form-group"><label>URL do Perfil LinkedIn</label><input type="text" id="f_linkedin" placeholder="linkedin.com/in/o-teu-perfil"></div>
       <button class="btn-primary" onclick="goStep(1)">Continuar →</button>
     </div>
   </div>
 
-  <!-- STEP 1: Detalhes profissionais + IA -->
+  <!-- STEP 1: Colar perfil LinkedIn -->
   <div class="step-panel" id="panel1">
     <div class="card">
+      <div class="paste-instructions">
+        <h4>Cola o teu perfil LinkedIn aqui</h4>
+        <div class="paste-step"><div class="paste-step-n">1</div><span>Vai ao teu perfil LinkedIn → clica em <strong style="color:#fff">"Ver perfil completo"</strong></span></div>
+        <div class="paste-step"><div class="paste-step-n">2</div><span>Selecciona todo o texto da página (<strong style="color:#fff">Ctrl+A</strong>) e copia (<strong style="color:#fff">Ctrl+C</strong>)</span></div>
+        <div class="paste-step"><div class="paste-step-n">3</div><span>Cola aqui em baixo (<strong style="color:#fff">Ctrl+V</strong>)</span></div>
+      </div>
+      <div class="paste-box">
+        <textarea id="linkedinText" placeholder="Cola aqui o texto do teu perfil LinkedIn...
+
+Exemplo do que deve aparecer:
+João Silva
+Director Financeiro na Deloitte Angola
+
+Sobre
+Profissional com 12 anos de experiência em gestão financeira...
+
+Experiência
+Director Financeiro
+Deloitte Angola · Jan 2018 - Presente
+Luanda, Angola
+Responsável pela gestão de...
+
+Formação
+Licenciatura em Gestão Financeira
+Universidade Agostinho Neto · 2008 - 2012"></textarea>
+      </div>
+
+      <!-- Resultado da análise IA -->
+      <div class="parse-result" id="parseResult">
+        <div class="parse-result-title">✓ IA extraiu os seguintes dados</div>
+        <div class="parse-tags" id="parseTags"></div>
+      </div>
+
+      <button class="btn-primary" id="btnAnalyse" onclick="analyseLinkedIn()">✨ Analisar com IA</button>
+      <button class="btn-secondary" onclick="goStep(2)" id="btnSkipPaste">Saltar este passo →</button>
+      <button class="btn-secondary" onclick="goStep(0)">← Voltar</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Detalhes + IA -->
+  <div class="step-panel" id="panel2">
+    <div class="card">
       <div class="form-row">
-        <div class="form-group">
-          <label>Título Profissional *</label>
-          <input type="text" id="f_jobTitle" placeholder="Ex: Director Financeiro">
-        </div>
-        <div class="form-group">
-          <label>Anos de Experiência</label>
+        <div class="form-group"><label>Título Profissional *</label><input type="text" id="f_jobTitle" placeholder="Ex: Director Financeiro"></div>
+        <div class="form-group"><label>Anos de Experiência</label>
           <select id="f_years">
             <option value="1">Menos de 1 ano</option>
             <option value="2">1-3 anos</option>
@@ -197,91 +231,72 @@ body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-heigh
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Empresa Actual (ou mais recente)</label>
-        <input type="text" id="f_company" placeholder="Ex: Deloitte Angola">
-      </div>
-
-      <div class="form-group">
-        <label>Competências Principais</label>
-        <div class="skills-wrap" id="skillsWrap"></div>
-        <div class="skills-input-row">
-          <input type="text" id="skillInput" placeholder="Ex: Gestão Financeira" onkeydown="if(event.key==='Enter'||event.key===','){addSkill();event.preventDefault();}">
-          <button class="btn-add-skill" onclick="addSkill()">+ Adicionar</button>
-        </div>
-      </div>
-
-      <!-- Resumo gerado por IA -->
+      <!-- Resumo -->
       <div class="form-group">
         <label style="display:flex;align-items:center;justify-content:space-between">
           Resumo Profissional
-          <button onclick="generateSummary()" style="background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.4);color:#c9a96e;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif" id="btnGenSummary">✨ Gerar com IA</button>
+          <button class="btn-ai" id="btnGenSummary" onclick="generateSummary()">✨ Gerar com IA</button>
         </label>
-        <textarea id="f_summary" placeholder="Resumo profissional... (ou gera com IA)"></textarea>
-        <div id="summaryAiBox" style="display:none" class="ai-box">
+        <textarea id="f_summary" placeholder="Escreve ou gera com IA..."></textarea>
+        <div class="ai-box" id="summaryAiBox">
           <div class="ai-box-title">✨ Sugestão da IA</div>
           <div class="ai-box-text" id="summaryAiText"></div>
           <div class="ai-box-actions">
-            <button class="btn-use" onclick="useSummary()">✓ Usar este resumo</button>
-            <button class="btn-regen" onclick="generateSummary()">↻ Gerar outro</button>
+            <button class="btn-use" onclick="useSummary()">✓ Usar</button>
+            <button class="btn-regen" onclick="generateSummary()">↻ Outro</button>
           </div>
         </div>
-        <div id="summaryLoading" style="display:none" class="ai-loading"><span class="ai-spin">⟳</span> A gerar resumo com IA...</div>
+      </div>
+
+      <!-- Competências -->
+      <div class="form-group">
+        <label>Competências</label>
+        <div class="skills-wrap" id="skillsWrap"></div>
+        <div class="skills-row">
+          <input type="text" id="skillInput" placeholder="Ex: Gestão Financeira" onkeydown="if(event.key==='Enter'||event.key===','){addSkill();event.preventDefault();}">
+          <button class="btn-add-skill" onclick="addSkill()">+</button>
+        </div>
       </div>
 
       <!-- Experiências -->
-      <div class="form-group" style="margin-top:8px">
-        <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          Experiências Profissionais
-          <button onclick="addExp()" style="background:rgba(201,169,110,.1);border:1px dashed #c9a96e;color:#c9a96e;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">+ Adicionar</button>
-        </label>
-        <div id="expContainer">
-          <!-- primeiro card fixo -->
-          <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:16px;margin-bottom:12px" id="exp-0">
+      <div class="form-group">
+        <div class="section-label-row">
+          <span>Experiências Profissionais</span>
+          <button class="btn-ai" onclick="addExp()">+ Adicionar</button>
+        </div>
+        <div id="expContainer"></div>
+      </div>
+
+      <!-- Formação -->
+      <div class="form-group">
+        <div class="section-label-row"><span>Formação Académica</span></div>
+        <div id="eduContainer">
+          <div class="exp-card" id="edu-0">
             <div class="form-row">
-              <div class="form-group" style="margin-bottom:10px"><label style="font-size:12px">Cargo</label><input type="text" placeholder="Ex: Director Financeiro"></div>
-              <div class="form-group" style="margin-bottom:10px"><label style="font-size:12px">Empresa</label><input type="text" placeholder="Ex: Banco BIC"></div>
+              <div class="form-group"><label>Grau / Curso</label><input type="text" id="e_degree" placeholder="Ex: Licenciatura em Gestão"></div>
+              <div class="form-group"><label>Instituição</label><input type="text" id="e_institution" placeholder="Ex: Universidade Agostinho Neto"></div>
             </div>
-            <div class="form-row">
-              <div class="form-group" style="margin-bottom:0"><label style="font-size:12px">Início</label><input type="text" placeholder="Jan 2018"></div>
-              <div class="form-group" style="margin-bottom:0"><label style="font-size:12px">Fim</label><input type="text" placeholder="Presente"></div>
-            </div>
-            <div class="form-group" style="margin-top:10px;margin-bottom:0">
-              <label style="font-size:12px;display:flex;align-items:center;justify-content:space-between">
-                Descrição
-                <button onclick="genResp(this)" style="background:none;border:none;color:#c9a96e;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif">✨ Sugerir funções</button>
-              </label>
-              <textarea style="min-height:70px" placeholder="Responsabilidades e conquistas..."></textarea>
-            </div>
+            <div class="form-group" style="margin-bottom:0"><label>Ano</label><input type="text" id="e_year" placeholder="2012"></div>
           </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Formação Académica</label>
-        <div class="form-row">
-          <input type="text" id="f_degree" placeholder="Ex: Licenciatura em Finanças" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:12px 16px;color:#fff;font-size:13px;outline:none">
-          <input type="text" id="f_institution" placeholder="Ex: Universidade Agostinho Neto" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:12px 16px;color:#fff;font-size:13px;outline:none">
-        </div>
-      </div>
-
-      <button class="btn-primary" onclick="goStep(2)">Continuar →</button>
-      <button class="btn-secondary" onclick="goStep(0)">← Voltar</button>
-    </div>
-  </div>
-
-  <!-- STEP 2: Template -->
-  <div class="step-panel" id="panel2">
-    <div class="card">
-      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Escolhe o teu template</div>
-      <div style="font-size:13px;color:#555;margin-bottom:20px">Selecciona o design que melhor representa o teu perfil</div>
-      <div class="tpl-grid" id="tplGrid"></div>
-      <button class="btn-primary" id="btnCreate" onclick="createCV()">🚀 Criar o meu CV agora</button>
+      <button class="btn-primary" onclick="goStep(3)">Continuar →</button>
       <button class="btn-secondary" onclick="goStep(1)">← Voltar</button>
     </div>
   </div>
 
-</div><!-- /wizard -->
+  <!-- STEP 3: Template -->
+  <div class="step-panel" id="panel3">
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:5px">Escolhe o teu template</div>
+      <div style="font-size:12px;color:#555;margin-bottom:18px">O design do teu CV profissional</div>
+      <div class="tpl-grid" id="tplGrid"></div>
+      <button class="btn-primary" id="btnCreate" onclick="createCV()">🚀 Criar CV agora</button>
+      <button class="btn-secondary" onclick="goStep(2)">← Voltar</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
@@ -289,74 +304,140 @@ body { font-family:'Inter',sans-serif; background:#0a0a0a; color:#fff; min-heigh
 var API = '/api';
 var token = localStorage.getItem('cv_token') || localStorage.getItem('token') || '';
 var skills = [];
-var expCount = 1;
-var selectedTplId = 1;
-var selectedTplSlug = 'cf-classico-azul';
+var expCount = 0;
+var selectedTplId = 2;
+var selectedTplSlug = 'cf-executivo-escuro';
+var photoUrl = '';
 
 var TEMPLATES = [
-  { id:2,  slug:'cf-executivo-escuro',    name:'Executivo Escuro',   preview:'background:linear-gradient(135deg,#0f172a 0,#0f172a 45%,#1e293b 45%)' },
-  { id:1,  slug:'cf-classico-azul',       name:'Clássico Azul',      preview:'background:linear-gradient(135deg,#1e3a5f 0,#1e3a5f 38%,#fff 38%)' },
-  { id:3,  slug:'cf-verde-profissional',  name:'Verde Profissional', preview:'background:linear-gradient(135deg,#14532d 0,#14532d 40%,#fff 40%)' },
-  { id:8,  slug:'sf-corporate-azul',      name:'Corporate Azul',     preview:'background:#fafafa;border-top:5px solid #1d4ed8' },
-  { id:12, slug:'sf-navy-executivo',      name:'Navy Executivo',     preview:'background:#fff;border-top:5px solid #0f172a' },
-  { id:14, slug:'ats-profissional',       name:'ATS Profissional',   preview:'background:#fff;border-left:4px solid #374151' },
+  { id:2,  slug:'cf-executivo-escuro',   name:'Executivo Escuro',   preview:'background:linear-gradient(135deg,#0f172a 0,#0f172a 45%,#1e293b 45%)' },
+  { id:1,  slug:'cf-classico-azul',      name:'Clássico Azul',      preview:'background:linear-gradient(135deg,#1e3a5f 0,#1e3a5f 38%,#fff 38%)' },
+  { id:3,  slug:'cf-verde-profissional', name:'Verde Profissional', preview:'background:linear-gradient(135deg,#14532d 0,#14532d 40%,#fff 40%)' },
+  { id:8,  slug:'sf-corporate-azul',     name:'Corporate Azul',     preview:'background:#fafafa;border-top:5px solid #1d4ed8' },
+  { id:12, slug:'sf-navy-executivo',     name:'Navy Executivo',     preview:'background:#fff;border-top:5px solid #0f172a' },
+  { id:14, slug:'ats-profissional',      name:'ATS Profissional',   preview:'background:#fff;border-left:4px solid #374151' },
 ];
 
-// ── Ler dados do URL ───────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────
 (function init() {
   if (!token) { window.location.href = '/login'; return; }
   var p = new URLSearchParams(window.location.search);
   var name  = p.get('name')  || '';
   var email = p.get('email') || '';
   var photo = p.get('photo') || '';
+  photoUrl = photo;
 
   document.getElementById('importedName').textContent  = name  || 'Nome não disponível';
-  document.getElementById('importedEmail').textContent = email || 'Email não disponível';
+  document.getElementById('importedEmail').textContent = email || '';
   document.getElementById('f_name').value  = name;
   document.getElementById('f_email').value = email;
 
   var av = document.getElementById('avatarEl');
-  if (photo) { av.innerHTML = '<img src="' + photo + '" onerror="this.style.display=\'none\'">'; }
+  if (photo) av.innerHTML = '<img src="' + photo + '" onerror="this.parentElement.textContent=\'👤\'">';
 
-  // Detectar LinkedIn URL do perfil a partir da conta
   try {
     var u = JSON.parse(atob(token.split('.')[1]));
     if (u.linkedin_id) document.getElementById('f_linkedin').value = 'linkedin.com/in/' + u.linkedin_id;
-  } catch(_) {}
+  } catch(_){}
 
+  // Criar primeiro exp card vazio
+  addExp();
   buildTemplateGrid();
 })();
 
-// ── Steps ─────────────────────────────────────────────────
+// ── Steps ──────────────────────────────────────────────────
+var TOTAL_STEPS = 4;
 function goStep(n) {
-  if (n === 1) {
-    if (!document.getElementById('f_name').value.trim()) { showToast('Preenche o teu nome'); return; }
-  }
-  if (n === 2) {
-    if (!document.getElementById('f_jobTitle').value.trim()) { showToast('Preenche o título profissional'); return; }
-  }
-  [0,1,2].forEach(function(i) {
+  if (n === 1 && !document.getElementById('f_name').value.trim()) { showToast('Preenche o teu nome'); return; }
+  if (n === 3 && !document.getElementById('f_jobTitle').value.trim()) { showToast('Preenche o título profissional'); return; }
+
+  for (var i = 0; i < TOTAL_STEPS; i++) {
     document.getElementById('panel' + i).classList.toggle('active', i === n);
     var sc = document.getElementById('sc' + i);
     var sl = document.getElementById('sl' + i);
-    if (i < n)       { sc.className = 'step-circle done'; sc.textContent = '✓'; sl.className = 'step-label done'; }
-    else if (i === n){ sc.className = 'step-circle active'; sc.textContent = (i+1); sl.className = 'step-label active'; }
-    else             { sc.className = 'step-circle'; sc.textContent = (i+1); sl.className = 'step-label'; }
-    if (i < 2) {
-      document.getElementById('line0' + (i+1) || 'line12').className = 'step-line' + (i < n ? ' done' : '');
-    }
-  });
+    if (i < n)        { sc.className = 'step-circle done'; sc.textContent = '✓'; sl.className = 'step-label done'; }
+    else if (i === n) { sc.className = 'step-circle active'; sc.textContent = i+1; sl.className = 'step-label active'; }
+    else              { sc.className = 'step-circle'; sc.textContent = i+1; sl.className = 'step-label'; }
+  }
   document.getElementById('line01').className = 'step-line' + (n > 0 ? ' done' : '');
   document.getElementById('line12').className = 'step-line' + (n > 1 ? ' done' : '');
-  window.scrollTo(0,0);
+  document.getElementById('line23').className = 'step-line' + (n > 2 ? ' done' : '');
+  window.scrollTo(0, 0);
+}
+
+// ── Analisar LinkedIn com IA ───────────────────────────────
+function analyseLinkedIn() {
+  var text = document.getElementById('linkedinText').value.trim();
+  if (text.length < 30) { showToast('Cola o texto do perfil LinkedIn primeiro'); return; }
+
+  var btn = document.getElementById('btnAnalyse');
+  btn.disabled = true;
+  btn.textContent = '⟳ A analisar...';
+
+  fetch(API + '/cv/parse-linkedin-text', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ text: text })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) { showToast('Erro: ' + d.error); btn.disabled=false; btn.textContent='✨ Analisar com IA'; return; }
+
+    // Preencher campos
+    if (d.fullName)  document.getElementById('f_name').value    = d.fullName;
+    if (d.jobTitle)  document.getElementById('f_jobTitle').value = d.jobTitle;
+    if (d.summary)   document.getElementById('f_summary').value  = d.summary;
+    if (d.phone)     document.getElementById('f_phone').value    = d.phone;
+    if (d.address)   document.getElementById('f_address').value  = d.address;
+
+    // Skills
+    if (d.skills && d.skills.length) {
+      skills = d.skills.slice(0, 12);
+      renderSkills();
+    }
+
+    // Experiências
+    if (d.experience && d.experience.length) {
+      document.getElementById('expContainer').innerHTML = '';
+      expCount = 0;
+      d.experience.forEach(function(e) { addExp(e); });
+    }
+
+    // Formação
+    if (d.education && d.education.length) {
+      var edu = d.education[0];
+      if (edu.degree)      document.getElementById('e_degree').value      = edu.degree;
+      if (edu.institution) document.getElementById('e_institution').value = edu.institution;
+      if (edu.year)        document.getElementById('e_year').value        = edu.year;
+    }
+
+    // Mostrar resumo do que foi extraído
+    var tags = [];
+    if (d.fullName)  tags.push('<div class="parse-tag"><strong>Nome</strong> ' + esc(d.fullName) + '</div>');
+    if (d.jobTitle)  tags.push('<div class="parse-tag"><strong>Cargo</strong> ' + esc(d.jobTitle) + '</div>');
+    if (d.experience && d.experience.length) tags.push('<div class="parse-tag"><strong>' + d.experience.length + '</strong> experiências</div>');
+    if (d.education  && d.education.length)  tags.push('<div class="parse-tag"><strong>' + d.education.length  + '</strong> formações</div>');
+    if (d.skills     && d.skills.length)     tags.push('<div class="parse-tag"><strong>' + d.skills.length     + '</strong> competências</div>');
+    if (d.summary)   tags.push('<div class="parse-tag"><strong>Sobre</strong> extraído</div>');
+    document.getElementById('parseTags').innerHTML = tags.join('');
+    document.getElementById('parseResult').style.display = 'block';
+
+    btn.disabled = false;
+    btn.textContent = '✨ Analisar com IA';
+    showToast('✓ Perfil analisado! Continua para rever os dados.');
+    setTimeout(function() { goStep(2); }, 1500);
+  })
+  .catch(function(err) {
+    showToast('Erro ao analisar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '✨ Analisar com IA';
+  });
 }
 
 // ── Skills ────────────────────────────────────────────────
 function addSkill() {
   var inp = document.getElementById('skillInput');
-  var val = inp.value.trim();
-  if (!val) return;
-  val.split(',').forEach(function(s) {
+  inp.value.trim().split(',').forEach(function(s) {
     s = s.trim();
     if (s && skills.indexOf(s) === -1) skills.push(s);
   });
@@ -365,39 +446,38 @@ function addSkill() {
 }
 function removeSkill(i) { skills.splice(i,1); renderSkills(); }
 function renderSkills() {
-  var html = '';
-  skills.forEach(function(s,i) {
-    html += '<div class="skill-tag">' + esc(s) + '<button onclick="removeSkill(' + i + ')">×</button></div>';
-  });
-  document.getElementById('skillsWrap').innerHTML = html;
+  document.getElementById('skillsWrap').innerHTML = skills.map(function(s,i) {
+    return '<div class="skill-tag">' + esc(s) + '<button onclick="removeSkill(' + i + ')">×</button></div>';
+  }).join('');
 }
 
-// ── Dynamic exp cards ──────────────────────────────────────
-function addExp() {
+// ── Exp cards ─────────────────────────────────────────────
+function addExp(data) {
   var id = 'exp-' + expCount++;
-  var html = '<div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:16px;margin-bottom:12px;position:relative" id="' + id + '">' +
-    '<button onclick="this.parentElement.remove()" style="position:absolute;top:10px;right:10px;background:rgba(255,50,50,.12);color:#ff5555;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer">Remover</button>' +
-    '<div class="form-row"><div class="form-group" style="margin-bottom:10px"><label style="font-size:12px">Cargo</label><input type="text" placeholder="Cargo"></div>' +
-    '<div class="form-group" style="margin-bottom:10px"><label style="font-size:12px">Empresa</label><input type="text" placeholder="Empresa"></div></div>' +
-    '<div class="form-row"><div class="form-group" style="margin-bottom:0"><label style="font-size:12px">Início</label><input type="text" placeholder="Jan 2018"></div>' +
-    '<div class="form-group" style="margin-bottom:0"><label style="font-size:12px">Fim</label><input type="text" placeholder="Presente"></div></div>' +
-    '<div class="form-group" style="margin-top:10px;margin-bottom:0"><label style="font-size:12px;display:flex;align-items:center;justify-content:space-between">Descrição' +
-    '<button onclick="genResp(this)" style="background:none;border:none;color:#c9a96e;font-size:11px;cursor:pointer;font-family:\'Inter\',sans-serif">✨ Sugerir funções</button></label>' +
-    '<textarea style="min-height:70px" placeholder="Responsabilidades e conquistas..."></textarea></div></div>';
+  var d = data || {};
+  var html = '<div class="exp-card" id="' + id + '">' +
+    (expCount > 1 ? '<button class="exp-card-remove" onclick="document.getElementById(\'' + id + '\').remove()">✕</button>' : '') +
+    '<div class="form-row"><div class="form-group"><label>Cargo</label><input type="text" placeholder="Ex: Director Financeiro" value="' + esc(d.title||'') + '"></div>' +
+    '<div class="form-group"><label>Empresa</label><input type="text" placeholder="Ex: Deloitte" value="' + esc(d.company||'') + '"></div></div>' +
+    '<div class="form-row"><div class="form-group"><label>Início</label><input type="text" placeholder="Jan 2018" value="' + esc(d.start||'') + '"></div>' +
+    '<div class="form-group"><label>Fim</label><input type="text" placeholder="Presente" value="' + esc(d.end||'') + '"></div></div>' +
+    '<div class="form-group" style="margin-bottom:0"><label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
+    '<button class="btn-ai" onclick="genResp(this)" style="font-size:10px">✨ Sugerir</button></label>' +
+    '<textarea style="min-height:65px" placeholder="Responsabilidades...">' + esc(d.description||'') + '</textarea></div></div>';
   document.getElementById('expContainer').insertAdjacentHTML('beforeend', html);
 }
 
 // ── IA: Gerar resumo ───────────────────────────────────────
 function generateSummary() {
-  var jobTitle = document.getElementById('f_jobTitle').value.trim() || '';
-  var name     = document.getElementById('f_name').value.trim() || '';
+  var jobTitle = document.getElementById('f_jobTitle').value.trim();
+  var name     = document.getElementById('f_name').value.trim();
   if (!jobTitle) { showToast('Preenche o título profissional primeiro'); return; }
 
+  var btn = document.getElementById('btnGenSummary');
+  btn.disabled = true; btn.innerHTML = '<span class="ai-spin">⟳</span>';
   document.getElementById('summaryAiBox').style.display = 'none';
-  document.getElementById('summaryLoading').style.display = 'flex';
-  document.getElementById('btnGenSummary').disabled = true;
 
-  var expCards = document.querySelectorAll('#expContainer [id^="exp-"]');
+  var expCards = document.querySelectorAll('#expContainer .exp-card');
   var expList = [];
   expCards.forEach(function(c) {
     var ins = c.querySelectorAll('input');
@@ -411,18 +491,12 @@ function generateSummary() {
   })
   .then(function(r){ return r.json(); })
   .then(function(d) {
-    document.getElementById('summaryAiText').textContent = d.summary || d.error || 'Erro';
+    document.getElementById('summaryAiText').textContent = d.summary || d.error || '';
     document.getElementById('summaryAiBox').style.display = 'block';
-    document.getElementById('summaryLoading').style.display = 'none';
-    document.getElementById('btnGenSummary').disabled = false;
+    btn.disabled = false; btn.innerHTML = '✨ Gerar';
   })
-  .catch(function() {
-    showToast('Erro ao contactar IA');
-    document.getElementById('summaryLoading').style.display = 'none';
-    document.getElementById('btnGenSummary').disabled = false;
-  });
+  .catch(function() { showToast('Erro IA'); btn.disabled=false; btn.innerHTML='✨ Gerar'; });
 }
-
 function useSummary() {
   document.getElementById('f_summary').value = document.getElementById('summaryAiText').textContent;
   document.getElementById('summaryAiBox').style.display = 'none';
@@ -430,12 +504,11 @@ function useSummary() {
 
 // ── IA: Sugerir responsabilidades ─────────────────────────
 function genResp(btn) {
-  var card = btn.closest('[id^="exp-"]');
+  var card = btn.closest('.exp-card');
   var ins  = card.querySelectorAll('input');
   var jobTitle = (ins[0] && ins[0].value.trim()) ? ins[0].value.trim() : document.getElementById('f_jobTitle').value.trim();
   if (!jobTitle) { showToast('Preenche o cargo primeiro'); return; }
-  btn.textContent = '⟳ A gerar...';
-  btn.disabled = true;
+  btn.disabled = true; btn.innerHTML = '<span class="ai-spin">⟳</span>';
   fetch(API + '/cv/generate-responsibilities', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
@@ -444,33 +517,24 @@ function genResp(btn) {
   .then(function(r){ return r.json(); })
   .then(function(d) {
     var ta = card.querySelector('textarea');
-    if (ta) ta.value = d.responsibilities || d.error || '';
-    btn.textContent = '✨ Sugerir funções';
-    btn.disabled = false;
+    if (ta) ta.value = d.responsibilities || '';
+    btn.disabled = false; btn.innerHTML = '✨ Sugerir';
   })
-  .catch(function() {
-    showToast('Erro ao contactar IA');
-    btn.textContent = '✨ Sugerir funções';
-    btn.disabled = false;
-  });
+  .catch(function() { showToast('Erro IA'); btn.disabled=false; btn.innerHTML='✨ Sugerir'; });
 }
 
 // ── Templates ─────────────────────────────────────────────
 function buildTemplateGrid() {
-  var html = '';
-  TEMPLATES.forEach(function(t, i) {
-    html += '<div class="tpl-card' + (i===0?' selected':'') + '" onclick="selectTpl(this,' + t.id + ',\'' + t.slug + '\')">' +
+  document.getElementById('tplGrid').innerHTML = TEMPLATES.map(function(t, i) {
+    return '<div class="tpl-card' + (i===0?' selected':'') + '" onclick="selectTpl(this,' + t.id + ',\'' + t.slug + '\')">' +
       '<div class="tpl-preview" style="' + t.preview + '"></div>' +
       '<div class="tpl-name">' + t.name + '</div></div>';
-  });
-  document.getElementById('tplGrid').innerHTML = html;
+  }).join('');
 }
-
 function selectTpl(el, id, slug) {
   document.querySelectorAll('.tpl-card').forEach(function(c){ c.classList.remove('selected'); });
   el.classList.add('selected');
-  selectedTplId   = id;
-  selectedTplSlug = slug;
+  selectedTplId = id; selectedTplSlug = slug;
 }
 
 // ── Criar CV ───────────────────────────────────────────────
@@ -479,11 +543,9 @@ function createCV() {
   if (!name) { showToast('Preenche o nome'); return; }
 
   var btn = document.getElementById('btnCreate');
-  btn.disabled = true;
-  btn.textContent = '⟳ A criar CV...';
+  btn.disabled = true; btn.textContent = '⟳ A criar CV...';
 
-  // Recolher experiências
-  var expCards = document.querySelectorAll('#expContainer [id^="exp-"]');
+  var expCards = document.querySelectorAll('#expContainer .exp-card');
   var experience = [];
   expCards.forEach(function(card) {
     var ins = card.querySelectorAll('input');
@@ -493,28 +555,30 @@ function createCV() {
     }
   });
 
-  var photo = document.querySelector('#avatarEl img');
+  var education = [];
+  var deg  = document.getElementById('e_degree').value.trim();
+  var inst = document.getElementById('e_institution').value.trim();
+  if (deg || inst) education.push({ degree: deg, institution: inst, year: document.getElementById('e_year').value });
+
   var cvData = {
-    fullName:     name,
-    name:         name,
-    jobTitle:     document.getElementById('f_jobTitle').value,
-    email:        document.getElementById('f_email').value,
-    phone:        document.getElementById('f_phone').value,
-    address:      document.getElementById('f_address').value,
-    linkedin:     document.getElementById('f_linkedin').value,
-    summary:      document.getElementById('f_summary').value,
-    experience:   experience,
-    education:    [{ degree: document.getElementById('f_degree').value, institution: document.getElementById('f_institution').value }].filter(function(e){ return e.degree; }),
-    skills:       skills,
-    languages:    [],
-    photo:        photo ? photo.src : null,
-    template:     selectedTplId,
+    fullName: name, name: name,
+    jobTitle:  document.getElementById('f_jobTitle').value,
+    email:     document.getElementById('f_email').value,
+    phone:     document.getElementById('f_phone').value,
+    address:   document.getElementById('f_address').value,
+    linkedin:  document.getElementById('f_linkedin').value,
+    summary:   document.getElementById('f_summary').value,
+    experience: experience,
+    education:  education,
+    skills:     skills,
+    languages:  [],
+    photo:      photoUrl || null,
+    template:   selectedTplId,
     templateSlug: selectedTplSlug,
     templateName: selectedTplSlug,
-    source:       'linkedin-import'
+    source: 'linkedin-import'
   };
 
-  // Criar CV via API
   fetch(API + '/templates/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
@@ -522,25 +586,23 @@ function createCV() {
   })
   .then(function(r){ return r.json(); })
   .then(function(d) {
-    if (!d.cvId) { showToast(d.error || 'Erro ao criar CV'); btn.disabled=false; btn.textContent='🚀 Criar o meu CV agora'; return; }
-    // Guardar conteúdo
+    if (!d.cvId) { showToast(d.error || 'Erro ao criar CV'); btn.disabled=false; btn.textContent='🚀 Criar CV agora'; return; }
     cvData.cvId = d.cvId;
     sessionStorage.setItem('cvData', JSON.stringify(cvData));
     return fetch(API + '/cv/' + d.cvId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ title: name + ' — CV', contentJson: cvData, templateId: selectedTplId, templateName: selectedTplSlug })
-    }).then(function(){ window.location.href = '/editor?cv=' + d.cvId + '&imported=linkedin'; });
+    }).then(function() { window.location.href = '/editor?cv=' + d.cvId; });
   })
   .catch(function(err) {
     showToast('Erro: ' + err.message);
-    btn.disabled = false;
-    btn.textContent = '🚀 Criar o meu CV agora';
+    btn.disabled = false; btn.textContent = '🚀 Criar CV agora';
   });
 }
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },3000); }
+function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },3500); }
 </script>
 </body>
 </html>

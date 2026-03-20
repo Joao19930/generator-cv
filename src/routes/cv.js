@@ -8,7 +8,7 @@ const { sql }  = require('../config/database');
 const multer   = require('multer');
 const { openaiConnector, pdfConnector, s3Connector,
         cloudinaryConnector, emailConnector, smtpConnector,
-        gaConnector, mixpanelConnector } = require('../connectors');
+        gaConnector, mixpanelConnector, claudeAsk } = require('../connectors');
 const { auth, premiumOnly } = require('../middleware/auth');
 const { toolLimiter }       = require('../middleware/rateLimiter');
 
@@ -391,6 +391,51 @@ router.post('/generate-responsibilities', auth, toolLimiter, async (req, res) =>
     catch { responsibilities = generateResponsibilitiesLocal(jobTitle); }
     res.json({ responsibilities });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/cv/parse-linkedin-text — IA: extrair perfil do texto LinkedIn ──
+router.post('/parse-linkedin-text', auth, toolLimiter, async (req, res) => {
+  const { text } = req.body;
+  if (!text || text.trim().length < 30)
+    return res.status(400).json({ error: 'Texto do perfil muito curto' });
+
+  const prompt = `Analisa este texto copiado de um perfil LinkedIn e extrai os dados estruturados.
+Devolve APENAS JSON válido, sem markdown, sem explicações, com esta estrutura exacta:
+{
+  "fullName": "",
+  "jobTitle": "",
+  "summary": "",
+  "phone": "",
+  "address": "",
+  "linkedin": "",
+  "experience": [
+    { "title": "", "company": "", "start": "", "end": "", "description": "" }
+  ],
+  "education": [
+    { "degree": "", "institution": "", "year": "" }
+  ],
+  "skills": []
+}
+
+Regras:
+- Se um campo não existir no texto, deixa string vazia ou array vazio
+- summary = secção "Sobre" ou "About" do perfil
+- Para experiências, preserva as datas tal como aparecem
+- Para skills, extrai palavras-chave de competências mencionadas
+- Devolve no máximo 6 experiências e 5 formações
+
+TEXTO DO PERFIL:
+${text.substring(0, 6000)}`;
+
+  try {
+    const raw = await claudeAsk(prompt, 2000);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.status(500).json({ error: 'IA não devolveu JSON válido' });
+    const parsed = JSON.parse(jsonMatch[0]);
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── POST /api/cv/ats-score — Score ATS público ──────────────

@@ -380,5 +380,6 @@ module.exports = {
   recaptchaConnector,   // 17 reCAPTCHA v3
   intercomConnector,    // 18 Intercom
   zapierConnector,      // 19 Zapier Webhooks
-  jobConnector          // 20 Indeed / Job Boards
+  jobConnector,         // 20 Indeed / Job Boards
+  claudeAsk             // Claude directo (para rotas que precisam)
 };
