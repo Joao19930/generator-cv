@@ -1,6 +1,6 @@
 // src/connectors/index.js
 // ─────────────────────────────────────────────────────────────
-// 20 CONECTORES — CV Generator Pro
+// 20 CONECTORES — CV Premium
 // Cada conector é um objecto com métodos prontos a usar
 // ─────────────────────────────────────────────────────────────
 require('dotenv').config();
@@ -28,7 +28,7 @@ const emailConnector = {
 
   sendPasswordReset: (toEmail, token) =>
     getSG().send({ to: toEmail, from: process.env.EMAIL_FROM,
-      subject: 'Redefinição de senha — CV Generator',
+      subject: 'Redefinição de senha — CV Premium',
       html: `<p>Clique <a href="${process.env.APP_URL}/reset?token=${token}">aqui</a> para redefinir a sua senha. Válido 1 hora.</p>` })
 };
 
@@ -269,7 +269,7 @@ const linkedinConnector = {
 const twilioConnector = {
   sendOTP: (phone, otp) => {
     const t = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    return t.messages.create({ body: `CV Generator — código: ${otp}. Válido 10 min.`, from: process.env.TWILIO_PHONE, to: phone });
+    return t.messages.create({ body: `CV Premium — código: ${otp}. Válido 10 min.`, from: process.env.TWILIO_PHONE, to: phone });
   }
 };
 

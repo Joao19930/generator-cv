@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "agency-agents",
+			"path": "../../../Git_Clone_Agencias/agency-agents"
+		}
+	],
+	"settings": {}
+}

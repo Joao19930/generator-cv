@@ -1,6 +1,6 @@
 // src/server.js
 // ─────────────────────────────────────────────────────────────
-// CV Generator Pro — Servidor Principal
+// CV Premium — Servidor Principal
 // Arquitectura tipo Resume.io / Zety
 // ─────────────────────────────────────────────────────────────
 require('dotenv').config();
@@ -324,8 +324,8 @@ async function migrateChatKnowledge(pool) {
      )`,
     // Secções de conhecimento iniciais
     `INSERT INTO chat_knowledge (section_key, section_title, content)
-     SELECT 'product_info', 'O que é o CV Generator Pro',
-       'O CV Generator Pro é uma plataforma profissional angolana para criar CVs modernos e otimizados para ATS. Oferecemos mais de 13 templates profissionais, geração de PDF de alta qualidade, análise ATS, e ferramentas de IA para melhorar o CV. Disponível em plano gratuito e plano Premium.'
+     SELECT 'product_info', 'O que é o CV Premium',
+       'O CV Premium é uma plataforma profissional angolana para criar CVs modernos e otimizados para ATS. Oferecemos mais de 13 templates profissionais, geração de PDF de alta qualidade, análise ATS, e ferramentas de IA para melhorar o CV. Disponível em plano gratuito e plano Premium.'
      WHERE NOT EXISTS (SELECT 1 FROM chat_knowledge WHERE section_key = 'product_info')`,
     `INSERT INTO chat_knowledge (section_key, section_title, content)
      SELECT 'cv_tips', 'Dicas para criar um bom CV',
@@ -360,7 +360,7 @@ getPool().then(async (pool) => {
   // Importar vagas 10s após arranque (evita falhas de rede no boot)
   setTimeout(() => importJobs(pool).catch(() => {}), 10000);
   server.listen(PORT, () => {
-    console.log(`\n🚀 CV Generator Pro`);
+    console.log(`\n🚀 CV Premium`);
     console.log(`   Local:   http://localhost:${PORT}`);
     console.log(`   Admin:   http://localhost:${PORT}/api/admin/overview`);
     console.log(`   Health:  http://localhost:${PORT}/health`);

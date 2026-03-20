@@ -13,7 +13,7 @@ const HYPOTHETICAL_TESTIS = [
   { id: 'h5', name: 'Isabel Cardoso',       role: 'Contabilista · Cabinda',           text: 'O serviço de distribuição de CV para empresas parceiras foi o que me diferenciou. Recebi contacto de uma empresa que eu nem sabia que estava a contratar.',        stars: 5, hypothetical: true },
   { id: 'h6', name: 'Pedro Lopes Mbinda',   role: 'Professor Universitário · Malanje',text: 'Excelente plataforma! A carta de apresentação gerada pela IA ficou melhor do que qualquer coisa que eu teria escrito sozinho.',                                    stars: 4, hypothetical: true },
   { id: 'h7', name: 'Fernanda Queirós',     role: 'Advogada · Luanda',               text: 'Profissional e intuitivo. Em 30 minutos tinha um CV completo com design impecável. Já recomendei a todos os meus colegas.',                                         stars: 5, hypothetical: true },
-  { id: 'h8', name: 'António Sebastião',    role: 'Gestor Comercial · Lobito',        text: 'O CV Premium da Caos Criativo superou todas as minhas expectativas. Consegui entrevistas em 4 empresas na primeira semana após actualizar o meu currículo.',        stars: 5, hypothetical: true },
+  { id: 'h8', name: 'António Sebastião',    role: 'Gestor Comercial · Lobito',        text: 'O CV Premium da CV Premium superou todas as minhas expectativas. Consegui entrevistas em 4 empresas na primeira semana após actualizar o meu currículo.',        stars: 5, hypothetical: true },
 ];
 
 // ── GET /api/content/coaches ──────────────────────────────────

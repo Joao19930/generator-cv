@@ -1,6 +1,6 @@
 // src/routes/chat.js
 // ─────────────────────────────────────────────────────────────
-// Chatbot IA — CV Generator Pro
+// Chatbot IA — CV Premium
 // POST /api/chat  → público (sem JWT)
 // ─────────────────────────────────────────────────────────────
 const express = require('express');
@@ -27,7 +27,7 @@ async function getKnowledge(db) {
 
 function buildSystemPrompt(sections) {
   let prompt =
-    `És o assistente virtual do CV Generator Pro — plataforma angolana de criação de CVs profissionais.\n` +
+    `És o assistente virtual do CV Premium — plataforma angolana de criação de CVs profissionais.\n` +
     `Responde sempre em português (PT/AO). Sê conciso, amigável e prático.\n` +
     `Especializa-te em criação de CVs, otimização ATS e dicas de emprego para Angola e PALOP.\n` +
     `Quando o utilizador precisar de ajuda técnica específica da plataforma, encaminha-o para o suporte.\n` +

@@ -1,4 +1,4 @@
-// chat-widget.js — Chatbot flutuante CV Generator Pro
+// chat-widget.js — Chatbot flutuante CV Premium
 // Injector automático: basta incluir <script src="/chat-widget.js"></script>
 (function () {
   'use strict';
@@ -21,7 +21,7 @@
     for (const key of Object.keys(PAGE_CONTEXT)) {
       if (p.startsWith(key)) return PAGE_CONTEXT[key];
     }
-    return 'Olá! 👋 Sou o assistente do CV Generator Pro. Como posso ajudar-te hoje?';
+    return 'Olá! 👋 Sou o assistente do CV Premium. Como posso ajudar-te hoje?';
   })();
 
   const QUICK_ACTIONS = [
@@ -152,12 +152,12 @@
     const panel = document.createElement('div');
     panel.id = 'cvgen-chat-panel';
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', 'Chat de apoio CV Generator');
+    panel.setAttribute('aria-label', 'Chat de apoio CV Premium');
     panel.innerHTML = `
       <div id="cvgen-chat-header">
         <div class="avatar">🤖</div>
         <div class="info">
-          <strong>Assistente CV Generator</strong>
+          <strong>Assistente CV Premium</strong>
           <span>● Online — resposta em segundos</span>
         </div>
         <button id="cvgen-chat-close" aria-label="Fechar chat">✕</button>

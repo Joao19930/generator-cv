@@ -52,7 +52,7 @@ router.post('/register', authLimiter, async (req, res) => {
 
     // Acções pós-registo (não bloquear a resposta)
     Promise.allSettled([
-      emailConnector.sendWelcome(email, name).catch(() => smtpConnector.send(email, 'Bem-vindo ao CV Generator!', `<h2>Olá ${name}!</h2><p>A sua conta foi criada com sucesso.</p><a href="${process.env.APP_URL}">Criar CV agora</a>`)),
+      emailConnector.sendWelcome(email, name).catch(() => smtpConnector.send(email, 'Bem-vindo ao CV Premium!', `<h2>Olá ${name}!</h2><p>A sua conta foi criada com sucesso.</p><a href="${process.env.APP_URL}">Criar CV agora</a>`)),
       hubspotConnector.createContact(email, name),
       zapierConnector.onNewUser({ email, name }),
       intercomConnector.createUser(email, name, user.Id),

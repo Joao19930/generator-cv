@@ -1,4 +1,4 @@
-// upgrade-modal.js — Sistema de upgrade de planos CV Generator Pro
+// upgrade-modal.js — Sistema de upgrade de planos CV Premium
 // Injector automático: incluído via <script src="/upgrade-modal.js"></script>
 (function () {
   'use strict';
@@ -10,13 +10,13 @@
     semanal: {
       icon: '⚡', nome: 'Plano Semanal', preco: '3.000 Kz', periodo: '7 dias',
       cor: '#D97706', corLight: '#FEF3C7',
-      msg: 'Olá, quero ativar o Plano Semanal (3.000 Kz / 7 dias) do CV Generator Pro.',
+      msg: 'Olá, quero ativar o Plano Semanal (3.000 Kz / 7 dias) do CV Premium.',
       features: ['Criar e editar CVs', 'Download PDF', 'Todos os templates', 'Score ATS completo', 'IA para textos']
     },
     premium: {
       icon: '👑', nome: 'Plano Premium', preco: '7.000 Kz', periodo: 'mês',
       cor: '#2563EB', corLight: '#EEF2FF',
-      msg: 'Olá, quero ativar o Plano Premium (7.000 Kz / mês) do CV Generator Pro.',
+      msg: 'Olá, quero ativar o Plano Premium (7.000 Kz / mês) do CV Premium.',
       features: ['Tudo do Semanal', 'Carta de apresentação IA', 'Geração de resumo IA', 'Templates exclusivos', 'Suporte prioritário']
     }
   };

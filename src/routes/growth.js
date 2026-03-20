@@ -93,7 +93,7 @@ router.get('/share/:cvId', async (req, res) => {
     if (!cv) return res.status(404).json({ error: 'CV não encontrado ou privado' });
     res.json({
       og_title:       `${cv.Name || cv.name} — CV Profissional`,
-      og_description: `Veja o CV profissional de ${cv.Name || cv.name} criado com CV Generator`,
+      og_description: `Veja o CV profissional de ${cv.Name || cv.name} criado com CV Premium`,
       og_image:       `${process.env.APP_URL}/api/og/${req.params.cvId}`,
       og_url:         `${process.env.APP_URL}/cv/${req.params.cvId}`
     });

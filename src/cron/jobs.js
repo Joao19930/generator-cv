@@ -39,7 +39,7 @@ const processEmailQueue = async (pool) => {
   `).catch(() => ({ recordset: [] }));
 
   const tplHtml = {
-    welcome:  (name) => `<h2>Bem-vindo ao CV Generator, ${name}!</h2><p>A sua conta está pronta.</p><a href="${process.env.APP_URL}/editor" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none">Criar o meu CV</a>`,
+    welcome:  (name) => `<h2>Bem-vindo ao CV Premium, ${name}!</h2><p>A sua conta está pronta.</p><a href="${process.env.APP_URL}/editor" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none">Criar o meu CV</a>`,
     tips:     ()     => `<h2>3 Segredos de CV dos Recrutadores</h2><ul><li>Use palavras-chave da vaga</li><li>Quantifique resultados</li><li>Máximo 1 página</li></ul><a href="${process.env.APP_URL}/editor">Melhorar o meu CV</a>`,
     upgrade:  ()     => `<h2>Desbloqueie tudo no Premium</h2><p>Remova marcas d'água, aceda a todos os templates e descarregue ilimitadamente.</p><a href="${process.env.APP_URL}/pricing" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none">Ver Planos</a>`,
     reengage: (name) => `<h2>${name}, o seu CV está à espera</h2><p>Não deixe o seu CV incompleto. Os recrutadores procuram candidatos como você agora mesmo.</p><a href="${process.env.APP_URL}/editor">Continuar o meu CV</a>`,
