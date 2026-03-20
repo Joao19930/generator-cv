@@ -86,8 +86,8 @@ app.get('/ats',          (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
 app.get('/pricing',      (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'pricing.html')));
-app.get('/empregos',     (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'empregos.html')));
+app.get('/empregos',        (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'empregos.html')));
+app.get('/linkedin-import', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'linkedin-import.html')); });
 
 // ── Chatbot training (admin) ─────────────────────────────────
 app.get('/admin-chat-training', (req, res) =>

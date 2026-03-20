@@ -187,18 +187,21 @@ router.post('/google', async (req, res) => {
 
 // ── GET /api/auth/linkedin — redireciona para LinkedIn ───────
 router.get('/linkedin', (req, res) => {
+  const mode = req.query.mode || 'login'; // 'login' | 'import'
   const params = new URLSearchParams({
     response_type: 'code',
     client_id:     process.env.LINKEDIN_CLIENT_ID,
     redirect_uri:  process.env.LINKEDIN_REDIRECT_URI,
     scope:         'openid profile email',
+    state:         mode,
   });
   res.redirect(`https://www.linkedin.com/oauth/v2/authorization?${params}`);
 });
 
 // ── GET /api/auth/linkedin/callback ─────────────────────────
 router.get('/linkedin/callback', async (req, res) => {
-  const { code, error } = req.query;
+  const { code, error, state } = req.query;
+  const mode = state || 'login'; // 'login' | 'import'
   if (error) return res.redirect(`${process.env.APP_URL}/login?error=linkedin_denied`);
 
   try {
@@ -265,10 +268,13 @@ router.get('/linkedin/callback', async (req, res) => {
     const token = signToken(user);
     const userJson = JSON.stringify({ id: user.Id, name: user.Name, email: user.Email, plan: user.Plan, role: user.Role })
       .replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const redirect = mode === 'import'
+      ? `/linkedin-import?name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}&photo=${encodeURIComponent(avatar)}`
+      : '/app';
     res.send(`<!DOCTYPE html><html><body><script>
       localStorage.setItem('cv_token', '${token}');
       localStorage.setItem('cv_user', '${userJson}');
-      window.location.href = '/app';
+      window.location.href = '${redirect}';
     </script></body></html>`);
   } catch (err) {
     console.error('linkedin-callback ERROR:', err.message, err.stack);
