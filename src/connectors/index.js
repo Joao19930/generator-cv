@@ -188,20 +188,37 @@ Devolve APENAS o texto do resumo, sem títulos, sem aspas, sem comentários.`;
     const contextParts = [];
     if (company) contextParts.push(`Empresa: ${company}`);
     if (sector) contextParts.push(`Sector: ${sector}`);
-    if (yearsExp) contextParts.push(`Nível de senioridade: ${yearsExp} anos de experiência`);
-    const context = contextParts.length ? '\n' + contextParts.join('\n') : '';
-    const prompt = `Escreve 6 bullet points de responsabilidades e conquistas profissionais para o cargo "${jobTitle}" num CV, em português de Angola.${context}
+    if (yearsExp) contextParts.push(`Nível: ${yearsExp}`);
+    const context = contextParts.length ? '\nContexto: ' + contextParts.join(' | ') : '';
+    const prompt = `Escreve 7 a 8 responsabilidades reais e concretas para o cargo "${jobTitle}" num CV, em português de Angola (pt-AO).${context}
 
-Requisitos obrigatórios para cada bullet point:
-- Começa com um verbo de acção forte no passado ou presente (Liderou, Desenvolveu, Implementou, Geriu, Optimizou, Coordenou, Reduziu, Aumentou, Garantiu, Supervisionou…)
-- Inclui contexto específico: o quê, como e/ou resultado mensurável (ex: "Reduziu o tempo de entrega em 30% através da automatização de processos")
-- Mistura responsabilidades do dia-a-dia com conquistas com impacto real
-- Evitar linguagem vaga como "responsável por", "encarregue de", "ajudou a"
-- Comprimento ideal: 15-25 palavras por bullet
-- Últimos 2 bullets devem mostrar conquistas mensuráveis ou de liderança
+REGRA ABSOLUTA — PROIBIDO usar qualquer uma destas frases genéricas:
+- "Execução das funções inerentes ao cargo"
+- "Colaboração com a equipa para atingir os objectivos"
+- "Elaboração de relatórios de actividades e resultados"
+- "Cumprimento dos procedimentos internos e normas de qualidade"
+- "Atendimento e apoio a clientes/parceiros conforme necessário"
+- "Participação em formações e actividades de melhoria contínua"
+- "Responsável por", "Encarregue de", "Apoio a", "Colaboração em"
 
-Formato: cada linha começa com "• " sem numeração. Devolve apenas as 6 linhas, sem introdução nem conclusão.`;
-    return claudeAsk(prompt, 550);
+OBRIGATÓRIO — cada linha deve:
+1. Descrever uma tarefa REAL e ESPECÍFICA deste cargo no dia-a-dia (o que a pessoa faz com as mãos, com o corpo, com a mente)
+2. Ser tão específica que só faz sentido para ESTE cargo e não para qualquer outro
+3. Começar com infinitivo (Preparar, Confeccionar, Garantir, Controlar, Organizar, Gerir, Coordenar, Supervisionar...)
+4. Ter 8 a 18 palavras — concisa mas descritiva
+
+Exemplo correcto para "Cozinheira":
+• Preparar e confeccionar refeições diárias (pequeno-almoço, almoço e jantar)
+• Elaborar pratos conforme o menu definido ou orientação superior
+• Garantir higiene e segurança alimentar em todo o processo de confecção
+• Controlar a conservação dos alimentos respeitando validades e métodos de armazenamento
+• Organizar e manter a cozinha limpa e em condições de trabalho
+• Gerir stocks básicos e comunicar necessidades de reposição ao responsável
+• Adaptar refeições a necessidades específicas (dietas, alergias, crianças)
+• Coordenar os tempos de preparo para cumprir os horários das refeições
+
+Agora faz o mesmo para "${jobTitle}". Devolve apenas as linhas, sem introdução, sem conclusão, sem numeração.`;
+    return claudeAsk(prompt, 700);
   }
 };
 
