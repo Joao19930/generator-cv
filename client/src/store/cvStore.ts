@@ -86,6 +86,10 @@ interface DataSnapshot {
   fontFamily: string
   fontSize: number
   lineSpacing: LineSpacingType
+  funcaoArea: string
+  habilidades: Skill[]
+  cursos: string[]
+  interesses: string[]
 }
 
 export interface CVState extends DataSnapshot {
@@ -127,6 +131,12 @@ export interface CVState extends DataSnapshot {
   redo: () => void
   loadFromStorage: () => void
   loadFromData: (data: any) => void
+  setFuncaoArea: (area: string) => void
+  addHabilidade: (name: string, level?: string) => void
+  updateHabilidade: (id: string, data: Partial<Skill>) => void
+  removeHabilidade: (id: string) => void
+  setCursos: (cursos: string[]) => void
+  setInteresses: (interesses: string[]) => void
 }
 
 const DEFAULT_PERSONAL: PersonalInfo = {
@@ -170,6 +180,10 @@ function getSnapshot(state: CVState): DataSnapshot {
     fontFamily: state.fontFamily,
     fontSize: state.fontSize,
     lineSpacing: state.lineSpacing,
+    funcaoArea: state.funcaoArea,
+    habilidades: state.habilidades.map(h => ({ ...h })),
+    cursos: [...state.cursos],
+    interesses: [...state.interesses],
   }
 }
 
@@ -177,13 +191,6 @@ const MAX_HISTORY = 30
 const STORAGE_KEY = 'cv_editor_data'
 
 export const useCVStore = create<CVState>((set, get) => {
-  function pushHistory(prevSnapshot: DataSnapshot) {
-    set(s => ({
-      past: [...s.past.slice(-(MAX_HISTORY - 1)), prevSnapshot],
-      future: [],
-    }))
-  }
-
   function withHistory<T extends Partial<DataSnapshot>>(updater: (s: CVState) => T) {
     const prev = getSnapshot(get())
     set(s => ({ ...updater(s), past: [...s.past.slice(-(MAX_HISTORY - 1)), prev], future: [] }))
@@ -209,6 +216,10 @@ export const useCVStore = create<CVState>((set, get) => {
       fontFamily: s.fontFamily,
       fontSize: s.fontSize,
       lineSpacing: s.lineSpacing,
+      funcaoArea: s.funcaoArea,
+      habilidades: s.habilidades,
+      cursos: s.cursos,
+      interesses: s.interesses,
     }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
@@ -235,6 +246,10 @@ export const useCVStore = create<CVState>((set, get) => {
     zoom: 0.85,
     past: [],
     future: [],
+    funcaoArea: '',
+    habilidades: [],
+    cursos: [],
+    interesses: [],
 
     setTitle: (t) => { set({ title: t }); saveToStorage() },
 
@@ -402,9 +417,31 @@ export const useCVStore = create<CVState>((set, get) => {
         fontFamily: content.fontFamily ?? s.fontFamily,
         fontSize: content.fontSize ?? s.fontSize,
         lineSpacing: content.lineSpacing ?? s.lineSpacing,
+        funcaoArea: content.funcaoArea ?? s.funcaoArea,
+        habilidades: content.habilidades ?? s.habilidades,
+        cursos: content.cursos ?? s.cursos,
+        interesses: content.interesses ?? s.interesses,
         past: [],
         future: [],
       }))
     },
+
+    setFuncaoArea: (area) => { set({ funcaoArea: area }); saveToStorage() },
+
+    addHabilidade: (name, level = 'Intermédio') => withHistory(s => ({
+      habilidades: [...s.habilidades, { id: uid(), name, level: level as SkillLevel }]
+    })),
+
+    updateHabilidade: (id, data) => withHistory(s => ({
+      habilidades: s.habilidades.map(h => h.id === id ? { ...h, ...data } : h)
+    })),
+
+    removeHabilidade: (id) => withHistory(s => ({
+      habilidades: s.habilidades.filter(h => h.id !== id)
+    })),
+
+    setCursos: (cursos) => withHistory(() => ({ cursos })),
+
+    setInteresses: (interesses) => withHistory(() => ({ interesses })),
   }
 })

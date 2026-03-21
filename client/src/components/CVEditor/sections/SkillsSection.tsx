@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { useCVStore, Skill, SkillLevel } from '../../../store/cvStore'
+import SuggestionsPanel from '../forms/SuggestionsPanel'
 
 const LEVELS: SkillLevel[] = ['Básico', 'Intermédio', 'Avançado', 'Expert']
 
@@ -116,6 +117,10 @@ export default function SkillsSection() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <SuggestionsPanel />
+
+      <div style={{ borderTop: '1px solid #1e293b', paddingTop: 12 }} />
+
       <div style={{ display: 'flex', gap: 8 }}>
         <input
           value={input}
