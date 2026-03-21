@@ -183,6 +183,18 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .jh-stat{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.5);}
 .jh-stat strong{color:#fff;font-size:13px;}
 
+.jobs-week-alert{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid #c2410c;border-left:4px solid #f97316;border-radius:10px;padding:14px 16px;margin-bottom:16px;position:relative;animation:alertPulse 2.5s ease-in-out infinite;}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.25);}50%{box-shadow:0 0 0 6px rgba(249,115,22,0);}}
+.jwa-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.jwa-body{flex:1;min-width:0;}
+.jwa-title{font-size:13px;font-weight:700;color:#fed7aa;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.jwa-badge{background:#f97316;color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;}
+.jwa-text{font-size:12px;color:#fca97a;line-height:1.5;}
+.jwa-list{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px;}
+.jwa-list li{background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.3);border-radius:20px;padding:2px 10px;font-size:11px;color:#fed7aa;font-weight:600;}
+.jwa-close{position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(253,186,116,.5);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;}
+.jwa-close:hover{color:#fed7aa;}
+
 .jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
 @keyframes jobFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .jb-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:12px;transition:all .25s;cursor:pointer;animation:jobFadeUp .4s ease both;position:relative;overflow:hidden;}
@@ -731,6 +743,22 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
             <div class="jh-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Actualizado em tempo real</div>
           </div>
         </div>
+      </div>
+
+      <!-- ALERTA VAGAS DA SEMANA -->
+      <div class="jobs-week-alert" id="jobsWeekAlert">
+        <div class="jwa-icon">🔔</div>
+        <div class="jwa-body">
+          <div class="jwa-title">
+            Vagas da Semana
+            <span class="jwa-badge">Novo</span>
+          </div>
+          <div class="jwa-text">Novas oportunidades adicionadas esta semana. Candidata-te antes que fechem!</div>
+          <ul class="jwa-list" id="jwaList">
+            <li>Comercial</li><li>Banca</li><li>Seguradora</li>
+          </ul>
+        </div>
+        <button class="jwa-close" onclick="dismissWeekAlert()" title="Fechar">✕</button>
       </div>
 
       <!-- FILTROS -->
@@ -2383,17 +2411,17 @@ function toggleSaveJob(id, btn) {
 }
 
 function buildJobsCatTabs() {
-  const cats = ['Todos', ...new Set(allJobs.map(j => j.Category).filter(Boolean))];
+  const cats = ['Todos', ...new Set(allJobs.map(j => j.Category || j.category).filter(Boolean))];
   const el   = document.getElementById('jobsCatTabs'); el.innerHTML = '';
   cats.forEach((c, i) => {
-    const cnt = c === 'Todos' ? allJobs.length : allJobs.filter(j => j.Category === c).length;
+    const cnt = c === 'Todos' ? allJobs.length : allJobs.filter(j => (j.Category||j.category) === c).length;
     const d   = document.createElement('div');
     d.className = 'cat-tab' + (i === 0 ? ' active' : '');
     d.innerHTML = `${c} <span style="opacity:.6;font-size:10px;margin-left:3px;">${cnt}</span>`;
     d.onclick   = () => {
       el.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
       d.classList.add('active');
-      const filtered = c === 'Todos' ? allJobs : allJobs.filter(j => j.Category === c);
+      const filtered = c === 'Todos' ? allJobs : allJobs.filter(j => (j.Category||j.category) === c);
       renderJobs(filtered);
     };
     el.appendChild(d);
@@ -2406,6 +2434,50 @@ function buildJobsCatTabs() {
   document.getElementById('jobsHeroSub').textContent   =
     allJobs.length === 0 ? 'Nenhuma vaga disponível de momento.'
     : `${allJobs.length} vaga${allJobs.length !== 1 ? 's' : ''} disponíve${allJobs.length !== 1 ? 'is' : 'l'} de empresas parceiras`;
+
+  // Actualizar alerta da semana com categorias reais
+  updateWeekAlert();
+}
+
+// ── Alerta vagas da semana ─────────────────────────────────────
+function updateWeekAlert() {
+  const dismissed = sessionStorage.getItem('jobsAlertDismissed');
+  const alert = document.getElementById('jobsWeekAlert');
+  if (dismissed) { if (alert) alert.style.display = 'none'; return; }
+
+  // Categorias com mais vagas (top 4, excluindo "Todos")
+  const catMap = {};
+  allJobs.forEach(j => {
+    const c = j.Category || j.category;
+    if (c) catMap[c] = (catMap[c] || 0) + 1;
+  });
+  const topCats = Object.entries(catMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([c]) => c);
+
+  const listEl = document.getElementById('jwaList');
+  if (listEl && topCats.length) {
+    listEl.innerHTML = topCats.map(c => `<li onclick="filterByCat('${c}')" style="cursor:pointer;">${c} <span style="opacity:.6">${catMap[c]}</span></li>`).join('');
+  }
+
+  // Número de vagas no alerta
+  const totalEl = alert && alert.querySelector('.jwa-text');
+  if (totalEl) {
+    totalEl.textContent = `${allJobs.length} oportunidades disponíveis. Candidata-te antes que fechem!`;
+  }
+}
+
+function dismissWeekAlert() {
+  sessionStorage.setItem('jobsAlertDismissed', '1');
+  const a = document.getElementById('jobsWeekAlert');
+  if (a) { a.style.transition = 'opacity .3s, max-height .4s'; a.style.opacity = '0'; setTimeout(() => a.style.display = 'none', 350); }
+}
+
+function filterByCat(cat) {
+  const tabs = document.querySelectorAll('#jobsCatTabs .cat-tab');
+  tabs.forEach(t => { t.classList.toggle('active', t.textContent.trim().startsWith(cat)); });
+  renderJobs(allJobs.filter(j => (j.Category||j.category) === cat));
 }
 
 function renderJobs(list) {
