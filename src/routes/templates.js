@@ -107,7 +107,16 @@ router.post('/start', auth, async (req, res) => {
     if (!tpl) return res.status(404).json({ error: 'Nenhum template disponível.' });
 
     // ── Limite de 3 CVs para plano free ──────────────────────
-    const plan = (req.user.plan || 'free').toLowerCase();
+    // Ler plano directamente da BD (JWT pode estar desactualizado após upgrade)
+    const userRow = await pool.request()
+      .input('uid', sql.Int, req.user.id)
+      .query('SELECT plan, access_until FROM users WHERE id = @uid');
+    const u = userRow.recordset[0];
+    const dbPlan = (u?.plan || u?.Plan || 'free').toLowerCase();
+    const accessUntil = u?.access_until || u?.AccessUntil || null;
+    const hasActiveAccess = accessUntil && new Date(accessUntil) > new Date();
+    const plan = (dbPlan !== 'free' || hasActiveAccess) ? 'premium' : 'free';
+
     if (plan === 'free') {
       const countResult = await pool.request()
         .input('userId', sql.Int, req.user.id)
