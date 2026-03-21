@@ -1,7 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useCVStore } from '../../../store/cvStore'
 
-function fmtDate(d: string) {
+const POPPINS_INJECTED_KEY = '__poppins_injected__'
+
+function injectPoppins() {
+  if ((window as any)[POPPINS_INJECTED_KEY]) return
+  const style = document.createElement('style')
+  style.textContent = "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');"
+  document.head.appendChild(style)
+  ;(window as any)[POPPINS_INJECTED_KEY] = true
+}
+
+function fmtDate(d: string): string {
   if (!d) return ''
   const [y, m] = d.split('-')
   if (!m) return y
@@ -9,7 +19,7 @@ function fmtDate(d: string) {
   return `${months[parseInt(m) - 1]} ${y}`
 }
 
-function fmtDateRange(start: string, end: string, current: boolean) {
+function fmtDateRange(start: string, end: string, current: boolean): string {
   const s = fmtDate(start)
   const e = current ? 'Presente' : fmtDate(end)
   if (!s && !e) return ''
@@ -19,186 +29,318 @@ function fmtDateRange(start: string, end: string, current: boolean) {
 
 export default function ModernTemplate() {
   const store = useCVStore()
-  const { personal, summary, experience, education, skills, languages, certifications, customSections, sectionOrder, primaryColor, fontFamily, fontSize, lineSpacing } = store
+  const {
+    personal,
+    summary,
+    experience,
+    education,
+    skills,
+    languages,
+    certifications,
+    customSections,
+    sectionOrder,
+    primaryColor,
+    fontSize,
+    lineSpacing,
+  } = store
+
+  useEffect(() => {
+    injectPoppins()
+  }, [])
 
   const lh = lineSpacing === 'compact' ? 1.3 : lineSpacing === 'spacious' ? 1.9 : 1.6
-  const ff = fontFamily === 'Inter' ? "'Inter', sans-serif" : fontFamily === 'Georgia' ? 'Georgia, serif' : fontFamily === 'Merriweather' ? "'Merriweather', Georgia, serif" : fontFamily === 'Roboto' ? "'Roboto', sans-serif" : "'Playfair Display', Georgia, serif"
 
-  const sidebarSecTitle: React.CSSProperties = {
-    fontSize: fontSize + 1,
+  const sidebarSecTitleStyle: React.CSSProperties = {
+    fontSize: 9,
     fontWeight: 700,
-    color: '#fff',
     textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-    marginBottom: 10,
-    paddingBottom: 4,
-    borderBottom: '1px solid rgba(255,255,255,0.3)',
-  }
-
-  const mainSecTitle: React.CSSProperties = {
-    fontSize: fontSize + 2,
-    fontWeight: 700,
+    letterSpacing: '2px',
     color: primaryColor,
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
     marginBottom: 8,
     paddingBottom: 4,
-    borderBottom: `2px solid ${primaryColor}`,
+    borderBottom: '1px solid #edebe7',
+  }
+
+  const mainSecTitleStyle: React.CSSProperties = {
+    fontSize: 9,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '2px',
+    color: primaryColor,
+    marginBottom: 8,
+    paddingBottom: 4,
+    borderBottom: '1px solid #edebe7',
+  }
+
+  function renderSidebarSection(key: string): React.ReactNode {
+    if (key === 'education' && education.length > 0) {
+      return (
+        <div key="education" style={{ marginBottom: 16 }}>
+          <div style={sidebarSecTitleStyle}>Formação</div>
+          {education.map((edu, i) => (
+            <div key={edu.id} style={{ marginBottom: i < education.length - 1 ? 10 : 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#111827' }}>
+                {edu.degree}{edu.field ? `, ${edu.field}` : ''}
+              </div>
+              <div style={{ fontSize: 9, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
+              <div style={{ fontSize: 8, color: '#6b7280', fontStyle: 'italic' }}>
+                {fmtDateRange(edu.startDate, edu.endDate, false)}
+              </div>
+              {edu.description && (
+                <div style={{ fontSize: 8, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
+                  {edu.description}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    if (key === 'skills' && skills.length > 0) {
+      return (
+        <div key="skills" style={{ marginBottom: 16 }}>
+          <div style={sidebarSecTitleStyle}>Competências</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {skills.map(sk => (
+              <div key={sk.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                  <span style={{ fontSize: 9, color: '#374151', fontWeight: 500 }}>{sk.name}</span>
+                  <span style={{ fontSize: 8, color: '#9ca3af' }}>{sk.level}</span>
+                </div>
+                <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
+                  <div style={{
+                    height: '100%',
+                    borderRadius: 2,
+                    background: primaryColor,
+                    width: sk.level === 'Expert' ? '100%' : sk.level === 'Avançado' ? '75%' : sk.level === 'Intermédio' ? '50%' : '25%',
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (key === 'languages' && languages.length > 0) {
+      return (
+        <div key="languages" style={{ marginBottom: 16 }}>
+          <div style={sidebarSecTitleStyle}>Idiomas</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {languages.map(lang => (
+              <div key={lang.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 9, fontWeight: 500, color: '#374151' }}>{lang.name}</span>
+                <span style={{ fontSize: 9, color: '#9ca3af' }}>{lang.level}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  function renderMainSection(key: string): React.ReactNode {
+    if (key === 'personal' || key === 'education' || key === 'skills' || key === 'languages') return null
+
+    if (key === 'summary' && summary) {
+      return (
+        <div key="summary" style={{ marginBottom: 16 }}>
+          <div style={mainSecTitleStyle}>Sobre Mim</div>
+          <div style={{
+            borderLeft: `1.5px solid ${primaryColor}`,
+            paddingLeft: 10,
+            fontStyle: 'italic',
+            fontSize: 9,
+            fontWeight: 300,
+            color: '#374151',
+            lineHeight: 1.6,
+          }}>
+            {summary}
+          </div>
+        </div>
+      )
+    }
+
+    if (key === 'experience' && experience.length > 0) {
+      return (
+        <div key="experience" style={{ marginBottom: 16 }}>
+          <div style={mainSecTitleStyle}>Experiência Profissional</div>
+          {experience.map((exp, i) => (
+            <div key={exp.id} style={{ display: 'flex', gap: 12, marginBottom: i < experience.length - 1 ? 14 : 0 }}>
+              {/* Timeline dot + line */}
+              <div style={{ flexShrink: 0, paddingTop: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  border: `1.5px solid ${primaryColor}`,
+                  flexShrink: 0,
+                }} />
+                {i < experience.length - 1 && (
+                  <div style={{
+                    width: 1.5,
+                    flex: 1,
+                    background: `${primaryColor}40`,
+                    marginTop: 2,
+                    minHeight: 20,
+                  }} />
+                )}
+              </div>
+              {/* Content */}
+              <div style={{ flex: 1, paddingBottom: 4 }}>
+                <div style={{ fontWeight: 700, fontSize: 11, color: '#111827' }}>{exp.role}</div>
+                <div style={{ fontWeight: 600, fontSize: 10, color: primaryColor }}>
+                  {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                </div>
+                <div style={{ fontSize: 9, color: '#6b7280', fontStyle: 'italic', marginBottom: 3 }}>
+                  {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
+                </div>
+                {exp.description && (
+                  <div style={{ marginTop: 4, fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: 1.5 }}>
+                    {exp.description}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    if (key === 'certifications' && certifications.length > 0) {
+      return (
+        <div key="certifications" style={{ marginBottom: 16 }}>
+          <div style={mainSecTitleStyle}>Certificações</div>
+          {certifications.map(cert => (
+            <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <div>
+                <span style={{ fontWeight: 600, fontSize: 9, color: '#111827' }}>{cert.name}</span>
+                {cert.issuer && <span style={{ color: '#6b7280', fontSize: 9 }}> — {cert.issuer}</span>}
+              </div>
+              {cert.date && (
+                <span style={{ fontSize: 8, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
+                  {fmtDate(cert.date)}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    if (key.startsWith('custom_')) {
+      const id = key.replace('custom_', '')
+      const cs = customSections.find(s => s.id === id)
+      if (!cs || !cs.content) return null
+      return (
+        <div key={key} style={{ marginBottom: 16 }}>
+          <div style={mainSecTitleStyle}>{cs.title}</div>
+          <p style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0, whiteSpace: 'pre-line' }}>
+            {cs.content}
+          </p>
+        </div>
+      )
+    }
+
+    return null
   }
 
   return (
-    <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', display: 'flex', minHeight: '100%', background: '#fff' }}>
-      {/* Sidebar */}
-      <div style={{ width: '30%', background: primaryColor, color: '#fff', padding: '28px 18px', flexShrink: 0 }}>
-        {/* Photo + Name */}
+    <div style={{
+      width: 794,
+      minHeight: 1123,
+      fontFamily: "'Poppins', sans-serif",
+      background: '#fff',
+    }}>
+      {/* HEADER */}
+      <header style={{
+        padding: '28px 36px 20px',
+        background: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 20,
+      }}>
         {personal.photo && (
-          <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <img src={personal.photo} alt="foto" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.5)' }} />
+          <img
+            src={personal.photo}
+            alt="foto"
+            style={{
+              width: 76,
+              height: 76,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: `1.5px solid ${primaryColor}`,
+              flexShrink: 0,
+            }}
+          />
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: '#111827',
+            fontFamily: "'Poppins', sans-serif",
+            margin: 0,
+            lineHeight: 1.2,
+          }}>
+            {personal.fullName || 'Nome Completo'}
+          </h1>
+          {personal.jobTitle && (
+            <p style={{
+              fontSize: 9,
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '2.8px',
+              color: primaryColor,
+              margin: '4px 0 8px',
+            }}>
+              {personal.jobTitle}
+            </p>
+          )}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: 9, color: '#6b7280' }}>
+            {personal.email && <span>{personal.email}</span>}
+            {personal.phone && <span>{personal.phone}</span>}
+            {personal.address && <span>{personal.address}</span>}
+            {personal.linkedin && <span>{personal.linkedin}</span>}
+            {personal.website && <span>{personal.website}</span>}
+            {personal.showNationality && personal.nationality && <span>{personal.nationality}</span>}
+            {personal.showBirthDate && personal.birthDate && <span>{personal.birthDate}</span>}
           </div>
-        )}
-        <h1 style={{ fontSize: fontSize + 6, fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: 4, textAlign: personal.photo ? 'center' : 'left' }}>
-          {personal.fullName || 'Nome Completo'}
-        </h1>
-        {personal.jobTitle && (
-          <p style={{ fontSize: fontSize, color: 'rgba(255,255,255,0.8)', marginBottom: 20, textAlign: personal.photo ? 'center' : 'left', fontWeight: 500 }}>
-            {personal.jobTitle}
-          </p>
-        )}
-
-        {/* Contacts */}
-        <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {personal.email && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)', wordBreak: 'break-all' }}>{personal.email}</span>}
-          {personal.phone && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)' }}>{personal.phone}</span>}
-          {personal.address && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)' }}>{personal.address}</span>}
-          {personal.linkedin && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)', wordBreak: 'break-all' }}>{personal.linkedin}</span>}
-          {personal.website && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)', wordBreak: 'break-all' }}>{personal.website}</span>}
-          {personal.showNationality && personal.nationality && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)' }}>{personal.nationality}</span>}
-          {personal.showBirthDate && personal.birthDate && <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.85)' }}>{personal.birthDate}</span>}
         </div>
+      </header>
 
-        {/* Skills in sidebar */}
-        {skills.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <div style={sidebarSecTitle}>Competências</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {skills.map(sk => (
-                <div key={sk.id}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.9)' }}>{sk.name}</span>
-                    <span style={{ fontSize: fontSize - 2, color: 'rgba(255,255,255,0.6)' }}>{sk.level}</span>
-                  </div>
-                  <div style={{ height: 3, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
-                    <div style={{
-                      height: '100%',
-                      borderRadius: 2,
-                      background: '#fff',
-                      width: sk.level === 'Expert' ? '100%' : sk.level === 'Avançado' ? '75%' : sk.level === 'Intermédio' ? '50%' : '25%',
-                    }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Gradient accent line */}
+      <div style={{
+        height: 1.5,
+        background: `linear-gradient(90deg, ${primaryColor}, transparent)`,
+        margin: '0 36px',
+      }} />
 
-        {/* Languages in sidebar */}
-        {languages.length > 0 && (
-          <div>
-            <div style={sidebarSecTitle}>Idiomas</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {languages.map(lang => (
-                <div key={lang.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.9)' }}>{lang.name}</span>
-                  <span style={{ fontSize: fontSize - 1, color: 'rgba(255,255,255,0.6)' }}>{lang.level}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {/* TWO-COLUMN BODY */}
+      <div style={{ display: 'flex', marginTop: 0 }}>
+        {/* Sidebar */}
+        <aside style={{
+          width: 230,
+          background: '#fafaf9',
+          padding: '20px 16px',
+          flexShrink: 0,
+          boxSizing: 'border-box',
+        }}>
+          {sectionOrder.map(key => renderSidebarSection(key))}
+        </aside>
 
-      {/* Main content */}
-      <div style={{ flex: 1, padding: '28px 24px', lineHeight: lh }}>
-        {sectionOrder.map(key => {
-          if (key === 'personal' || key === 'skills' || key === 'languages') return null
-
-          if (key === 'summary' && summary) {
-            return (
-              <div key="summary" style={{ marginBottom: 20 }}>
-                <div style={mainSecTitle}>Sobre Mim</div>
-                <p style={{ color: '#374151', fontSize, lineHeight: lh }}>{summary}</p>
-              </div>
-            )
-          }
-          if (key === 'experience' && experience.length > 0) {
-            return (
-              <div key="experience" style={{ marginBottom: 20 }}>
-                <div style={mainSecTitle}>Experiência</div>
-                {experience.map((exp, i) => (
-                  <div key={exp.id} style={{ marginBottom: i < experience.length - 1 ? 14 : 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: fontSize + 1, color: '#111827' }}>{exp.role}</div>
-                        <div style={{ color: primaryColor, fontSize, fontWeight: 600 }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</div>
-                      </div>
-                      <div style={{ fontSize: fontSize - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
-                        {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
-                      </div>
-                    </div>
-                    {exp.description && <div style={{ marginTop: 4, color: '#374151', fontSize, lineHeight: lh, whiteSpace: 'pre-line' }}>{exp.description}</div>}
-                  </div>
-                ))}
-              </div>
-            )
-          }
-          if (key === 'education' && education.length > 0) {
-            return (
-              <div key="education" style={{ marginBottom: 20 }}>
-                <div style={mainSecTitle}>Formação</div>
-                {education.map((edu, i) => (
-                  <div key={edu.id} style={{ marginBottom: i < education.length - 1 ? 12 : 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: fontSize + 1, color: '#111827' }}>{edu.degree}{edu.field ? `, ${edu.field}` : ''}</div>
-                        <div style={{ color: primaryColor, fontSize, fontWeight: 600 }}>{edu.institution}</div>
-                      </div>
-                      <div style={{ fontSize: fontSize - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>{fmtDateRange(edu.startDate, edu.endDate, false)}</div>
-                    </div>
-                    {edu.description && <div style={{ marginTop: 3, color: '#374151', fontSize }}>{edu.description}</div>}
-                  </div>
-                ))}
-              </div>
-            )
-          }
-          if (key === 'certifications' && certifications.length > 0) {
-            return (
-              <div key="certifications" style={{ marginBottom: 20 }}>
-                <div style={mainSecTitle}>Certificações</div>
-                {certifications.map(cert => (
-                  <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <div>
-                      <span style={{ fontWeight: 600, fontSize, color: '#111827' }}>{cert.name}</span>
-                      {cert.issuer && <span style={{ color: '#6b7280', fontSize }}> — {cert.issuer}</span>}
-                    </div>
-                    {cert.date && <span style={{ fontSize: fontSize - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>{fmtDate(cert.date)}</span>}
-                  </div>
-                ))}
-              </div>
-            )
-          }
-          if (key.startsWith('custom_')) {
-            const id = key.replace('custom_', '')
-            const cs = customSections.find(s => s.id === id)
-            if (!cs || !cs.content) return null
-            return (
-              <div key={key} style={{ marginBottom: 20 }}>
-                <div style={mainSecTitle}>{cs.title}</div>
-                <p style={{ color: '#374151', fontSize, lineHeight: lh, whiteSpace: 'pre-line' }}>{cs.content}</p>
-              </div>
-            )
-          }
-          return null
-        })}
+        {/* Main */}
+        <main style={{
+          flex: 1,
+          padding: '20px 24px',
+          boxSizing: 'border-box',
+        }}>
+          {sectionOrder.map(key => renderMainSection(key))}
+        </main>
       </div>
     </div>
   )

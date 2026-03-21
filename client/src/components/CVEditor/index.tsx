@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Undo2, Redo2, Download, Share2, X, Lock } from 'lucide-react'
 import { useCVStore } from '../../store/cvStore'
 import { useAutosave } from '../../hooks/useAutosave'
 import { exportPDF } from '../../utils/exportPDF'
 import LeftPanel from './LeftPanel'
+import PreviewPanel from './PreviewPanel'
 import RightPanel from './RightPanel'
 import UpgradeModal from './UpgradeModal'
 import toast from 'react-hot-toast'
@@ -14,13 +15,41 @@ interface CVEditorProps {
   isPremium?: boolean
 }
 
+function calcProgress(store: ReturnType<typeof useCVStore.getState>): number {
+  let score = 0
+  if (store.personal.fullName) score += 1
+  if (store.personal.email) score += 1
+  if (store.personal.phone) score += 0.5
+  if (store.personal.jobTitle) score += 1
+  if (store.personal.address) score += 0.5
+  if (store.summary && store.summary.length > 50) score += 1.5
+  if (store.experience.length > 0) score += 1.5
+  if (store.education.length > 0) score += 1
+  if (store.skills.length >= 3) score += 1
+  if (store.languages.length > 0) score += 0.5
+  return Math.min(100, Math.round((score / 10) * 100))
+}
+
 export default function CVEditor({ cvId = null, token = null, isPremium = false }: CVEditorProps) {
   const store = useCVStore()
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [savedAt, setSavedAt] = useState<Date | null>(null)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
-  // Autosave hook
-  useAutosave(cvId, token)
+  const handleSaved = useCallback(() => {
+    setSavedAt(new Date())
+  }, [])
+
+  useAutosave(cvId, token, handleSaved)
+
+  useEffect(() => {
+    function onResize() {
+      setWindowWidth(window.innerWidth)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // Load data on mount
   useEffect(() => {
@@ -44,7 +73,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
       const filename = store.title || 'cv'
       await exportPDF('cv-preview-paper', filename)
       toast.success('PDF exportado com sucesso!')
-    } catch (err) {
+    } catch {
       toast.error('Erro ao exportar PDF')
     } finally {
       setExporting(false)
@@ -64,168 +93,206 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
     })
   }
 
+  const progress = calcProgress(store)
+  const isMobile = windowWidth < 768
+
+  function formatSavedTime(date: Date): string {
+    const h = date.getHours().toString().padStart(2, '0')
+    const m = date.getMinutes().toString().padStart(2, '0')
+    return `${h}:${m}`
+  }
+
+  const sepStyle: React.CSSProperties = {
+    width: 1,
+    height: 20,
+    background: '#1e293b',
+    flexShrink: 0,
+  }
+
+  const iconBtnStyle = (disabled?: boolean): React.CSSProperties => ({
+    width: 34,
+    height: 34,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'transparent',
+    border: '1px solid #1e293b',
+    borderRadius: 7,
+    color: disabled ? '#334155' : '#94a3b8',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: 'all 0.15s',
+    flexShrink: 0,
+  })
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0f172a' }}>
-      {/* Topbar */}
+      {/* TOPBAR */}
       <header style={{
-        height: 56,
+        height: 48,
         background: '#0f172a',
         borderBottom: '1px solid #1e293b',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '0 16px',
+        gap: 10,
+        padding: '0 12px',
         flexShrink: 0,
         zIndex: 50,
       }}>
-        {/* Left: Logo + title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-          <a href="/app" style={{ textDecoration: 'none', flexShrink: 0 }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
-              CV<span style={{ color: '#f59e0b' }}>Premium</span>
-            </span>
-          </a>
+        {/* Logo */}
+        <a href="/app" style={{ textDecoration: 'none', flexShrink: 0 }}>
+          <span style={{ fontSize: 15, fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            CV<span style={{ color: '#f59e0b' }}>Premium</span>
+          </span>
+        </a>
 
-          <div style={{ width: 1, height: 20, background: '#1e293b' }} />
+        <div style={sepStyle} />
 
-          <input
-            value={store.title}
-            onChange={e => store.setTitle(e.target.value)}
-            style={{
-              background: 'transparent',
-              border: '1px solid transparent',
-              borderRadius: 6,
-              padding: '4px 8px',
-              color: '#e2e8f0',
-              fontSize: 14,
-              fontWeight: 500,
-              outline: 'none',
-              minWidth: 120,
-              maxWidth: 280,
-              transition: 'border-color 0.15s',
-            }}
-            onFocus={e => (e.target.style.borderColor = '#f59e0b')}
-            onBlur={e => (e.target.style.borderColor = 'transparent')}
-          />
+        {/* Editable title */}
+        <input
+          value={store.title}
+          onChange={e => store.setTitle(e.target.value)}
+          style={{
+            background: 'transparent',
+            border: '1px solid transparent',
+            borderRadius: 6,
+            padding: '4px 8px',
+            color: '#e2e8f0',
+            fontSize: 14,
+            fontWeight: 500,
+            outline: 'none',
+            minWidth: 100,
+            maxWidth: 220,
+            transition: 'border-color 0.15s',
+          }}
+          onFocus={e => { (e.target as HTMLInputElement).style.borderColor = '#b5a48a' }}
+          onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'transparent' }}
+        />
+
+        <div style={sepStyle} />
+
+        {/* Undo / Redo */}
+        <button
+          type="button"
+          onClick={() => store.undo()}
+          disabled={store.past.length === 0}
+          title="Desfazer (Ctrl+Z)"
+          style={iconBtnStyle(store.past.length === 0)}
+        >
+          <Undo2 size={15} />
+        </button>
+        <button
+          type="button"
+          onClick={() => store.redo()}
+          disabled={store.future.length === 0}
+          title="Refazer (Ctrl+Y)"
+          style={iconBtnStyle(store.future.length === 0)}
+        >
+          <Redo2 size={15} />
+        </button>
+
+        {/* Flex spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Progress section */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>Progresso</span>
+          <div style={{
+            width: 90,
+            height: 4,
+            background: '#1e293b',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              width: `${progress}%`,
+              height: '100%',
+              background: '#b5a48a',
+              borderRadius: 2,
+              transition: 'width 0.4s ease',
+            }} />
+          </div>
+          <span style={{ fontSize: 11, color: '#b5a48a', fontWeight: 600, minWidth: 32 }}>{progress}%</span>
         </div>
 
-        {/* Center: Undo/Redo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <button
-            type="button"
-            onClick={() => store.undo()}
-            disabled={store.past.length === 0}
-            title="Desfazer (Ctrl+Z)"
-            style={{
-              width: 34,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              border: '1px solid #1e293b',
-              borderRadius: 7,
-              color: store.past.length === 0 ? '#334155' : '#94a3b8',
-              cursor: store.past.length === 0 ? 'not-allowed' : 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            <Undo2 size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={() => store.redo()}
-            disabled={store.future.length === 0}
-            title="Refazer (Ctrl+Y)"
-            style={{
-              width: 34,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              border: '1px solid #1e293b',
-              borderRadius: 7,
-              color: store.future.length === 0 ? '#334155' : '#94a3b8',
-              cursor: store.future.length === 0 ? 'not-allowed' : 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            <Redo2 size={15} />
-          </button>
-        </div>
+        <div style={sepStyle} />
 
-        {/* Right: actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={handleShare}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '7px 14px',
-              background: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: 8,
-              color: '#94a3b8',
-              fontSize: 13,
-              cursor: 'pointer',
-              fontWeight: 500,
-            }}
-          >
-            <Share2 size={14} />
-            Partilhar
-          </button>
+        {/* Saved badge */}
+        {savedAt ? (
+          <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap' }}>
+            ✓ Guardado {formatSavedTime(savedAt)}
+          </span>
+        ) : (
+          <span style={{ fontSize: 11, color: '#475569', fontWeight: 500, flexShrink: 0, whiteSpace: 'nowrap' }}>
+            Não guardado
+          </span>
+        )}
 
-          <button
-            type="button"
-            onClick={handleDownload}
-            disabled={exporting}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '7px 14px',
-              background: isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#1e293b',
-              border: isPremium ? 'none' : '1px solid #334155',
-              borderRadius: 8,
-              color: isPremium ? '#fff' : '#94a3b8',
-              fontSize: 13,
-              cursor: exporting ? 'wait' : 'pointer',
-              fontWeight: 600,
-              opacity: exporting ? 0.7 : 1,
-            }}
-          >
-            {isPremium ? <Download size={14} /> : <Lock size={14} />}
-            {exporting ? 'A exportar...' : 'Descarregar PDF'}
-          </button>
+        <div style={sepStyle} />
 
-          <button
-            type="button"
-            onClick={() => { window.location.href = '/app' }}
-            style={{
-              width: 34,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              border: '1px solid #1e293b',
-              borderRadius: 7,
-              color: '#64748b',
-              cursor: 'pointer',
-            }}
-          >
-            <X size={15} />
-          </button>
-        </div>
+        {/* Share */}
+        <button
+          type="button"
+          onClick={handleShare}
+          title="Partilhar"
+          style={iconBtnStyle()}
+        >
+          <Share2 size={15} />
+        </button>
+
+        {/* Download PDF */}
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={exporting}
+          title={isPremium ? 'Descarregar PDF' : 'Requer Premium'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            background: isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#1e293b',
+            border: isPremium ? 'none' : '1px solid #334155',
+            borderRadius: 8,
+            color: isPremium ? '#fff' : '#64748b',
+            fontSize: 12,
+            cursor: exporting ? 'wait' : 'pointer',
+            fontWeight: 600,
+            opacity: exporting ? 0.7 : 1,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {isPremium ? <Download size={13} /> : <Lock size={13} />}
+          {exporting ? 'A exportar...' : 'PDF'}
+        </button>
+
+        {/* Close */}
+        <button
+          type="button"
+          onClick={() => { window.location.href = '/app' }}
+          style={iconBtnStyle()}
+          title="Fechar editor"
+        >
+          <X size={15} />
+        </button>
       </header>
 
-      {/* Main area */}
+      {/* BODY */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <LeftPanel />
-        <RightPanel />
+        {/* LeftPanel — always visible */}
+        <div style={{ width: 260, flexShrink: 0, overflow: 'hidden' }}>
+          <LeftPanel />
+        </div>
+
+        {/* PreviewPanel — always visible */}
+        <PreviewPanel />
+
+        {/* RightPanel — hidden on mobile */}
+        {!isMobile && (
+          <div style={{ width: 180, flexShrink: 0, overflow: 'hidden' }}>
+            <RightPanel />
+          </div>
+        )}
       </div>
 
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}

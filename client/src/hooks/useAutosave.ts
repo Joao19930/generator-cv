@@ -4,7 +4,7 @@ import { useCVStore } from '../store/cvStore'
 
 const STORAGE_KEY = 'cv_editor_data'
 
-export function useAutosave(cvId: string | null, token: string | null) {
+export function useAutosave(cvId: string | null, token: string | null, onSaved?: () => void) {
   const store = useCVStore()
   const lastSavedRef = useRef<string>('')
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -38,6 +38,7 @@ export function useAutosave(cvId: string | null, token: string | null) {
       // Save to localStorage
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...JSON.parse(snapshot), id: store.id }))
+        onSaved?.()
       } catch {}
 
       // Save to API if available
