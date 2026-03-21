@@ -1,4 +1,3 @@
-import React from 'react'
 import { useCVStore } from '../../../store/cvStore'
 import AIButton from '../AIButton'
 
@@ -7,11 +6,7 @@ const MAX_CHARS = 400
 export default function SummarySection() {
   const { summary, setSummary, personal, experience } = useCVStore()
 
-  const aiPrompt = `Escreve um resumo profissional conciso (máx 3 frases, ${MAX_CHARS} caracteres) para um CV.
-Nome: ${personal.fullName || 'não especificado'}
-Cargo: ${personal.jobTitle || 'não especificado'}
-Experiências: ${experience.map(e => `${e.role} na ${e.company}`).join(', ') || 'não especificado'}
-Escreve apenas o resumo, sem títulos nem explicações.`
+  const aiPrompt = `És um recrutador sénior. Cria um resumo profissional de 3 frases em português europeu para: Nome: ${personal.fullName || 'não especificado'}, Cargo: ${personal.jobTitle || 'não especificado'}, Experiências: ${experience.map(e => `${e.role} na ${e.company}`).join(', ') || 'não especificado'}. Máximo 350 caracteres. Começa com verbo de acção. Sem aspas.`
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
