@@ -143,6 +143,22 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
   }
 });
 
+// ── POST /api/cv/:id/download — registar download (print) ────
+router.post('/:id/download', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ error: 'ID inválido' });
+    // Verificar que o CV pertence ao utilizador
+    const check = await req.db.request().input('id', sql.Int, id).input('uid', sql.Int, req.user.id)
+      .query('SELECT id FROM cvs WHERE id=@id AND user_id=@uid');
+    if (!check.recordset.length) return res.status(403).json({ error: 'Sem permissão' });
+    // Incrementar contador
+    await req.db.request().input('id', sql.Int, id)
+      .query('UPDATE cvs SET downloaded=TRUE, download_count=COALESCE(download_count,0)+1 WHERE id=@id');
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── POST /api/cv/improve-text — IA: melhorar texto ──────────
 router.post('/improve-text', auth, toolLimiter, async (req, res) => {
   const { text, jobTitle } = req.body;

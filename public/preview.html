@@ -1261,6 +1261,35 @@
         }
 
         function downloadCV() {
+            // Registar download no servidor + analytics
+            (function() {
+                try {
+                    var params = new URLSearchParams(window.location.search);
+                    var cvId = params.get('cv');
+                    var token = localStorage.getItem('cv_token') || localStorage.getItem('token') || '';
+                    var sid = sessionStorage.getItem('_sid') || (function(){ var s = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', s); return s; })();
+                    var uid = null;
+                    try { if (token) uid = JSON.parse(atob(token.split('.')[1])).id; } catch(_) {}
+
+                    // Incrementar download_count na BD
+                    if (cvId && token) {
+                        fetch('/api/cv/' + cvId + '/download', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }
+                        }).catch(function(){});
+                    }
+
+                    // Registar evento no analytics
+                    fetch('/api/track/event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ eventType: 'cv_downloaded', page: '/preview',
+                            data: { cvId: cvId }, sessionId: sid, userId: uid }),
+                        keepalive: true
+                    }).catch(function(){});
+                } catch(_) {}
+            })();
+
             // Remove watermark, print, restore
             var wm = document.querySelector('.watermark');
             if (wm) wm.style.display = 'none';
