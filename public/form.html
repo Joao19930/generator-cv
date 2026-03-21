@@ -654,6 +654,28 @@
         var langCount = 1;
         var cvId = null;
 
+        // ── Analytics tracking ───────────────────────────────
+        function _tSid() {
+            var s = sessionStorage.getItem('_sid');
+            if (!s) { s = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', s); }
+            return s;
+        }
+        function _tUid() {
+            try { return token ? JSON.parse(atob(token.split('.')[1])).id : null; } catch(_){ return null; }
+        }
+        function trackEvent(et, data) {
+            try {
+                fetch('/api/track/event', { method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ eventType: et, page: '/editor', data: data||null,
+                        sessionId: _tSid(), userId: _tUid() }) }).catch(function(){});
+            } catch(_) {}
+        }
+        // Track page view do editor
+        (function(){ try {
+            fetch('/api/track', { method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ page: '/editor', sessionId: _tSid(), userId: _tUid() }) }).catch(function(){});
+        } catch(_){} })();
+
         // ── Init ────────────────────────────────────────────
         (function init() {
             var params = new URLSearchParams(window.location.search);
@@ -994,6 +1016,7 @@
 
             // Guardar em sessionStorage
             sessionStorage.setItem('cvData', JSON.stringify(cvData));
+            trackEvent('cv_saved', { cvId: cvId, template: tplSlug });
 
             // Guardar no servidor se autenticado
             if (token && cvId) {
@@ -1011,9 +1034,11 @@
                     })
                 })
                 .then(function() {
+                    trackEvent('cv_downloaded', { cvId: cvId, template: tplSlug });
                     window.location.href = '/preview?cv=' + cvId;
                 })
                 .catch(function() {
+                    trackEvent('cv_downloaded', { cvId: cvId, template: tplSlug });
                     window.location.href = '/preview?cv=' + cvId;
                 });
             } else {
@@ -1447,6 +1472,7 @@
         // ══════════════════════════════════════════════
 
         function aiGenerateSummary() {
+            trackEvent('ai_generate', { type: 'summary' });
             var btn = document.getElementById('btnAiSummary');
             var name = (document.getElementById('fullName').value || '').trim();
             var jobTitle = (document.getElementById('jobTitle').value || '').trim();
@@ -1521,6 +1547,7 @@
         }
 
         function aiGenerateResponsibilities(triggerBtn) {
+            trackEvent('ai_generate', { type: 'responsibilities' });
             var card = triggerBtn.closest('.item-card');
             if (!card) return;
             var inputs = card.querySelectorAll('input');

@@ -225,3 +225,18 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS cv_credits     INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS cover_credits  INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS access_until   TIMESTAMP;
 CREATE INDEX IF NOT EXISTS ix_pay_req_status ON payment_requests(status, created_at DESC);
+
+
+-- ── User Events (comportamento granular) ─────────────────────
+CREATE TABLE IF NOT EXISTS user_events (
+  id         SERIAL PRIMARY KEY,
+  event_type VARCHAR(100) NOT NULL,
+  page       VARCHAR(100),
+  data       VARCHAR(500),
+  user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  session_id VARCHAR(64),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_events_type    ON user_events(event_type, created_at DESC);
+CREATE INDEX IF NOT EXISTS ix_events_user    ON user_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS ix_events_created ON user_events(created_at DESC);

@@ -540,7 +540,16 @@ router.get('/analytics', async (req, res) => {
       catch(e) { console.warn('analytics query failed:', e.message); return {}; }
     };
 
-    const [byPage, cvStats, openTickets, sessionStats, topUsers, abandonedCvs, bounces] = await Promise.all([
+    // Auto-criar tabela user_events se não existir
+    await req.db.request().query(
+      `CREATE TABLE IF NOT EXISTS user_events (
+        id SERIAL PRIMARY KEY, event_type VARCHAR(100) NOT NULL,
+        page VARCHAR(100), data VARCHAR(500),
+        user_id INTEGER, session_id VARCHAR(64),
+        created_at TIMESTAMP DEFAULT NOW())`
+    ).catch(() => {});
+
+    const [byPage, cvStats, openTickets, sessionStats, topUsers, abandonedCvs, bounces, topEvents, recentEvents, downloadEvents] = await Promise.all([
       safe(`SELECT page, COUNT(*) AS total, COUNT(DISTINCT session_id) AS unique_sessions
             FROM page_views GROUP BY page ORDER BY total DESC`),
       safeOne(`SELECT
@@ -577,6 +586,29 @@ router.get('/analytics', async (req, res) => {
               SELECT session_id FROM page_views WHERE session_id IS NOT NULL
               GROUP BY session_id HAVING COUNT(*)=1
             ) ORDER BY pv.created_at DESC LIMIT 15`),
+      // Top eventos por tipo
+      safe(`SELECT event_type,
+            COUNT(*) AS total,
+            COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days') AS last_7d,
+            COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 day') AS today
+            FROM user_events
+            GROUP BY event_type ORDER BY total DESC`),
+      // Feed de eventos recentes
+      safe(`SELECT ue.event_type, ue.page, ue.data, ue.created_at,
+            u.name AS user_name, u.email AS user_email
+            FROM user_events ue LEFT JOIN users u ON u.id = ue.user_id
+            ORDER BY ue.created_at DESC LIMIT 30`),
+      // Downloads por evento
+      safeOne(`SELECT
+        COUNT(*) FILTER (WHERE event_type='cv_downloaded') AS downloads_total,
+        COUNT(*) FILTER (WHERE event_type='cv_downloaded' AND created_at >= NOW() - INTERVAL '7 days') AS downloads_7d,
+        COUNT(*) FILTER (WHERE event_type='cv_downloaded' AND created_at >= NOW() - INTERVAL '1 day') AS downloads_today,
+        COUNT(*) FILTER (WHERE event_type='cv_created') AS creates_total,
+        COUNT(*) FILTER (WHERE event_type='ai_generate') AS ai_total,
+        COUNT(*) FILTER (WHERE event_type='ats_score_run') AS ats_total,
+        COUNT(*) FILTER (WHERE event_type='job_viewed') AS job_views_total,
+        COUNT(*) FILTER (WHERE event_type='panel_viewed') AS panel_views_total
+        FROM user_events`),
     ]);
 
     let cvs_downloaded = 0;
@@ -591,10 +623,13 @@ router.get('/analytics', async (req, res) => {
     const total_sessions   = n(sessionStats,'TotalSessions','total_sessions');
     const bounces_count    = n(sessionStats,'Bounces','bounces');
 
+    const evDl = downloadEvents || {};
+    const evDownloads = n(evDl,'downloads_total','Downloads_total') || cvs_downloaded;
+
     res.json({
       ok: true,
       stats: {
-        total_cvs, cvs_with_content, cvs_downloaded,
+        total_cvs, cvs_with_content, cvs_downloaded: evDownloads,
         abandoned: total_cvs - cvs_with_content,
         views_total:     n(cvStats,'ViewsTotal','views_total'),
         unique_visitors: n(cvStats,'UniqueVisitors','unique_visitors'),
@@ -604,8 +639,17 @@ router.get('/analytics', async (req, res) => {
         avg_sec:         n(sessionStats,'AvgSec','avg_sec'),
         total_sessions,
         bounce_rate: total_sessions > 0 ? Math.round(bounces_count/total_sessions*100) : 0,
+        // Métricas de eventos
+        downloads_7d:    n(evDl,'downloads_7d','Downloads_7d'),
+        downloads_today: n(evDl,'downloads_today','Downloads_today'),
+        creates_total:   n(evDl,'creates_total','Creates_total'),
+        ai_total:        n(evDl,'ai_total','Ai_total'),
+        ats_total:       n(evDl,'ats_total','Ats_total'),
+        job_views_total: n(evDl,'job_views_total','Job_views_total'),
       },
       byPage, topUsers, abandonedCvs, bounces,
+      topEvents: topEvents || [],
+      recentEvents: recentEvents || [],
     });
   } catch(e) {
     console.error('analytics route error:', e.message);

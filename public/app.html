@@ -1343,13 +1343,25 @@ document.addEventListener('DOMContentLoaded', () => {
   trackPageView('/app');
 });
 
+function _trackSid() {
+  let sid = sessionStorage.getItem('_sid');
+  if (!sid) { sid = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', sid); }
+  return sid;
+}
+function _trackUid() {
+  try { const t = localStorage.getItem('cv_token'); return t ? JSON.parse(atob(t.split('.')[1])).id : null; } catch(_){return null;}
+}
 function trackPageView(page) {
   try {
-    let sid = sessionStorage.getItem('_sid');
-    if (!sid) { sid = Math.random().toString(36).slice(2); sessionStorage.setItem('_sid', sid); }
-    const uid = (() => { try { const t = localStorage.getItem('cv_token'); return t ? JSON.parse(atob(t.split('.')[1])).id : null; } catch(_){return null;} })();
     fetch('/api/track', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ page, sessionId: sid, userId: uid }) }).catch(()=>{});
+      body: JSON.stringify({ page, sessionId: _trackSid(), userId: _trackUid() }) }).catch(()=>{});
+  } catch(_) {}
+}
+function trackEvent(eventType, data) {
+  try {
+    fetch('/api/track/event', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ eventType, page: location.pathname, data: data||null,
+        sessionId: _trackSid(), userId: _trackUid() }) }).catch(()=>{});
   } catch(_) {}
 }
 
@@ -1441,6 +1453,7 @@ function nav(id, el) {
   document.getElementById('tbTitle').textContent = PANEL_TITLES[id] || id;
   setBottomActive(id);
   if (id === 'ats') initATSPanel();
+  trackEvent('panel_viewed', { panel: id });
 }
 
 function setBottomActive(id) {
@@ -2225,6 +2238,7 @@ function tplCard(t, small) {
   </div>`;
 }
 function tplCardClick(t) {
+  trackEvent('template_selected', { templateId: t.id, templateSlug: t.slug, templateName: t.name });
   startCV(t);
 }
 
@@ -2356,6 +2370,7 @@ let savedJobs = JSON.parse(localStorage.getItem('saved_jobs') || '[]');
 function openJobDetail(id) {
   const j = allJobs.find(x => (x.Id||x.id) === id);
   if (!j) return;
+  trackEvent('job_viewed', { jobId: id, title: j.Title, company: j.Company, category: j.Category||j.category });
   const grad = JOB_GRADIENTS[allJobs.indexOf(j) % JOB_GRADIENTS.length];
   const loc  = [j.City, j.Country].filter(Boolean).join(', ');
   const contactType = j.ContactType || j.contact_type || 'url';
@@ -3075,6 +3090,7 @@ async function runATSScore() {
   const cvText = document.getElementById('atsCvText').value.trim();
   const jobDesc = document.getElementById('atsJobDesc').value.trim();
   if (!cvText || !jobDesc) { alert('Preenche os dois campos para analisar.'); return; }
+  trackEvent('ats_score_run');
   const btn = document.getElementById('atsAnalyzeBtn');
   btn.disabled = true; btn.textContent = '⏳ A analisar…';
   try {
@@ -3082,6 +3098,7 @@ async function runATSScore() {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Erro na análise');
     const score = typeof d.score === 'number' ? d.score : parseInt(d.score) || 0;
+    trackEvent('ats_score_result', { score });
     const col = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626';
     document.getElementById('atsScoreNum').textContent = score + '%';
     document.getElementById('atsScoreNum').style.color = col;
@@ -3211,7 +3228,7 @@ async function goToEditor() {
 }
 
 async function createNewCV() {
-  // Vai directo ao editor com o primeiro template gratuito disponível
+  trackEvent('cv_create_click');
   const token = localStorage.getItem('cv_token');
   const tpl = (allTpls || []).find(t => !t.premium) || allTpls[0] || { id: null, slug: 'classico-azul' };
   try {
@@ -3222,6 +3239,7 @@ async function createNewCV() {
     });
     const d = await res.json();
     if (!res.ok) { if (d.limitReached) { showLimitModal(); return; } alert(d.error || 'Erro ao criar CV.'); return; }
+    trackEvent('cv_created', { cvId: d.cvId, template: tpl.slug });
     location.href = `/editor?cv=${d.cvId}`;
   } catch(_) { location.href = '/editor'; }
 }

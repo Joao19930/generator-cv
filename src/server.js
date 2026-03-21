@@ -146,6 +146,32 @@ app.post('/api/track', async (req, res) => {
   } catch (_) {}
 });
 
+// ── Tracking de eventos granulares (público) ─────────────────
+app.post('/api/track/event', async (req, res) => {
+  res.json({ ok: true });
+  try {
+    const pool = await getPool();
+    const { eventType, page = '/', data, sessionId, userId } = req.body;
+    if (!eventType) return;
+    // Criar tabela se não existir (auto-migrate)
+    await pool.request().query(
+      `CREATE TABLE IF NOT EXISTS user_events (
+        id SERIAL PRIMARY KEY, event_type VARCHAR(100) NOT NULL,
+        page VARCHAR(100), data VARCHAR(500),
+        user_id INTEGER, session_id VARCHAR(64),
+        created_at TIMESTAMP DEFAULT NOW())`
+    ).catch(() => {});
+    await pool.request()
+      .input('et',   sql.VarChar, String(eventType).slice(0, 100))
+      .input('page', sql.VarChar, String(page).slice(0, 100))
+      .input('data', sql.VarChar, data ? JSON.stringify(data).slice(0, 500) : null)
+      .input('uid',  sql.Int,     userId ? parseInt(userId) : null)
+      .input('sid',  sql.VarChar, sessionId ? String(sessionId).slice(0, 64) : null)
+      .query(`INSERT INTO user_events (event_type, page, data, user_id, session_id)
+              VALUES (@et, @page, @data, @uid, @sid)`);
+  } catch (_) {}
+});
+
 // ── Rate limiting global ─────────────────────────────────────
 app.use(rateLimiter(300, 3600));
 

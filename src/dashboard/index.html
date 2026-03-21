@@ -608,6 +608,21 @@ tbody tr:hover{background:#fafafa;}
   <!-- KPI ROW -->
   <div id="analyticsKpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;"></div>
 
+  <!-- EVENTOS KPI ROW -->
+  <div id="analyticsEventKpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;"></div>
+
+  <!-- Top Eventos + Feed Recente -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="an-card">
+      <div class="an-card-hdr">⚡ Eventos por Tipo</div>
+      <div id="analyticsTopEvents"></div>
+    </div>
+    <div class="an-card">
+      <div class="an-card-hdr">🕐 Actividade Recente</div>
+      <div id="analyticsRecentEvents"></div>
+    </div>
+  </div>
+
   <!-- Visitas + Funil -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
     <div class="an-card">
@@ -2820,7 +2835,7 @@ function saveAPIKeys() {
 
 // ── ANALYTICS ─────────────────────────────────────────────────
 async function loadAnalytics() {
-  const ids = ['analyticsKpis','analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'];
+  const ids = ['analyticsKpis','analyticsEventKpis','analyticsTopEvents','analyticsRecentEvents','analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'];
   const loading = '<p style="font-size:12px;color:var(--t4);padding:12px 0;">A carregar...</p>';
   ids.forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=loading; });
   const ah = { headers: { Authorization: 'Bearer ' + TOKEN } };
@@ -2855,6 +2870,80 @@ async function loadAnalytics() {
         <div class="an-kpi-bar" style="background:${k.color}"></div>
       </div>`
     ).join('');
+
+    // ── Eventos KPIs ──────────────────────────────────────
+    const ev = s;
+    const eventKpis = [
+      { icon:'📥', label:'Downloads Total',  val: n('cvs_downloaded'),    sub:`+${n('downloads_7d')} esta semana · ${n('downloads_today')} hoje`,  color:'#059669' },
+      { icon:'✨', label:'IA Geradas',        val: n('ai_total'),          sub:'resumos + responsabilidades',                                         color:'#7c3aed' },
+      { icon:'🎯', label:'Score ATS',         val: n('ats_total'),         sub:'análises realizadas',                                                  color:'#0891b2' },
+      { icon:'💼', label:'Vagas Vistas',      val: n('job_views_total'),   sub:'detalhes de emprego abertos',                                          color:'#f59e0b' },
+      { icon:'📝', label:'CVs Criados (ev)',  val: n('creates_total'),     sub:'via botão Criar CV',                                                   color:'#1a56db' },
+      { icon:'🧭', label:'Naveg. Painéis',    val: n('panel_views_total'), sub:'cliques nos separadores',                                              color:'#6b7280' },
+    ];
+    document.getElementById('analyticsEventKpis').innerHTML = eventKpis.map(k =>
+      `<div class="an-kpi">
+        <div class="an-kpi-icon">${k.icon}</div>
+        <div class="an-kpi-val" style="color:${k.color}">${k.val}</div>
+        <div class="an-kpi-lbl">${k.label}</div>
+        <div class="an-kpi-sub">${k.sub}</div>
+        <div class="an-kpi-bar" style="background:${k.color}"></div>
+      </div>`
+    ).join('');
+
+    // ── Top Eventos ────────────────────────────────────────
+    const evLabels = {
+      'cv_downloaded':'📥 Download CV','cv_created':'📝 CV Criado','cv_create_click':'🖱 Clique Criar CV',
+      'cv_saved':'💾 CV Guardado','ai_generate':'✨ IA Gerada','ats_score_run':'🎯 ATS Analisado',
+      'ats_score_result':'📊 ATS Resultado','panel_viewed':'🧭 Painel Visitado',
+      'template_selected':'🎨 Template Escolhido','job_viewed':'💼 Vaga Vista',
+    };
+    const evList = d.topEvents || [];
+    const maxEv = Math.max(...evList.map(e=>Number(e.Total||e.total||0)),1);
+    document.getElementById('analyticsTopEvents').innerHTML = evList.length
+      ? evList.map(e=>{
+          const nm = evLabels[e.EventType||e.event_type] || (e.EventType||e.event_type);
+          const tot = Number(e.Total||e.total||0);
+          const w7  = Number(e.Last7d||e.last_7d||0);
+          const tod = Number(e.Today||e.today||0);
+          return `<div style="margin-bottom:11px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:3px;">
+              <span style="font-weight:600;color:var(--text)">${nm}</span>
+              <span style="color:var(--t3)">${tot} · <span style="color:#7c3aed">7d:${w7}</span> · <span style="color:#059669">hoje:${tod}</span></span>
+            </div>
+            <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${Math.round(tot/maxEv*100)}%;background:var(--blue);border-radius:3px;"></div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">Sem eventos registados ainda.<br><small>Os eventos aparecem assim que os utilizadores interajam com o site.</small></p>';
+
+    // ── Feed de Eventos Recentes ───────────────────────────
+    const evFeed = d.recentEvents || [];
+    const evIcons = { cv_downloaded:'📥',cv_created:'📝',cv_saved:'💾',ai_generate:'✨',ats_score_run:'🎯',
+      panel_viewed:'🧭',template_selected:'🎨',job_viewed:'💼',cv_create_click:'🖱',ats_score_result:'📊' };
+    const fmtTs = v => { if(!v) return '—';
+      const d2=new Date(v), now=new Date(), diff=Math.round((now-d2)/1000);
+      if(diff<60) return diff+'s atrás'; if(diff<3600) return Math.floor(diff/60)+'m atrás';
+      if(diff<86400) return Math.floor(diff/3600)+'h atrás';
+      return d2.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+    };
+    document.getElementById('analyticsRecentEvents').innerHTML = evFeed.length
+      ? `<div style="max-height:280px;overflow-y:auto;">${evFeed.map(e=>{
+          const et = e.EventType||e.event_type;
+          const ic = evIcons[et] || '•';
+          const lbl = evLabels[et] || et;
+          const who = e.user_name||e.UserName ? `${e.user_name||e.UserName}` : 'Anónimo';
+          return `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:11px;">
+            <span style="font-size:15px;flex-shrink:0;margin-top:1px;">${ic}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:var(--text)">${lbl}</div>
+              <div style="color:var(--t4)">${who}</div>
+            </div>
+            <div style="color:var(--t4);flex-shrink:0;font-size:10px;">${fmtTs(e.created_at||e.CreatedAt)}</div>
+          </div>`;
+        }).join('')}</div>`
+      : '<p style="font-size:12px;color:var(--t4);text-align:center;padding:24px 0;">Nenhuma actividade recente</p>';
 
     // ── Visitas por Página ─────────────────────────────────
     const pages = d.byPage || [];
@@ -2950,6 +3039,9 @@ async function loadAnalytics() {
     if (ab > 0)        insights.push({icon:'⚠️',text:`${ab} CV(s) abandonados — Considera enviar email de reactivação. Pequeno incentivo pode converter estes utilizadores.`,action:`Contactar ${Math.min(ab,10)} utilizadores`});
     if (n('cvs_7d')>0) insights.push({icon:'📈',text:`${n('cvs_7d')} CVs criados esta semana — Momento activo. Ideal para campanha de conversão para premium.`,action:'Lançar campanha premium'});
     if (wc>0&&dl===0)  insights.push({icon:'💡',text:`${wc} CVs preenchidos mas nenhum descarregado — Rever o fluxo de download. Pode haver uma barreira no botão de exportação.`,action:'Rever fluxo de download'});
+    if (n('ai_total')>0) insights.push({icon:'✨',text:`${n('ai_total')} gerações com IA usadas — Os utilizadores estão a explorar a funcionalidade IA. Considere destacar mais esta feature.`,action:null});
+    if (n('ats_total')>0) insights.push({icon:'🎯',text:`${n('ats_total')} análises ATS realizadas — Utilizadores motivados a optimizar candidaturas. Bom candidato para upsell premium.`,action:'Campanha ATS premium'});
+    if (n('job_views_total')>0) insights.push({icon:'💼',text:`${n('job_views_total')} vagas de emprego abertas — Alta intenção de candidatura. Momento ideal para recomendar download de CV.`,action:null});
     if (n('open_tickets')>0) insights.push({icon:'💬',text:`${n('open_tickets')} ticket(s) de suporte sem resposta — Responder rapidamente reduz o churn e aumenta a satisfação.`,action:'Ver suporte'});
     if (top.length>0)  insights.push({icon:'🏆',text:`Utilizador mais activo: ${top[0].Name||top[0].name||'—'} (${Number(top[0].Views||top[0].views||0)} páginas). Candidato ideal para testemunho ou programa de embaixadores.`,action:null});
     if (insights.length===0) insights.push({icon:'📊',text:'Dados insuficientes para análise. Continue a recolher visitas — as recomendações aparecerão automaticamente.',action:null});
@@ -2969,7 +3061,7 @@ async function loadAnalytics() {
   } catch(e) {
     console.error('Analytics error:', e);
     document.getElementById('analyticsKpis').innerHTML = `<p style="color:#dc2626;font-size:12px;grid-column:1/-1">Erro: ${e.message}</p>`;
-    ['analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'].forEach(id=>{
+    ['analyticsEventKpis','analyticsTopEvents','analyticsRecentEvents','analyticsPages','analyticsCvFunnel','analyticsTopUsers','analyticsAbandoned','analyticsBounces','analyticsRetention'].forEach(id=>{
       const el=document.getElementById(id); if(el) el.innerHTML='<p style="font-size:12px;color:var(--t4);text-align:center;padding:16px">Sem dados disponíveis</p>';
     });
   }
