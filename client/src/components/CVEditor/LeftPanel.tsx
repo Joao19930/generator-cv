@@ -197,8 +197,7 @@ export default function LeftPanel() {
   return (
     <div
       style={{
-        width: 420,
-        flexShrink: 0,
+        width: '100%',
         background: '#1e293b',
         borderRight: '1px solid #334155',
         display: 'flex',

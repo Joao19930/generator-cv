@@ -14,11 +14,15 @@ export function useAuth() {
       .finally(() => setLoading(false))
   }, [token])
 
+  const plan = (user?.plan || user?.Plan || 'free').toLowerCase()
+  const planExpiry = user?.plan_expiry || user?.PlanExpiry || null
+  const hasActiveAccess = planExpiry && new Date(planExpiry) > new Date()
+
   return {
     user,
     loading,
     token,
-    isPremium: user?.plan === 'premium',
+    isPremium: plan === 'premium' || !!hasActiveAccess,
     isLoggedIn: !!user,
   }
 }

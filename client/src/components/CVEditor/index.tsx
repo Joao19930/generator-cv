@@ -36,6 +36,33 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
   const [exporting, setExporting] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [leftWidth, setLeftWidth] = useState(320)
+  const isDragging = React.useRef(false)
+  const dragStart = React.useRef(0)
+  const dragStartWidth = React.useRef(320)
+
+  function onResizeMouseDown(e: React.MouseEvent) {
+    isDragging.current = true
+    dragStart.current = e.clientX
+    dragStartWidth.current = leftWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    function onMove(ev: MouseEvent) {
+      if (!isDragging.current) return
+      const delta = ev.clientX - dragStart.current
+      setLeftWidth(Math.min(520, Math.max(220, dragStartWidth.current + delta)))
+    }
+    function onUp() {
+      isDragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   const handleSaved = useCallback(() => {
     setSavedAt(new Date())
@@ -291,10 +318,24 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
 
       {/* BODY */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* LeftPanel — always visible */}
-        <div style={{ width: 260, flexShrink: 0, overflow: 'hidden' }}>
+        {/* LeftPanel — resizable */}
+        <div style={{ width: leftWidth, flexShrink: 0, overflow: 'hidden' }}>
           <LeftPanel />
         </div>
+
+        {/* Resize handle */}
+        <div
+          onMouseDown={onResizeMouseDown}
+          style={{
+            width: 4,
+            flexShrink: 0,
+            background: '#1e293b',
+            cursor: 'col-resize',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = '#b5a48a' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = '#1e293b' }}
+        />
 
         {/* PreviewPanel — always visible */}
         <PreviewPanel />
