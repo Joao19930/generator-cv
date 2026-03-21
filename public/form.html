@@ -1600,9 +1600,8 @@
                 if (diff > 0) yearsExp = diff + ' anos';
             }
 
-            // Recolher competências
-            var skillsEl = document.getElementById('skills');
-            var skills = skillsEl ? skillsEl.value.trim() : '';
+            // Recolher competências da lista global
+            var skillsStr = (typeof skills !== 'undefined' && Array.isArray(skills)) ? skills.join(', ') : '';
 
             fetch(API + '/cv/generate-summary', {
                 method: 'POST',
@@ -1611,7 +1610,7 @@
                     name: name || jobTitle,
                     jobTitle: jobTitle,
                     experiences: expList.join('; ') || '',
-                    skills: skills,
+                    skills: skillsStr,
                     yearsExp: yearsExp
                 })
             })

@@ -948,12 +948,149 @@ function buildCVHtml(content, templateName) {
 }
 
 function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
-  const n = name || jobTitle || 'Profissional';
-  const j = jobTitle || 'área';
-  const yrs = yearsExp ? `${yearsExp} de experiência` : 'experiência comprovada';
-  const expNote = experiences ? ` em ${experiences.slice(0, 100)}` : '';
-  const skillNote = skills ? ` Competências em ${skills.slice(0, 80)}.` : '';
-  return `Profissional de ${j} com ${yrs}${expNote}. Historial sólido na execução de tarefas com rigor, sentido de responsabilidade e orientação para resultados.${skillNote} Adaptável a novos contextos e comprometido(a) com a melhoria contínua e o crescimento da organização.`;
+  const j = (jobTitle || '').trim();
+  const jl = j.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const yrs = yearsExp ? yearsExp : '';
+  const exp = experiences ? String(experiences).slice(0, 120) : '';
+  const sk  = skills     ? String(skills).slice(0, 80)       : '';
+  const yrsLabel = yrs ? `com ${yrs} de experiência` : 'com experiência na área';
+  const skNote   = sk ? ` Domínio em ${sk}.` : '';
+
+  // Helper que monta o resumo a partir de fragmentos específicos da profissão
+  const build = (intro, body, close) =>
+    `${intro} ${yrsLabel}. ${body}${skNote} ${close}`;
+
+  // ── Cozinha / Restauração ──────────────────────────────────
+  if (/cozinheir|chef|pasteleiro|padeiro|confeit|restaura|caterl/i.test(jl))
+    return build(
+      `Chef de Cozinha especializado(a) na confecção de pratos da culinária tradicional e internacional`,
+      `Experiência na gestão de cozinha, controlo de stocks, elaboração de ementas e garantia dos padrões HACCP. Capacidade de coordenar brigadas de cozinha em ambientes de alta rotatividade, mantendo a qualidade e apresentação dos pratos.${exp ? ` Histórico profissional inclui: ${exp}.` : ''}`,
+      `Focado(a) na excelência gastronómica e na satisfação do cliente.`
+    );
+
+  // ── Motorista / Condutor ──────────────────────────────────
+  if (/motorista|condutor|chofer|transportador|logistic.*motor/i.test(jl))
+    return build(
+      `Motorista profissional`,
+      `Historial comprovado no transporte seguro de passageiros e mercadorias, com respeito rigoroso pelo código da estrada e prazos de entrega. Experiência em rotas urbanas e inter-provinciais, bem como na manutenção preventiva de veículos.${exp ? ` Empresas onde trabalhou: ${exp}.` : ''}`,
+      `Comprometido(a) com a segurança, pontualidade e boa conduta no exercício da função.`
+    );
+
+  // ── Segurança / Vigilante ─────────────────────────────────
+  if (/seguran|vigilante|guarda|protec/i.test(jl))
+    return build(
+      `Agente de Segurança`,
+      `Experiência em controlo de acessos, vigilância de instalações e gestão de ocorrências. Capacidade de actuar com calma sob pressão, comunicar eficazmente e garantir a segurança de pessoas e bens. Conhecimento de primeiros socorros e protocolos de emergência.${exp ? ` Locais de serviço: ${exp}.` : ''}`,
+      `Rigoroso(a), discreto(a) e comprometido(a) com a protecção das instalações e colaboradores.`
+    );
+
+  // ── Vendas / Comercial ────────────────────────────────────
+  if (/vend|comercial|representante.*vend|agente.*vend|sales|account manager/i.test(jl))
+    return build(
+      `Profissional Comercial`,
+      `Experiência comprovada em prospeção de clientes, negociação e fecho de vendas. Orientado(a) para resultados, com capacidade de superar metas e construir relações de longo prazo com clientes. Conhecimento do mercado angolano e das suas especificidades.${exp ? ` Experiências anteriores: ${exp}.` : ''}`,
+      `Motivado(a) pelo crescimento das carteiras de clientes e pelo cumprimento de objectivos comerciais.`
+    );
+
+  // ── RH / Recursos Humanos ─────────────────────────────────
+  if (/recursos humanos|gestao.*rh|rh |hr |recrutamento|talent|people/i.test(jl))
+    return build(
+      `Técnico(a) de Recursos Humanos`,
+      `Sólida experiência em recrutamento e selecção, processamento salarial, gestão de benefícios e conformidade laboral angolana (INSS, IRT, RENT). Capacidade de desenvolver políticas internas, planos de carreira e acções de formação.${exp ? ` Histórico: ${exp}.` : ''}`,
+      `Comprometido(a) com uma gestão de pessoas justa, ética e orientada para o desenvolvimento organizacional.`
+    );
+
+  // ── Contabilidade / Finanças ──────────────────────────────
+  if (/contabil|contabilist|financ|fiscal|audit|tesourar|economist/i.test(jl))
+    return build(
+      `Profissional de Contabilidade e Finanças`,
+      `Experiência em elaboração de demonstrações financeiras, conciliação bancária, apuramento de impostos e reporte para a AGT. Rigor no cumprimento das obrigações fiscais e conhecimento da legislação tributária angolana.${exp ? ` Empresas: ${exp}.` : ''}`,
+      `Comprometido(a) com a exactidão, transparência e integridade na gestão financeira.`
+    );
+
+  // ── Engenharia / Técnico ──────────────────────────────────
+  if (/engenh|tecnic.*manut|electricist|canalizador|mecanic|industrial/i.test(jl))
+    return build(
+      `Profissional de Engenharia e Manutenção`,
+      `Experiência em manutenção preventiva e correctiva de equipamentos, leitura de plantas técnicas e resolução de avarias. Capacidade de trabalhar sob pressão e cumprir prazos em ambientes industriais e de construção.${exp ? ` Projectos e empresas: ${exp}.` : ''}`,
+      `Orientado(a) para a eficiência operacional, segurança no trabalho e melhoria contínua dos processos.`
+    );
+
+  // ── Professor / Formador ──────────────────────────────────
+  if (/professor|docente|formador|educador|pedagogia|ensino/i.test(jl))
+    return build(
+      `Profissional de Educação e Formação`,
+      `Experiência no planeamento e leccionação de aulas, desenvolvimento de materiais didácticos e avaliação de alunos. Capacidade de adaptar o ensino a diferentes perfis e necessidades, promovendo um ambiente de aprendizagem motivador.${exp ? ` Instituições: ${exp}.` : ''}`,
+      `Apaixonado(a) pelo desenvolvimento das capacidades dos alunos e pela qualidade do ensino em Angola.`
+    );
+
+  // ── Saúde / Enfermagem / Medicina ─────────────────────────
+  if (/enfermeiro|enfermagem|medico|medica|farmaceut|clinic|saude|laborator/i.test(jl))
+    return build(
+      `Profissional de Saúde`,
+      `Experiência no cuidado e acompanhamento de doentes, administração de medicação e registo clínico. Actuação com rigor técnico, sigilo profissional e sensibilidade humana no atendimento ao paciente.${exp ? ` Unidades de saúde: ${exp}.` : ''}`,
+      `Comprometido(a) com o bem-estar dos doentes e com a qualidade dos serviços de saúde prestados.`
+    );
+
+  // ── Informática / Programação / TI ───────────────────────
+  if (/programador|developer|informatica|software|sistemas|ti |it |tecnologia|web|dados|data/i.test(jl))
+    return build(
+      `Profissional de Tecnologia e Sistemas de Informação`,
+      `Experiência no desenvolvimento, implementação e suporte de soluções tecnológicas. Capacidade de analisar requisitos, resolver problemas técnicos e colaborar em equipas multidisciplinares de TI.${exp ? ` Projectos: ${exp}.` : ''}`,
+      `Focado(a) na entrega de soluções digitais eficientes e na adopção das melhores práticas do sector.`
+    );
+
+  // ── Marketing / Comunicação ───────────────────────────────
+  if (/marketing|publicidade|comunicacao|community|social media|digital|branding/i.test(jl))
+    return build(
+      `Profissional de Marketing e Comunicação`,
+      `Experiência na criação de campanhas, gestão de redes sociais, produção de conteúdo e análise de métricas digitais. Capacidade criativa aliada a um pensamento estratégico orientado para resultados mensuráveis.${exp ? ` Marcas e projectos: ${exp}.` : ''}`,
+      `Apaixonado(a) por construir marcas relevantes e criar ligações autênticas entre as empresas e o seu público.`
+    );
+
+  // ── Bancário ──────────────────────────────────────────────
+  if (/bancario|banco|credito|gestor.*conta|compliance|risco.*financ/i.test(jl))
+    return build(
+      `Profissional Bancário`,
+      `Experiência no atendimento a clientes empresariais e particulares, análise de crédito e gestão de carteiras. Conhecimento da regulamentação do sector financeiro angolano e das exigências do BNA.${exp ? ` Bancos e entidades: ${exp}.` : ''}`,
+      `Orientado(a) para a fidelização de clientes, controlo de risco e crescimento sustentável do negócio.`
+    );
+
+  // ── Recepcionista / Secretária / Administrativo ───────────
+  if (/recepcion|secretar|administrat|assistente.*admin|office/i.test(jl))
+    return build(
+      `Profissional Administrativo(a)`,
+      `Experiência em gestão de agenda, atendimento presencial e telefónico, organização de documentação e apoio à direcção. Rigoroso(a), proactivo(a) e com forte sentido de confidencialidade.${exp ? ` Empresas: ${exp}.` : ''}`,
+      `Comprometido(a) com a eficiência administrativa e com a boa imagem institucional da organização.`
+    );
+
+  // ── Logística / Armazém ───────────────────────────────────
+  if (/logistic|armazem|warehouse|stock|inventario|compras|aprovisionamento/i.test(jl))
+    return build(
+      `Profissional de Logística e Gestão de Stocks`,
+      `Experiência na gestão de armazém, controlo de inventários, coordenação de entregas e optimização da cadeia de abastecimento. Capacidade de reduzir custos operacionais mantendo os níveis de serviço.${exp ? ` Empresas: ${exp}.` : ''}`,
+      `Focado(a) na eficiência da cadeia logística e no cumprimento rigoroso dos prazos de entrega.`
+    );
+
+  // ── Gestor / Director / Líder ─────────────────────────────
+  if (/gestor|director|lider|manager|coordenador|supervisor|chefe.*depart/i.test(jl))
+    return build(
+      `Gestor(a) com sólida capacidade de liderança`,
+      `Experiência na definição de estratégias, gestão de equipas e acompanhamento de KPIs. Historial de alcance de resultados em ambientes de alta exigência, com foco no desenvolvimento das pessoas e na eficiência dos processos.${exp ? ` Organizações: ${exp}.` : ''}`,
+      `Comprometido(a) com o crescimento sustentável da organização e com a valorização do capital humano.`
+    );
+
+  // ── Limpeza / Higiene ─────────────────────────────────────
+  if (/limpeza|higiene|lavandaria|housekeeping|auxiliar.*limpeza/i.test(jl))
+    return build(
+      `Auxiliar de Limpeza e Higienização`,
+      `Experiência na limpeza e manutenção de instalações comerciais, hoteleiras e industriais, com conhecimento de produtos de higienização e técnicas adequadas a cada superfície. Pontual, responsável e com espírito de equipa.${exp ? ` Locais de trabalho: ${exp}.` : ''}`,
+      `Comprometido(a) com a higiene, organização e o bom ambiente das instalações.`
+    );
+
+  // ── DEFAULT — genérico mas estruturado por cargo ──────────
+  const intro = j ? `${j}` : 'Profissional';
+  return `${intro} ${yrsLabel}. ${exp ? `Experiência profissional inclui: ${exp}. ` : ''}Actua com rigor técnico, sentido de responsabilidade e foco em resultados concretos. Adaptável a diferentes contextos organizacionais, com capacidade de trabalho autónomo e em equipa.${skNote} Comprometido(a) com o desenvolvimento profissional contínuo e com a criação de valor para a organização.`;
 }
 
 function generateResponsibilitiesLocal(jobTitle) {
