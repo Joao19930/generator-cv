@@ -77,7 +77,7 @@ export default function RightPanel() {
   const r = 25
   const circ = 2 * Math.PI * r // ~157
   const atsOffset = circ * (1 - atsScore / 100)
-  const atsColor = atsScore >= 80 ? '#22c55e' : atsScore >= 40 ? '#b5a48a' : '#ef4444'
+  const atsColor = atsScore >= 80 ? '#22c55e' : atsScore >= 40 ? '#f59e0b' : '#ef4444'
   const atsLabel = atsScore >= 80 ? 'Excelente' : atsScore >= 40 ? 'Bom' : 'Fraco'
 
   // ATS tip
@@ -111,14 +111,14 @@ export default function RightPanel() {
           <div style={{
             width: `${progress}%`,
             height: '100%',
-            background: '#b5a48a',
+            background: '#f59e0b',
             borderRadius: 2,
             transition: 'width 0.4s ease',
           }} />
         </div>
 
         {/* Percentage */}
-        <div style={{ textAlign: 'center', fontSize: 18, fontWeight: 700, color: '#b5a48a', marginBottom: 10 }}>
+        <div style={{ textAlign: 'center', fontSize: 18, fontWeight: 700, color: '#f59e0b', marginBottom: 10 }}>
           {progress}%
         </div>
 
@@ -130,7 +130,7 @@ export default function RightPanel() {
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                background: item.ok ? '#b5a48a' : 'transparent',
+                background: item.ok ? '#f59e0b' : 'transparent',
                 border: item.ok ? 'none' : '1.5px solid #334155',
                 flexShrink: 0,
               }} />
@@ -201,7 +201,7 @@ export default function RightPanel() {
       <div style={cardStyle}>
         <div style={{ ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 4 }}>
           Dica IA
-          <span style={{ color: '#b5a48a', fontSize: 12 }}>✦</span>
+          <span style={{ color: '#f59e0b', fontSize: 12 }}>✦</span>
         </div>
         <p style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5, margin: 0, transition: 'opacity 0.3s' }}>
           {AI_TIPS[tipIndex]}
@@ -221,7 +221,7 @@ export default function RightPanel() {
           onClick={() => { window.location.href = '/empregos' }}
           style={{
             cursor: 'pointer',
-            color: '#b5a48a',
+            color: '#f59e0b',
             fontSize: 10,
             fontWeight: 600,
             textAlign: 'center',

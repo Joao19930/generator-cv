@@ -228,7 +228,7 @@ export const useCVStore = create<CVState>((set, get) => {
     customSections: [],
     sectionOrder: [...DEFAULT_SECTION_ORDER],
     template: 'executive',
-    primaryColor: '#1a2e4a',
+    primaryColor: '#b5a48a',
     fontFamily: 'Inter',
     fontSize: 11,
     lineSpacing: 'normal',

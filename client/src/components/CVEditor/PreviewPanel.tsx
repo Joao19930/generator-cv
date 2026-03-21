@@ -83,9 +83,9 @@ export default function PreviewPanel() {
                 onClick={() => setTemplate(opt.id)}
                 style={{
                   ...subToolbarBtnBase,
-                  background: active ? '#b5a48a' : 'transparent',
+                  background: active ? '#f59e0b' : 'transparent',
                   color: active ? '#fff' : '#64748b',
-                  borderColor: active ? '#b5a48a' : '#334155',
+                  borderColor: active ? '#f59e0b' : '#334155',
                 }}
               >
                 {opt.label}
@@ -131,9 +131,9 @@ export default function PreviewPanel() {
                 onClick={() => setZoom(opt.value)}
                 style={{
                   ...subToolbarBtnBase,
-                  background: active ? '#b5a48a' : 'transparent',
+                  background: active ? '#f59e0b' : 'transparent',
                   color: active ? '#fff' : '#64748b',
-                  borderColor: active ? '#b5a48a' : '#334155',
+                  borderColor: active ? '#f59e0b' : '#334155',
                 }}
               >
                 {opt.label}
