@@ -51,16 +51,28 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Load data on mount
+  // Load data on mount — AbortController evita que um fetch atrasado
+  // sobrescreva o que o utilizador já escreveu (race condition / Strict Mode)
   useEffect(() => {
+    const controller = new AbortController()
+
     if (cvId && token) {
-      fetch(`/api/cv/${cvId}`, { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`/api/cv/${cvId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+      })
         .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data) store.loadFromData(data) })
-        .catch(() => store.loadFromStorage())
+        .then(data => {
+          if (!controller.signal.aborted && data) store.loadFromData(data)
+        })
+        .catch(err => {
+          if (err.name !== 'AbortError') store.loadFromStorage()
+        })
     } else {
       store.loadFromStorage()
     }
+
+    return () => controller.abort()
   }, [cvId, token])
 
   async function handleDownload() {
