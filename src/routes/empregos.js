@@ -266,24 +266,51 @@ async function importJooble(db) {
 
 // ── Seed de vagas demo (quando sem API key) ───────────────────
 async function seedDemoJobs(db) {
-  const cnt = await db.request()
-    .query(`SELECT COUNT(*) AS n FROM jobs WHERE source='demo'`)
-    .catch(() => ({ recordset: [{ n: 1 }] }));
-  if (parseInt(cnt.recordset[0].n) > 0) return;
+  // Limpa demos antigas e re-insere sempre (para apanhar actualizações)
+  await db.request()
+    .query(`DELETE FROM jobs WHERE source='demo'`)
+    .catch(() => {});
 
   const demos = [
-    { t: 'Desenvolvedor Full-Stack',         c: 'TechAngola Lda',    l: 'Luanda',    cat: 'Tecnologia',   d: 'Procuramos dev full-stack com experiência em Node.js, React e bases de dados SQL/NoSQL para integrar equipa de produto.', salary: '250.000 Kz' },
-    { t: 'Gestor de Projecto Sénior',         c: 'Sonangol EP',       l: 'Luanda',    cat: 'Gestão',        d: 'Vaga para gestor de projecto com experiência em PMI/Agile. Responsável por projectos de transformação digital.', salary: '400.000 Kz' },
-    { t: 'Analista Financeiro',               c: 'Banco BFA',         l: 'Luanda',    cat: 'Finanças',      d: 'Análise de dados financeiros, elaboração de relatórios e apoio à tomada de decisão estratégica da direcção.', salary: '300.000 Kz' },
-    { t: 'Designer UI/UX',                    c: 'Criativa Agency',   l: 'Luanda',    cat: 'Design',        d: 'Criar interfaces digitais de alto impacto, protótipos no Figma e guias de estilo para clientes nacionais e internacionais.', salary: '180.000 Kz' },
-    { t: 'Engenheiro Civil',                  c: 'Mota-Engil Angola', l: 'Luanda',    cat: 'Engenharia',    d: 'Supervisão de obras de construção civil, coordenação de equipas e controlo de qualidade em projectos de infra-estruturas.', salary: '350.000 Kz' },
-    { t: 'Especialista em Marketing Digital', c: 'Unitel',            l: 'Luanda',    cat: 'Marketing',     d: 'Gestão de campanhas digitais, SEO, redes sociais e análise de métricas de performance para marca de telecomunicações.', salary: '220.000 Kz' },
-    { t: 'Técnico de Redes e Sistemas',       c: 'Multichoice Angola',l: 'Luanda',    cat: 'Tecnologia',    d: 'Administração de redes, manutenção de servidores e suporte técnico de nível 2 para infra-estrutura corporativa.', salary: '200.000 Kz' },
-    { t: 'Contabilista Sénior',               c: 'Deloitte Angola',   l: 'Luanda',    cat: 'Finanças',      d: 'Elaboração de relatórios financeiros, auditoria interna e consultoria fiscal para carteira de clientes corporativos.', salary: '280.000 Kz' },
-    { t: 'Gestor de Recursos Humanos',        c: 'TAAG Linhas Aéreas',l: 'Luanda',    cat: 'Recursos Humanos', d: 'Recrutamento, avaliação de desempenho e implementação de políticas de RH numa das maiores empresas nacionais.', salary: '260.000 Kz' },
-    { t: 'Advogado Corporativo',              c: 'Miranda & Associados',l:'Luanda',   cat: 'Jurídico',      d: 'Assessoria jurídica a empresas em direito comercial, contratos, direito petrolífero e transacções internacionais.', salary: '450.000 Kz' },
-    { t: 'Coordenador de Logística',          c: 'DHL Angola',        l: 'Luanda',    cat: 'Logística',     d: 'Coordenação de operações de armazém, gestão de transportadoras e optimização de rotas de distribuição.', salary: '190.000 Kz' },
-    { t: 'Médico Clínico Geral',              c: 'Clínica Girassol',  l: 'Luanda',    cat: 'Saúde',         d: 'Consultas de medicina geral e familiar, urgências e acompanhamento de pacientes em clínica privada de referência.', salary: '500.000 Kz' },
+    // ── Tecnologia ──────────────────────────────────────────────
+    { t: 'Desenvolvedor Full-Stack',         c: 'TechAngola Lda',       l: 'Luanda',    cat: 'Tecnologia',       d: 'Procuramos dev full-stack com experiência em Node.js, React e bases de dados SQL/NoSQL para integrar equipa de produto.', salary: '250.000 Kz' },
+    { t: 'Técnico de Redes e Sistemas',      c: 'Multichoice Angola',   l: 'Luanda',    cat: 'Tecnologia',       d: 'Administração de redes, manutenção de servidores e suporte técnico de nível 2 para infra-estrutura corporativa.', salary: '200.000 Kz' },
+    // ── Gestão ──────────────────────────────────────────────────
+    { t: 'Gestor de Projecto Sénior',        c: 'Sonangol EP',          l: 'Luanda',    cat: 'Gestão',           d: 'Vaga para gestor de projecto com experiência em PMI/Agile. Responsável por projectos de transformação digital.', salary: '400.000 Kz' },
+    { t: 'Director de Operações',            c: 'Grupo Zahara',         l: 'Luanda',    cat: 'Gestão',           d: 'Supervisão das operações diárias do grupo, gestão de KPIs, coordenação de direcções e reporte à administração.', salary: '550.000 Kz' },
+    // ── Finanças ────────────────────────────────────────────────
+    { t: 'Analista Financeiro',              c: 'Banco BFA',            l: 'Luanda',    cat: 'Finanças',         d: 'Análise de dados financeiros, elaboração de relatórios e apoio à tomada de decisão estratégica da direcção.', salary: '300.000 Kz' },
+    { t: 'Contabilista Sénior',              c: 'Deloitte Angola',      l: 'Luanda',    cat: 'Finanças',         d: 'Elaboração de relatórios financeiros, auditoria interna e consultoria fiscal para carteira de clientes corporativos.', salary: '280.000 Kz' },
+    // ── Comercial ───────────────────────────────────────────────
+    { t: 'Gestor Comercial',                 c: 'Refriango',            l: 'Luanda',    cat: 'Comercial',        d: 'Gestão de carteira de clientes B2B, prospeção de novos mercados e cumprimento de metas mensais de vendas. Experiência mínima 3 anos.', salary: '280.000 Kz' },
+    { t: 'Representante Comercial',          c: 'Coca-Cola SABCO Angola',l:'Luanda',    cat: 'Comercial',        d: 'Visitas a pontos de venda, negociação com distribuidores e acompanhamento de volumes de vendas por rota definida.', salary: '180.000 Kz' },
+    { t: 'Director Comercial',               c: 'Angola Cables',        l: 'Luanda',    cat: 'Comercial',        d: 'Liderança da equipa comercial de 25 pessoas, definição de estratégia de vendas e crescimento de receita em 30%. Mínimo 7 anos de experiência.', salary: '600.000 Kz' },
+    { t: 'Supervisor de Vendas',             c: 'Unilever Angola',      l: 'Luanda',    cat: 'Comercial',        d: 'Supervisão de equipa de vendedores, acompanhamento no terreno, análise de dados de sell-out e formação da equipa.', salary: '230.000 Kz' },
+    { t: 'Agente de Vendas Externo',         c: 'Águas Caxito',         l: 'Bengo',     cat: 'Comercial',        d: 'Prospeção e captação de novos clientes para abastecimento de água, elaboração de propostas e seguimento pós-venda.', salary: '150.000 Kz' },
+    { t: 'Key Account Manager',              c: 'Nestlé Angola',        l: 'Luanda',    cat: 'Comercial',        d: 'Gestão de contas estratégicas no canal moderno (supermercados, grossistas), negociação de espaço e promoções.', salary: '320.000 Kz' },
+    // ── Seguradora ──────────────────────────────────────────────
+    { t: 'Gestor de Sinistros',              c: 'NOSSA Seguros',        l: 'Luanda',    cat: 'Seguradora',       d: 'Análise e gestão de processos de sinistros auto, habitação e vida. Negociação com peritos, reparadores e clientes.', salary: '220.000 Kz' },
+    { t: 'Actuário Júnior',                  c: 'AAA Seguros',          l: 'Luanda',    cat: 'Seguradora',       d: 'Cálculo de prémios, reservas técnicas e análise de risco actuarial para produtos de seguro de vida e não-vida.', salary: '300.000 Kz' },
+    { t: 'Agente de Seguros',                c: 'ENSA Seguros',         l: 'Luanda',    cat: 'Seguradora',       d: 'Prospeção e venda de apólices (auto, saúde, vida, habitação), acompanhamento de carteira e renovações anuais.', salary: '160.000 Kz' },
+    { t: 'Gestor de Apólices Empresariais',  c: 'Global Alliance Seguros',l:'Luanda',   cat: 'Seguradora',       d: 'Gestão de seguros colectivos, saúde empresarial e patrimónios para carteira de clientes corporativos.', salary: '280.000 Kz' },
+    { t: 'Técnico de Subscrição de Seguros', c: 'Nossa Seguros',        l: 'Luanda',    cat: 'Seguradora',       d: 'Avaliação e aceitação de riscos de seguros não-vida, análise de propostas e definição de condições de cobertura.', salary: '240.000 Kz' },
+    { t: 'Inspector de Sinistros Auto',      c: 'AAA Seguros',          l: 'Luanda',    cat: 'Seguradora',       d: 'Vistoria de veículos sinistrados, levantamento de danos, peritagem e elaboração de relatórios técnicos de avaliação.', salary: '200.000 Kz' },
+    // ── Banca ────────────────────────────────────────────────────
+    { t: 'Gestor de Cliente Empresarial',    c: 'Banco BIC',            l: 'Luanda',    cat: 'Banca',            d: 'Gestão de carteira de empresas, análise de crédito, produtos de cash management e apoio às necessidades financeiras dos clientes.', salary: '350.000 Kz' },
+    { t: 'Analista de Crédito',              c: 'Banco Millennium Atlântico',l:'Luanda', cat: 'Banca',            d: 'Análise de processos de crédito empresarial, avaliação de risco, elaboração de pareceres e acompanhamento de carteira.', salary: '290.000 Kz' },
+    { t: 'Caixa Bancário',                   c: 'Banco Keve',           l: 'Luanda',    cat: 'Banca',            d: 'Atendimento ao balcão, processamento de operações de caixa, câmbio de moeda e suporte a produtos bancários de retalho.', salary: '130.000 Kz' },
+    { t: 'Gestor de Conta Particulares',     c: 'Banco BAI',            l: 'Luanda',    cat: 'Banca',            d: 'Gestão de carteira de clientes particulares, promoção de produtos de poupança, crédito pessoal e cartões.', salary: '220.000 Kz' },
+    { t: 'Responsável de Compliance Bancário',c:'Banco BFA',            l: 'Luanda',    cat: 'Banca',            d: 'Implementação de políticas de conformidade regulatória, prevenção de branqueamento de capitais e reporte ao BNA.', salary: '420.000 Kz' },
+    { t: 'Analista de Risco de Mercado',     c: 'Banco de Poupança e Crédito',l:'Luanda',cat:'Banca',            d: 'Monitorização de riscos de mercado, taxa de juro e liquidez. Elaboração de relatórios de stress testing e ALM.', salary: '380.000 Kz' },
+    { t: 'Director de Agência Bancária',     c: 'Banco Sol',            l: 'Benguela',  cat: 'Banca',            d: 'Gestão operacional e comercial da agência, liderança de equipa, cumprimento de metas e qualidade de atendimento.', salary: '480.000 Kz' },
+    // ── Outros ──────────────────────────────────────────────────
+    { t: 'Designer UI/UX',                   c: 'Criativa Agency',      l: 'Luanda',    cat: 'Design',           d: 'Criar interfaces digitais de alto impacto, protótipos no Figma e guias de estilo para clientes nacionais e internacionais.', salary: '180.000 Kz' },
+    { t: 'Engenheiro Civil',                 c: 'Mota-Engil Angola',    l: 'Luanda',    cat: 'Engenharia',       d: 'Supervisão de obras de construção civil, coordenação de equipas e controlo de qualidade em projectos de infra-estruturas.', salary: '350.000 Kz' },
+    { t: 'Especialista em Marketing Digital',c: 'Unitel',               l: 'Luanda',    cat: 'Marketing',        d: 'Gestão de campanhas digitais, SEO, redes sociais e análise de métricas de performance para marca de telecomunicações.', salary: '220.000 Kz' },
+    { t: 'Gestor de Recursos Humanos',       c: 'TAAG Linhas Aéreas',   l: 'Luanda',    cat: 'Recursos Humanos', d: 'Recrutamento, avaliação de desempenho e implementação de políticas de RH numa das maiores empresas nacionais.', salary: '260.000 Kz' },
+    { t: 'Advogado Corporativo',             c: 'Miranda & Associados', l: 'Luanda',    cat: 'Jurídico',         d: 'Assessoria jurídica a empresas em direito comercial, contratos, direito petrolífero e transacções internacionais.', salary: '450.000 Kz' },
+    { t: 'Coordenador de Logística',         c: 'DHL Angola',           l: 'Luanda',    cat: 'Logística',        d: 'Coordenação de operações de armazém, gestão de transportadoras e optimização de rotas de distribuição.', salary: '190.000 Kz' },
+    { t: 'Médico Clínico Geral',             c: 'Clínica Girassol',     l: 'Luanda',    cat: 'Saúde',            d: 'Consultas de medicina geral e familiar, urgências e acompanhamento de pacientes em clínica privada de referência.', salary: '500.000 Kz' },
   ];
 
   for (const j of demos) {
