@@ -110,11 +110,11 @@ router.post('/start', auth, async (req, res) => {
     // Ler plano directamente da BD (JWT pode estar desactualizado após upgrade)
     const userRow = await pool.request()
       .input('uid', sql.Int, req.user.id)
-      .query('SELECT plan, access_until FROM users WHERE id = @uid');
+      .query('SELECT plan, plan_expiry FROM users WHERE id = @uid');
     const u = userRow.recordset[0];
     const dbPlan = (u?.plan || u?.Plan || 'free').toLowerCase();
-    const accessUntil = u?.access_until || u?.AccessUntil || null;
-    const hasActiveAccess = accessUntil && new Date(accessUntil) > new Date();
+    const planExpiry = u?.plan_expiry || u?.PlanExpiry || null;
+    const hasActiveAccess = planExpiry && new Date(planExpiry) > new Date();
     const plan = (dbPlan !== 'free' || hasActiveAccess) ? 'premium' : 'free';
 
     if (plan === 'free') {
