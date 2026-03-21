@@ -823,34 +823,260 @@ function buildCVHtml(content, templateName) {
   </div></body></html>`;
 }
 
-function generateSummaryLocal(name, jobTitle, experiences) {
-  const n = name || 'o candidato';
-  const j = jobTitle || 'profissional';
-  const expNote = experiences ? ` com experiência em ${experiences.slice(0, 80)}` : '';
-  return `${n} é um(a) ${j} dedicado(a)${expNote}. Orientado(a) para resultados, com forte capacidade de trabalho em equipa e resolução de problemas. Comprometido(a) com a excelência profissional e o desenvolvimento contínuo. Disponível para novos desafios e para contribuir para o crescimento da organização.`;
+function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
+  const n = name || jobTitle || 'Profissional';
+  const j = jobTitle || 'área';
+  const yrs = yearsExp ? `${yearsExp} de experiência` : 'experiência comprovada';
+  const expNote = experiences ? ` em ${experiences.slice(0, 100)}` : '';
+  const skillNote = skills ? ` Competências em ${skills.slice(0, 80)}.` : '';
+  return `Profissional de ${j} com ${yrs}${expNote}. Historial sólido na execução de tarefas com rigor, sentido de responsabilidade e orientação para resultados.${skillNote} Adaptável a novos contextos e comprometido(a) com a melhoria contínua e o crescimento da organização.`;
 }
 
 function generateResponsibilitiesLocal(jobTitle) {
-  const jt = (jobTitle || '').toLowerCase();
+  const jt = (jobTitle || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const maps = [
-    { rx: /motorista|condutor|driver/,         items: ['Condução segura de veículos da empresa', 'Cumprimento das rotas e horários estabelecidos', 'Manutenção básica e verificação do estado do veículo', 'Transporte de mercadorias e/ou passageiros', 'Registo de quilómetros e ocorrências de viagem', 'Cumprimento do código da estrada e normas de segurança'] },
-    { rx: /cozinheiro|chef|cozinha|pasteleiro/, items: ['Preparação e confecção de refeições conforme o menu', 'Controlo de qualidade e higiene alimentar', 'Gestão de stocks e encomenda de ingredientes', 'Organização e limpeza da área de trabalho', 'Criação de novas receitas e sugestões do dia', 'Cumprimento das normas HACCP'] },
-    { rx: /contabilist|financ|auditor/,         items: ['Registo e lançamento de documentos contabilísticos', 'Elaboração de relatórios financeiros mensais', 'Controlo e reconciliação de contas bancárias', 'Cumprimento das obrigações fiscais e declarativas', 'Análise de custos e apoio à gestão orçamental', 'Arquivo e organização da documentação contabilística'] },
-    { rx: /vendedor|comercial|sales/,           items: ['Prospeção e captação de novos clientes', 'Apresentação e demonstração de produtos/serviços', 'Negociação e fecho de vendas', 'Acompanhamento e fidelização da carteira de clientes', 'Registo de actividades no CRM', 'Cumprimento das metas comerciais mensais'] },
-    { rx: /electricista|electric/,             items: ['Instalação e manutenção de sistemas eléctricos', 'Diagnóstico e resolução de avarias eléctricas', 'Leitura e interpretação de esquemas eléctricos', 'Instalação de quadros eléctricos e cablagens', 'Cumprimento das normas de segurança eléctrica', 'Registo de intervenções técnicas realizadas'] },
-    { rx: /professor|docente|ensino/,           items: ['Planificação e leccionação de aulas', 'Avaliação contínua e sumativa dos alunos', 'Elaboração de materiais pedagógicos', 'Acompanhamento individualizado dos alunos', 'Participação em reuniões pedagógicas', 'Comunicação regular com os encarregados de educação'] },
-    { rx: /rh|recursos humanos|recrutamento/,   items: ['Recrutamento e selecção de candidatos', 'Gestão de admissões, contratos e documentação', 'Controlo de assiduidade e gestão de férias', 'Elaboração de processos de avaliação de desempenho', 'Organização de acções de formação interna', 'Apoio ao cumprimento da legislação laboral'] },
-    { rx: /marketing|digital|social media/,     items: ['Gestão das redes sociais da empresa', 'Criação de conteúdos e campanhas digitais', 'Análise de métricas e relatórios de desempenho', 'Gestão de tráfego pago (Meta Ads, Google Ads)', 'Desenvolvimento de estratégias de marketing de conteúdo', 'Coordenação com fornecedores criativos e agências'] },
-    { rx: /engenheir|engineer/,                 items: ['Desenvolvimento e acompanhamento de projectos técnicos', 'Elaboração de relatórios e documentação técnica', 'Supervisão de obras e equipas no terreno', 'Controlo de qualidade e cumprimento de normas', 'Resolução de problemas técnicos complexos', 'Coordenação com clientes e fornecedores'] },
+    // Cozinha / Restauração
+    { rx: /cozinheir|chef|pasteleiro|padeiro|confeit/,
+      items: [
+        'Preparar e confeccionar refeições diárias (pequeno-almoço, almoço e jantar)',
+        'Elaborar pratos de acordo com o menu definido ou orientação superior',
+        'Garantir a higiene e segurança alimentar em todo o processo de confecção',
+        'Controlar a conservação dos alimentos, respeitando validades e condições de armazenamento',
+        'Organizar e manter a cozinha limpa e em condições de trabalho',
+        'Gerir stocks básicos de ingredientes e comunicar necessidades de reposição',
+        'Adaptar refeições a necessidades específicas (dietas, alergias, crianças)',
+        'Coordenar os tempos de preparo para cumprir os horários das refeições',
+      ]},
+    // Motorista / Condutor
+    { rx: /motorista|condutor|driver|chofer/,
+      items: [
+        'Conduzir veículos de forma segura, respeitando o código da estrada e os regulamentos internos',
+        'Transportar passageiros ou mercadorias para os destinos definidos no roteiro diário',
+        'Verificar o estado do veículo antes de cada saída (nível de óleo, pneus, travões, luzes)',
+        'Reportar avarias e agendar intervenções de manutenção preventiva',
+        'Gerir o registo de quilómetros percorridos, combustível consumido e ocorrências de viagem',
+        'Garantir a segurança e o conforto dos passageiros ou a integridade da carga transportada',
+        'Conhecer rotas alternativas para minimizar atrasos e optimizar os percursos',
+      ]},
+    // Segurança / Vigilância
+    { rx: /seguranca|vigilant|guarda|porteiro/,
+      items: [
+        'Controlar o acesso de pessoas e viaturas às instalações, verificando credenciais',
+        'Efectuar rondas periódicas às instalações para detectar situações irregulares',
+        'Monitorizar o sistema de videovigilância (CCTV) e registar ocorrências',
+        'Actuar em situações de emergência (incêndio, intrusão, acidente) seguindo os procedimentos',
+        'Gerir o livro de ocorrências e elaborar relatórios de turno',
+        'Garantir a protecção de pessoas, bens e equipamentos das instalações',
+        'Comunicar de imediato situações suspeitas ao superior hierárquico ou às autoridades',
+      ]},
+    // Limpeza / Higienização
+    { rx: /limpeza|higieniz|copeiro|faxineir/,
+      items: [
+        'Limpar e higienizar escritórios, instalações sanitárias, corredores e áreas comuns',
+        'Varrer, aspirar, encerar e lavar os pavimentos conforme o plano de limpeza',
+        'Limpar vidros, janelas e superfícies horizontais com os produtos adequados',
+        'Recolher e separar o lixo, colocando-o nos contentores correctos',
+        'Repor consumíveis nas casas de banho (papel, sabão, toalhas)',
+        'Gerir o stock de produtos de limpeza e comunicar necessidades de reposição',
+        'Cumprir as normas de higiene, segurança e utilização correcta dos produtos químicos',
+      ]},
+    // Contabilidade / Finanças
+    { rx: /contabilist|financ|auditor|fiscal|tesourar/,
+      items: [
+        'Lançar e classificar documentos contabilísticos (facturas, recibos, notas de crédito)',
+        'Elaborar balancetes, demonstrações de resultados e balanços mensais',
+        'Reconciliar contas bancárias e gerir extractos de movimentos',
+        'Preparar e submeter declarações fiscais (IRT, IVA, IRC) nos prazos legais',
+        'Controlar contas a pagar e a receber, acompanhando cobranças e pagamentos',
+        'Analisar desvios orçamentais e apresentar relatórios à gestão',
+        'Arquivar e organizar toda a documentação financeira e fiscal',
+      ]},
+    // Vendas / Comercial
+    { rx: /vendedor|comercial|sales|agente comercial|representante/,
+      items: [
+        'Prospetar e captar novos clientes através de visitas, chamadas e referências',
+        'Apresentar e demonstrar produtos ou serviços de acordo com as necessidades do cliente',
+        'Negociar preços, condições e prazos de entrega, garantindo margens definidas',
+        'Acompanhar e fidelizar a carteira de clientes existentes com visitas regulares',
+        'Registar todas as actividades e oportunidades de negócio no CRM',
+        'Elaborar propostas comerciais e acompanhar o processo de fecho de vendas',
+        'Cumprir e superar as metas comerciais mensais estabelecidas pela direcção',
+      ]},
+    // Electricista
+    { rx: /electricista|eletricista|electric/,
+      items: [
+        'Instalar sistemas eléctricos em edifícios residenciais, comerciais e industriais',
+        'Realizar a manutenção preventiva e correctiva de instalações eléctricas',
+        'Diagnosticar avarias eléctricas e proceder à sua reparação com segurança',
+        'Ler e interpretar esquemas, plantas e projectos eléctricos',
+        'Instalar e ligar quadros eléctricos, disjuntores, tomadas e cablagens',
+        'Cumprir rigorosamente as normas de segurança eléctrica (NP, IEC)',
+        'Registar as intervenções realizadas e elaborar relatórios técnicos',
+      ]},
+    // Canalizador / Técnico de manutenção
+    { rx: /canalizador|explicador|mecanic|manutenc|tecnico/,
+      items: [
+        'Realizar a manutenção preventiva e correctiva de equipamentos e instalações',
+        'Diagnosticar falhas e avarias, identificando a causa raiz do problema',
+        'Executar reparações mecânicas, eléctricas ou hidráulicas conforme necessário',
+        'Registar todas as intervenções técnicas em fichas de manutenção',
+        'Controlar o stock de peças sobresselentes e consumíveis',
+        'Assegurar que os equipamentos operam dentro dos parâmetros de segurança',
+        'Propor melhorias e optimizações no plano de manutenção preventiva',
+      ]},
+    // Professor / Docente
+    { rx: /professor|docente|educador|formador|instrutor/,
+      items: [
+        'Planificar e leccionar aulas de acordo com o currículo e programa definido',
+        'Preparar materiais didácticos, fichas de trabalho e testes de avaliação',
+        'Avaliar os alunos de forma contínua e sumativa, registando o progresso individual',
+        'Acompanhar alunos com dificuldades e adaptar estratégias de ensino',
+        'Participar em reuniões de conselho de turma e reuniões pedagógicas',
+        'Comunicar regularmente com os encarregados de educação sobre o desempenho dos alunos',
+        'Manter registos de assiduidade, notas e ocorrências disciplinares actualizados',
+      ]},
+    // Recursos Humanos
+    { rx: /recursos humanos|rh\b|recrutamento|gestao de pessoas/,
+      items: [
+        'Publicar vagas, triagem de candidaturas e gestão do processo de recrutamento',
+        'Realizar entrevistas de selecção e aplicar testes de avaliação de competências',
+        'Elaborar contratos de trabalho, adendas e processar admissões e cessações',
+        'Controlar assiduidade, gerir mapas de férias e ausências',
+        'Processar salários, subsídios e encargos sociais (INSS, IRT)',
+        'Organizar acções de formação interna e gerir o plano de desenvolvimento de competências',
+        'Garantir o cumprimento da legislação laboral angolana e gerir processos disciplinares',
+      ]},
+    // Marketing / Comunicação
+    { rx: /marketing|social media|comunicacao|publicidade|community/,
+      items: [
+        'Gerir as redes sociais da empresa (Instagram, Facebook, LinkedIn, TikTok)',
+        'Criar e publicar conteúdos (textos, imagens, vídeos) alinhados com a identidade da marca',
+        'Planear e executar campanhas de publicidade digital (Meta Ads, Google Ads)',
+        'Analisar métricas de desempenho e elaborar relatórios mensais com conclusões e acções',
+        'Gerir o website, actualizar conteúdos e optimizar para SEO',
+        'Coordenar acções de marketing com designers, fotógrafos e parceiros externos',
+        'Desenvolver estratégias de crescimento orgânico e aumento do engagement',
+      ]},
+    // Engenheiro (genérico)
+    { rx: /engenheir|engenheiro/,
+      items: [
+        'Desenvolver e supervisionar projectos técnicos desde a concepção até à conclusão',
+        'Elaborar memórias descritivas, especificações técnicas e peças desenhadas',
+        'Fiscalizar obras e instalações, garantindo conformidade com os projectos aprovados',
+        'Controlar a qualidade dos materiais e dos trabalhos executados em obra',
+        'Coordenar equipas técnicas e subempreiteiros no terreno',
+        'Identificar e resolver problemas técnicos de forma ágil e fundamentada',
+        'Elaborar relatórios de progresso, vistorias e autos de medição',
+      ]},
+    // Programador / Desenvolvedor
+    { rx: /programador|developer|desenvolvedor|software|informatica|it\b|tecnologia/,
+      items: [
+        'Desenvolver aplicações web e/ou mobile com base nos requisitos do projecto',
+        'Escrever código limpo, testável e bem documentado seguindo as boas práticas',
+        'Participar em revisões de código (code review) e sessões de pair programming',
+        'Diagnosticar e corrigir bugs reportados em produção e ambientes de testes',
+        'Integrar APIs externas e serviços de terceiros nas soluções desenvolvidas',
+        'Colaborar com designers UX/UI para garantir interfaces funcionais e intuitivas',
+        'Manter e optimizar sistemas existentes, reduzindo tempos de resposta e consumo de recursos',
+      ]},
+    // Médico / Enfermeiro / Saúde
+    { rx: /medico|enfermeiro|enfermeira|farmaceut|saude|clinico|cirurgiao/,
+      items: [
+        'Realizar consultas médicas, colher historial clínico e examinar os pacientes',
+        'Diagnosticar doenças e prescrever tratamentos, medicamentos e exames complementares',
+        'Acompanhar o estado clínico dos pacientes internados e ajustar terapêuticas',
+        'Executar procedimentos clínicos e cirúrgicos dentro do âmbito de especialidade',
+        'Registar e actualizar os processos clínicos de cada paciente',
+        'Encaminhar casos para especialistas e articular com equipas multidisciplinares',
+        'Promover acções de educação para a saúde junto de pacientes e familiares',
+      ]},
+    // Recepcionista / Secretária
+    { rx: /recepcionista|secretaria|secretario|assistente admin|assistente execut/,
+      items: [
+        'Receber e encaminhar visitantes, clientes e parceiros de forma profissional',
+        'Atender e filtrar chamadas telefónicas, tomando mensagens e encaminhando para os responsáveis',
+        'Gerir a agenda do director ou da equipa, marcando reuniões e compromissos',
+        'Redigir e enviar correspondência, e-mails e documentos oficiais',
+        'Organizar e arquivar documentação física e digital com rigor e confidencialidade',
+        'Tratar de tarefas administrativas (compras de escritório, gestão de correio, apoio logístico)',
+        'Coordenar salas de reunião e apoiar na organização de eventos internos',
+      ]},
+    // Gestor / Director / Coordenador
+    { rx: /gestor|director|gerente|coordenador|responsavel|manager|lider/,
+      items: [
+        'Definir objectivos estratégicos e operacionais para a equipa ou departamento',
+        'Gerir, motivar e desenvolver uma equipa de colaboradores',
+        'Planear e controlar o orçamento anual do departamento',
+        'Monitorizar indicadores de desempenho (KPIs) e tomar acções correctivas',
+        'Reportar regularmente à administração o estado das operações e resultados',
+        'Negociar com fornecedores, parceiros e clientes estratégicos',
+        'Implementar processos de melhoria contínua e optimização operacional',
+      ]},
+    // Armazém / Logística / Operador
+    { rx: /armazem|logistic|stock|inventar|operador|estivador|pick|warehouse/,
+      items: [
+        'Receber, conferir e armazenar mercadorias de acordo com os procedimentos internos',
+        'Preparar encomendas (picking e packing) com precisão e dentro dos prazos',
+        'Controlar o stock físico e reconciliar com o sistema de gestão (ERP/WMS)',
+        'Organizar o armazém optimizando o espaço e facilitando o acesso às referências',
+        'Operar equipamentos de movimentação de cargas (empilhador, porta-paletes)',
+        'Registar entradas e saídas de stock e reportar divergências',
+        'Garantir a correcta etiquetagem, lote e rastreabilidade dos produtos',
+      ]},
+    // Construção Civil / Pedreiro / Obras
+    { rx: /pedreiro|construcao|civil|obras|pintor|carpinteir|soldador/,
+      items: [
+        'Executar trabalhos de construção, remodelação e acabamentos conforme projecto',
+        'Ler e interpretar plantas e desenhos técnicos de construção civil',
+        'Preparar e aplicar materiais de construção (betão, argamassa, revestimentos)',
+        'Garantir o cumprimento das normas de segurança em obra (EPI, sinalização)',
+        'Coordenar o trabalho com outros oficiais e subempreiteiros no estaleiro',
+        'Controlar a qualidade dos materiais e técnicas aplicadas',
+        'Reportar ao encarregado o progresso diário e eventuais problemas de obra',
+      ]},
+    // Advogado / Jurídico
+    { rx: /advogado|juridic|direito|jurist|legal/,
+      items: [
+        'Prestar aconselhamento jurídico a clientes em matérias de direito civil, comercial ou laboral',
+        'Redigir contratos, pareceres, petições, recursos e outros instrumentos jurídicos',
+        'Representar clientes em tribunal e em processos administrativos e arbitrais',
+        'Analisar a legalidade de operações empresariais e identificar riscos jurídicos',
+        'Acompanhar a evolução legislativa e regulatória relevante para os clientes',
+        'Negociar acordos e resolver litígios de forma extrajudicial quando possível',
+        'Gerir prazos processuais e manter os processos actualizados no sistema interno',
+      ]},
+    // Assistente Social / Psicólogo
+    { rx: /assistente social|psicolog|conselheir|social worker/,
+      items: [
+        'Realizar entrevistas de avaliação social ou psicológica para diagnóstico de situações',
+        'Elaborar planos de intervenção individualizados e acompanhar a sua execução',
+        'Articular com entidades externas (hospitais, tribunais, instituições) para apoio integrado',
+        'Prestar apoio emocional e aconselhamento a indivíduos e famílias em situação de vulnerabilidade',
+        'Elaborar relatórios técnicos e participar em reuniões de equipa multidisciplinar',
+        'Promover acções de sensibilização e prevenção na comunidade',
+        'Garantir a confidencialidade e o respeito pela dignidade dos utentes',
+      ]},
+    // Farmácia
+    { rx: /farmac/,
+      items: [
+        'Aviar receitas médicas, verificando dosagem, posologia e validade',
+        'Prestar aconselhamento farmacêutico a clientes sobre medicamentos e produtos de saúde',
+        'Controlar o stock de medicamentos e produtos, fazendo encomendas quando necessário',
+        'Garantir a correcta armazenagem dos medicamentos (temperatura, humidade, validades)',
+        'Verificar a conformidade das facturas de fornecedores com as encomendas recebidas',
+        'Registar entradas e saídas de estupefacientes e psicotrópicos conforme legislação',
+        'Manter a farmácia organizada e cumprir as normas de higiene e segurança',
+      ]},
   ];
   const match = maps.find(m => m.rx.test(jt));
   const items = match ? match.items : [
-    `Execução das funções inerentes ao cargo de ${jobTitle}`,
-    'Colaboração com a equipa para atingir os objectivos da empresa',
-    'Elaboração de relatórios de actividades e resultados',
-    'Cumprimento dos procedimentos internos e normas de qualidade',
-    'Atendimento e apoio a clientes/parceiros conforme necessário',
-    'Participação em formações e actividades de melhoria contínua',
+    `Desenvolver as actividades específicas do cargo de ${jobTitle} com rigor e profissionalismo`,
+    'Planear e executar tarefas diárias de acordo com as prioridades definidas pela chefia',
+    'Garantir o cumprimento dos prazos e a qualidade dos resultados entregues',
+    'Identificar problemas operacionais e propor soluções práticas e eficientes',
+    'Comunicar de forma clara e proactiva com a equipa e superiores hierárquicos',
+    'Manter registos actualizados e organizar a documentação inerente ao cargo',
+    'Contribuir para a melhoria contínua dos processos e do desempenho da equipa',
   ];
   return items.map(i => `• ${i}`).join('\n');
 }
