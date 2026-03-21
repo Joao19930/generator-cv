@@ -118,6 +118,9 @@
         .skills-input-row input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,58,107,.1); }
         .btn-add-skill { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: 'Inter', sans-serif; white-space: nowrap; transition: opacity .2s, box-shadow .2s; }
         .btn-add-skill:hover { opacity: .88; box-shadow: var(--shadow-h); }
+        .skill-suggest { background: var(--bg); border: 1.5px solid rgba(26,58,107,.25); color: var(--navy); border-radius: 50px; padding: 5px 13px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: background .15s, border-color .15s, opacity .2s; }
+        .skill-suggest:hover { background: var(--navy-l); border-color: var(--navy); }
+        .skill-suggest.used { opacity: .35; pointer-events: none; text-decoration: line-through; }
         .photo-upload { display: flex; align-items: center; gap: 18px; }
         .photo-preview { width: 80px; height: 80px; border-radius: 50%; background: var(--bg); border: 2px dashed var(--border2); display: flex; align-items: center; justify-content: center; font-size: 28px; overflow: hidden; flex-shrink: 0; }
         .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
@@ -344,24 +347,76 @@
                 <div class="item-card" id="edu-0">
                     <button class="btn-remove" onclick="removeItem('edu-0')">Remover</button>
                     <div class="form-row">
-                        <div class="form-group"><label>Grau / Curso *</label><input type="text" placeholder="Ex: MBA Finanças"></div>
-                        <div class="form-group"><label>Instituição *</label><input type="text" placeholder="Ex: Universidade Católica"></div>
+                        <div class="form-group"><label>Frequência Universitária *</label>
+                            <select>
+                                <option value="">Seleccionar nível...</option>
+                                <option>Frequência Universitária</option>
+                                <option>Licenciatura</option>
+                                <option>Pós-Graduação</option>
+                                <option>Mestrado</option>
+                                <option>Doutoramento</option>
+                                <option>MBA</option>
+                                <option>Ensino Médio</option>
+                                <option>Ensino Técnico</option>
+                                <option>Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Instituição *</label><input type="text" placeholder="Ex: Universidade Católica de Angola"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>Ano de Conclusão</label><input type="text" placeholder="2018"></div>
-                        <div class="form-group"><label>Classificação</label><input type="text" placeholder="Ex: 18 valores"></div>
+                        <div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018"></div>
+                        <div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022 (ou 'Actual')"></div>
                     </div>
                 </div>
             </div>
-            <button class="btn-add" onclick="addEducation()">+ Adicionar Formação</button>
+            <button class="btn-add" onclick="addEducation()">+ Adicionar Formação Académica</button>
+        </div>
+
+        <!-- FORMAÇÃO PROFISSIONAL -->
+        <div class="form-section">
+            <h3>Formação Profissional</h3>
+            <div id="profContainer">
+                <div class="item-card" id="prof-0">
+                    <button class="btn-remove" onclick="removeItem('prof-0')">Remover</button>
+                    <div class="form-row">
+                        <div class="form-group"><label>Curso / Certificação *</label><input type="text" placeholder="Ex: Excel Avançado"></div>
+                        <div class="form-group"><label>Entidade / Plataforma</label><input type="text" placeholder="Ex: INEFOP, Udemy, LinkedIn Learning"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ano</label><input type="text" placeholder="Ex: 2023"></div>
+                        <div class="form-group"><label>Duração</label><input type="text" placeholder="Ex: 40h, 3 meses"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addProf()">+ Adicionar Formação Profissional</button>
         </div>
 
         <!-- COMPETÊNCIAS -->
         <div class="form-section">
             <h3>Competências</h3>
+            <div style="margin-bottom:12px;">
+                <div style="font-size:12px;color:var(--t3,#64748b);margin-bottom:8px;font-weight:600;">Sugestões — clica para adicionar:</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;" id="skillSuggestions">
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Microsoft Excel</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Microsoft Word</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Microsoft PowerPoint</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Power BI</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Liderança de Equipas</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Comunicação Eficaz</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Gestão de Tempo</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Trabalho em Equipa</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Resolução de Problemas</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Atendimento ao Cliente</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Gestão de Projectos</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Análise de Dados</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Negociação</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Planeamento Estratégico</button>
+                    <button type="button" class="skill-suggest" onclick="addSkillSuggest(this)">Inteligência Emocional</button>
+                </div>
+            </div>
             <div class="skills-container" id="skillsContainer"></div>
             <div class="skills-input-row">
-                <input type="text" id="skillInput" placeholder="Ex: Excel, Power BI, Liderança..." onkeydown="if(event.key==='Enter'){addSkill();event.preventDefault();}">
+                <input type="text" id="skillInput" placeholder="Outra competência..." onkeydown="if(event.key==='Enter'){addSkill();event.preventDefault();}">
                 <button class="btn-add-skill" onclick="addSkill()">+ Adicionar</button>
             </div>
         </div>
@@ -510,8 +565,12 @@
                         <span class="section-pct" id="pct-experiencia">–</span>
                     </div>
                     <div class="section-item">
-                        <div class="section-item-left"><span class="section-dot" id="dot-formacao"></span>Formação</div>
+                        <div class="section-item-left"><span class="section-dot" id="dot-formacao"></span>Formação Académica</div>
                         <span class="section-pct" id="pct-formacao">–</span>
+                    </div>
+                    <div class="section-item">
+                        <div class="section-item-left"><span class="section-dot" id="dot-profissional"></span>Form. Profissional</div>
+                        <span class="section-pct" id="pct-profissional">–</span>
                     </div>
                     <div class="section-item">
                         <div class="section-item-left"><span class="section-dot" id="dot-competencias"></span>Competências</div>
@@ -761,12 +820,19 @@
         function addEduCard(e, i) {
             var id = 'edu-' + i;
             var d = e || {};
+            var levels = ['','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','Doutoramento','MBA','Ensino Médio','Ensino Técnico','Outro'];
+            var degreeVal = esc(d.degree||d.course||'');
+            var opts = levels.map(function(lv){ return '<option value="'+lv+'"'+(lv===degreeVal?' selected':'')+'>'+( lv||'Seleccionar nível...')+'</option>'; }).join('');
             var html = '<div class="item-card" id="' + id + '">' +
                 '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
-                '<div class="form-row"><div class="form-group"><label>Grau / Curso</label><input type="text" placeholder="Ex: MBA Finanças" value="' + esc(d.degree||d.course||'') + '"></div>' +
-                '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN" value="' + esc(d.institution||d.school||'') + '"></div></div>' +
-                '<div class="form-row"><div class="form-group"><label>Ano</label><input type="text" placeholder="2018" value="' + esc(d.year||d.start||'') + '"></div>' +
-                '<div class="form-group"><label>Classificação</label><input type="text" placeholder="Muito Bom" value="' + esc(d.grade||'') + '"></div></div></div>';
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Frequência Universitária</label><select>'+opts+'</select></div>' +
+                  '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN" value="' + esc(d.institution||d.school||'') + '"></div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018" value="' + esc(d.start||d.year||'') + '"></div>' +
+                  '<div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022" value="' + esc(d.end||d.endYear||'') + '"></div>' +
+                '</div></div>';
             document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -865,13 +931,44 @@
 
         function addEducation() {
             var id = 'edu-' + eduCount++;
+            var levels = ['','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','Doutoramento','MBA','Ensino Médio','Ensino Técnico','Outro'];
+            var opts = levels.map(function(lv){ return '<option value="'+lv+'">'+( lv||'Seleccionar nível...')+'</option>'; }).join('');
             var html = '<div class="item-card" id="' + id + '">' +
                 '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
-                '<div class="form-row"><div class="form-group"><label>Grau / Curso</label><input type="text" placeholder="Ex: Licenciatura"></div>' +
-                '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN"></div></div>' +
-                '<div class="form-row"><div class="form-group"><label>Ano</label><input type="text" placeholder="2015"></div>' +
-                '<div class="form-group"><label>Classificação</label><input type="text" placeholder="Muito Bom"></div></div></div>';
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Frequência Universitária</label><select>'+opts+'</select></div>' +
+                  '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN"></div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018"></div>' +
+                  '<div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022 (ou Actual)"></div>' +
+                '</div></div>';
             document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        var profCount = 1;
+        function addProf() {
+            var id = 'prof-' + profCount++;
+            var html = '<div class="item-card" id="' + id + '">' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Curso / Certificação *</label><input type="text" placeholder="Ex: Primavera V10"></div>' +
+                  '<div class="form-group"><label>Entidade / Plataforma</label><input type="text" placeholder="Ex: INEFOP, Udemy"></div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                  '<div class="form-group"><label>Ano</label><input type="text" placeholder="Ex: 2023"></div>' +
+                  '<div class="form-group"><label>Duração</label><input type="text" placeholder="Ex: 40h, 3 meses"></div>' +
+                '</div></div>';
+            document.getElementById('profContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        function addSkillSuggest(btn) {
+            var val = btn.textContent.trim();
+            if (!skills.includes(val)) {
+                skills.push(val);
+                renderSkills();
+            }
+            btn.classList.add('used');
         }
 
         function removeItem(id) {
@@ -938,13 +1035,27 @@
             var eduCards = document.querySelectorAll('[id^="edu-"]');
             var education = [];
             eduCards.forEach(function(card) {
+                var sel    = card.querySelector('select');
+                var inputs = card.querySelectorAll('input');
+                var degree = sel ? sel.value : (inputs[0] ? inputs[0].value : '');
+                var inst   = inputs[0] ? inputs[0].value : '';
+                var start  = inputs[1] ? inputs[1].value : '';
+                var end    = inputs[2] ? inputs[2].value : '';
+                if (degree.trim() || inst.trim()) {
+                    education.push({ degree: degree, institution: inst, start: start, end: end, year: start });
+                }
+            });
+
+            var profCards = document.querySelectorAll('[id^="prof-"]');
+            var profTraining = [];
+            profCards.forEach(function(card) {
                 var inputs = card.querySelectorAll('input');
                 if (inputs[0] && inputs[0].value.trim()) {
-                    education.push({
-                        degree:      inputs[0].value,
-                        institution: inputs[1] ? inputs[1].value : '',
-                        year:        inputs[2] ? inputs[2].value : '',
-                        grade:       inputs[3] ? inputs[3].value : ''
+                    profTraining.push({
+                        course:    inputs[0].value,
+                        entity:    inputs[1] ? inputs[1].value : '',
+                        year:      inputs[2] ? inputs[2].value : '',
+                        duration:  inputs[3] ? inputs[3].value : ''
                     });
                 }
             });
@@ -973,15 +1084,16 @@
                 address:      document.getElementById('address').value,
                 linkedin:     document.getElementById('linkedin').value,
                 summary:      document.getElementById('summary').value,
-                experience:   experience,
-                education:    education,
-                skills:       skills,
-                languages:    languages,
-                photo:        photo,
-                template:     tplNum,
-                templateSlug: tplSlug,
-                templateName: tplSlug,
-                cvId:         cvId
+                experience:    experience,
+                education:     education,
+                profTraining:  profTraining,
+                skills:        skills,
+                languages:     languages,
+                photo:         photo,
+                template:      tplNum,
+                templateSlug:  tplSlug,
+                templateName:  tplSlug,
+                cvId:          cvId
             };
 
             // Guardar em sessionStorage
@@ -1047,11 +1159,20 @@
             expCards.forEach(function(card) { var ins = card.querySelectorAll('input'); if (ins[0] && ins[0].value.trim()) hasExp = true; });
             scores.experiencia = hasExp ? 100 : 0;
 
-            // Formação
+            // Formação Académica — tem selecção de nível ou instituição preenchida
             var eduCards = document.querySelectorAll('[id^="edu-"]');
             var hasEdu = false;
-            eduCards.forEach(function(card) { var ins = card.querySelectorAll('input'); if (ins[0] && ins[0].value.trim()) hasEdu = true; });
+            eduCards.forEach(function(card) {
+                var sel = card.querySelector('select'); var ins = card.querySelectorAll('input');
+                if ((sel && sel.value) || (ins[0] && ins[0].value.trim())) hasEdu = true;
+            });
             scores.formacao = hasEdu ? 100 : 0;
+
+            // Formação Profissional
+            var profCards = document.querySelectorAll('[id^="prof-"]');
+            var hasProf = false;
+            profCards.forEach(function(card) { var ins = card.querySelectorAll('input'); if (ins[0] && ins[0].value.trim()) hasProf = true; });
+            scores.profissional = hasProf ? 100 : 0;
 
             // Competências
             scores.competencias = skills.length > 0 ? Math.min(100, skills.length * 20) : 0;
@@ -1085,12 +1206,12 @@
             document.getElementById('ringSub').textContent = subs[subIdx];
 
             // Dots + pcts
-            var sections = ['pessoal','experiencia','formacao','competencias','idiomas','modelo'];
+            var sections = ['pessoal','experiencia','formacao','profissional','competencias','idiomas','modelo'];
             sections.forEach(function(k) {
                 var dot = document.getElementById('dot-' + k);
                 var pct = document.getElementById('pct-' + k);
                 if (dot) { dot.classList.toggle('ok', s[k] === 100); }
-                if (pct) { pct.textContent = s[k] + '%'; }
+                if (pct) { pct.textContent = (s[k] !== undefined ? s[k] : '–') + (s[k] !== undefined ? '%' : ''); }
             });
         }
 
@@ -1107,6 +1228,7 @@
             // Delegate for dynamic cards
             document.getElementById('experienceContainer').addEventListener('input', updateCompletion);
             document.getElementById('educationContainer').addEventListener('input', updateCompletion);
+            document.getElementById('profContainer').addEventListener('input', updateCompletion);
             document.getElementById('languagesContainer').addEventListener('input', updateCompletion);
         }
         attachCompletionListeners();
@@ -1219,12 +1341,17 @@
                     experience.push({ title: inputs[0].value, company: inputs[1]?inputs[1].value:'', start: inputs[2]?inputs[2].value:'', end: inputs[3]?inputs[3].value:'', location: inputs[4]?inputs[4].value:'', description: textarea?textarea.value:'' });
                 }
             });
-            var eduCards = document.querySelectorAll('[id^="edu-"]');
+            var eduCards2 = document.querySelectorAll('[id^="edu-"]');
             var education = [];
-            eduCards.forEach(function(card) {
+            eduCards2.forEach(function(card) {
+                var sel2   = card.querySelector('select');
                 var inputs = card.querySelectorAll('input');
-                if (inputs[0] && inputs[0].value.trim()) {
-                    education.push({ degree: inputs[0].value, institution: inputs[1]?inputs[1].value:'', year: inputs[2]?inputs[2].value:'', grade: inputs[3]?inputs[3].value:'' });
+                var degree = sel2 ? sel2.value : (inputs[0] ? inputs[0].value : '');
+                var inst   = inputs[0] ? inputs[0].value : '';
+                var start  = inputs[1] ? inputs[1].value : '';
+                var end    = inputs[2] ? inputs[2].value : '';
+                if (degree.trim() || inst.trim()) {
+                    education.push({ degree: degree, institution: inst, start: start, end: end, year: start });
                 }
             });
             var langRows = document.querySelectorAll('[id^="lang-"]');
