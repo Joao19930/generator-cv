@@ -571,6 +571,114 @@ function buildCVHtml(content, templateName) {
   const secHeaderLine = (txt, color='#1e293b') =>
     `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${color};border-left:3px solid ${color};padding-left:8px;margin:16px 0 10px;">${txt}</div>`;
 
+  // ── Template: COM FOTO (Azul Profissional) ─────────────────────────────
+  if (slug === 'com-foto') {
+    const BLUE = '#1e3a6e', GOLD = '#c8960c', GRAY_BG = '#f8f9fa';
+    const expB = experiences.map(e => `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <div style="font-size:13px;font-weight:700;color:${BLUE};">${esc(e.company||e.title)}</div>
+          <div style="font-size:10.5px;color:#888;margin-left:8px;">${esc(e.startDate||e.start||'')}${(e.endDate||e.end) ? ` – ${esc(e.endDate||e.end)}` : ' – Presente'}</div>
+        </div>
+        <div style="font-size:11.5px;color:#555;font-style:italic;margin:1px 0 4px;">${esc(e.title)}</div>
+        ${e.description ? `<div style="font-size:11.5px;color:#374151;line-height:1.65;">${nl2br(esc(e.description))}</div>` : ''}
+      </div>`).join('');
+    const eduB = education.map(e => `
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12.5px;font-weight:700;color:${BLUE};">${esc(e.degree||e.course||'')}</div>
+        <div style="font-size:11px;color:#555;">${esc(e.institution||'')}</div>
+        <div style="font-size:10.5px;color:#888;">${esc(e.startDate||e.year||'')}</div>
+      </div>`).join('');
+    const secH = (txt) => `<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${BLUE};border-bottom:1.5px solid ${GOLD};padding-bottom:3px;margin:14px 0 8px;">${txt}</div>`;
+    const secR = (txt) => `<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${BLUE};border-bottom:2px solid ${GOLD};padding-bottom:4px;margin:18px 0 10px;">${txt}</div>`;
+    const sideContacts = [
+      phone    ? `📞 ${esc(phone)}`    : '',
+      email    ? `✉ ${esc(email)}`     : '',
+      address  ? `📍 ${esc(address)}`  : '',
+      linkedin ? `in ${esc(linkedin)}` : '',
+      website  ? `🌐 ${esc(website)}`  : ''
+    ].filter(Boolean).map(c => `<div style="font-size:10.5px;color:#444;line-height:1.9;word-break:break-all;">${c}</div>`).join('');
+    const sideSkills = skills.map(s => `<div style="font-size:10.5px;color:#444;line-height:1.8;">• ${esc(s)}</div>`).join('');
+    const sideLangs  = languages.map(l => `<div style="font-size:10.5px;color:#444;line-height:1.8;">• ${esc(l.language||l)}${l.level ? ` (${esc(l.level)})` : ''}</div>`).join('');
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Calibri,Arial,sans-serif;background:#fff;font-size:12px;}</style>
+    </head><body>
+      <div style="padding:22px 32px 14px;display:flex;align-items:center;gap:18px;border-bottom:2.5px solid ${GOLD};">
+        ${photoUrl ? `<img src="${photoUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2.5px solid ${GOLD};flex-shrink:0;">` : ''}
+        <div>
+          <div style="font-size:26px;font-weight:700;color:${BLUE};text-transform:uppercase;letter-spacing:1px;">${esc(name)}</div>
+          <div style="font-size:12px;color:#666;margin-top:4px;text-transform:uppercase;letter-spacing:2px;">${esc(jobTitle)}</div>
+        </div>
+      </div>
+      <div style="display:flex;">
+        <div style="width:32%;background:${GRAY_BG};padding:14px 16px;border-right:1px solid #e5e7eb;">
+          ${secH('CONTACT')}${sideContacts}
+          ${sideSkills ? secH('SKILLS')+sideSkills : ''}
+          ${sideLangs  ? secH('LANGUAGES')+sideLangs : ''}
+        </div>
+        <div style="flex:1;padding:14px 24px;">
+          ${summary ? secR('PROFILE')+`<p style="font-size:12px;line-height:1.7;color:#374151;">${esc(summary)}</p>` : ''}
+          ${secR('WORK EXPERIENCE')}${expB}
+          ${eduB ? secR('EDUCATION')+eduB : ''}
+        </div>
+      </div>
+    </body></html>`;
+  }
+
+  // ── Template: SEM FOTO (Dourado Angolano) ──────────────────────────────
+  if (slug === 'sem-foto') {
+    const GOLD = '#c8960c', DARK = '#1a1a1a', SIDEBAR_BG = '#fffbf5';
+    const expB = experiences.map(e => {
+      const period = [e.startDate||e.start, e.endDate||e.end||'Actual'].filter(Boolean).join(' – ');
+      return `<div style="display:flex;gap:0;margin-bottom:16px;">
+        <div style="width:110px;flex-shrink:0;padding-right:12px;text-align:right;font-size:10.5px;color:#888;line-height:1.5;padding-top:2px;">${esc(period)}</div>
+        <div style="flex:1;border-left:2px solid #f0e8d5;padding-left:14px;">
+          <div style="font-size:12.5px;font-weight:700;color:${DARK};">${esc(e.company||e.title)}</div>
+          <div style="font-size:11.5px;color:#555;font-style:italic;margin:2px 0 4px;">${esc(e.title)}</div>
+          ${e.description ? `<div style="margin-top:4px;"><div style="font-size:11.5px;font-weight:700;color:${DARK};margin-bottom:4px;">Responsabilidades:</div><div style="font-size:11.5px;color:#374151;line-height:1.65;">${nl2br(esc(e.description))}</div></div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    const eduB = education.map(e => {
+      const period = [e.startDate||e.start, e.endDate||e.end].filter(Boolean).join(' – ');
+      return `<div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:${DARK};">${esc(e.degree||e.course||'')}</div>
+        <div style="font-size:11.5px;font-weight:600;color:${DARK};">${esc(e.institution||'')}</div>
+        ${period ? `<div style="font-size:10.5px;color:#888;">${esc(period)}</div>` : ''}
+      </div>`;
+    }).join('');
+    const sideSkills = skills.map(s => `<div style="font-size:11px;color:#374151;line-height:1.8;padding-left:8px;">• ${esc(s)}</div>`).join('');
+    const sideLangs  = languages.map(l => `<div style="font-size:11px;color:#374151;line-height:1.8;padding-left:8px;">• ${esc(l.language||l)}${l.level ? ` (${esc(l.level)})` : ''}</div>`).join('');
+    const contactRow = [
+      phone    ? `<span><span style="color:${GOLD};">📞</span> ${esc(phone)}</span>`    : '',
+      email    ? `<span><span style="color:${GOLD};">✉</span> ${esc(email)}</span>`     : '',
+      address  ? `<span><span style="color:${GOLD};">📍</span> ${esc(address)}</span>`  : '',
+      linkedin ? `<span><span style="color:${GOLD};">in</span> ${esc(linkedin)}</span>` : ''
+    ].filter(Boolean).join('');
+    const secS = (txt) => `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${GOLD};margin:14px 0 7px;">${txt}</div>`;
+    const secM = (txt) => `<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${DARK};margin:18px 0 10px;padding-bottom:3px;border-bottom:1.5px solid #f0e8d5;">${txt}</div>`;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Calibri,Arial,sans-serif;background:#fff;font-size:12px;}</style>
+    </head><body>
+      <div style="padding:20px 32px 12px;border-bottom:2px solid ${GOLD};">
+        <div style="font-size:28px;font-weight:700;color:${DARK};text-transform:uppercase;text-align:center;letter-spacing:1px;">${esc(name)}</div>
+        <div style="font-size:12.5px;color:#555;text-align:center;margin:4px 0 10px;letter-spacing:1px;">${esc(jobTitle)}</div>
+        ${contactRow ? `<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:14px;font-size:11px;color:#555;padding:6px 0;">${contactRow}</div>` : ''}
+      </div>
+      <div style="display:flex;">
+        <div style="width:35%;background:${SIDEBAR_BG};padding:10px 16px;border-right:1px solid #f0e8d5;">
+          ${eduB ? secS('Educação')+eduB : ''}
+          ${sideSkills ? secS('Habilidades Técnicas')+sideSkills : ''}
+          ${sideLangs  ? secS('Competências Linguísticas')+sideLangs : ''}
+        </div>
+        <div style="flex:1;padding:10px 22px;">
+          ${summary ? secM('Resumo Profissional')+`<p style="font-size:11.5px;line-height:1.75;color:#374151;">${esc(summary)}</p>` : ''}
+          ${expB ? secM('Experiência de Trabalho')+expB : ''}
+        </div>
+      </div>
+    </body></html>`;
+  }
+
   // ── Template: ATS (ats-simples, ats-profissional, ats-executivo) ──────
   if (slug.includes('ats')) {
     const isExec = slug.includes('executivo');
