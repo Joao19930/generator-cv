@@ -160,8 +160,11 @@ const DEFAULT_SECTION_ORDER = [
   'experience',
   'education',
   'skills',
+  'habilidades',
   'languages',
   'certifications',
+  'cursos',
+  'interesses',
 ]
 
 function getSnapshot(state: CVState): DataSnapshot {

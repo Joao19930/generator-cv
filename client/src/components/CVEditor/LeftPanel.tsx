@@ -18,7 +18,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   User, FileText, Briefcase, GraduationCap, Zap,
-  Globe, Award, Plus, ChevronDown, ChevronUp, GripVertical, Sparkles
+  Globe, Award, Plus, ChevronDown, ChevronUp, GripVertical,
+  BookOpen, Heart, Wrench
 } from 'lucide-react'
 import { useCVStore } from '../../store/cvStore'
 import PersonalSection from './sections/PersonalSection'
@@ -26,18 +27,24 @@ import SummarySection from './sections/SummarySection'
 import ExperienceSection from './sections/ExperienceSection'
 import EducationSection from './sections/EducationSection'
 import SkillsSection from './sections/SkillsSection'
+import HabilidadesSection from './sections/HabilidadesSection'
+import CursosSection from './sections/CursosSection'
+import InteressesSection from './sections/InteressesSection'
 import LanguagesSection from './sections/LanguagesSection'
 import CertificationsSection from './sections/CertificationsSection'
 import CustomSectionEditor from './sections/CustomSection'
 
 const SECTION_META: Record<string, { label: string; icon: React.ReactNode; hasAI?: boolean }> = {
-  personal: { label: 'Informação Pessoal', icon: <User size={14} /> },
-  summary: { label: 'Resumo Profissional', icon: <FileText size={14} />, hasAI: true },
-  experience: { label: 'Experiência', icon: <Briefcase size={14} />, hasAI: true },
-  education: { label: 'Formação', icon: <GraduationCap size={14} /> },
-  skills: { label: 'Competências', icon: <Zap size={14} /> },
-  languages: { label: 'Idiomas', icon: <Globe size={14} /> },
-  certifications: { label: 'Certificações', icon: <Award size={14} /> },
+  personal: { label: 'Perfil Profissional', icon: <User size={15} /> },
+  summary: { label: 'Resumo Profissional', icon: <FileText size={15} />, hasAI: true },
+  experience: { label: 'Experiência', icon: <Briefcase size={15} />, hasAI: true },
+  education: { label: 'Educação', icon: <GraduationCap size={15} /> },
+  skills: { label: 'Competências', icon: <Zap size={15} /> },
+  habilidades: { label: 'Habilidades Técnicas', icon: <Wrench size={15} /> },
+  languages: { label: 'Idiomas', icon: <Globe size={15} /> },
+  certifications: { label: 'Certificações', icon: <Award size={15} /> },
+  cursos: { label: 'Cursos & Formação', icon: <BookOpen size={15} /> },
+  interesses: { label: 'Interesses', icon: <Heart size={15} /> },
 }
 
 function calculateCompletion(store: ReturnType<typeof useCVStore.getState>): number {
@@ -74,7 +81,7 @@ function SortableItem({ id, children }: SortableItemProps) {
       }}
       {...attributes}
     >
-      {React.cloneElement(children as React.ReactElement, { dragListeners: listeners })}
+      {React.cloneElement(children as React.ReactElement<any>, { dragListeners: listeners })}
     </div>
   )
 }
@@ -113,7 +120,7 @@ function SectionHeader({ sectionKey, dragListeners }: SectionHeaderProps) {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '10px 12px',
+          padding: '13px 14px',
           cursor: 'pointer',
           userSelect: 'none',
         }}
@@ -133,7 +140,7 @@ function SectionHeader({ sectionKey, dragListeners }: SectionHeaderProps) {
           onClick={() => setOpen(o => !o)}
         >
           <span style={{ color: '#64748b' }}>{meta.icon}</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>{meta.label}</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>{meta.label}</span>
           {(meta as any).hasAI && (
             <span style={{
               fontSize: 9,
@@ -163,8 +170,11 @@ function SectionHeader({ sectionKey, dragListeners }: SectionHeaderProps) {
             {sectionKey === 'experience' && <ExperienceSection />}
             {sectionKey === 'education' && <EducationSection />}
             {sectionKey === 'skills' && <SkillsSection />}
+            {sectionKey === 'habilidades' && <HabilidadesSection />}
             {sectionKey === 'languages' && <LanguagesSection />}
             {sectionKey === 'certifications' && <CertificationsSection />}
+            {sectionKey === 'cursos' && <CursosSection />}
+            {sectionKey === 'interesses' && <InteressesSection />}
             {isCustom && customId && <CustomSectionEditor id={customId} />}
           </div>
         </div>
