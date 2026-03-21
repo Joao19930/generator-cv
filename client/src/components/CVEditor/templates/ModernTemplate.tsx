@@ -42,6 +42,9 @@ export default function ModernTemplate() {
     primaryColor,
     fontSize,
     lineSpacing,
+    habilidades,
+    cursos,
+    interesses,
   } = store
 
   useEffect(() => {
@@ -140,6 +143,62 @@ export default function ModernTemplate() {
     }
 
     return null
+  }
+
+  function renderSidebarExtra(): React.ReactNode {
+    return (
+      <>
+        {habilidades.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={sidebarSecTitleStyle}>Habilidades Técnicas</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {habilidades.map(h => (
+                <div key={h.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: 9, color: '#374151', fontWeight: 500 }}>{h.name}</span>
+                  </div>
+                  <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
+                    <div style={{
+                      height: '100%',
+                      borderRadius: 2,
+                      background: primaryColor,
+                      width: h.level === 'Expert' ? '95%' : h.level === 'Avançado' ? '80%' : h.level === 'Intermédio' ? '60%' : '40%',
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {cursos.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={sidebarSecTitleStyle}>Cursos</div>
+            {cursos.slice(0, 5).map((c, i) => (
+              <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
+                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{c}</span>
+              </div>
+            ))}
+            {cursos.length > 5 && (
+              <div style={{ fontSize: 8, color: '#9ca3af', marginTop: 2 }}>+{cursos.length - 5} mais</div>
+            )}
+          </div>
+        )}
+
+        {interesses.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={sidebarSecTitleStyle}>Interesses</div>
+            {interesses.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
+                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    )
   }
 
   function renderMainSection(key: string): React.ReactNode {
@@ -331,6 +390,7 @@ export default function ModernTemplate() {
           boxSizing: 'border-box',
         }}>
           {sectionOrder.map(key => renderSidebarSection(key))}
+          {renderSidebarExtra()}
         </aside>
 
         {/* Main */}
