@@ -1052,6 +1052,13 @@ let state = {
 
 // ── INIT ────────────────────────────────────────────────────
 const _loaded = new Set(); // painéis já carregados
+let _activePanel = 'overview';
+
+// Recarrega o painel activo (usado após guardar/editar/apagar)
+async function loadFromAPI() {
+  _loaded.delete(_activePanel);
+  await loadPanelData(_activePanel);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('lastUpdate').textContent = 'Actualizado em ' + new Date().toLocaleTimeString('pt-PT');
@@ -1223,6 +1230,7 @@ const PANEL_TITLES = {
 };
 
 function showPanel(id, el) {
+  _activePanel = id;
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.si').forEach(i => i.classList.remove('active'));
   const p = document.getElementById('panel-' + id);

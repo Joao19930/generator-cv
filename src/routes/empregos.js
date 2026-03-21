@@ -466,13 +466,30 @@ router.post('/importar', async (req, res) => {
       log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
     } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
 
-    // Contagem final
+    // Contagem final de vagas importadas de APIs externas
     const cnt = await req.db.request().query(
       `SELECT source, COUNT(*) AS n FROM jobs
        WHERE source IN ('adzuna','arbeitnow','remotive','jobicy') GROUP BY source`
-    );
+    ).catch(() => ({ recordset: [] }));
     const totals = cnt.recordset.map(r => `${r.source}:${r.n}`).join(', ');
-    log.push(`→ Total na BD: ${totals || '0'}`);
+    const totalImported = cnt.recordset.reduce((s, r) => s + parseInt(r.n || 0), 0);
+    log.push(`→ Vagas de APIs externas: ${totals || 'nenhuma'}`);
+
+    // Se nenhuma API externa funcionou, inserir vagas demo angolanas
+    if (totalImported === 0) {
+      log.push('⚠ APIs externas sem resultado — a inserir vagas demo angolanas…');
+      await seedDemoJobs(req.db);
+      const demoCount = await req.db.request()
+        .query(`SELECT COUNT(*) AS n FROM jobs WHERE source='demo'`)
+        .catch(() => ({ recordset: [{ n: 0 }] }));
+      log.push(`✓ Vagas demo: ${parseInt(demoCount.recordset[0].n || 0)} vagas disponíveis`);
+    }
+
+    // Contagem total final
+    const total = await req.db.request()
+      .query(`SELECT COUNT(*) AS n FROM jobs WHERE active=TRUE`)
+      .catch(() => ({ recordset: [{ n: 0 }] }));
+    log.push(`✓ Total de vagas activas na plataforma: ${parseInt(total.recordset[0].n || 0)}`);
 
   } catch (e) { log.push(`✗ Erro geral: ${e.message}`); }
   res.json({ log });
