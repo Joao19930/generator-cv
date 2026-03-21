@@ -96,7 +96,7 @@ export default function ExecutiveTemplate() {
               <div style={{ fontSize: 10, fontWeight: 600, color: primaryColor }}>
                 {exp.company}{exp.location ? ` — ${exp.location}` : ''}
               </div>
-              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280', fontStyle: 'italic', marginBottom: 3 }}>
+              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280',  marginBottom: 3 }}>
                 {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
               </div>
               {exp.description && (
@@ -127,7 +127,7 @@ export default function ExecutiveTemplate() {
                 {edu.degree}{edu.field ? `, ${edu.field}` : ''}
               </div>
               <div style={{ fontSize: 10, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
-              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280', fontStyle: 'italic' }}>
+              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280',  }}>
                 {fmtDateRange(edu.startDate, edu.endDate, false)}
               </div>
               {edu.description && (

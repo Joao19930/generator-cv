@@ -83,7 +83,7 @@ export default function ModernTemplate() {
                 {edu.degree}{edu.field ? `, ${edu.field}` : ''}
               </div>
               <div style={{ fontSize: 9, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
-              <div style={{ fontSize: 8, color: '#6b7280', fontStyle: 'italic' }}>
+              <div style={{ fontSize: 8, color: '#6b7280',  }}>
                 {fmtDateRange(edu.startDate, edu.endDate, false)}
               </div>
               {edu.description && (
@@ -152,7 +152,7 @@ export default function ModernTemplate() {
           <div style={{
             borderLeft: `1.5px solid ${primaryColor}`,
             paddingLeft: 10,
-            fontStyle: 'italic',
+            
             fontSize: 9,
             fontWeight: 300,
             color: '#374151',
@@ -196,7 +196,7 @@ export default function ModernTemplate() {
                 <div style={{ fontWeight: 600, fontSize: 10, color: primaryColor }}>
                   {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                 </div>
-                <div style={{ fontSize: 9, color: '#6b7280', fontStyle: 'italic', marginBottom: 3 }}>
+                <div style={{ fontSize: 9, color: '#6b7280',  marginBottom: 3 }}>
                   {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
                 </div>
                 {exp.description && (

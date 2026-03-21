@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preview CV - CV Premium</title>
-    <!-- Calibri é fonte nativa do sistema -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>emailjs.init('hP_48MpVt8XwvoWC7');</script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Calibri', 'Trebuchet MS', sans-serif; background: #0a0a0a; color: #fff; }
+        body { font-family: 'Poppins', 'Poppins', sans-serif; background: #0a0a0a; color: #fff; }
         nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: rgba(10,10,10,0.95); border-bottom: 1px solid #222; position: fixed; width: 100%; top: 0; z-index: 100; }
         .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: #fff; }
         .logo span { color: #c9a96e; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
-        .btn-back { background: transparent; border: 1px solid #444; color: #aaa; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-download { background: #c9a96e; color: #000; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .btn-back { background: transparent; border: 1px solid #444; color: #aaa; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: 'Poppins', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-download { background: #c9a96e; color: #000; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Poppins', sans-serif; }
         .btn-download:hover { background: #e0c080; }
         .preview-wrapper { padding: 100px 20px 60px; display: flex; justify-content: center; }
         .preview-frame { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 40px 120px rgba(0,0,0,0.8); position: relative; }
         .watermark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: flex; align-items: center; justify-content: center; }
-        .watermark-text { font-size: 80px; font-weight: 900; color: rgba(201,169,110,0.07); transform: rotate(-35deg); white-space: nowrap; font-family: 'Calibri', 'Trebuchet MS', sans-serif; letter-spacing: 10px; }
+        .watermark-text { font-size: 80px; font-weight: 900; color: rgba(201,169,110,0.07); transform: rotate(-35deg); white-space: nowrap; font-family: 'Poppins', sans-serif; letter-spacing: 10px; }
 
         /* PAYMENT OVERLAY */
         .payment-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 200; align-items: center; justify-content: center; }
@@ -34,7 +35,7 @@
         .features-list { text-align: left; margin-bottom: 24px; }
         .features-list div { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 13px; color: #aaa; }
         .features-list div span:first-child { color: #22c55e; font-size: 15px; }
-        .btn-cancel { background: transparent; border: none; color: #555; font-size: 12px; cursor: pointer; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-top: 12px; display: block; width: 100%; }
+        .btn-cancel { background: transparent; border: none; color: #555; font-size: 12px; cursor: pointer; font-family: 'Poppins', sans-serif; margin-top: 12px; display: block; width: 100%; }
         #paypal-button-container { margin-bottom: 8px; }
 
         /* SUCCESS OVERLAY */
@@ -44,45 +45,45 @@
         .success-icon { font-size: 60px; margin-bottom: 16px; }
         .success-card h2 { font-size: 26px; font-weight: 800; color: #22c55e; margin-bottom: 8px; }
         .success-card p { color: #888; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
-        .btn-dl { background: #c9a96e; color: #000; border: none; padding: 14px 36px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-bottom: 12px; }
+        .btn-dl { background: #c9a96e; color: #000; border: none; padding: 14px 36px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; font-family: 'Poppins', sans-serif; margin-bottom: 12px; }
         .btn-dl:hover { background: #e0c080; }
         .email-form { display: flex; gap: 8px; margin-top: 16px; }
-        .email-form input { flex: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 11px 14px; color: #fff; font-size: 13px; outline: none; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .email-form input { flex: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 11px 14px; color: #fff; font-size: 13px; outline: none; font-family: 'Poppins', sans-serif; }
         .email-form input:focus { border-color: #c9a96e; }
-        .btn-email { background: #1a1a1a; border: 1px solid #c9a96e; color: #c9a96e; padding: 11px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .btn-email { background: #1a1a1a; border: 1px solid #c9a96e; color: #c9a96e; padding: 11px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; font-family: 'Poppins', sans-serif; }
         .email-sent { color: #22c55e; font-size: 12px; margin-top: 8px; display: none; }
 
         /* ==================== TEMPLATE 1: EXECUTIVE CLASSIC (COM FOTO) ==================== */
-        .tmpl-1 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #1a1a2e; }
+        .tmpl-1 { font-family: 'Poppins', sans-serif; color: #1a1a2e; }
         .tmpl-1 .cv-header { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); color: white; padding: 50px 50px 40px; display: flex; gap: 28px; align-items: center; }
         .tmpl-1 .cv-photo { width: 95px; height: 95px; border-radius: 50%; object-fit: cover; border: 3px solid #c9a96e; flex-shrink: 0; }
         .tmpl-1 .cv-photo-placeholder { width: 95px; height: 95px; border-radius: 50%; background: rgba(201,169,110,0.15); border: 3px solid #c9a96e; flex-shrink: 0; }
         .tmpl-1 .cv-name { font-size: 34px; font-weight: 700; letter-spacing: 2px; margin-bottom: 4px; }
-        .tmpl-1 .cv-title { font-size: 13px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; font-weight: 300; margin-bottom: 14px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-1 .cv-title { font-size: 13px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; font-weight: 300; margin-bottom: 14px; font-family: 'Poppins', sans-serif; }
         .tmpl-1 .cv-contacts { display: flex; flex-wrap: wrap; gap: 14px; }
-        .tmpl-1 .cv-contact-item { font-size: 11px; color: rgba(255,255,255,0.65); font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-1 .cv-contact-item { font-size: 11px; color: rgba(255,255,255,0.65); font-family: 'Poppins', sans-serif; }
         .tmpl-1 .cv-body { display: grid; grid-template-columns: 2fr 1fr; }
         .tmpl-1 .cv-main { padding: 32px 30px 32px 50px; }
         .tmpl-1 .cv-sidebar { background: #f5f5f0; padding: 32px 22px; }
-        .tmpl-1 .section-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #c9a96e; font-weight: 700; font-family: 'Calibri', 'Trebuchet MS', sans-serif; border-bottom: 1px solid #c9a96e; padding-bottom: 5px; margin-bottom: 18px; }
+        .tmpl-1 .section-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #c9a96e; font-weight: 700; font-family: 'Poppins', sans-serif; border-bottom: 1px solid #c9a96e; padding-bottom: 5px; margin-bottom: 18px; }
         .tmpl-1 .cv-section { margin-bottom: 28px; }
-        .tmpl-1 .summary-text { font-size: 13px; line-height: 1.8; color: #444; font-style: italic; }
+        .tmpl-1 .summary-text { font-size: 13px; line-height: 1.8; color: #444;  }
         .tmpl-1 .exp-item { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #eee; }
         .tmpl-1 .exp-item:last-child { border-bottom: none; }
         .tmpl-1 .exp-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
-        .tmpl-1 .exp-company { font-size: 12px; color: #c9a96e; font-weight: 600; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-1 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 6px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-1 .exp-company { font-size: 12px; color: #c9a96e; font-weight: 600; font-family: 'Poppins', sans-serif; }
+        .tmpl-1 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 6px; font-family: 'Poppins', sans-serif; }
         .tmpl-1 .exp-desc { font-size: 12px; line-height: 1.7; color: #555; }
         .tmpl-1 .edu-item { margin-bottom: 14px; }
         .tmpl-1 .edu-degree { font-size: 13px; font-weight: 700; color: #1a1a2e; }
-        .tmpl-1 .edu-school { font-size: 12px; color: #666; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-1 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-1 .skill-item { background: #1a1a2e; color: #c9a96e; font-size: 10px; padding: 4px 9px; border-radius: 3px; display: inline-block; margin: 2px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-1 .lang-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; font-size: 12px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-1 .edu-school { font-size: 12px; color: #666; font-family: 'Poppins', sans-serif; }
+        .tmpl-1 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Poppins', sans-serif; }
+        .tmpl-1 .skill-item { background: #1a1a2e; color: #c9a96e; font-size: 10px; padding: 4px 9px; border-radius: 3px; display: inline-block; margin: 2px; font-family: 'Poppins', sans-serif; }
+        .tmpl-1 .lang-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; font-size: 12px; font-family: 'Poppins', sans-serif; }
         .tmpl-1 .lang-level { background: #1a1a2e; color: #c9a96e; padding: 2px 7px; border-radius: 3px; font-size: 10px; }
 
         /* ==================== TEMPLATE 2: CREATIVE MODERN (COM FOTO) ==================== */
-        .tmpl-2 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; }
+        .tmpl-2 { font-family: 'Poppins', sans-serif; color: #111; }
         .tmpl-2 .cv-header { background: #2e1a1a; color: white; padding: 40px 50px; position: relative; overflow: hidden; }
         .tmpl-2 .cv-header::before { content: ''; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(201,169,110,0.08); }
         .tmpl-2 .cv-header::after { content: ''; position: absolute; right: 40px; bottom: -80px; width: 160px; height: 160px; border-radius: 50%; background: rgba(201,169,110,0.05); }
@@ -118,7 +119,7 @@
         .tmpl-2 .lang-level { color: #c9a96e; font-size: 11px; font-weight: 600; }
 
         /* ==================== TEMPLATE 3: TECH MINIMAL (COM FOTO) ==================== */
-        .tmpl-3 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; }
+        .tmpl-3 { font-family: 'Poppins', sans-serif; color: #111; }
         .tmpl-3 .cv-header { background: #f8f8f8; border-left: 5px solid #0a1a0a; padding: 38px 50px; display: flex; justify-content: space-between; align-items: center; }
         .tmpl-3 .cv-header-left { display: flex; gap: 22px; align-items: center; }
         .tmpl-3 .cv-photo { width: 78px; height: 78px; border-radius: 8px; object-fit: cover; }
@@ -145,40 +146,40 @@
         .tmpl-3 .lang-item { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; color: #333; }
 
         /* ==================== TEMPLATE 4: FINANCE PRO (COM FOTO) ==================== */
-        .tmpl-4 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; }
+        .tmpl-4 { font-family: 'Poppins', sans-serif; color: #111; }
         .tmpl-4 .cv-header { background: white; border-top: 5px solid #c9a96e; padding: 38px 50px 28px; }
         .tmpl-4 .header-inner { display: flex; justify-content: space-between; align-items: flex-start; }
         .tmpl-4 .cv-name-block { display: flex; gap: 18px; align-items: center; }
         .tmpl-4 .cv-photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid #c9a96e; }
         .tmpl-4 .cv-photo-placeholder { width: 72px; height: 72px; border-radius: 50%; background: #f5f0e8; border: 2px solid #c9a96e; }
         .tmpl-4 .cv-name { font-size: 32px; font-weight: 700; color: #1a1a0a; letter-spacing: 1px; }
-        .tmpl-4 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-top: 3px; }
+        .tmpl-4 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; font-family: 'Poppins', sans-serif; margin-top: 3px; }
         .tmpl-4 .cv-contacts { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-        .tmpl-4 .cv-contact-item { font-size: 11px; color: #777; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-4 .cv-contact-item { font-size: 11px; color: #777; font-family: 'Poppins', sans-serif; }
         .tmpl-4 .cv-divider { height: 1px; background: linear-gradient(90deg, #c9a96e, transparent); margin: 0 50px; }
         .tmpl-4 .cv-body { display: grid; grid-template-columns: 1fr 210px; }
         .tmpl-4 .cv-main { padding: 28px 28px 28px 50px; }
         .tmpl-4 .cv-sidebar { background: #fafaf5; border-left: 1px solid #e8e0d0; padding: 28px 18px; }
-        .tmpl-4 .section-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 700; margin-bottom: 14px; }
+        .tmpl-4 .section-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #c9a96e; font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 14px; }
         .tmpl-4 .cv-section { margin-bottom: 24px; }
-        .tmpl-4 .summary-text { font-size: 13px; line-height: 1.8; color: #444; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-4 .summary-text { font-size: 13px; line-height: 1.8; color: #444; font-family: 'Poppins', sans-serif; }
         .tmpl-4 .exp-item { margin-bottom: 16px; }
         .tmpl-4 .exp-title { font-size: 14px; font-weight: 700; color: #1a1a0a; }
-        .tmpl-4 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 600; }
-        .tmpl-4 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 5px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-4 .exp-desc { font-size: 12px; line-height: 1.7; color: #555; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-4 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Poppins', sans-serif; font-weight: 600; }
+        .tmpl-4 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 5px; font-family: 'Poppins', sans-serif; }
+        .tmpl-4 .exp-desc { font-size: 12px; line-height: 1.7; color: #555; font-family: 'Poppins', sans-serif; }
         .tmpl-4 .edu-item { margin-bottom: 12px; }
         .tmpl-4 .edu-degree { font-size: 13px; font-weight: 700; color: #1a1a0a; }
-        .tmpl-4 .edu-school { font-size: 12px; color: #666; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-4 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-4 .skill-item { display: block; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; color: #333; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-4 .edu-school { font-size: 12px; color: #666; font-family: 'Poppins', sans-serif; }
+        .tmpl-4 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Poppins', sans-serif; }
+        .tmpl-4 .skill-item { display: block; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; color: #333; font-family: 'Poppins', sans-serif; }
         .tmpl-4 .skill-item::before { content: '◆ '; color: #c9a96e; font-size: 7px; }
-        .tmpl-4 .lang-item { font-size: 12px; margin-bottom: 7px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-4 .lang-item { font-size: 12px; margin-bottom: 7px; font-family: 'Poppins', sans-serif; }
         .tmpl-4 .lang-name { font-weight: 600; color: #1a1a0a; }
         .tmpl-4 .lang-level { color: #888; font-size: 11px; }
 
         /* ==================== TEMPLATE 5: MEDICAL ELITE (COM FOTO) ==================== */
-        .tmpl-5 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; }
+        .tmpl-5 { font-family: 'Poppins', sans-serif; color: #111; }
         .tmpl-5 .cv-header { background: linear-gradient(135deg, #0a1a1a, #1a2e2e); color: white; padding: 38px 50px; display: flex; gap: 24px; align-items: center; }
         .tmpl-5 .cv-photo { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid #4ecdc4; }
         .tmpl-5 .cv-photo-placeholder { width: 88px; height: 88px; border-radius: 50%; background: rgba(78,205,196,0.15); border: 3px solid #4ecdc4; }
@@ -206,67 +207,67 @@
         .tmpl-5 .lang-level { color: #4ecdc4; font-size: 11px; }
 
         /* ==================== TEMPLATE 6: LEGAL EXPERT (COM FOTO) ==================== */
-        .tmpl-6 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #1a0a1a; }
+        .tmpl-6 { font-family: 'Poppins', sans-serif; color: #1a0a1a; }
         .tmpl-6 .cv-header { background: #1a0a1a; color: white; padding: 48px 50px; }
         .tmpl-6 .header-inner { display: flex; gap: 22px; align-items: flex-start; }
         .tmpl-6 .cv-photo { width: 82px; height: 82px; object-fit: cover; border: 2px solid #c9a96e; }
         .tmpl-6 .cv-photo-placeholder { width: 82px; height: 82px; background: rgba(201,169,110,0.15); border: 2px solid #c9a96e; }
         .tmpl-6 .cv-name { font-size: 36px; font-weight: 700; letter-spacing: 2px; margin-bottom: 4px; }
-        .tmpl-6 .cv-title { font-size: 11px; color: #c9a96e; letter-spacing: 5px; text-transform: uppercase; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 300; margin-bottom: 14px; }
+        .tmpl-6 .cv-title { font-size: 11px; color: #c9a96e; letter-spacing: 5px; text-transform: uppercase; font-family: 'Poppins', sans-serif; font-weight: 300; margin-bottom: 14px; }
         .tmpl-6 .cv-contacts { display: flex; flex-wrap: wrap; gap: 18px; }
-        .tmpl-6 .cv-contact-item { font-size: 11px; color: rgba(255,255,255,0.45); font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-6 .cv-contact-item { font-size: 11px; color: rgba(255,255,255,0.45); font-family: 'Poppins', sans-serif; }
         .tmpl-6 .cv-body { display: grid; grid-template-columns: 1fr 195px; }
         .tmpl-6 .cv-main { padding: 32px 28px 32px 50px; }
         .tmpl-6 .cv-sidebar { background: #f5f0f5; padding: 32px 18px; }
-        .tmpl-6 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a0a1a; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 700; margin-bottom: 14px; border-bottom: 2px solid #1a0a1a; padding-bottom: 5px; }
+        .tmpl-6 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a0a1a; font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 14px; border-bottom: 2px solid #1a0a1a; padding-bottom: 5px; }
         .tmpl-6 .cv-section { margin-bottom: 26px; }
         .tmpl-6 .summary-text { font-size: 14px; line-height: 1.9; color: #333; }
         .tmpl-6 .exp-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e8e0e8; }
         .tmpl-6 .exp-title { font-size: 15px; font-weight: 700; color: #1a0a1a; }
-        .tmpl-6 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 600; }
-        .tmpl-6 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 5px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-6 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Poppins', sans-serif; font-weight: 600; }
+        .tmpl-6 .exp-meta { font-size: 11px; color: #999; margin: 2px 0 5px; font-family: 'Poppins', sans-serif; }
         .tmpl-6 .exp-desc { font-size: 13px; line-height: 1.7; color: #444; }
         .tmpl-6 .edu-item { margin-bottom: 12px; }
         .tmpl-6 .edu-degree { font-size: 14px; font-weight: 700; color: #1a0a1a; }
-        .tmpl-6 .edu-school { font-size: 12px; color: #666; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-6 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-6 .skill-item { display: block; font-size: 12px; padding: 3px 0; color: #444; font-family: 'Calibri', 'Trebuchet MS', sans-serif; border-bottom: 1px solid #e8e0e8; }
+        .tmpl-6 .edu-school { font-size: 12px; color: #666; font-family: 'Poppins', sans-serif; }
+        .tmpl-6 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Poppins', sans-serif; }
+        .tmpl-6 .skill-item { display: block; font-size: 12px; padding: 3px 0; color: #444; font-family: 'Poppins', sans-serif; border-bottom: 1px solid #e8e0e8; }
         .tmpl-6 .skill-item::before { content: '§ '; color: #c9a96e; }
         .tmpl-6 .lang-item { font-size: 13px; margin-bottom: 9px; }
         .tmpl-6 .lang-name { font-weight: 600; color: #1a0a1a; }
-        .tmpl-6 .lang-level { font-size: 11px; color: #888; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-6 .lang-level { font-size: 11px; color: #888; font-family: 'Poppins', sans-serif; }
 
         /* ==================== TEMPLATE 7: EXECUTIVE MINIMALISTA (SEM FOTO) ==================== */
-        .tmpl-7 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-7 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-7 .cv-header { padding: 52px 60px 32px; text-align: center; border-bottom: 2px solid #1a1a2e; }
         .tmpl-7 .cv-name { font-size: 40px; font-weight: 700; letter-spacing: 4px; color: #1a1a2e; margin-bottom: 6px; }
-        .tmpl-7 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 5px; text-transform: uppercase; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-bottom: 16px; }
+        .tmpl-7 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 5px; text-transform: uppercase; font-family: 'Poppins', sans-serif; margin-bottom: 16px; }
         .tmpl-7 .cv-contacts { display: flex; justify-content: center; flex-wrap: wrap; gap: 18px; }
-        .tmpl-7 .cv-contact-item { font-size: 11px; color: #888; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-7 .cv-contact-item { font-size: 11px; color: #888; font-family: 'Poppins', sans-serif; }
         .tmpl-7 .cv-body { display: grid; grid-template-columns: 1fr 195px; }
         .tmpl-7 .cv-main { padding: 32px 30px 32px 60px; }
         .tmpl-7 .cv-sidebar { background: #fafaf8; border-left: 1px solid #e8e8e0; padding: 32px 22px; }
-        .tmpl-7 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a1a2e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 700; margin-bottom: 6px; }
+        .tmpl-7 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a1a2e; font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 6px; }
         .tmpl-7 .section-line { width: 28px; height: 1px; background: #c9a96e; margin-bottom: 16px; }
         .tmpl-7 .cv-section { margin-bottom: 30px; }
-        .tmpl-7 .summary-text { font-size: 14px; line-height: 2; color: #444; font-style: italic; }
+        .tmpl-7 .summary-text { font-size: 14px; line-height: 2; color: #444;  }
         .tmpl-7 .exp-item { margin-bottom: 20px; }
         .tmpl-7 .exp-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
-        .tmpl-7 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; letter-spacing: 1px; }
-        .tmpl-7 .exp-meta { font-size: 11px; color: #aaa; margin: 3px 0 7px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-7 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Poppins', sans-serif; letter-spacing: 1px; }
+        .tmpl-7 .exp-meta { font-size: 11px; color: #aaa; margin: 3px 0 7px; font-family: 'Poppins', sans-serif; }
         .tmpl-7 .exp-desc { font-size: 13px; line-height: 1.8; color: #555; }
         .tmpl-7 .edu-item { margin-bottom: 14px; }
         .tmpl-7 .edu-degree { font-size: 14px; font-weight: 700; color: #1a1a2e; }
-        .tmpl-7 .edu-school { font-size: 12px; color: #777; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-7 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-7 .skill-item { display: block; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; color: #444; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-7 .lang-item { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #eee; font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #444; }
+        .tmpl-7 .edu-school { font-size: 12px; color: #777; font-family: 'Poppins', sans-serif; }
+        .tmpl-7 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Poppins', sans-serif; }
+        .tmpl-7 .skill-item { display: block; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; color: #444; font-family: 'Poppins', sans-serif; }
+        .tmpl-7 .lang-item { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #eee; font-family: 'Poppins', sans-serif; color: #444; }
         .tmpl-7 .lang-level { color: #c9a96e; font-size: 11px; }
 
         /* ==================== TEMPLATE 8: TWO COLUMNS PRO (SEM FOTO) ==================== */
-        .tmpl-8 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-8 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-8 .cv-header { padding: 42px 50px 28px; border-bottom: 3px solid #eee; }
-        .tmpl-8 .cv-name { font-size: 32px; font-weight: 700; color: #111; letter-spacing: 1px; margin-bottom: 4px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-8 .cv-name { font-size: 32px; font-weight: 700; color: #111; letter-spacing: 1px; margin-bottom: 4px; font-family: 'Poppins', sans-serif; }
         .tmpl-8 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
         .tmpl-8 .cv-contacts { display: flex; flex-wrap: wrap; gap: 14px; }
         .tmpl-8 .cv-contact-item { font-size: 11px; color: #888; }
@@ -290,9 +291,9 @@
         .tmpl-8 .lang-level { color: #c9a96e; font-size: 11px; }
 
         /* ==================== TEMPLATE 9: TIMELINE CLASSIC (SEM FOTO) ==================== */
-        .tmpl-9 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-9 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-9 .cv-header { padding: 42px 60px 28px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #eee; }
-        .tmpl-9 .cv-name { font-size: 34px; font-weight: 700; color: #1a1a2e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-bottom: 4px; }
+        .tmpl-9 .cv-name { font-size: 34px; font-weight: 700; color: #1a1a2e; font-family: 'Poppins', sans-serif; margin-bottom: 4px; }
         .tmpl-9 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 2px; text-transform: uppercase; }
         .tmpl-9 .cv-contacts-right { text-align: right; }
         .tmpl-9 .cv-contact-item { font-size: 11px; color: #888; margin-bottom: 3px; display: block; }
@@ -319,9 +320,9 @@
         .tmpl-9 .lang-level { color: #c9a96e; font-size: 11px; }
 
         /* ==================== TEMPLATE 10: BOLD HEADER DARK (SEM FOTO) ==================== */
-        .tmpl-10 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-10 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-10 .cv-header { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: white; padding: 48px 60px; text-align: center; }
-        .tmpl-10 .cv-name { font-size: 44px; font-weight: 800; letter-spacing: 3px; margin-bottom: 8px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-10 .cv-name { font-size: 44px; font-weight: 800; letter-spacing: 3px; margin-bottom: 8px; font-family: 'Poppins', sans-serif; }
         .tmpl-10 .cv-title { font-size: 12px; color: #c9a96e; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 18px; }
         .tmpl-10 .cv-contacts { display: flex; justify-content: center; flex-wrap: wrap; gap: 18px; }
         .tmpl-10 .cv-contact-item { font-size: 11px; color: rgba(255,255,255,0.55); }
@@ -346,9 +347,9 @@
         .tmpl-10 .lang-level { color: #c9a96e; font-size: 11px; }
 
         /* ==================== TEMPLATE 11: FINANCE CLEAN (SEM FOTO) ==================== */
-        .tmpl-11 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-11 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-11 .cv-header { background: #fff; border-left: 5px solid #c9a96e; padding: 38px 50px; }
-        .tmpl-11 .cv-name { font-size: 34px; font-weight: 700; color: #1a1a0a; font-family: 'Calibri', 'Trebuchet MS', sans-serif; margin-bottom: 4px; }
+        .tmpl-11 .cv-name { font-size: 34px; font-weight: 700; color: #1a1a0a; font-family: 'Poppins', sans-serif; margin-bottom: 4px; }
         .tmpl-11 .cv-title { font-size: 11px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
         .tmpl-11 .cv-contacts { display: flex; flex-wrap: wrap; gap: 16px; }
         .tmpl-11 .cv-contact-item { font-size: 11px; color: #888; }
@@ -376,38 +377,38 @@
         .tmpl-11 .lang-level { font-size: 11px; color: #999; }
 
         /* ==================== TEMPLATE 12: LEGAL PRESTIGE (SEM FOTO) ==================== */
-        .tmpl-12 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #111; background: #fff; }
+        .tmpl-12 { font-family: 'Poppins', sans-serif; color: #111; background: #fff; }
         .tmpl-12 .cv-header { background: #fff; border-top: 6px solid #1a0a1a; padding: 38px 60px 28px; text-align: center; }
         .tmpl-12 .cv-name { font-size: 38px; font-weight: 700; letter-spacing: 3px; color: #1a0a1a; margin-bottom: 6px; }
-        .tmpl-12 .cv-title { font-size: 11px; color: #c9a96e; letter-spacing: 6px; text-transform: uppercase; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 300; margin-bottom: 14px; }
+        .tmpl-12 .cv-title { font-size: 11px; color: #c9a96e; letter-spacing: 6px; text-transform: uppercase; font-family: 'Poppins', sans-serif; font-weight: 300; margin-bottom: 14px; }
         .tmpl-12 .cv-divider { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; }
         .tmpl-12 .cv-divider-line { width: 55px; height: 1px; background: #1a0a1a; }
         .tmpl-12 .cv-divider-dot { width: 5px; height: 5px; border-radius: 50%; background: #c9a96e; }
         .tmpl-12 .cv-contacts { display: flex; justify-content: center; flex-wrap: wrap; gap: 18px; }
-        .tmpl-12 .cv-contact-item { font-size: 11px; color: #888; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-12 .cv-contact-item { font-size: 11px; color: #888; font-family: 'Poppins', sans-serif; }
         .tmpl-12 .cv-body { display: grid; grid-template-columns: 1fr 195px; border-top: 1px solid #eee; margin-top: 18px; }
         .tmpl-12 .cv-main { padding: 28px 28px 28px 60px; }
         .tmpl-12 .cv-sidebar { background: #fafafa; border-left: 1px solid #eee; padding: 28px 18px; }
-        .tmpl-12 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a0a1a; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 700; margin-bottom: 14px; border-bottom: 2px solid #1a0a1a; padding-bottom: 4px; }
+        .tmpl-12 .section-title { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #1a0a1a; font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 14px; border-bottom: 2px solid #1a0a1a; padding-bottom: 4px; }
         .tmpl-12 .cv-section { margin-bottom: 26px; }
         .tmpl-12 .summary-text { font-size: 14px; line-height: 2; color: #444; }
         .tmpl-12 .exp-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0ece8; }
         .tmpl-12 .exp-title { font-size: 15px; font-weight: 700; color: #1a0a1a; }
-        .tmpl-12 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; font-weight: 600; }
-        .tmpl-12 .exp-meta { font-size: 11px; color: #aaa; margin: 2px 0 5px; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-12 .exp-company { font-size: 12px; color: #c9a96e; font-family: 'Poppins', sans-serif; font-weight: 600; }
+        .tmpl-12 .exp-meta { font-size: 11px; color: #aaa; margin: 2px 0 5px; font-family: 'Poppins', sans-serif; }
         .tmpl-12 .exp-desc { font-size: 13px; line-height: 1.8; color: #555; }
         .tmpl-12 .edu-item { margin-bottom: 12px; }
         .tmpl-12 .edu-degree { font-size: 14px; font-weight: 700; color: #1a0a1a; }
-        .tmpl-12 .edu-school { font-size: 12px; color: #777; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-12 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
-        .tmpl-12 .skill-item { display: block; font-size: 12px; padding: 3px 0; color: #444; font-family: 'Calibri', 'Trebuchet MS', sans-serif; border-bottom: 1px solid #eee; }
+        .tmpl-12 .edu-school { font-size: 12px; color: #777; font-family: 'Poppins', sans-serif; }
+        .tmpl-12 .edu-year { font-size: 11px; color: #c9a96e; font-family: 'Poppins', sans-serif; }
+        .tmpl-12 .skill-item { display: block; font-size: 12px; padding: 3px 0; color: #444; font-family: 'Poppins', sans-serif; border-bottom: 1px solid #eee; }
         .tmpl-12 .skill-item::before { content: '§ '; color: #c9a96e; }
         .tmpl-12 .lang-item { font-size: 13px; margin-bottom: 9px; }
         .tmpl-12 .lang-name { font-weight: 600; color: #1a0a1a; }
-        .tmpl-12 .lang-level { font-size: 11px; color: #888; font-family: 'Calibri', 'Trebuchet MS', sans-serif; }
+        .tmpl-12 .lang-level { font-size: 11px; color: #888; font-family: 'Poppins', sans-serif; }
 
         /* ==================== TEMPLATE 13: ATS PRO ==================== */
-        .tmpl-13 { font-family: 'Calibri', 'Trebuchet MS', sans-serif; color: #000; background: #fff; }
+        .tmpl-13 { font-family: 'Poppins', sans-serif; color: #000; background: #fff; }
         .tmpl-13 .cv-header { padding: 36px 50px 24px; border-bottom: 2px solid #000; }
         .tmpl-13 .cv-name { font-size: 26px; font-weight: 700; color: #000; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
         .tmpl-13 .cv-title { font-size: 13px; color: #333; margin-bottom: 10px; }
@@ -421,7 +422,7 @@
         .tmpl-13 .exp-header { display: flex; justify-content: space-between; align-items: baseline; }
         .tmpl-13 .exp-title { font-size: 13px; font-weight: 700; color: #000; }
         .tmpl-13 .exp-dates { font-size: 12px; color: #333; }
-        .tmpl-13 .exp-company { font-size: 12px; color: #333; font-style: italic; margin-bottom: 4px; }
+        .tmpl-13 .exp-company { font-size: 12px; color: #333;  margin-bottom: 4px; }
         .tmpl-13 .exp-desc { font-size: 12px; line-height: 1.7; color: #111; margin-top: 4px; }
         .tmpl-13 .exp-desc-bullet { font-size: 12px; line-height: 1.7; color: #111; padding-left: 14px; }
         .tmpl-13 .exp-desc-bullet::before { content: '• '; }
@@ -429,7 +430,7 @@
         .tmpl-13 .edu-header { display: flex; justify-content: space-between; }
         .tmpl-13 .edu-degree { font-size: 13px; font-weight: 700; color: #000; }
         .tmpl-13 .edu-year { font-size: 12px; color: #333; }
-        .tmpl-13 .edu-school { font-size: 12px; color: #333; font-style: italic; }
+        .tmpl-13 .edu-school { font-size: 12px; color: #333;  }
         .tmpl-13 .skills-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .tmpl-13 .skill-plain { font-size: 12px; color: #111; }
         .tmpl-13 .skill-plain::after { content: ' •'; color: #999; }
@@ -676,7 +677,7 @@
                             '<div style="font-size:13px;font-weight:700;color:'+BLUE+';">'+esc(e.company||e.title)+'</div>'+
                             '<div style="font-size:10.5px;color:#888;flex-shrink:0;margin-left:8px;">'+esc(period)+'</div>'+
                         '</div>'+
-                        '<div style="font-size:11.5px;color:#555;font-style:italic;margin:1px 0 4px;">'+esc(e.title)+'</div>'+
+                        '<div style="font-size:11.5px;color:#555;margin:1px 0 4px;">'+esc(e.title)+'</div>'+
                         (desc?'<div style="font-size:11.5px;color:#374151;line-height:1.65;">'+desc+'</div>':'')+
                     '</div>';
                 }).join('');
@@ -705,7 +706,7 @@
                 ? data.skills.map(function(s){ return '<div style="font-size:11px;color:#444;line-height:1.8;">• '+esc(s)+'</div>'; }).join('')
                 : '';
             var sideLangs = (data.languages&&data.languages.length)
-                ? data.languages.map(function(l){ return '<div style="font-size:11px;color:#444;line-height:1.8;">• '+esc(l.name||l)+(l.level?' ('+esc(l.level)+')':'')+'</div>'; }).join('')
+                ? data.languages.map(function(l){ return '<div style="font-size:11px;color:#444;line-height:1.8;">• '+esc(l.language||l.name||l)+(l.level?' ('+esc(l.level)+')':'')+'</div>'; }).join('')
                 : '';
             var secHead = function(txt){
                 return '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:'+BLUE+';border-bottom:1.5px solid '+GOLD+';padding-bottom:3px;margin:14px 0 8px;">'+txt+'</div>';
@@ -752,7 +753,7 @@
                         '<div style="width:110px;flex-shrink:0;padding-right:12px;text-align:right;font-size:10.5px;color:#888;line-height:1.5;padding-top:2px;">'+esc(period)+'</div>'+
                         '<div style="flex:1;border-left:2px solid #f0e8d5;padding-left:14px;">'+
                             '<div style="font-size:12.5px;font-weight:700;color:'+DARK+';">'+esc(e.company||e.title)+'</div>'+
-                            '<div style="font-size:11.5px;color:#555;font-style:italic;margin:2px 0 4px;">'+esc(e.title)+'</div>'+
+                            '<div style="font-size:11.5px;color:#555;margin:2px 0 4px;">'+esc(e.title)+'</div>'+
                             (desc?'<div style="margin-top:4px;"><div style="font-size:11.5px;font-weight:700;color:'+DARK+';margin-bottom:4px;">Responsabilidades:</div><div style="font-size:11.5px;color:#374151;line-height:1.65;">'+desc+'</div></div>':'')+
                         '</div>'+
                     '</div>';
@@ -773,7 +774,7 @@
                 ? data.skills.map(function(s){ return '<div style="font-size:11px;color:#374151;line-height:1.8;padding-left:10px;">• '+esc(s)+'</div>'; }).join('')
                 : '';
             var langsHTML = (data.languages&&data.languages.length)
-                ? data.languages.map(function(l){ return '<div style="font-size:11px;color:#374151;line-height:1.8;padding-left:10px;">• '+esc(l.name||l)+(l.level?' ('+esc(l.level)+')':'')+'</div>'; }).join('')
+                ? data.languages.map(function(l){ return '<div style="font-size:11px;color:#374151;line-height:1.8;padding-left:10px;">• '+esc(l.language||l.name||l)+(l.level?' ('+esc(l.level)+')':'')+'</div>'; }).join('')
                 : '';
             var secSide = function(txt){
                 return '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:'+GOLD+';margin:14px 0 7px;">'+txt+'</div>';

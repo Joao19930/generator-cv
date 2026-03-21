@@ -580,7 +580,7 @@ function buildCVHtml(content, templateName) {
           <div style="font-size:13px;font-weight:700;color:${BLUE};">${esc(e.company||e.title)}</div>
           <div style="font-size:10.5px;color:#888;margin-left:8px;">${esc(e.startDate||e.start||'')}${(e.endDate||e.end) ? ` – ${esc(e.endDate||e.end)}` : ' – Presente'}</div>
         </div>
-        <div style="font-size:11.5px;color:#555;font-style:italic;margin:1px 0 4px;">${esc(e.title)}</div>
+        <div style="font-size:11.5px;color:#555;margin:1px 0 4px;">${esc(e.title)}</div>
         ${e.description ? `<div style="font-size:11.5px;color:#374151;line-height:1.65;">${nl2br(esc(e.description))}</div>` : ''}
       </div>`).join('');
     const eduB = education.map(e => `
@@ -601,7 +601,7 @@ function buildCVHtml(content, templateName) {
     const sideSkills = skills.map(s => `<div style="font-size:10.5px;color:#444;line-height:1.8;">• ${esc(s)}</div>`).join('');
     const sideLangs  = languages.map(l => `<div style="font-size:10.5px;color:#444;line-height:1.8;">• ${esc(l.language||l)}${l.level ? ` (${esc(l.level)})` : ''}</div>`).join('');
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Calibri,Arial,sans-serif;background:#fff;font-size:12px;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Poppins',Arial,sans-serif;background:#fff;font-size:12px;}</style>
     </head><body>
       <div style="padding:22px 32px 14px;display:flex;align-items:center;gap:18px;border-bottom:2.5px solid ${GOLD};">
         ${photoUrl ? `<img src="${photoUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2.5px solid ${GOLD};flex-shrink:0;">` : ''}
@@ -634,7 +634,7 @@ function buildCVHtml(content, templateName) {
         <div style="width:110px;flex-shrink:0;padding-right:12px;text-align:right;font-size:10.5px;color:#888;line-height:1.5;padding-top:2px;">${esc(period)}</div>
         <div style="flex:1;border-left:2px solid #f0e8d5;padding-left:14px;">
           <div style="font-size:12.5px;font-weight:700;color:${DARK};">${esc(e.company||e.title)}</div>
-          <div style="font-size:11.5px;color:#555;font-style:italic;margin:2px 0 4px;">${esc(e.title)}</div>
+          <div style="font-size:11.5px;color:#555;margin:2px 0 4px;">${esc(e.title)}</div>
           ${e.description ? `<div style="margin-top:4px;"><div style="font-size:11.5px;font-weight:700;color:${DARK};margin-bottom:4px;">Responsabilidades:</div><div style="font-size:11.5px;color:#374151;line-height:1.65;">${nl2br(esc(e.description))}</div></div>` : ''}
         </div>
       </div>`;
@@ -658,7 +658,7 @@ function buildCVHtml(content, templateName) {
     const secS = (txt) => `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${GOLD};margin:14px 0 7px;">${txt}</div>`;
     const secM = (txt) => `<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${DARK};margin:18px 0 10px;padding-bottom:3px;border-bottom:1.5px solid #f0e8d5;">${txt}</div>`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Calibri,Arial,sans-serif;background:#fff;font-size:12px;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Poppins',Arial,sans-serif;background:#fff;font-size:12px;}</style>
     </head><body>
       <div style="padding:20px 32px 12px;border-bottom:2px solid ${GOLD};">
         <div style="font-size:28px;font-weight:700;color:${DARK};text-transform:uppercase;text-align:center;letter-spacing:1px;">${esc(name)}</div>
@@ -712,7 +712,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: cf-executivo-escuro (navy escuro + foto) ────────────────
   if (slug.includes('executivo-escuro')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:#0f172a;padding:32px 36px;display:flex;align-items:center;gap:24px;">
       ${photoUrl ? `<img src="${photoUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #3b82f6;flex-shrink:0;">` : ''}
@@ -734,7 +734,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: cf-gradiente-roxo (purple gradient + foto centrada) ─────
   if (slug.includes('gradiente-roxo')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px;text-align:center;">
       ${photoUrl ? `<img src="${photoUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);margin:0 auto 12px;display:block;">` : ''}
@@ -754,7 +754,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: cf-verde-profissional (verde + foto) ────────────────────
   if (slug.includes('verde-profissional')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:#15803d;padding:30px 36px;display:flex;align-items:center;gap:22px;">
       ${photoUrl ? `<img src="${photoUrl}" style="width:85px;height:85px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.4);flex-shrink:0;">` : ''}
@@ -778,7 +778,7 @@ function buildCVHtml(content, templateName) {
     const sideSkills = skills.map(s => `<div style="font-size:11px;color:rgba(255,255,255,.85);margin-bottom:5px;">• ${esc(s)}</div>`).join('');
     const sideLang   = languages.map(l => `<div style="font-size:11px;color:rgba(255,255,255,.85);margin-bottom:5px;">${esc(l.language||l)}${l.level?` (${esc(l.level)})`:''}</div>`).join('');
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
     </head><body>
     <div style="width:220px;background:#0d9488;padding:28px 20px;flex-shrink:0;">
       ${photoUrl ? `<img src="${photoUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);display:block;margin:0 auto 16px;">` : ''}
@@ -799,7 +799,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: cf-coral-criativo (coral/rose centrado + foto) ─────────
   if (slug.includes('coral-criativo')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:#be185d;padding:28px 36px;display:flex;align-items:center;gap:22px;">
       ${photoUrl ? `<img src="${photoUrl}" style="width:85px;height:85px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.35);flex-shrink:0;">` : ''}
@@ -821,7 +821,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: sf-corporate-azul (barra azul topo, 2 colunas) ─────────
   if (slug.includes('corporate-azul')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:#1d4ed8;height:8px;"></div>
     <div style="padding:28px 36px 16px;">
@@ -849,7 +849,7 @@ function buildCVHtml(content, templateName) {
       ${languages.length ? `<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:1px;margin:14px 0 6px;">Línguas</div>${langList()}` : ''}
     `;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
     </head><body>
     <div style="width:210px;background:#f1f5f9;padding:28px 18px;flex-shrink:0;border-right:1px solid #e2e8f0;">
       <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">${esc(name)}</div>
@@ -866,7 +866,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: sf-verde-academico (cabeçalho verde centrado) ──────────
   if (slug.includes('verde-academico')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Georgia',serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Georgia',serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="text-align:center;padding:28px 36px 16px;border-bottom:2px solid #15803d;">
       <div style="font-size:24px;font-weight:700;color:#0f172a;letter-spacing:.3px;">${esc(name)}</div>
@@ -885,7 +885,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: sf-laranja-criativo (faixa laranja esquerda) ───────────
   if (slug.includes('laranja-criativo')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;display:flex;min-height:100vh;}</style>
     </head><body>
     <div style="width:6px;background:linear-gradient(180deg,#ea580c,#f97316);flex-shrink:0;"></div>
     <div style="flex:1;padding:32px 36px;">
@@ -905,7 +905,7 @@ function buildCVHtml(content, templateName) {
   // ── Template: sf-navy-executivo (navy centrado, sem foto) ─────────────
   if (slug.includes('navy-executivo')) {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
     </head><body>
     <div style="background:#0f172a;padding:28px 36px;text-align:center;">
       <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:.5px;">${esc(name)}</div>
@@ -926,7 +926,7 @@ function buildCVHtml(content, templateName) {
   const accentColor = slug.includes('minimalista') ? '#2563eb' : '#2563eb';
   const hasPhoto = photoUrl && (slug.includes('cf-') || slug.includes('classico') || slug.includes('com_foto'));
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Arial',sans-serif;font-size:12px;color:#1e293b;background:#fff;}</style>
   </head><body>
   <div style="border-top:5px solid ${accentColor};padding:28px 36px 16px;">
     <div style="display:flex;align-items:center;gap:20px;">
