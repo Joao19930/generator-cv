@@ -96,6 +96,21 @@ function localFallback(prompt) {
     return 'Microsoft Office, Comunicação Escrita, Trabalho em Equipa, Gestão do Tempo, Resolução de Problemas';
   }
 
+  // Caso 4: descrição de experiência (ExperienceSection do editor React)
+  if (p.includes('descrição profissional para experiência') || p.includes('escreve uma descrição') || p.includes('bullets com •')) {
+    const cargoMatch = prompt.match(/cargo[:\s]+([^\n]+)/i);
+    const empresaMatch = prompt.match(/empresa[:\s]+([^\n]+)/i);
+    const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
+    const empresa = empresaMatch ? empresaMatch[1].trim() : '';
+    const ctx = empresa && empresa !== 'não especificada' ? ` na ${empresa}` : '';
+    return `• Executar as funções de ${cargo}${ctx} com rigor técnico e foco nos objectivos\n• Coordenar processos e actividades diárias garantindo eficiência operacional\n• Colaborar com as equipas internas para cumprimento de metas e prazos\n• Reportar indicadores de desempenho à chefia e propor melhorias contínuas`;
+  }
+
+  // Fallback genérico — nunca retornar null para prompts longos
+  if (p.length > 100) {
+    return 'Profissional com sólida experiência na área, orientado(a) para resultados e com capacidade de adaptação a diferentes contextos organizacionais. Destaca-se pelo rigor técnico, proactividade e compromisso com a entrega de valor.';
+  }
+
   return null;
 }
 

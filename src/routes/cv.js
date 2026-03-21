@@ -119,24 +119,34 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
     console.log('[PDF] cv_id=%d template_name="%s" resolved="%s"', cv.Id || cv.id, cv.TemplateName, tplName);
 
     const html = buildCVHtml(content, tplName);
-    const pdfBuf  = await pdfConnector.fromHTML(html);
+    const pdfBuf = await pdfConnector.fromHTML(html);
 
-    // Upload para S3
-    const key = await s3Connector.upload(pdfBuf, `${cv.Slug}.pdf`, req.user.id);
-    const url  = await s3Connector.getUrl(key, 3600);
+    const hasS3 = process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY && process.env.AWS_BUCKET;
 
-    // Actualizar contador
-    await req.db.request().input('id', sql.Int, cv.Id).input('key', sql.NVarChar, key)
-      .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1, s3_key=@key WHERE id=@id');
-
-    // E-mail com link
-    const user = (await req.db.request().input('id', sql.Int, req.user.id)
-      .query('SELECT name, email FROM users WHERE id = @id')).recordset[0];
-    emailConnector.sendCVReady(user.Email, user.Name, url)
-      .catch(() => smtpConnector.send(user.Email, 'O seu CV está pronto!', `<p>Olá ${user.Name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`));
-
-    gaConnector.track(req.user.id, 'cv_downloaded');
-    res.json({ url, expires_in: 3600 });
+    if (hasS3) {
+      // Upload para S3 e devolve URL assinada
+      const slug = cv.Slug || cv.slug || `cv-${cv.Id || cv.id}`;
+      const key = await s3Connector.upload(pdfBuf, `${slug}.pdf`, req.user.id);
+      const url = await s3Connector.getUrl(key, 3600);
+      await req.db.request().input('id', sql.Int, cv.Id || cv.id).input('key', sql.NVarChar, key)
+        .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1, s3_key=@key WHERE id=@id');
+      const user = (await req.db.request().input('id', sql.Int, req.user.id)
+        .query('SELECT name, email FROM users WHERE id = @id')).recordset[0];
+      emailConnector.sendCVReady(user.Email, user.Name, url)
+        .catch(() => smtpConnector.send(user.Email, 'O seu CV está pronto!', `<p>Olá ${user.Name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`).catch(() => {}));
+      gaConnector.track(req.user.id, 'cv_downloaded');
+      res.json({ url, expires_in: 3600 });
+    } else {
+      // Sem S3 — enviar PDF directamente para download
+      await req.db.request().input('id', sql.Int, cv.Id || cv.id)
+        .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1 WHERE id=@id').catch(() => {});
+      gaConnector.track(req.user.id, 'cv_downloaded');
+      const filename = (cv.Title || cv.title || 'cv').replace(/[^a-zA-Z0-9-_]/g, '_');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
+      res.setHeader('Content-Length', pdfBuf.length);
+      res.send(pdfBuf);
+    }
   } catch (err) {
     console.error('generate-pdf:', err.message);
     res.status(500).json({ error: 'Erro ao gerar PDF' });
