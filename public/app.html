@@ -650,6 +650,22 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 
       <div id="lockNoticeWrap"></div>
 
+      <!-- ALERTA VAGAS DA SEMANA (overview) -->
+      <div class="jobs-week-alert" id="jobsWeekAlertOv" style="margin-bottom:18px;cursor:pointer;" onclick="nav('jobs',null)">
+        <div class="jwa-icon">🔔</div>
+        <div class="jwa-body">
+          <div class="jwa-title">
+            Vagas da Semana
+            <span class="jwa-badge">Novo</span>
+          </div>
+          <div class="jwa-text" id="jwaOvText">Novas oportunidades adicionadas esta semana. Candidata-te antes que fechem!</div>
+          <ul class="jwa-list" id="jwaOvList">
+            <li>Comercial</li><li>Banca</li><li>Seguradora</li>
+          </ul>
+        </div>
+        <button class="jwa-close" onclick="event.stopPropagation();dismissWeekAlertOv()" title="Fechar">✕</button>
+      </div>
+
       <!-- 1. VAGAS RECENTES -->
       <div class="sec-mb" id="overviewJobsWrap" style="display:none;">
         <div class="sec-hdr">
@@ -2442,10 +2458,15 @@ function buildJobsCatTabs() {
 // ── Alerta vagas da semana ─────────────────────────────────────
 function updateWeekAlert() {
   const dismissed = sessionStorage.getItem('jobsAlertDismissed');
-  const alert = document.getElementById('jobsWeekAlert');
-  if (dismissed) { if (alert) alert.style.display = 'none'; return; }
+  const alertJobs = document.getElementById('jobsWeekAlert');
+  const alertOv   = document.getElementById('jobsWeekAlertOv');
+  if (dismissed) {
+    if (alertJobs) alertJobs.style.display = 'none';
+    if (alertOv)   alertOv.style.display   = 'none';
+    return;
+  }
 
-  // Categorias com mais vagas (top 4, excluindo "Todos")
+  // Categorias com mais vagas (top 4)
   const catMap = {};
   allJobs.forEach(j => {
     const c = j.Category || j.category;
@@ -2456,22 +2477,38 @@ function updateWeekAlert() {
     .slice(0, 4)
     .map(([c]) => c);
 
-  const listEl = document.getElementById('jwaList');
-  if (listEl && topCats.length) {
-    listEl.innerHTML = topCats.map(c => `<li onclick="filterByCat('${c}')" style="cursor:pointer;">${c} <span style="opacity:.6">${catMap[c]}</span></li>`).join('');
+  const totalText = `${allJobs.length} oportunidades disponíveis. Candidata-te antes que fechem!`;
+  const listHtml  = topCats.map(c =>
+    `<li onclick="nav('jobs',null);setTimeout(()=>filterByCat('${c}'),200)" style="cursor:pointer;">${c} <span style="opacity:.6">${catMap[c]}</span></li>`
+  ).join('');
+
+  // Alerta no painel vagas
+  if (alertJobs) {
+    const listEl  = document.getElementById('jwaList');
+    const totalEl = alertJobs.querySelector('.jwa-text');
+    if (listEl  && topCats.length) listEl.innerHTML = listHtml;
+    if (totalEl) totalEl.textContent = totalText;
   }
 
-  // Número de vagas no alerta
-  const totalEl = alert && alert.querySelector('.jwa-text');
-  if (totalEl) {
-    totalEl.textContent = `${allJobs.length} oportunidades disponíveis. Candidata-te antes que fechem!`;
+  // Alerta no overview
+  if (alertOv) {
+    const listElOv  = document.getElementById('jwaOvList');
+    const totalElOv = document.getElementById('jwaOvText');
+    if (listElOv  && topCats.length) listElOv.innerHTML = listHtml;
+    if (totalElOv) totalElOv.textContent = totalText;
   }
 }
 
 function dismissWeekAlert() {
   sessionStorage.setItem('jobsAlertDismissed', '1');
-  const a = document.getElementById('jobsWeekAlert');
-  if (a) { a.style.transition = 'opacity .3s, max-height .4s'; a.style.opacity = '0'; setTimeout(() => a.style.display = 'none', 350); }
+  ['jobsWeekAlert','jobsWeekAlertOv'].forEach(id => {
+    const a = document.getElementById(id);
+    if (a) { a.style.transition = 'opacity .3s, max-height .4s'; a.style.opacity = '0'; setTimeout(() => a.style.display = 'none', 350); }
+  });
+}
+
+function dismissWeekAlertOv() {
+  dismissWeekAlert();
 }
 
 function filterByCat(cat) {
