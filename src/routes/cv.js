@@ -951,7 +951,10 @@ function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
   const j = (jobTitle || '').trim();
   const jl = j.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const yrs = yearsExp ? yearsExp : '';
-  const exp = experiences ? String(experiences).slice(0, 120) : '';
+  const expRaw = experiences ? String(experiences) : '';
+  const exp = expRaw.slice(0, 120);
+  // texto combinado para matching: título + experiências (permite inferir área quando título é ambíguo)
+  const combined = (jl + ' ' + expRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')).slice(0, 600);
   const sk  = skills     ? String(skills).slice(0, 80)       : '';
   const yrsLabel = yrs ? `com ${yrs} de experiência` : 'com experiência na área';
   const skNote   = sk ? ` Domínio em ${sk}.` : '';
@@ -959,6 +962,16 @@ function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
   // Helper que monta o resumo a partir de fragmentos específicos da profissão
   const build = (intro, body, close) =>
     `${intro} ${yrsLabel}. ${body}${skNote} ${close}`;
+
+  // ── Manutenção / Técnico de Instalações ───────────────────
+  // Detectado pelo título OU pelas experiências (ex: "Técnico de RH" com exp de manutenção)
+  if (/manutenc|tecnic.*manut|tecnic.*instala|tecnic.*equip|tecnic.*repara|eletricist|hidraul|mecanic.*tecnic|tecnic.*mecanic|tecnic.*electr|tecnic.*hvac|tecnic.*refriger|frigori/i.test(combined) ||
+      /avaria|peca.*sobressel|sobresselente|ficha.*manutenc|preventiv.*correct|correctiv.*prevent/i.test(combined))
+    return build(
+      `Técnico(a) de Manutenção especializado(a) em manutenção preventiva e correctiva de equipamentos e instalações`,
+      `Experiência no diagnóstico de falhas e avarias, execução de reparações mecânicas, eléctricas e hidráulicas, e registo de intervenções técnicas. Controlo rigoroso do stock de peças sobresselentes e consumíveis, garantindo a operacionalidade contínua dos equipamentos.${exp ? ` Contexto: ${exp}.` : ''}`,
+      `Orientado(a) para a eficiência operacional, segurança no trabalho e melhoria contínua do plano de manutenção.`
+    );
 
   // ── Cozinha / Restauração ──────────────────────────────────
   if (/cozinheir|chef|pasteleiro|padeiro|confeit|restaura|caterl/i.test(jl))
@@ -993,7 +1006,7 @@ function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
     );
 
   // ── RH / Recursos Humanos ─────────────────────────────────
-  if (/recursos humanos|gestao.*rh|rh |hr |recrutamento|talent|people/i.test(jl))
+  if (/recursos.hum|gestao.*rh|\brh\b|hr\b|recrutamento|talent|people/i.test(jl))
     return build(
       `Técnico(a) de Recursos Humanos`,
       `Sólida experiência em recrutamento e selecção, processamento salarial, gestão de benefícios e conformidade laboral angolana (INSS, IRT, RENT). Capacidade de desenvolver políticas internas, planos de carreira e acções de formação.${exp ? ` Histórico: ${exp}.` : ''}`,
@@ -1009,7 +1022,7 @@ function generateSummaryLocal(name, jobTitle, experiences, skills, yearsExp) {
     );
 
   // ── Engenharia / Técnico ──────────────────────────────────
-  if (/engenh|tecnic.*manut|electricist|canalizador|mecanic|industrial/i.test(jl))
+  if (/engenh|electricist|canalizador|mecanic|industrial/i.test(jl))
     return build(
       `Profissional de Engenharia e Manutenção`,
       `Experiência em manutenção preventiva e correctiva de equipamentos, leitura de plantas técnicas e resolução de avarias. Capacidade de trabalhar sob pressão e cumprir prazos em ambientes industriais e de construção.${exp ? ` Projectos e empresas: ${exp}.` : ''}`,
