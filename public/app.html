@@ -3092,18 +3092,29 @@ function submitDistribution() {
 }
 
 /* ── MODAL ─────────────────────────────────────── */
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  selTpl = null;
-  document.getElementById('goBtn').disabled = true;
-  document.querySelectorAll('.m-tpl').forEach(m => m.classList.remove('sel'));
-}
+function openModal() { createNewCV(); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
 
 async function goToEditor() {
   if (!selTpl) return;
   await startCV(selTpl);
+}
+
+async function createNewCV() {
+  // Vai directo ao editor com o primeiro template gratuito disponível
+  const token = localStorage.getItem('cv_token');
+  const tpl = (allTpls || []).find(t => !t.premium) || allTpls[0] || { id: null, slug: 'classico-azul' };
+  try {
+    const res = await fetch(`${API}/templates/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ templateId: tpl.id, slug: tpl.slug })
+    });
+    const d = await res.json();
+    if (!res.ok) { if (d.limitReached) { showLimitModal(); return; } alert(d.error || 'Erro ao criar CV.'); return; }
+    location.href = `/editor?cv=${d.cvId}`;
+  } catch(_) { location.href = '/editor'; }
 }
 
 async function startCV(t) {
