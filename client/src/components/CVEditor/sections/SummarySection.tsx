@@ -6,7 +6,14 @@ const MAX_CHARS = 400
 export default function SummarySection() {
   const { summary, setSummary, personal, experience } = useCVStore()
 
-  const aiPrompt = `És um recrutador sénior. Cria um resumo profissional de 3 frases em português europeu para: Nome: ${personal.fullName || 'não especificado'}, Cargo: ${personal.jobTitle || 'não especificado'}, Experiências: ${experience.map(e => `${e.role} na ${e.company}`).join(', ') || 'não especificado'}. Máximo 350 caracteres. Começa com verbo de acção. Sem aspas.`
+  const expList = experience.map(e => `${e.role} na ${e.company}`).join('; ') || 'não especificado'
+  const aiPrompt = [
+    `Escreve um resumo profissional em português para um CV.`,
+    `Nome: ${personal.fullName || 'não especificado'}`,
+    `Cargo actual: ${personal.jobTitle || 'não especificado'}`,
+    `Experiências: ${expList}`,
+    `Regras: máximo 3 frases, máximo 350 caracteres, começa directamente com o cargo ou nome, sem aspas, sem títulos, sem explicações — apenas o texto do resumo.`,
+  ].join('\n')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

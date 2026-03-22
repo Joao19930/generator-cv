@@ -175,6 +175,9 @@ app.post('/api/track/event', async (req, res) => {
 // ── Rate limiting global ─────────────────────────────────────
 app.use(rateLimiter(300, 3600));
 
+// ── AI Copiloto — não precisa de DB, montar antes do middleware de DB ──
+app.use('/api/ai',      aiRoutes);
+
 // ── Injectar pool DB em cada request ────────────────────────
 app.use(async (req, res, next) => {
   try { req.db = await getPool(); next(); }
@@ -187,7 +190,6 @@ app.use('/api/growth',    growthRoutes);       // Sitemap, ATS, referral, OG
 app.use('/api/templates', templatesRoutes);    // Templates (GET público, POST protegido)
 app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testimonials (público)
 app.use('/api/empregos', empregosRoutes);      // Módulo Vagas de Emprego (público)
-app.use('/api/ai',      aiRoutes);            // AI Copiloto — streaming proxy Anthropic
 
 // ── Rotas protegidas (JWT) ───────────────────────────────────
 app.use('/api/cv',      auth, cvRoutes);

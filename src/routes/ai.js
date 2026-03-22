@@ -66,7 +66,8 @@ function localFallback(prompt) {
 
   // Caso 1: gerar resumo profissional
   if (p.includes('resumo profissional') || p.includes('escreve um resumo')) {
-    const cargoMatch = prompt.match(/cargo[:\s]+([^\n]+)/i);
+    // Parar no primeiro delimitador (vírgula, ponto, newline) para não capturar instruções
+    const cargoMatch = prompt.match(/cargo[:\s]+([^,.\n]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
     return `${cargo} com sólida experiência na área, orientado(a) para resultados e com capacidade de trabalhar em ambientes exigentes. Destaco-me pela proactividade, rigor técnico e compromisso com a qualidade do trabalho entregue.`;
   }
