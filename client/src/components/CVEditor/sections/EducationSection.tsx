@@ -24,6 +24,52 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 4,
 }
 
+const MONTHS = [
+  { v: '01', l: 'Jan' }, { v: '02', l: 'Fev' }, { v: '03', l: 'Mar' },
+  { v: '04', l: 'Abr' }, { v: '05', l: 'Mai' }, { v: '06', l: 'Jun' },
+  { v: '07', l: 'Jul' }, { v: '08', l: 'Ago' }, { v: '09', l: 'Set' },
+  { v: '10', l: 'Out' }, { v: '11', l: 'Nov' }, { v: '12', l: 'Dez' },
+]
+
+function MonthYearInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const parts = value ? value.split('-') : ['', '']
+  const yr = parts[0] || ''
+  const mo = parts[1] || ''
+
+  function update(newYr: string, newMo: string) {
+    if (newYr && newMo) onChange(`${newYr}-${newMo}`)
+    else if (newYr) onChange(newYr)
+    else onChange('')
+  }
+
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <select
+          value={mo}
+          onChange={e => update(yr, e.target.value)}
+          style={{ ...inputStyle, flex: 1, padding: '10px 8px' }}
+          onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+        >
+          <option value="">Mês</option>
+          {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+        </select>
+        <input
+          type="text"
+          value={yr}
+          onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); update(v, mo) }}
+          placeholder="Ano"
+          style={{ ...inputStyle, width: 72, padding: '10px 8px' }}
+          onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+        />
+      </div>
+    </div>
+  )
+}
+
 function EducationItem({ item }: { item: Education }) {
   const { updateEducation, removeEducation } = useCVStore()
   const [open, setOpen] = useState(true)
@@ -66,7 +112,7 @@ function EducationItem({ item }: { item: Education }) {
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={labelStyle}>Instituição</label>
               <input style={inputStyle} value={item.institution} onChange={e => updateEducation(item.id, { institution: e.target.value })}
-                placeholder="Universidade de Lisboa"
+                placeholder="Universidade Agostinho Neto"
                 onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
@@ -80,29 +126,19 @@ function EducationItem({ item }: { item: Education }) {
             <div>
               <label style={labelStyle}>Área</label>
               <input style={inputStyle} value={item.field} onChange={e => updateEducation(item.id, { field: e.target.value })}
-                placeholder="Engenharia Informática"
+                placeholder="Gestão de Empresas"
                 onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
-            <div>
-              <label style={labelStyle}>Data início</label>
-              <input type="month" style={inputStyle} value={item.startDate} onChange={e => updateEducation(item.id, { startDate: e.target.value })}
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Data fim</label>
-              <input type="month" style={inputStyle} value={item.endDate} onChange={e => updateEducation(item.id, { endDate: e.target.value })}
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
+            <MonthYearInput label="Data início" value={item.startDate} onChange={v => updateEducation(item.id, { startDate: v })} />
+            <MonthYearInput label="Data fim" value={item.endDate} onChange={v => updateEducation(item.id, { endDate: v })} />
           </div>
           <div>
             <label style={labelStyle}>Notas / Descrição</label>
             <textarea
               value={item.description}
               onChange={e => updateEducation(item.id, { description: e.target.value })}
-              placeholder="Média: 17/20, tese sobre..."
+              placeholder="Média: 15/20, tese sobre gestão de recursos..."
               rows={2}
               style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, fontFamily: 'inherit' }}
               onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
@@ -120,11 +156,6 @@ export default function EducationSection() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {education.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '20px 0', color: '#94A3B8', fontSize: 13 }}>
-          Ainda não tens formações — adiciona a primeira!
-        </div>
-      )}
       {education.map(item => (
         <EducationItem key={item.id} item={item} />
       ))}

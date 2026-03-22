@@ -22,6 +22,7 @@ export default function ClassicTemplate() {
   const { personal, summary, experience, education, skills, languages, certifications, customSections, sectionOrder, fontFamily, fontSize, lineSpacing } = store
 
   const lh = lineSpacing === 'compact' ? 1.3 : lineSpacing === 'spacious' ? 1.9 : 1.6
+  const smallFs = 9
   const ff = fontFamily === 'Inter' ? "'Inter', sans-serif" : fontFamily === 'Georgia' ? 'Georgia, serif' : fontFamily === 'Merriweather' ? "'Merriweather', Georgia, serif" : fontFamily === 'Roboto' ? "'Roboto', sans-serif" : "'Playfair Display', Georgia, serif"
 
   const secTitle: React.CSSProperties = {
@@ -95,8 +96,8 @@ export default function ClassicTemplate() {
                     <strong style={{ fontSize: fontSize + 1, color: '#111827' }}>{edu.degree}{edu.field ? `, ${edu.field}` : ''}</strong>
                     <span style={{ fontSize: fontSize - 1, color: '#6b7280' }}>{fmtDateRange(edu.startDate, edu.endDate, false)}</span>
                   </div>
-                  <div style={{ color: '#374151', fontStyle: 'italic' }}>{edu.institution}</div>
-                  {edu.description && <div style={{ marginTop: 2, color: '#374151' }}>{edu.description}</div>}
+                  <div style={{ fontSize: smallFs, color: '#374151', fontStyle: 'italic' }}>{edu.institution}</div>
+                  {edu.description && <div style={{ fontSize: smallFs, marginTop: 2, color: '#374151' }}>{edu.description}</div>}
                 </div>
               ))}
             </div>
@@ -106,7 +107,7 @@ export default function ClassicTemplate() {
           return (
             <div key="skills" style={{ marginBottom: 16 }}>
               <h2 style={secTitle}>Competências</h2>
-              <p style={{ margin: 0, color: '#374151', lineHeight: lh }}>
+              <p style={{ margin: 0, fontSize: smallFs, color: '#374151', lineHeight: lh }}>
                 {skills.map(sk => sk.name).join(' · ')}
               </p>
             </div>
@@ -116,7 +117,7 @@ export default function ClassicTemplate() {
           return (
             <div key="languages" style={{ marginBottom: 16 }}>
               <h2 style={secTitle}>Idiomas</h2>
-              <p style={{ margin: 0, color: '#374151' }}>
+              <p style={{ margin: 0, fontSize: smallFs, color: '#374151' }}>
                 {languages.map(l => `${l.name} (${l.level})`).join(' · ')}
               </p>
             </div>
@@ -129,8 +130,8 @@ export default function ClassicTemplate() {
               {certifications.map(cert => (
                 <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span>
-                    <strong style={{ color: '#111827' }}>{cert.name}</strong>
-                    {cert.issuer && <span style={{ color: '#6b7280' }}> — {cert.issuer}</span>}
+                    <strong style={{ fontSize: smallFs, color: '#111827' }}>{cert.name}</strong>
+                    {cert.issuer && <span style={{ fontSize: smallFs, color: '#6b7280' }}> — {cert.issuer}</span>}
                   </span>
                   {cert.date && <span style={{ fontSize: fontSize - 1, color: '#9ca3af' }}>{fmtDate(cert.date)}</span>}
                 </div>

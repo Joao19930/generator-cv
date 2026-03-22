@@ -235,8 +235,14 @@ export const useCVStore = create<CVState>((set, get) => {
     title: 'O meu CV',
     personal: { ...DEFAULT_PERSONAL },
     summary: '',
-    experience: [],
-    education: [],
+    experience: [{
+      id: uid(), company: '', role: '', location: '',
+      startDate: '', endDate: '', current: false, description: ''
+    }],
+    education: [{
+      id: uid(), institution: '', degree: '', field: '',
+      startDate: '', endDate: '', description: ''
+    }],
     skills: [],
     languages: [],
     certifications: [],

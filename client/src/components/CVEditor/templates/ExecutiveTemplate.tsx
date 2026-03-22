@@ -53,6 +53,7 @@ export default function ExecutiveTemplate() {
 
   const lh = lineSpacing === 'compact' ? 1.3 : lineSpacing === 'spacious' ? 1.9 : 1.6
   const fs = fontSize // base font size from store (default 11)
+  const smallFs = 9   // education, skills, languages, certifications
 
   const sidebarSecTitleStyle: React.CSSProperties = {
     fontSize: fs - 1,
@@ -135,7 +136,7 @@ export default function ExecutiveTemplate() {
                 {fmtDateRange(edu.startDate, edu.endDate, false)}
               </div>
               {edu.description && (
-                <div style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
+                <div style={{ fontSize: smallFs, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
                   {edu.description}
                 </div>
               )}
@@ -152,8 +153,8 @@ export default function ExecutiveTemplate() {
           {certifications.map(cert => (
             <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <div>
-                <span style={{ fontWeight: 600, fontSize: fs, color: '#111827' }}>{cert.name}</span>
-                {cert.issuer && <span style={{ color: '#6b7280', fontSize: fs }}> — {cert.issuer}</span>}
+                <span style={{ fontWeight: 600, fontSize: smallFs, color: '#111827' }}>{cert.name}</span>
+                {cert.issuer && <span style={{ color: '#6b7280', fontSize: smallFs }}> — {cert.issuer}</span>}
               </div>
               {cert.date && (
                 <span style={{ fontSize: fs - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
@@ -287,7 +288,7 @@ export default function ExecutiveTemplate() {
                     border: '1px solid #ddd9d2',
                     background: '#fafaf9',
                     borderRadius: 20,
-                    fontSize: fs - 1,
+                    fontSize: smallFs,
                     fontWeight: 600,
                     color: '#374151',
                     margin: '0 3px 4px 0',
@@ -305,7 +306,7 @@ export default function ExecutiveTemplate() {
           <div style={{ marginBottom: 18 }}>
             <div style={sidebarSecTitleStyle}>Idiomas</div>
             {languages.map(lang => (
-              <div key={lang.id} style={{ fontSize: fs, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
+              <div key={lang.id} style={{ fontSize: smallFs, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
                 <strong style={{ color: '#111827' }}>{lang.name}</strong>
                 {lang.level ? ` — ${lang.level}` : ''}
               </div>
@@ -321,7 +322,7 @@ export default function ExecutiveTemplate() {
               {habilidades.map(h => (
                 <div key={h.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontSize: fs, color: '#374151', fontWeight: 500 }}>{h.name}</span>
+                    <span style={{ fontSize: smallFs, color: '#374151', fontWeight: 500 }}>{h.name}</span>
                   </div>
                   <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
                     <div style={{

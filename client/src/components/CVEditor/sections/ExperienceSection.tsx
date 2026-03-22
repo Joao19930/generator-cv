@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, GripVertical } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, GripVertical, Wand2 } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -18,7 +18,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useCVStore, Experience } from '../../../store/cvStore'
-import AIButton from '../AIButton'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -42,15 +41,101 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 4,
 }
 
+const MONTHS = [
+  { v: '01', l: 'Jan' }, { v: '02', l: 'Fev' }, { v: '03', l: 'Mar' },
+  { v: '04', l: 'Abr' }, { v: '05', l: 'Mai' }, { v: '06', l: 'Jun' },
+  { v: '07', l: 'Jul' }, { v: '08', l: 'Ago' }, { v: '09', l: 'Set' },
+  { v: '10', l: 'Out' }, { v: '11', l: 'Nov' }, { v: '12', l: 'Dez' },
+]
+
+function MonthYearInput({
+  label, value, onChange, disabled,
+}: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean }) {
+  const parts = value ? value.split('-') : ['', '']
+  const yr = parts[0] || ''
+  const mo = parts[1] || ''
+
+  function update(newYr: string, newMo: string) {
+    if (newYr && newMo) onChange(`${newYr}-${newMo}`)
+    else if (newYr) onChange(newYr)
+    else onChange('')
+  }
+
+  const baseStyle: React.CSSProperties = {
+    ...inputStyle,
+    padding: '10px 8px',
+    opacity: disabled ? 0.4 : 1,
+  }
+
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <select
+          value={mo}
+          onChange={e => update(yr, e.target.value)}
+          disabled={disabled}
+          style={{ ...baseStyle, flex: 1 }}
+          onFocus={e => { if (!disabled) { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' } }}
+          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+        >
+          <option value="">Mês</option>
+          {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+        </select>
+        <input
+          type="text"
+          value={yr}
+          onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); update(v, mo) }}
+          placeholder="Ano"
+          disabled={disabled}
+          style={{ ...baseStyle, width: 72 }}
+          onFocus={e => { if (!disabled) { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' } }}
+          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+        />
+      </div>
+    </div>
+  )
+}
+
 function ExperienceItem({ item, dragListeners }: { item: Experience; dragListeners?: React.HTMLAttributes<HTMLElement> }) {
   const { updateExperience, removeExperience } = useCVStore()
   const [open, setOpen] = useState(true)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [draft, setDraft] = useState<string | null>(null)
+  const [prevDesc, setPrevDesc] = useState<string>('')
 
   const aiPrompt = `Escreve uma descrição profissional para experiência de trabalho num CV (máx 4 bullets com •).
 Cargo: ${item.role || 'não especificado'}
 Empresa: ${item.company || 'não especificada'}
 Responsabilidades actuais: ${item.description || 'nenhuma'}
 Escreve apenas os bullets, sem título.`
+
+  async function handleGenerate() {
+    setPrevDesc(item.description)
+    setAiLoading(true)
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiPrompt }),
+      })
+      const data = await res.json()
+      if (data.text) {
+        setDraft(data.text)
+        updateExperience(item.id, { description: data.text })
+      }
+    } catch {}
+    setAiLoading(false)
+  }
+
+  function handleManter() {
+    setDraft(null)
+  }
+
+  function handleDescartar() {
+    updateExperience(item.id, { description: prevDesc })
+    setDraft(null)
+  }
 
   return (
     <div
@@ -113,7 +198,7 @@ Escreve apenas os bullets, sem título.`
             <div>
               <label style={labelStyle}>Cargo</label>
               <input style={inputStyle} value={item.role} onChange={e => updateExperience(item.id, { role: e.target.value })}
-                placeholder="Eng. de Software"
+                placeholder="Gestor Comercial"
                 onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
@@ -127,23 +212,12 @@ Escreve apenas os bullets, sem título.`
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={labelStyle}>Localização</label>
               <input style={inputStyle} value={item.location} onChange={e => updateExperience(item.id, { location: e.target.value })}
-                placeholder="Lisboa, Portugal"
+                placeholder="Luanda, Angola"
                 onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
-            <div>
-              <label style={labelStyle}>Data início</label>
-              <input type="month" style={inputStyle} value={item.startDate} onChange={e => updateExperience(item.id, { startDate: e.target.value })}
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Data fim</label>
-              <input type="month" style={{ ...inputStyle, opacity: item.current ? 0.4 : 1 }} value={item.endDate}
-                disabled={item.current} onChange={e => updateExperience(item.id, { endDate: e.target.value })}
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
+            <MonthYearInput label="Data início" value={item.startDate} onChange={v => updateExperience(item.id, { startDate: v })} />
+            <MonthYearInput label="Data fim" value={item.endDate} onChange={v => updateExperience(item.id, { endDate: v })} disabled={item.current} />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -160,12 +234,28 @@ Escreve apenas os bullets, sem título.`
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <label style={labelStyle}>Descrição</label>
-              <AIButton prompt={aiPrompt} onResult={text => updateExperience(item.id, { description: text })}>
-                Melhorar
-              </AIButton>
+              {!draft && (
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={aiLoading}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '4px 10px',
+                    background: aiLoading ? '#E2E8F0' : 'linear-gradient(135deg,#22C55E,#16A34A)',
+                    border: 'none', borderRadius: 6,
+                    color: aiLoading ? '#94A3B8' : '#fff',
+                    fontSize: 11, fontWeight: 700,
+                    cursor: aiLoading ? 'wait' : 'pointer',
+                  }}
+                >
+                  <Wand2 size={11} />
+                  {aiLoading ? 'A gerar...' : 'Gerar com IA'}
+                </button>
+              )}
             </div>
 
-            {item.role && (!item.description || item.description.length < 20) && (
+            {item.role && !draft && (!item.description || item.description.length < 20) && (
               <div style={{
                 padding: '10px 12px',
                 background: '#EFF6FF',
@@ -180,19 +270,28 @@ Escreve apenas os bullets, sem título.`
                 <span style={{ fontSize: 12, color: '#1E40AF', fontWeight: 500 }}>
                   💡 Gerar descrição para "<strong>{item.role}</strong>"
                 </span>
-                <AIButton
-                  prompt={aiPrompt}
-                  onResult={text => updateExperience(item.id, { description: text })}
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={aiLoading}
+                  style={{
+                    padding: '4px 10px',
+                    background: 'linear-gradient(135deg,#22C55E,#16A34A)',
+                    border: 'none', borderRadius: 6,
+                    color: '#fff', fontSize: 11, fontWeight: 700,
+                    cursor: aiLoading ? 'wait' : 'pointer',
+                    flexShrink: 0,
+                  }}
                 >
-                  Gerar →
-                </AIButton>
+                  {aiLoading ? 'A gerar...' : 'Gerar →'}
+                </button>
               </div>
             )}
 
             <textarea
               value={item.description}
-              onChange={e => updateExperience(item.id, { description: e.target.value })}
-              placeholder="• Desenvolveu funcionalidades para a plataforma&#10;• Liderou equipa de 3 engenheiros&#10;• Reduziu tempo de resposta em 40%"
+              onChange={e => { updateExperience(item.id, { description: e.target.value }); if (draft !== null) setDraft(e.target.value) }}
+              placeholder="• Geriu equipa comercial de 8 pessoas em Luanda&#10;• Aumentou volume de vendas em 35% em 2023&#10;• Negociou contratos com parceiros estratégicos"
               rows={4}
               style={{
                 ...inputStyle,
@@ -203,6 +302,35 @@ Escreve apenas os bullets, sem título.`
               onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
               onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
             />
+
+            {draft !== null && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={handleManter}
+                  style={{
+                    flex: 1, padding: '7px 0',
+                    background: 'linear-gradient(135deg,#22C55E,#16A34A)',
+                    border: 'none', borderRadius: 7,
+                    color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  ✓ Manter
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDescartar}
+                  style={{
+                    flex: 1, padding: '7px 0',
+                    background: '#F1F5F9',
+                    border: '1px solid #E2E8F0', borderRadius: 7,
+                    color: '#64748B', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  ✕ Descartar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -243,12 +371,6 @@ export default function ExperienceSection() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {experience.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '20px 0', color: '#94A3B8', fontSize: 13 }}>
-          Ainda não tens experiências — adiciona a primeira!
-        </div>
-      )}
-
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={experience.map(e => e.id)} strategy={verticalListSortingStrategy}>
           {experience.map(item => (

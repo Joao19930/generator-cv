@@ -120,7 +120,7 @@ export default function PersonalSection() {
               style={inputStyle}
               value={personal.fullName}
               onChange={e => setPersonal({ fullName: e.target.value })}
-              placeholder="Ex: Maria Silva"
+              placeholder="Ex: João Manuel Silva"
               onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
               onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
             />
@@ -132,7 +132,7 @@ export default function PersonalSection() {
               style={inputStyle}
               value={personal.jobTitle}
               onChange={e => setPersonal({ jobTitle: e.target.value })}
-              placeholder="Ex: Engenheiro de Software"
+              placeholder="Ex: Gestor Comercial"
               onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
               onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
             />
@@ -144,7 +144,7 @@ export default function PersonalSection() {
             type="email"
             value={personal.email}
             onChange={e => setPersonal({ email: e.target.value })}
-            placeholder="email@exemplo.com"
+            placeholder="joao.silva@gmail.com"
             onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
           />
@@ -155,7 +155,7 @@ export default function PersonalSection() {
             type="tel"
             value={personal.phone}
             onChange={e => setPersonal({ phone: e.target.value })}
-            placeholder="+351 912 345 678"
+            placeholder="+244 923 456 789"
             onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
           />
@@ -166,7 +166,7 @@ export default function PersonalSection() {
               style={inputStyle}
               value={personal.address}
               onChange={e => setPersonal({ address: e.target.value })}
-              placeholder="Lisboa, Portugal"
+              placeholder="Luanda, Angola"
               onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
               onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
             />
@@ -215,7 +215,7 @@ export default function PersonalSection() {
                 style={{ ...inputStyle, marginTop: 4 }}
                 value={personal.nationality}
                 onChange={e => setPersonal({ nationality: e.target.value })}
-                placeholder="Ex: Portuguesa"
+                placeholder="Ex: Angolana"
                 onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
               />
