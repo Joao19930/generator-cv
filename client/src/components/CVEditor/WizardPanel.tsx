@@ -111,10 +111,10 @@ export default function WizardPanel() {
   const cvDone = isLastStep && isStepDone(4, store)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e293b' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0d2d4a' }}>
 
       {/* Step indicators — dark */}
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid #334155', background: '#0f172a' }}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #1a3a5c', background: '#0A2540' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {STEPS.map((s, i) => {
             const done = isStepDone(i, store)
@@ -126,6 +126,8 @@ export default function WizardPanel() {
                   type="button"
                   onClick={() => setStep(i)}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px' }}
+                  onMouseEnter={e => { const circle = (e.currentTarget as HTMLButtonElement).querySelector('div') as HTMLElement; if (circle) circle.style.transform = 'scale(1.05)' }}
+                  onMouseLeave={e => { const circle = (e.currentTarget as HTMLButtonElement).querySelector('div') as HTMLElement; if (circle) circle.style.transform = 'scale(1)' }}
                 >
                   <div style={{
                     width: 34,
@@ -169,14 +171,14 @@ export default function WizardPanel() {
       </div>
 
       {/* Section header + inline tip — dark */}
-      <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #334155', background: '#1e293b' }}>
+      <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #1a3a5c', background: '#0d2d4a' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 38,
             height: 38,
             borderRadius: 10,
-            background: '#0f172a',
-            border: '1px solid #334155',
+            background: '#0A2540',
+            border: '1px solid #1a3a5c',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -194,8 +196,8 @@ export default function WizardPanel() {
         <div style={{
           marginTop: 10,
           padding: '7px 11px',
-          background: '#0f172a',
-          border: '1px solid #1e293b',
+          background: '#0A2540',
+          border: '1px solid #0d2d4a',
           borderRadius: 7,
           borderLeft: '3px solid #f59e0b',
         }}>
@@ -206,7 +208,10 @@ export default function WizardPanel() {
       </div>
 
       {/* Section content — fundo claro para os form cards */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px', background: '#F5F7FA' }}>
+      <style>{`
+        @keyframes fadeSection { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+      <div key={step} style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px', background: '#F5F7FA', animation: 'fadeSection 0.25s ease' }}>
         {step === 0 && <PersonalSection />}
         {step === 1 && <ExperienceSection />}
         {step === 2 && <EducationSection />}
@@ -223,11 +228,11 @@ export default function WizardPanel() {
       {/* Navigation footer — dark */}
       <div style={{
         padding: '12px 20px',
-        borderTop: '1px solid #334155',
+        borderTop: '1px solid #1a3a5c',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: '#0f172a',
+        background: '#0A2540',
         flexShrink: 0,
       }}>
         <button
@@ -240,9 +245,9 @@ export default function WizardPanel() {
             gap: 6,
             padding: '8px 14px',
             background: 'transparent',
-            border: '1px solid #334155',
+            border: '1px solid #1a3a5c',
             borderRadius: 8,
-            color: step === 0 ? '#334155' : '#94a3b8',
+            color: step === 0 ? '#1a3a5c' : '#94a3b8',
             fontSize: 13,
             fontWeight: 600,
             cursor: step === 0 ? 'not-allowed' : 'pointer',
@@ -252,7 +257,7 @@ export default function WizardPanel() {
           Anterior
         </button>
 
-        <span style={{ fontSize: 11, color: '#334155', fontWeight: 500 }}>
+        <span style={{ fontSize: 11, color: '#1a3a5c', fontWeight: 500 }}>
           {step + 1} / {totalSteps}
         </span>
 

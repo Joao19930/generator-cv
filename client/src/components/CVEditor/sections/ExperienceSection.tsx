@@ -54,12 +54,15 @@ Escreve apenas os bullets, sem título.`
 
   return (
     <div
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)' }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)' }}
       style={{
         background: '#FFFFFF',
         border: '1px solid #E2E8F0',
         borderRadius: 12,
         overflow: 'hidden',
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        transition: 'box-shadow 0.2s',
       }}
     >
       <div
@@ -161,6 +164,31 @@ Escreve apenas os bullets, sem título.`
                 Melhorar
               </AIButton>
             </div>
+
+            {item.role && (!item.description || item.description.length < 20) && (
+              <div style={{
+                padding: '10px 12px',
+                background: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                borderRadius: 9,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+                marginBottom: 8,
+              }}>
+                <span style={{ fontSize: 12, color: '#1E40AF', fontWeight: 500 }}>
+                  💡 Gerar descrição para "<strong>{item.role}</strong>"
+                </span>
+                <AIButton
+                  prompt={aiPrompt}
+                  onResult={text => updateExperience(item.id, { description: text })}
+                >
+                  Gerar →
+                </AIButton>
+              </div>
+            )}
+
             <textarea
               value={item.description}
               onChange={e => updateExperience(item.id, { description: e.target.value })}

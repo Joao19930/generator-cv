@@ -56,8 +56,8 @@ function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) 
           alignItems: 'center',
           gap: 5,
           padding: '3px 9px',
-          background: open ? '#334155' : '#1e293b',
-          border: `1px solid ${open ? color + '60' : '#334155'}`,
+          background: open ? '#1a3a5c' : '#0d2d4a',
+          border: `1px solid ${open ? color + '60' : '#1a3a5c'}`,
           borderRadius: 20,
           cursor: 'pointer',
           transition: 'all 0.15s',
@@ -82,8 +82,8 @@ function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) 
             left: '50%',
             transform: 'translateX(-50%)',
             width: 230,
-            background: '#1e293b',
-            border: '1px solid #334155',
+            background: '#0d2d4a',
+            border: '1px solid #1a3a5c',
             borderRadius: 12,
             padding: '12px 14px',
             zIndex: 99,
@@ -97,8 +97,8 @@ function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) 
               transform: 'translateX(-50%) rotate(45deg)',
               width: 9,
               height: 9,
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: '#0d2d4a',
+              border: '1px solid #1a3a5c',
               borderBottom: 'none',
               borderRight: 'none',
             }} />
@@ -120,9 +120,9 @@ function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) 
                     alignItems: 'center',
                     gap: 9,
                     padding: '7px 10px',
-                    background: '#0f172a',
+                    background: '#0A2540',
                     borderRadius: 8,
-                    border: '1px solid #334155',
+                    border: '1px solid #1a3a5c',
                   }}>
                     <span style={{
                       fontSize: 11,
@@ -203,12 +203,12 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0A2540', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* HEADER — dark */}
       <header style={{
         height: 52,
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
+        background: '#0A2540',
+        borderBottom: '1px solid #0d2d4a',
         display: 'flex',
         alignItems: 'center',
         gap: 14,
@@ -223,7 +223,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
           </span>
         </a>
 
-        <div style={{ width: 1, height: 18, background: '#1e293b', flexShrink: 0 }} />
+        <div style={{ width: 1, height: 18, background: '#0d2d4a', flexShrink: 0 }} />
 
         {/* Title */}
         <input
@@ -241,13 +241,13 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
             minWidth: 80,
             maxWidth: 180,
           }}
-          onFocus={e => { (e.target as HTMLInputElement).style.borderColor = '#334155'; (e.target as HTMLInputElement).style.color = '#e2e8f0' }}
+          onFocus={e => { (e.target as HTMLInputElement).style.borderColor = '#1a3a5c'; (e.target as HTMLInputElement).style.color = '#e2e8f0' }}
           onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'transparent'; (e.target as HTMLInputElement).style.color = '#64748b' }}
         />
 
         {/* Progress + ATS badge */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ flex: 1, height: 4, background: '#1e293b', borderRadius: 2, overflow: 'hidden', maxWidth: 160 }}>
+          <div style={{ flex: 1, height: 4, background: '#0d2d4a', borderRadius: 2, overflow: 'hidden', maxWidth: 160 }}>
             <div style={{
               height: '100%',
               width: `${progress}%`,
@@ -269,7 +269,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
           <span style={{ fontSize: 11, color: '#475569', flexShrink: 0 }}>Não guardado</span>
         )}
 
-        <div style={{ width: 1, height: 18, background: '#1e293b', flexShrink: 0 }} />
+        <div style={{ width: 1, height: 18, background: '#0d2d4a', flexShrink: 0 }} />
 
         {/* Download PDF */}
         <button
@@ -281,8 +281,8 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
             alignItems: 'center',
             gap: 6,
             padding: '7px 14px',
-            background: isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#1e293b',
-            border: isPremium ? 'none' : '1px solid #334155',
+            background: isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#0d2d4a',
+            border: isPremium ? 'none' : '1px solid #1a3a5c',
             borderRadius: 8,
             color: isPremium ? '#fff' : '#64748b',
             fontSize: 12,
@@ -308,7 +308,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
             alignItems: 'center',
             justifyContent: 'center',
             background: 'transparent',
-            border: '1px solid #1e293b',
+            border: '1px solid #0d2d4a',
             borderRadius: 7,
             color: '#475569',
             cursor: 'pointer',
@@ -322,12 +322,12 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
       {/* BODY */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Wizard Left Panel — dark chrome */}
-        <div style={{ width: 460, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#1e293b', borderRight: '1px solid #334155' }}>
+        <div style={{ width: 460, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0d2d4a', borderRight: '1px solid #1a3a5c' }}>
           <WizardPanel />
         </div>
 
         {/* Preview Right — branco puro */}
-        <div style={{ flex: 1, overflow: 'auto', background: '#334155' }}>
+        <div style={{ flex: 1, overflow: 'auto', background: '#1a3a5c' }}>
           <PreviewPanel />
         </div>
       </div>
