@@ -26,26 +26,125 @@ function calcATS(store: ReturnType<typeof useCVStore.getState>): number {
   return s
 }
 
+function getATSHints(store: ReturnType<typeof useCVStore.getState>): { pts: number; label: string }[] {
+  const hints: { pts: number; label: string }[] = []
+  if (!store.personal.jobTitle) hints.push({ pts: 15, label: 'Adicionar cargo profissional' })
+  if (!store.summary || store.summary.length <= 100) hints.push({ pts: 15, label: 'Melhorar o resumo (mín. 100 chars)' })
+  if (store.skills.length < 5) hints.push({ pts: 20, label: `Adicionar ${Math.max(0, 5 - store.skills.length)} competências` })
+  if (store.experience.length === 0) hints.push({ pts: 20, label: 'Adicionar experiência profissional' })
+  if (!(store.personal.email && store.personal.phone && store.personal.address)) hints.push({ pts: 15, label: 'Completar email, telefone e morada' })
+  if (store.education.length === 0) hints.push({ pts: 10, label: 'Adicionar formação académica' })
+  if (!store.personal.linkedin) hints.push({ pts: 5, label: 'Incluir perfil LinkedIn' })
+  // Mostrar apenas os 3 com mais impacto
+  return hints.sort((a, b) => b.pts - a.pts).slice(0, 3)
+}
+
 function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) {
+  const [open, setOpen] = useState(false)
   const score = calcATS(store)
   const color = score >= 70 ? '#22c55e' : score >= 40 ? '#f59e0b' : '#ef4444'
+  const hints = getATSHints(store)
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        padding: '3px 9px',
-        background: '#1e293b',
-        border: `1px solid #334155`,
-        borderRadius: 20,
-        flexShrink: 0,
-        cursor: 'default',
-      }}
-      title={`Score ATS: ${score}/100 — ${score >= 70 ? 'CV bem optimizado' : score >= 40 ? 'Adicione mais detalhes' : 'Preencha mais secções'}`}
-    >
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
-      <span style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: '0.02em' }}>ATS {score}</span>
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      {/* Badge — clicável */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 5,
+          padding: '3px 9px',
+          background: open ? '#334155' : '#1e293b',
+          border: `1px solid ${open ? color + '60' : '#334155'}`,
+          borderRadius: 20,
+          cursor: 'pointer',
+          transition: 'all 0.15s',
+        }}
+      >
+        <div style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: '0.02em' }}>ATS {score}</span>
+        <span style={{ fontSize: 10, color: '#475569', marginLeft: 1 }}>▾</span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <>
+          {/* Overlay para fechar ao clicar fora */}
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 98 }}
+            onClick={() => setOpen(false)}
+          />
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 230,
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: 12,
+            padding: '12px 14px',
+            zIndex: 99,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          }}>
+            {/* Seta */}
+            <div style={{
+              position: 'absolute',
+              top: -5,
+              left: '50%',
+              transform: 'translateX(-50%) rotate(45deg)',
+              width: 9,
+              height: 9,
+              background: '#1e293b',
+              border: '1px solid #334155',
+              borderBottom: 'none',
+              borderRight: 'none',
+            }} />
+
+            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Como subir o score
+            </p>
+
+            {hints.length === 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ fontSize: 14 }}>🏆</span>
+                <span style={{ fontSize: 12, color: '#22c55e', fontWeight: 600 }}>CV totalmente optimizado!</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {hints.map((h, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 9,
+                    padding: '7px 10px',
+                    background: '#0f172a',
+                    borderRadius: 8,
+                    border: '1px solid #334155',
+                  }}>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#22c55e',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                    }}>
+                      +{h.pts}pts
+                    </span>
+                    <span style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.4 }}>{h.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <p style={{ margin: '10px 0 0', fontSize: 10, color: '#475569', textAlign: 'center' }}>
+              Score actual: <strong style={{ color }}>{score}/100</strong>
+            </p>
+          </div>
+        </>
+      )}
     </div>
   )
 }
