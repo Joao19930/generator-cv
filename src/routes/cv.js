@@ -419,6 +419,22 @@ router.post('/generate-responsibilities', auth, toolLimiter, async (req, res) =>
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── POST /api/cv/generate-course-content — IA: sugerir conteúdo de curso ────
+router.post('/generate-course-content', auth, toolLimiter, async (req, res) => {
+  const { courseName, entity } = req.body;
+  if (!courseName) return res.status(400).json({ error: 'courseName é obrigatório' });
+  try {
+    const prompt = `Escreve 5 a 7 tópicos/módulos principais do curso "${courseName}"${entity ? ` ministrado por "${entity}"` : ''} para incluir num CV em português de Angola (pt-AO).
+Cada linha deve descrever um tópico ou competência adquirida no curso.
+Começa cada linha com "• " e tem 6 a 14 palavras.
+Devolve apenas as linhas, sem título, sem numeração, sem explicações.`;
+    let content;
+    try { content = await claudeAsk(prompt, 600); }
+    catch { content = `• Fundamentos e conceitos essenciais de ${courseName}\n• Aplicação prática dos conhecimentos adquiridos\n• Técnicas e metodologias da área\n• Desenvolvimento de competências específicas\n• Resolução de problemas e casos práticos`; }
+    res.json({ content });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── POST /api/cv/parse-linkedin-text — IA: extrair perfil do texto LinkedIn ──
 router.post('/parse-linkedin-text', auth, toolLimiter, async (req, res) => {
   const { text } = req.body;

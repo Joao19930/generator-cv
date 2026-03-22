@@ -208,6 +208,8 @@ export default function LeftPanel() {
     <div
       style={{
         width: '100%',
+        flex: 1,
+        minHeight: 0,
         background: '#1e293b',
         borderRight: '1px solid #334155',
         display: 'flex',
@@ -233,7 +235,7 @@ export default function LeftPanel() {
       </div>
 
       {/* Sections list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px 0' }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 12px 0' }}>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={store.sectionOrder} strategy={verticalListSortingStrategy}>
             {store.sectionOrder.map(key => (

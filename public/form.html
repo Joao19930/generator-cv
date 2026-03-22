@@ -224,6 +224,38 @@
         .wizard-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: background .3s; }
         .wizard-dot.active { background: var(--navy); }
 
+        /* ── Item card header com botões ────────────────── */
+        .item-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+        .item-card-title { font-size:13px; font-weight:700; color:var(--navy); }
+        .item-card-actions { display:flex; align-items:center; gap:5px; }
+        .btn-move { background:var(--navy-l); border:1px solid rgba(26,58,107,.3); color:var(--navy); border-radius:6px; padding:3px 9px; cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; transition:all .2s; line-height:1.4; }
+        .btn-move:hover { background:var(--navy-m); }
+        .btn-move:disabled { opacity:.3; cursor:default; }
+        .btn-confirm { background:var(--navy); color:#fff; border:none; border-radius:6px; padding:6px 14px; cursor:pointer; font-size:12px; font-weight:700; font-family:'Inter',sans-serif; transition:opacity .2s; display:flex; align-items:center; gap:5px; }
+        .btn-confirm:hover { opacity:.88; }
+        .item-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+
+        /* ── Toggle "actual" ─────────────────────────── */
+        .toggle-atual-wrap { display:flex; align-items:center; gap:7px; }
+        .toggle-atual-label { font-size:11px; color:var(--t3); font-weight:600; letter-spacing:.2px; }
+        .toggle-switch { position:relative; width:34px; height:18px; cursor:pointer; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+        .toggle-slider { position:absolute; inset:0; background:#cbd5e1; border-radius:18px; transition:.25s; }
+        .toggle-slider:before { position:absolute; content:""; height:12px; width:12px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.25s; }
+        .toggle-switch input:checked + .toggle-slider { background:var(--navy); }
+        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+
+        /* ── Selects de data (mês/ano) ───────────────── */
+        .date-row { display:flex; gap:8px; align-items:flex-end; }
+        .date-row .form-group { flex:1; }
+        .date-row .form-group select { font-size:13px; }
+
+        /* ── Secção Assinatura ───────────────────────── */
+        .signature-canvas-wrap { border:1px solid var(--border); border-radius:8px; background:#f9fafb; padding:8px; margin-top:4px; cursor:crosshair; position:relative; }
+        #signatureCanvas { display:block; width:100%; height:100px; touch-action:none; }
+        .btn-clear-sig { position:absolute; top:6px; right:6px; background:none; border:1px solid var(--border); color:var(--t3); border-radius:5px; padding:3px 8px; font-size:11px; cursor:pointer; font-family:'Inter',sans-serif; }
+        .btn-clear-sig:hover { border-color:var(--red); color:var(--red); }
+
         @media (max-width: 900px) {
             .editor-layout { grid-template-columns: 1fr; }
             .sidebar-col { position: static; }
@@ -308,21 +340,42 @@
             <h3>Experiência Profissional</h3>
             <div id="experienceContainer">
                 <div class="item-card" id="exp-0">
-                    <button class="btn-remove" onclick="removeItem('exp-0')">Remover</button>
-                    <div class="form-row">
-                        <div class="form-group"><label>Cargo *</label><input type="text" placeholder="Ex: Director Financeiro"></div>
-                        <div class="form-group"><label>Empresa *</label><input type="text" placeholder="Ex: Deloitte Angola"></div>
+                    <div class="item-card-header">
+                        <span class="item-card-title">Experiência</span>
+                        <div class="item-card-actions">
+                            <button class="btn-move" onclick="moveItemUp(this)" type="button" title="Mover para cima">▲</button>
+                            <button class="btn-move" onclick="moveItemDown(this)" type="button" title="Mover para baixo">▼</button>
+                            <button class="btn-remove" onclick="removeItem('exp-0')" style="position:static;margin-left:2px">Remover</button>
+                        </div>
                     </div>
-                    <div class="form-row three">
-                        <div class="form-group"><label>Data Início</label><input type="text" placeholder="Jan 2020"></div>
-                        <div class="form-group"><label>Data Fim</label><input type="text" placeholder="Presente"></div>
-                        <div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda, Angola"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Função *</label><input type="text" placeholder="Ex: Director Financeiro"></div>
+                        <div class="form-group"><label>Empregador *</label><input type="text" placeholder="Ex: Deloitte Angola"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Cidade</label><input type="text" placeholder="Ex: Luanda"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de início</label>
+                            <div class="date-row">
+                                <div class="form-group"><select class="exp-month-start"><option value="">Mês</option><option>janeiro</option><option>fevereiro</option><option>março</option><option>abril</option><option>maio</option><option>junho</option><option>julho</option><option>agosto</option><option>setembro</option><option>outubro</option><option>novembro</option><option>dezembro</option></select></div>
+                                <div class="form-group"><select class="exp-year-start"></select></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;justify-content:space-between">Data de conclusão <span class="toggle-atual-wrap"><span class="toggle-atual-label">atual</span><label class="toggle-switch"><input type="checkbox" onchange="toggleAtual(this)"><span class="toggle-slider"></span></label></span></label>
+                            <div class="date-row exp-end-date">
+                                <div class="form-group"><select class="exp-month-end"><option value="">Mês</option><option>janeiro</option><option>fevereiro</option><option>março</option><option>abril</option><option>maio</option><option>junho</option><option>julho</option><option>agosto</option><option>setembro</option><option>outubro</option><option>novembro</option><option>dezembro</option></select></div>
+                                <div class="form-group"><select class="exp-year-end"></select></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-row full">
                         <div class="form-group">
                             <label style="display:flex;align-items:center;justify-content:space-between">
                                 Descrição
-                                <button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button>
+                                <button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugestões de IA</button>
                             </label>
                             <textarea placeholder="Descreve as tuas funções e realizações..."></textarea>
                             <div class="ai-suggestion-box">
@@ -335,6 +388,10 @@
                             </div>
                         </div>
                     </div>
+                    <div class="item-card-footer">
+                        <span></span>
+                        <button class="btn-confirm" type="button" onclick="confirmCard(this)">✓ Confirmar</button>
+                    </div>
                 </div>
             </div>
             <button class="btn-add" onclick="addExperience()">+ Adicionar Experiência</button>
@@ -345,9 +402,16 @@
             <h3>Formação Académica</h3>
             <div id="educationContainer">
                 <div class="item-card" id="edu-0">
-                    <button class="btn-remove" onclick="removeItem('edu-0')">Remover</button>
-                    <div class="form-row">
-                        <div class="form-group"><label>Frequência Universitária *</label>
+                    <div class="item-card-header">
+                        <span class="item-card-title">Educação</span>
+                        <div class="item-card-actions">
+                            <button class="btn-move" onclick="moveItemUp(this)" type="button" title="Mover para cima">▲</button>
+                            <button class="btn-move" onclick="moveItemDown(this)" type="button" title="Mover para baixo">▼</button>
+                            <button class="btn-remove" onclick="removeItem('edu-0')" style="position:static;margin-left:2px">Remover</button>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group"><label>Educação *</label>
                             <select>
                                 <option value="">Seleccionar nível...</option>
                                 <option>Frequência Universitária</option>
@@ -361,11 +425,47 @@
                                 <option>Outro</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Instituição *</label><input type="text" placeholder="Ex: Universidade Católica de Angola"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018"></div>
-                        <div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022 (ou 'Actual')"></div>
+                        <div class="form-group"><label>Instituição *</label><input type="text" placeholder="Ex: Universidade Católica de Angola"></div>
+                        <div class="form-group"><label>Cidade</label><input type="text" placeholder="Ex: Luanda"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de início</label>
+                            <div class="date-row">
+                                <div class="form-group"><select class="edu-month-start"><option value="">Mês</option><option>janeiro</option><option>fevereiro</option><option>março</option><option>abril</option><option>maio</option><option>junho</option><option>julho</option><option>agosto</option><option>setembro</option><option>outubro</option><option>novembro</option><option>dezembro</option></select></div>
+                                <div class="form-group"><select class="edu-year-start"></select></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;justify-content:space-between">Data de conclusão <span class="toggle-atual-wrap"><span class="toggle-atual-label">atual</span><label class="toggle-switch"><input type="checkbox" onchange="toggleAtual(this)"><span class="toggle-slider"></span></label></span></label>
+                            <div class="date-row edu-end-date">
+                                <div class="form-group"><select class="edu-month-end"><option value="">Mês</option><option>janeiro</option><option>fevereiro</option><option>março</option><option>abril</option><option>maio</option><option>junho</option><option>julho</option><option>agosto</option><option>setembro</option><option>outubro</option><option>novembro</option><option>dezembro</option></select></div>
+                                <div class="form-group"><select class="edu-year-end"></select></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;justify-content:space-between">
+                                Descrição
+                                <button class="ai-btn" onclick="aiGenerateEduDescription(this)" type="button">✨ Sugestões de IA</button>
+                            </label>
+                            <textarea placeholder="Descreve o curso, disciplinas ou realizações académicas..."></textarea>
+                            <div class="ai-suggestion-box">
+                                <div class="ai-resp-text"></div>
+                                <div class="ai-suggestion-actions">
+                                    <button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar esta descrição</button>
+                                    <button class="ai-btn" onclick="aiGenerateEduDescription(this.closest('.item-card').querySelector('.ai-btn'))" type="button" style="margin-top:0">↻ Gerar outra</button>
+                                    <button class="ai-dismiss-btn" onclick="this.closest('.ai-suggestion-box').classList.remove('show')">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-card-footer">
+                        <span></span>
+                        <button class="btn-confirm" type="button" onclick="confirmCard(this)">✓ Confirmar</button>
                     </div>
                 </div>
             </div>
@@ -377,7 +477,14 @@
             <h3>Formação Profissional</h3>
             <div id="profContainer">
                 <div class="item-card" id="prof-0">
-                    <button class="btn-remove" onclick="removeItem('prof-0')">Remover</button>
+                    <div class="item-card-header">
+                        <span class="item-card-title">Curso / Certificação</span>
+                        <div class="item-card-actions">
+                            <button class="btn-move" onclick="moveItemUp(this)" type="button" title="Mover para cima">▲</button>
+                            <button class="btn-move" onclick="moveItemDown(this)" type="button" title="Mover para baixo">▼</button>
+                            <button class="btn-remove" onclick="removeItem('prof-0')" style="position:static;margin-left:2px">Remover</button>
+                        </div>
+                    </div>
                     <div class="form-row">
                         <div class="form-group"><label>Curso / Certificação *</label><input type="text" placeholder="Ex: Excel Avançado"></div>
                         <div class="form-group"><label>Entidade / Plataforma</label><input type="text" placeholder="Ex: INEFOP, Udemy, LinkedIn Learning"></div>
@@ -385,6 +492,27 @@
                     <div class="form-row">
                         <div class="form-group"><label>Ano</label><input type="text" placeholder="Ex: 2023"></div>
                         <div class="form-group"><label>Duração</label><input type="text" placeholder="Ex: 40h, 3 meses"></div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;justify-content:space-between">
+                                Conteúdo / Tópicos
+                                <button class="ai-btn" onclick="aiGenerateCourseContent(this)" type="button">✨ Sugestões de IA</button>
+                            </label>
+                            <textarea placeholder="Descreve os tópicos e conteúdos do curso..."></textarea>
+                            <div class="ai-suggestion-box">
+                                <div class="ai-resp-text"></div>
+                                <div class="ai-suggestion-actions">
+                                    <button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar este conteúdo</button>
+                                    <button class="ai-btn" onclick="aiGenerateCourseContent(this.closest('.item-card').querySelector('.ai-btn'))" type="button" style="margin-top:0">↻ Gerar outro</button>
+                                    <button class="ai-dismiss-btn" onclick="this.closest('.ai-suggestion-box').classList.remove('show')">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-card-footer">
+                        <span></span>
+                        <button class="btn-confirm" type="button" onclick="confirmCard(this)">✓ Confirmar</button>
                     </div>
                 </div>
             </div>
@@ -425,14 +553,41 @@
         <div class="form-section">
             <h3>Idiomas</h3>
             <div id="languagesContainer">
-                <div class="form-row" id="lang-0">
-                    <div class="form-group"><label>Idioma</label><input type="text" placeholder="Ex: Português"></div>
-                    <div class="form-group"><label>Nível</label>
-                        <select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select>
+                <div class="item-card" id="lang-0" style="padding:14px 18px;">
+                    <div class="item-card-header" style="margin-bottom:10px;">
+                        <span class="item-card-title">Idioma</span>
+                        <div class="item-card-actions">
+                            <button class="btn-move" onclick="moveItemUp(this)" type="button" title="Mover para cima">▲</button>
+                            <button class="btn-move" onclick="moveItemDown(this)" type="button" title="Mover para baixo">▼</button>
+                            <button class="btn-remove" onclick="removeItem('lang-0')" style="position:static;margin-left:2px">Remover</button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><input type="text" placeholder="Ex: Português"></div>
+                        <div class="form-group"><select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div>
                     </div>
                 </div>
             </div>
             <button class="btn-add" onclick="addLanguage()">+ Adicionar Idioma</button>
+        </div>
+
+        <!-- ASSINATURA -->
+        <div class="form-section">
+            <h3>Assinatura</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Cidade</label><input type="text" id="sigCity" placeholder="Ex: Luanda"></div>
+                <div class="form-group"><label>Data</label><input type="date" id="sigDate"></div>
+            </div>
+            <div class="form-group" style="margin-top:6px;">
+                <label style="display:flex;align-items:center;justify-content:space-between;">
+                    Assinatura
+                    <span style="font-size:11px;color:var(--t4)">Desenha com o rato ou dedo</span>
+                </label>
+                <div class="signature-canvas-wrap">
+                    <canvas id="signatureCanvas" width="600" height="100"></canvas>
+                    <button type="button" class="btn-clear-sig" onclick="clearSignature()">Limpar</button>
+                </div>
+            </div>
         </div>
 
         <!-- TEMPLATES -->
@@ -782,20 +937,49 @@
                 });
         }
 
+        function monthYearSelects(prefix, startVal, endVal) {
+            var months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+            var mOpts = '<option value="">Mês</option>' + months.map(function(m){ return '<option'+(startVal&&startVal.toLowerCase().indexOf(m)!==-1?' selected':'')+'>'+m+'</option>'; }).join('');
+            var mOptsEnd = '<option value="">Mês</option>' + months.map(function(m){ return '<option'+(endVal&&endVal.toLowerCase().indexOf(m)!==-1?' selected':'')+'>'+m+'</option>'; }).join('');
+            var curY = new Date().getFullYear();
+            var yOpts = '<option value="">Ano</option>';
+            var yOptsEnd = '<option value="">Ano</option>';
+            var startY = startVal ? parseInt(startVal.match(/\d{4}/))||0 : 0;
+            var endY = endVal ? parseInt(endVal.match(/\d{4}/))||0 : 0;
+            for (var y = curY; y >= 1970; y--) {
+                yOpts += '<option'+(startY===y?' selected':'')+'>'+y+'</option>';
+                yOptsEnd += '<option'+(endY===y?' selected':'')+'>'+y+'</option>';
+            }
+            return {
+                startMonth: mOpts, startYear: yOpts,
+                endMonth: mOptsEnd, endYear: yOptsEnd
+            };
+        }
+
         function addExpCard(e, i) {
             var id = 'exp-' + i;
             var d = e || {};
+            var sy = monthYearSelects('exp', d.start||d.startDate||'', d.end||d.endDate||'');
+            var isAtual = (d.end||d.endDate||'').toLowerCase() === 'presente' || (d.end||d.endDate||'').toLowerCase() === 'actual' || (d.end||d.endDate||'').toLowerCase() === 'atual';
             var html = '<div class="item-card" id="' + id + '">' +
-                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
-                '<div class="form-row"><div class="form-group"><label>Cargo</label><input type="text" placeholder="Cargo" value="' + esc(d.title||'') + '"></div>' +
-                '<div class="form-group"><label>Empresa</label><input type="text" placeholder="Empresa" value="' + esc(d.company||'') + '"></div></div>' +
-                '<div class="form-row three">' +
-                '<div class="form-group"><label>Data Início</label><input type="text" placeholder="Jan 2020" value="' + esc(d.start||d.startDate||'') + '"></div>' +
-                '<div class="form-group"><label>Data Fim</label><input type="text" placeholder="Presente" value="' + esc(d.end||d.endDate||'') + '"></div>' +
-                '<div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda" value="' + esc(d.location||'') + '"></div></div>' +
+                '<div class="item-card-header"><span class="item-card-title">Experiência</span><div class="item-card-actions">' +
+                '<button class="btn-move" onclick="moveItemUp(this)" type="button" title="Mover para cima">▲</button>' +
+                '<button class="btn-move" onclick="moveItemDown(this)" type="button" title="Mover para baixo">▼</button>' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')" style="position:static;margin-left:2px">Remover</button>' +
+                '</div></div>' +
+                '<div class="form-row"><div class="form-group"><label>Função</label><input type="text" placeholder="Cargo" value="' + esc(d.title||'') + '"></div>' +
+                '<div class="form-group"><label>Empregador</label><input type="text" placeholder="Empresa" value="' + esc(d.company||'') + '"></div></div>' +
+                '<div class="form-row"><div class="form-group"><label>Cidade</label><input type="text" placeholder="Luanda" value="' + esc(d.location||'') + '"></div></div>' +
+                '<div class="form-row">' +
+                '<div class="form-group"><label>Data de início</label><div class="date-row"><div class="form-group"><select class="exp-month-start">'+sy.startMonth+'</select></div><div class="form-group"><select class="exp-year-start">'+sy.startYear+'</select></div></div></div>' +
+                '<div class="form-group"><label style="display:flex;align-items:center;justify-content:space-between">Data de conclusão <span class="toggle-atual-wrap"><span class="toggle-atual-label">atual</span><label class="toggle-switch"><input type="checkbox"'+(isAtual?' checked':'')+' onchange="toggleAtual(this)"><span class="toggle-slider"></span></label></span></label>' +
+                '<div class="date-row exp-end-date"'+(isAtual?' style="opacity:.35"':'')+'>'+
+                '<div class="form-group"><select class="exp-month-end"'+(isAtual?' disabled':'')+'>'+sy.endMonth+'</select></div>'+
+                '<div class="form-group"><select class="exp-year-end"'+(isAtual?' disabled':'')+'>'+sy.endYear+'</select></div></div></div>' +
+                '</div>' +
                 '<div class="form-row full"><div class="form-group">' +
                 '<label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
-                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button></label>' +
+                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugestões de IA</button></label>' +
                 '<textarea placeholder="Descrição...">' + esc(d.description||'') + '</textarea>' +
                 '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
                 '<div class="ai-suggestion-actions">' +
@@ -812,16 +996,38 @@
             var levels = ['','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','Doutoramento','MBA','Ensino Médio','Ensino Técnico','Outro'];
             var degreeVal = esc(d.degree||d.course||'');
             var opts = levels.map(function(lv){ return '<option value="'+lv+'"'+(lv===degreeVal?' selected':'')+'>'+( lv||'Seleccionar nível...')+'</option>'; }).join('');
+            var sy = monthYearSelects('edu', d.start||d.year||'', d.end||d.endYear||'');
+            var isAtual = (d.end||d.endYear||'').toLowerCase() === 'presente' || (d.end||d.endYear||'').toLowerCase() === 'actual' || (d.end||d.endYear||'').toLowerCase() === 'atual';
             var html = '<div class="item-card" id="' + id + '">' +
-                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
+                '<div class="item-card-header"><span class="item-card-title">Educação</span><div class="item-card-actions">' +
+                '<button class="btn-move" onclick="moveItemUp(this)" type="button">▲</button>' +
+                '<button class="btn-move" onclick="moveItemDown(this)" type="button">▼</button>' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')" style="position:static;margin-left:2px">Remover</button>' +
+                '</div></div>' +
+                '<div class="form-row full"><div class="form-group"><label>Educação</label><select>'+opts+'</select></div></div>' +
                 '<div class="form-row">' +
-                  '<div class="form-group"><label>Frequência Universitária</label><select>'+opts+'</select></div>' +
                   '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN" value="' + esc(d.institution||d.school||'') + '"></div>' +
+                  '<div class="form-group"><label>Cidade</label><input type="text" placeholder="Ex: Luanda" value="' + esc(d.city||d.location||'') + '"></div>' +
                 '</div>' +
                 '<div class="form-row">' +
-                  '<div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018" value="' + esc(d.start||d.year||'') + '"></div>' +
-                  '<div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022" value="' + esc(d.end||d.endYear||'') + '"></div>' +
-                '</div></div>';
+                '<div class="form-group"><label>Data de início</label><div class="date-row"><div class="form-group"><select class="edu-month-start">'+sy.startMonth+'</select></div><div class="form-group"><select class="edu-year-start">'+sy.startYear+'</select></div></div></div>' +
+                '<div class="form-group"><label style="display:flex;align-items:center;justify-content:space-between">Data de conclusão <span class="toggle-atual-wrap"><span class="toggle-atual-label">atual</span><label class="toggle-switch"><input type="checkbox"'+(isAtual?' checked':'')+' onchange="toggleAtual(this)"><span class="toggle-slider"></span></label></span></label>' +
+                '<div class="date-row edu-end-date"'+(isAtual?' style="opacity:.35"':'')+'>'+
+                '<div class="form-group"><select class="edu-month-end"'+(isAtual?' disabled':'')+'>'+sy.endMonth+'</select></div>'+
+                '<div class="form-group"><select class="edu-year-end"'+(isAtual?' disabled':'')+'>'+sy.endYear+'</select></div></div></div>' +
+                '</div>' +
+                '<div class="form-row full"><div class="form-group">' +
+                '<label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
+                '<button class="ai-btn" onclick="aiGenerateEduDescription(this)" type="button">✨ Sugestões de IA</button></label>' +
+                '<textarea placeholder="Descreve o curso, disciplinas ou realizações académicas...">' + esc(d.description||'') + '</textarea>' +
+                '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
+                '<div class="ai-suggestion-actions">' +
+                '<button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar esta descrição</button>' +
+                '<button class="ai-btn" onclick="aiGenerateEduDescription(this.closest(\'.item-card\').querySelector(\'.ai-btn\'))" type="button" style="margin-top:0">↻ Gerar outra</button>' +
+                '<button class="ai-dismiss-btn" onclick="this.closest(\'.ai-suggestion-box\').classList.remove(\'show\')">Fechar</button>' +
+                '</div></div></div></div>' +
+                '<div class="item-card-footer"><span></span><button class="btn-confirm" type="button" onclick="confirmCard(this)">✓ Confirmar</button></div>' +
+                '</div>';
             document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -832,9 +1038,16 @@
             var level = d.level || 'Nativo';
             var levels = ['Nativo','Fluente','Avançado','Intermédio','Básico'];
             var opts = levels.map(function(lv) { return '<option' + (lv === level ? ' selected' : '') + '>' + lv + '</option>'; }).join('');
-            var html = '<div class="form-row" id="' + id + '" style="margin-top:12px">' +
+            var html = '<div class="item-card" id="' + id + '" style="padding:14px 18px;">' +
+                '<div class="item-card-header" style="margin-bottom:10px;"><span class="item-card-title">Idioma</span>' +
+                '<div class="item-card-actions">' +
+                '<button class="btn-move" onclick="moveItemUp(this)" type="button">▲</button>' +
+                '<button class="btn-move" onclick="moveItemDown(this)" type="button">▼</button>' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')" style="position:static;margin-left:2px">Remover</button>' +
+                '</div></div>' +
+                '<div class="form-row">' +
                 '<div class="form-group"><input type="text" placeholder="Ex: Inglês" value="' + esc(name) + '"></div>' +
-                '<div class="form-group"><select>' + opts + '</select></div></div>';
+                '<div class="form-group"><select>' + opts + '</select></div></div></div>';
             document.getElementById('languagesContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -897,49 +1110,23 @@
 
         // ── Dynamic fields ────────────────────────────────
         function addExperience() {
-            var id = 'exp-' + expCount++;
-            var html = '<div class="item-card" id="' + id + '">' +
-                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
-                '<div class="form-row"><div class="form-group"><label>Cargo</label><input type="text" placeholder="Cargo"></div>' +
-                '<div class="form-group"><label>Empresa</label><input type="text" placeholder="Empresa"></div></div>' +
-                '<div class="form-row three"><div class="form-group"><label>Data Início</label><input type="text" placeholder="Jan 2020"></div>' +
-                '<div class="form-group"><label>Data Fim</label><input type="text" placeholder="Presente"></div>' +
-                '<div class="form-group"><label>Localização</label><input type="text" placeholder="Luanda"></div></div>' +
-                '<div class="form-row full"><div class="form-group">' +
-                '<label style="display:flex;align-items:center;justify-content:space-between">Descrição' +
-                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this)" type="button">✨ Sugerir funções</button></label>' +
-                '<textarea placeholder="Descrição..."></textarea>' +
-                '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
-                '<div class="ai-suggestion-actions">' +
-                '<button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar estas funções</button>' +
-                '<button class="ai-btn" onclick="aiGenerateResponsibilities(this.closest(\'.item-card\').querySelector(\'.ai-btn\'))" type="button" style="margin-top:0">↻ Gerar outras</button>' +
-                '<button class="ai-dismiss-btn" onclick="this.closest(\'.ai-suggestion-box\').classList.remove(\'show\')">Fechar</button>' +
-                '</div></div></div></div></div>';
-            document.getElementById('experienceContainer').insertAdjacentHTML('beforeend', html);
+            addExpCard({}, expCount++);
         }
 
         function addEducation() {
-            var id = 'edu-' + eduCount++;
-            var levels = ['','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','Doutoramento','MBA','Ensino Médio','Ensino Técnico','Outro'];
-            var opts = levels.map(function(lv){ return '<option value="'+lv+'">'+( lv||'Seleccionar nível...')+'</option>'; }).join('');
-            var html = '<div class="item-card" id="' + id + '">' +
-                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
-                '<div class="form-row">' +
-                  '<div class="form-group"><label>Frequência Universitária</label><select>'+opts+'</select></div>' +
-                  '<div class="form-group"><label>Instituição</label><input type="text" placeholder="Ex: UCAN"></div>' +
-                '</div>' +
-                '<div class="form-row">' +
-                  '<div class="form-group"><label>Início</label><input type="text" placeholder="Ex: 2018"></div>' +
-                  '<div class="form-group"><label>Término</label><input type="text" placeholder="Ex: 2022 (ou Actual)"></div>' +
-                '</div></div>';
-            document.getElementById('educationContainer').insertAdjacentHTML('beforeend', html);
+            addEduCard({}, eduCount++);
         }
 
         var profCount = 1;
         function addProf() {
             var id = 'prof-' + profCount++;
+            var sy = monthYearSelects('', '', '');
             var html = '<div class="item-card" id="' + id + '">' +
-                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')">Remover</button>' +
+                '<div class="item-card-header"><span class="item-card-title">Curso / Certificação</span><div class="item-card-actions">' +
+                '<button class="btn-move" onclick="moveItemUp(this)" type="button">▲</button>' +
+                '<button class="btn-move" onclick="moveItemDown(this)" type="button">▼</button>' +
+                '<button class="btn-remove" onclick="removeItem(\'' + id + '\')" style="position:static;margin-left:2px">Remover</button>' +
+                '</div></div>' +
                 '<div class="form-row">' +
                   '<div class="form-group"><label>Curso / Certificação *</label><input type="text" placeholder="Ex: Primavera V10"></div>' +
                   '<div class="form-group"><label>Entidade / Plataforma</label><input type="text" placeholder="Ex: INEFOP, Udemy"></div>' +
@@ -947,7 +1134,19 @@
                 '<div class="form-row">' +
                   '<div class="form-group"><label>Ano</label><input type="text" placeholder="Ex: 2023"></div>' +
                   '<div class="form-group"><label>Duração</label><input type="text" placeholder="Ex: 40h, 3 meses"></div>' +
-                '</div></div>';
+                '</div>' +
+                '<div class="form-row full"><div class="form-group">' +
+                '<label style="display:flex;align-items:center;justify-content:space-between">Conteúdo / Tópicos' +
+                '<button class="ai-btn" onclick="aiGenerateCourseContent(this)" type="button">✨ Sugestões de IA</button></label>' +
+                '<textarea placeholder="Descreve os tópicos e conteúdos do curso..."></textarea>' +
+                '<div class="ai-suggestion-box"><div class="ai-resp-text"></div>' +
+                '<div class="ai-suggestion-actions">' +
+                '<button class="ai-use-btn" onclick="aiUseResponsibilities(this)">✓ Usar este conteúdo</button>' +
+                '<button class="ai-btn" onclick="aiGenerateCourseContent(this.closest(\'.item-card\').querySelector(\'.ai-btn\'))" type="button" style="margin-top:0">↻ Gerar outro</button>' +
+                '<button class="ai-dismiss-btn" onclick="this.closest(\'.ai-suggestion-box\').classList.remove(\'show\')">Fechar</button>' +
+                '</div></div></div></div>' +
+                '<div class="item-card-footer"><span></span><button class="btn-confirm" type="button" onclick="confirmCard(this)">✓ Confirmar</button></div>' +
+                '</div>';
             document.getElementById('profContainer').insertAdjacentHTML('beforeend', html);
         }
 
@@ -966,11 +1165,7 @@
         }
 
         function addLanguage() {
-            var id = 'lang-' + langCount++;
-            var html = '<div class="form-row" id="' + id + '" style="margin-top:12px">' +
-                '<div class="form-group"><input type="text" placeholder="Ex: Inglês"></div>' +
-                '<div class="form-group"><select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div></div>';
-            document.getElementById('languagesContainer').insertAdjacentHTML('beforeend', html);
+            addLangRow({}, langCount++);
         }
 
         function addSkill() {
@@ -999,65 +1194,75 @@
             document.getElementById('skillsContainer').innerHTML = html;
         }
 
+        // ── Helpers para ler cards com nova estrutura ─────
+        function readExpCards() {
+            var experience = [];
+            document.querySelectorAll('[id^="exp-"]').forEach(function(card) {
+                var inputs = card.querySelectorAll('input[type="text"]');
+                var title = inputs[0] ? inputs[0].value.trim() : '';
+                if (!title) return;
+                var company = inputs[1] ? inputs[1].value : '';
+                var location = inputs[2] ? inputs[2].value : '';
+                var isAtual = card.querySelector('input[type="checkbox"]') && card.querySelector('input[type="checkbox"]').checked;
+                var mStart = card.querySelector('.exp-month-start'); var yStart = card.querySelector('.exp-year-start');
+                var mEnd = card.querySelector('.exp-month-end'); var yEnd = card.querySelector('.exp-year-end');
+                var start = [mStart&&mStart.value, yStart&&yStart.value].filter(Boolean).join(' ');
+                var end = isAtual ? 'Presente' : [mEnd&&mEnd.value, yEnd&&yEnd.value].filter(Boolean).join(' ');
+                var textarea = card.querySelector('textarea');
+                experience.push({ title: title, company: company, location: location, start: start, end: end, description: textarea ? textarea.value : '' });
+            });
+            return experience;
+        }
+
+        function readEduCards() {
+            var education = [];
+            document.querySelectorAll('[id^="edu-"]').forEach(function(card) {
+                var sel = card.querySelector('select');
+                var inputs = card.querySelectorAll('input[type="text"]');
+                var degree = sel ? sel.value : '';
+                var inst = inputs[0] ? inputs[0].value.trim() : '';
+                var city = inputs[1] ? inputs[1].value : '';
+                if (!degree && !inst) return;
+                var isAtual = card.querySelector('input[type="checkbox"]') && card.querySelector('input[type="checkbox"]').checked;
+                var mStart = card.querySelector('.edu-month-start'); var yStart = card.querySelector('.edu-year-start');
+                var mEnd = card.querySelector('.edu-month-end'); var yEnd = card.querySelector('.edu-year-end');
+                var start = [mStart&&mStart.value, yStart&&yStart.value].filter(Boolean).join(' ');
+                var end = isAtual ? 'Presente' : [mEnd&&mEnd.value, yEnd&&yEnd.value].filter(Boolean).join(' ');
+                var textarea = card.querySelector('textarea');
+                education.push({ degree: degree, institution: inst, city: city, start: start, end: end, year: start, description: textarea ? textarea.value : '' });
+            });
+            return education;
+        }
+
+        function readProfCards() {
+            var profTraining = [];
+            document.querySelectorAll('[id^="prof-"]').forEach(function(card) {
+                var inputs = card.querySelectorAll('input[type="text"]');
+                if (!inputs[0] || !inputs[0].value.trim()) return;
+                var textarea = card.querySelector('textarea');
+                profTraining.push({ course: inputs[0].value, entity: inputs[1]?inputs[1].value:'', year: inputs[2]?inputs[2].value:'', duration: inputs[3]?inputs[3].value:'', description: textarea?textarea.value:'' });
+            });
+            return profTraining;
+        }
+
+        function readLangRows() {
+            var languages = [];
+            document.querySelectorAll('[id^="lang-"]').forEach(function(card) {
+                var input = card.querySelector('input'); var sel = card.querySelector('select');
+                if (input && input.value.trim()) languages.push({ language: input.value, level: sel ? sel.value : 'Nativo' });
+            });
+            return languages;
+        }
+
         // ── Generate CV ───────────────────────────────────
         function generateCV() {
             var fullName = document.getElementById('fullName').value.trim();
             if (!fullName) { showToast('Por favor preenche o teu nome completo!'); return; }
 
-            var expCards = document.querySelectorAll('[id^="exp-"]');
-            var experience = [];
-            expCards.forEach(function(card) {
-                var inputs   = card.querySelectorAll('input');
-                var textarea = card.querySelector('textarea');
-                if (inputs[0] && inputs[0].value.trim()) {
-                    experience.push({
-                        title:       inputs[0].value,
-                        company:     inputs[1] ? inputs[1].value : '',
-                        start:       inputs[2] ? inputs[2].value : '',
-                        end:         inputs[3] ? inputs[3].value : '',
-                        location:    inputs[4] ? inputs[4].value : '',
-                        description: textarea  ? textarea.value  : ''
-                    });
-                }
-            });
-
-            var eduCards = document.querySelectorAll('[id^="edu-"]');
-            var education = [];
-            eduCards.forEach(function(card) {
-                var sel    = card.querySelector('select');
-                var inputs = card.querySelectorAll('input');
-                var degree = sel ? sel.value : (inputs[0] ? inputs[0].value : '');
-                var inst   = inputs[0] ? inputs[0].value : '';
-                var start  = inputs[1] ? inputs[1].value : '';
-                var end    = inputs[2] ? inputs[2].value : '';
-                if (degree.trim() || inst.trim()) {
-                    education.push({ degree: degree, institution: inst, start: start, end: end, year: start });
-                }
-            });
-
-            var profCards = document.querySelectorAll('[id^="prof-"]');
-            var profTraining = [];
-            profCards.forEach(function(card) {
-                var inputs = card.querySelectorAll('input');
-                if (inputs[0] && inputs[0].value.trim()) {
-                    profTraining.push({
-                        course:    inputs[0].value,
-                        entity:    inputs[1] ? inputs[1].value : '',
-                        year:      inputs[2] ? inputs[2].value : '',
-                        duration:  inputs[3] ? inputs[3].value : ''
-                    });
-                }
-            });
-
-            var langRows = document.querySelectorAll('[id^="lang-"]');
-            var languages = [];
-            langRows.forEach(function(row) {
-                var input  = row.querySelector('input');
-                var select = row.querySelector('select');
-                if (input && input.value.trim()) {
-                    languages.push({ language: input.value, level: select ? select.value : 'Nativo' });
-                }
-            });
+            var experience = readExpCards();
+            var education = readEduCards();
+            var profTraining = readProfCards();
+            var languages = readLangRows();
 
             var photoEl = document.getElementById('photoPreview').querySelector('img');
             var photo   = photoEl ? photoEl.src : null;
@@ -1078,6 +1283,11 @@
                 profTraining:  profTraining,
                 skills:        skills,
                 languages:     languages,
+                signature: {
+                    city: (document.getElementById('sigCity')||{}).value || '',
+                    date: (document.getElementById('sigDate')||{}).value || '',
+                    image: getSignatureDataUrl()
+                },
                 photo:         photo,
                 template:      tplNum,
                 templateSlug:  tplSlug,
@@ -1321,34 +1531,6 @@
         var lastSavedHash = null;
 
         function buildCvDataObj() {
-            var expCards = document.querySelectorAll('[id^="exp-"]');
-            var experience = [];
-            expCards.forEach(function(card) {
-                var inputs = card.querySelectorAll('input');
-                var textarea = card.querySelector('textarea');
-                if (inputs[0] && inputs[0].value.trim()) {
-                    experience.push({ title: inputs[0].value, company: inputs[1]?inputs[1].value:'', start: inputs[2]?inputs[2].value:'', end: inputs[3]?inputs[3].value:'', location: inputs[4]?inputs[4].value:'', description: textarea?textarea.value:'' });
-                }
-            });
-            var eduCards2 = document.querySelectorAll('[id^="edu-"]');
-            var education = [];
-            eduCards2.forEach(function(card) {
-                var sel2   = card.querySelector('select');
-                var inputs = card.querySelectorAll('input');
-                var degree = sel2 ? sel2.value : (inputs[0] ? inputs[0].value : '');
-                var inst   = inputs[0] ? inputs[0].value : '';
-                var start  = inputs[1] ? inputs[1].value : '';
-                var end    = inputs[2] ? inputs[2].value : '';
-                if (degree.trim() || inst.trim()) {
-                    education.push({ degree: degree, institution: inst, start: start, end: end, year: start });
-                }
-            });
-            var langRows = document.querySelectorAll('[id^="lang-"]');
-            var languages = [];
-            langRows.forEach(function(row) {
-                var input = row.querySelector('input'), sel = row.querySelector('select');
-                if (input && input.value.trim()) languages.push({ language: input.value, level: sel?sel.value:'Nativo' });
-            });
             var photoEl = document.getElementById('photoPreview').querySelector('img');
             var tplNum  = parseInt(document.getElementById('selectedTemplate').value) || 1;
             var tplSlug = document.getElementById('selectedSlug').value || '';
@@ -1361,8 +1543,9 @@
                 address: document.getElementById('address').value,
                 linkedin: document.getElementById('linkedin').value,
                 summary: document.getElementById('summary').value,
-                experience: experience, education: education,
-                skills: skills, languages: languages,
+                experience: readExpCards(), education: readEduCards(),
+                profTraining: readProfCards(), skills: skills, languages: readLangRows(),
+                signature: { city: (document.getElementById('sigCity')||{}).value||'', date: (document.getElementById('sigDate')||{}).value||'' },
                 photo: photoEl ? photoEl.src : null,
                 template: tplNum, templateSlug: tplSlug, templateName: tplSlug,
                 cvId: cvId
@@ -1697,6 +1880,226 @@
             updateCompletion();
             scheduleAutoSave();
             schedulePreview();
+        }
+
+        // ══════════════════════════════════════════════
+        // MOVER ITEMS PARA CIMA / PARA BAIXO
+        // ══════════════════════════════════════════════
+        function moveItemUp(btn) {
+            var card = btn.closest('.item-card');
+            var prev = card.previousElementSibling;
+            if (prev && prev.classList.contains('item-card')) {
+                card.parentNode.insertBefore(card, prev);
+                scheduleAutoSave();
+            }
+        }
+
+        function moveItemDown(btn) {
+            var card = btn.closest('.item-card');
+            var next = card.nextElementSibling;
+            if (next && next.classList.contains('item-card')) {
+                card.parentNode.insertBefore(next, card);
+                scheduleAutoSave();
+            }
+        }
+
+        // ══════════════════════════════════════════════
+        // TOGGLE "ACTUAL"
+        // ══════════════════════════════════════════════
+        function toggleAtual(checkbox) {
+            var endDateRow = checkbox.closest('.form-group').querySelector('.date-row, .exp-end-date, .edu-end-date');
+            if (!endDateRow) {
+                // Encontrar o próximo .date-row dentro do mesmo form-group
+                var fg = checkbox.closest('label').parentElement;
+                endDateRow = fg.querySelector('.exp-end-date, .edu-end-date, .date-row');
+            }
+            if (endDateRow) {
+                endDateRow.style.opacity = checkbox.checked ? '0.35' : '1';
+                var selects = endDateRow.querySelectorAll('select');
+                selects.forEach(function(s) { s.disabled = checkbox.checked; });
+            }
+        }
+
+        // ══════════════════════════════════════════════
+        // BOTÃO CONFIRMAR CARD
+        // ══════════════════════════════════════════════
+        function confirmCard(btn) {
+            var card = btn.closest('.item-card');
+            card.style.borderColor = 'var(--green)';
+            card.style.boxShadow = '0 0 0 2px rgba(22,163,74,.15)';
+            btn.textContent = '✓ Confirmado';
+            btn.style.background = 'var(--green)';
+            setTimeout(function() {
+                card.style.borderColor = '';
+                card.style.boxShadow = '';
+                btn.textContent = '✓ Confirmar';
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        // ══════════════════════════════════════════════
+        // POPULAR SELECTS DE ANO
+        // ══════════════════════════════════════════════
+        function populateYearSelects(container) {
+            var yearSelects = (container || document).querySelectorAll('.exp-year-start,.exp-year-end,.edu-year-start,.edu-year-end');
+            var currentYear = new Date().getFullYear();
+            yearSelects.forEach(function(sel) {
+                if (sel.options.length > 1) return; // já populado
+                sel.innerHTML = '<option value="">Ano</option>';
+                for (var y = currentYear; y >= 1970; y--) {
+                    sel.innerHTML += '<option value="'+y+'">'+y+'</option>';
+                }
+            });
+        }
+        populateYearSelects();
+
+        // ══════════════════════════════════════════════
+        // IA — EDUCAÇÃO (descrição)
+        // ══════════════════════════════════════════════
+        function aiGenerateEduDescription(triggerBtn) {
+            var card = triggerBtn.closest('.item-card');
+            if (!card) return;
+            var sel = card.querySelector('select');
+            var inputs = card.querySelectorAll('input[type="text"]');
+            var degree = sel ? sel.value : '';
+            var institution = (inputs[0] && inputs[0].value.trim()) || '';
+            var city = (inputs[1] && inputs[1].value.trim()) || '';
+            if (!degree && !institution) { showToast('Preenche o grau ou instituição primeiro'); return; }
+
+            triggerBtn.disabled = true;
+            triggerBtn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
+
+            var prompt = degree + (institution ? ' na ' + institution : '') + (city ? ' em ' + city : '');
+            fetch(API + '/cv/generate-responsibilities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ jobTitle: 'Estudante de ' + (degree || 'curso'), company: institution, sector: 'Educação', yearsExp: '' })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var text = d.responsibilities || d.error || 'Erro ao gerar';
+                var box = card.querySelector('.ai-suggestion-box');
+                var textEl = card.querySelector('.ai-resp-text');
+                textEl.setAttribute('data-raw', text);
+                var lines = text.split('\n').filter(function(l) { return l.trim(); });
+                textEl.innerHTML = lines.map(function(line) {
+                    var clean = line.replace(/^[•\-]\s*/, '');
+                    return '<div style="padding:4px 0;border-bottom:1px solid rgba(201,169,110,0.15);line-height:1.5">• ' + clean + '</div>';
+                }).join('');
+                box.classList.add('show');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugestões de IA';
+            })
+            .catch(function() {
+                showToast('Erro ao contactar IA. Tenta novamente.');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugestões de IA';
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // IA — FORMAÇÃO PROFISSIONAL (conteúdo de curso)
+        // ══════════════════════════════════════════════
+        function aiGenerateCourseContent(triggerBtn) {
+            var card = triggerBtn.closest('.item-card');
+            if (!card) return;
+            var inputs = card.querySelectorAll('input[type="text"]');
+            var courseName = (inputs[0] && inputs[0].value.trim()) || '';
+            var entity = (inputs[1] && inputs[1].value.trim()) || '';
+            if (!courseName) { showToast('Preenche o nome do curso primeiro'); return; }
+
+            triggerBtn.disabled = true;
+            triggerBtn.innerHTML = '<span class="ai-spin">⟳</span> A gerar...';
+
+            fetch(API + '/cv/generate-course-content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ courseName: courseName, entity: entity })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var text = d.content || d.error || 'Erro ao gerar';
+                var box = card.querySelector('.ai-suggestion-box');
+                var textEl = card.querySelector('.ai-resp-text');
+                textEl.setAttribute('data-raw', text);
+                var lines = text.split('\n').filter(function(l) { return l.trim(); });
+                textEl.innerHTML = lines.map(function(line) {
+                    var clean = line.replace(/^[•\-]\s*/, '');
+                    return '<div style="padding:4px 0;border-bottom:1px solid rgba(201,169,110,0.15);line-height:1.5">• ' + clean + '</div>';
+                }).join('');
+                box.classList.add('show');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugestões de IA';
+            })
+            .catch(function() {
+                showToast('Erro ao contactar IA. Tenta novamente.');
+                triggerBtn.disabled = false;
+                triggerBtn.innerHTML = '✨ Sugestões de IA';
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // ASSINATURA (canvas)
+        // ══════════════════════════════════════════════
+        (function initSignature() {
+            var canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var drawing = false;
+            var lastX = 0, lastY = 0;
+
+            function getPos(e) {
+                var rect = canvas.getBoundingClientRect();
+                var scaleX = canvas.width / rect.width;
+                var scaleY = canvas.height / rect.height;
+                if (e.touches) {
+                    return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+                }
+                return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+            }
+
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 1.8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            function startDraw(e) { e.preventDefault(); drawing = true; var p = getPos(e); lastX = p.x; lastY = p.y; }
+            function draw(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                var p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+                lastX = p.x; lastY = p.y;
+            }
+            function stopDraw() { drawing = false; }
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseleave', stopDraw);
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw);
+        })();
+
+        function clearSignature() {
+            var canvas = document.getElementById('signatureCanvas');
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function getSignatureDataUrl() {
+            var canvas = document.getElementById('signatureCanvas');
+            // Verificar se canvas está vazio
+            var ctx = canvas.getContext('2d');
+            var data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            for (var i = 0; i < data.length; i += 4) {
+                if (data[i+3] > 0) return canvas.toDataURL('image/png');
+            }
+            return null;
         }
     </script>
 </body>

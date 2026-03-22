@@ -319,7 +319,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
       {/* BODY */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* LeftPanel — resizable */}
-        <div style={{ width: leftWidth, flexShrink: 0, overflow: 'hidden' }}>
+        <div style={{ width: leftWidth, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <LeftPanel />
         </div>
 
