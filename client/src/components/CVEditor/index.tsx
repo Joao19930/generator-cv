@@ -14,6 +14,44 @@ interface CVEditorProps {
   isPremium?: boolean
 }
 
+function calcATS(store: ReturnType<typeof useCVStore.getState>): number {
+  let s = 0
+  if (store.personal.jobTitle) s += 15
+  if (store.summary && store.summary.length > 100) s += 15
+  if (store.skills.length >= 5) s += 20
+  if (store.experience.length > 0) s += 20
+  if (store.personal.email && store.personal.phone && store.personal.address) s += 15
+  if (store.education.length > 0) s += 10
+  if (store.personal.linkedin) s += 5
+  return s
+}
+
+function ATSBadge({ store }: { store: ReturnType<typeof useCVStore.getState> }) {
+  const score = calcATS(store)
+  const color = score >= 70 ? '#16A34A' : score >= 40 ? '#D97706' : '#DC2626'
+  const bg    = score >= 70 ? '#F0FDF4' : score >= 40 ? '#FFFBEB' : '#FEF2F2'
+  const label = score >= 70 ? 'Bom' : score >= 40 ? 'Médio' : 'Fraco'
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: '3px 8px',
+      background: bg,
+      border: `1px solid ${color}30`,
+      borderRadius: 20,
+      flexShrink: 0,
+      cursor: 'default',
+    }}
+    title={`Score ATS: ${score}/100 — ${score >= 70 ? 'CV bem optimizado para sistemas de recrutamento' : score >= 40 ? 'Adicione mais detalhes para melhorar' : 'Preencha mais secções para subir o score'}`}
+    >
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: '0.02em' }}>ATS {score}</span>
+      <span style={{ fontSize: 10, color, opacity: 0.8 }}>{label}</span>
+    </div>
+  )
+}
+
 function calcProgress(store: ReturnType<typeof useCVStore.getState>): number {
   let score = 0
   if (store.personal.fullName) score += 1
@@ -111,9 +149,9 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
           onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'transparent'; (e.target as HTMLInputElement).style.color = '#64748B' }}
         />
 
-        {/* Progress */}
+        {/* Progress + ATS badge */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ flex: 1, height: 6, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden', maxWidth: 200 }}>
+          <div style={{ flex: 1, height: 6, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden', maxWidth: 160 }}>
             <div style={{
               height: '100%',
               width: `${progress}%`,
@@ -123,6 +161,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
             }} />
           </div>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#64748B', flexShrink: 0 }}>{progress}%</span>
+          <ATSBadge store={store} />
         </div>
 
         {/* Save status */}
