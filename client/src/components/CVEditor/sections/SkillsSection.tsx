@@ -23,19 +23,20 @@ function SkillTag({ skill }: { skill: Skill }) {
         alignItems: 'center',
         gap: 4,
         padding: '4px 8px',
-        background: '#1e293b',
-        border: `1px solid ${LEVEL_COLORS[skill.level]}40`,
+        background: '#EFF6FF',
+        border: `1px solid ${LEVEL_COLORS[skill.level]}30`,
         borderRadius: 20,
         fontSize: 12,
+        position: 'relative',
       }}
     >
-      <span style={{ color: '#e2e8f0' }}>{skill.name}</span>
+      <span style={{ color: '#1E293B' }}>{skill.name}</span>
       <button
         type="button"
         onClick={() => setShowLevel(s => !s)}
         style={{
           padding: '1px 6px',
-          background: `${LEVEL_COLORS[skill.level]}20`,
+          background: `${LEVEL_COLORS[skill.level]}15`,
           border: 'none',
           borderRadius: 10,
           color: LEVEL_COLORS[skill.level],
@@ -49,7 +50,9 @@ function SkillTag({ skill }: { skill: Skill }) {
       <button
         type="button"
         onClick={() => removeSkill(skill.id)}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 0, display: 'flex', alignItems: 'center' }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#CBD5E1', padding: 0, display: 'flex', alignItems: 'center' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#CBD5E1')}
       >
         <X size={11} />
       </button>
@@ -59,15 +62,17 @@ function SkillTag({ skill }: { skill: Skill }) {
           style={{
             position: 'absolute' as const,
             zIndex: 50,
+            top: '100%',
+            left: 0,
             marginTop: 4,
-            background: '#1e293b',
-            border: '1px solid #334155',
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
             borderRadius: 8,
             padding: 4,
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           }}
         >
           {LEVELS.map(l => (
@@ -85,6 +90,7 @@ function SkillTag({ skill }: { skill: Skill }) {
                 cursor: 'pointer',
                 textAlign: 'left',
                 fontWeight: skill.level === l ? 700 : 400,
+                whiteSpace: 'nowrap',
               }}
             >
               {l}
@@ -119,7 +125,7 @@ export default function SkillsSection() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <SuggestionsPanel />
 
-      <div style={{ borderTop: '1px solid #1e293b', paddingTop: 12 }} />
+      <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 12 }} />
 
       <div style={{ display: 'flex', gap: 8 }}>
         <input
@@ -129,27 +135,27 @@ export default function SkillsSection() {
           placeholder="Nome da competência..."
           style={{
             flex: 1,
-            background: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: 8,
-            padding: '8px 12px',
-            color: '#f8fafc',
-            fontSize: 13,
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderRadius: 10,
+            padding: '10px 12px',
+            color: '#1E293B',
+            fontSize: 14,
             outline: 'none',
-            transition: 'border-color 0.15s',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
           }}
-          onFocus={e => (e.target.style.borderColor = '#f59e0b')}
-          onBlur={e => (e.target.style.borderColor = '#334155')}
+          onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
         />
         <select
           value={level}
           onChange={e => setLevel(e.target.value as SkillLevel)}
           style={{
-            background: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: 8,
-            padding: '8px 10px',
-            color: '#94a3b8',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: 10,
+            padding: '10px 10px',
+            color: '#64748B',
             fontSize: 12,
             outline: 'none',
             cursor: 'pointer',
@@ -161,12 +167,12 @@ export default function SkillsSection() {
           type="button"
           onClick={handleAdd}
           style={{
-            width: 36,
-            height: 36,
-            background: '#f59e0b',
+            width: 42,
+            height: 42,
+            background: '#1E40AF',
             border: 'none',
-            borderRadius: 8,
-            color: '#0f172a',
+            borderRadius: 10,
+            color: '#FFFFFF',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -179,12 +185,12 @@ export default function SkillsSection() {
       </div>
 
       {skills.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '16px 0', color: '#475569', fontSize: 13 }}>
+        <div style={{ textAlign: 'center', padding: '16px 0', color: '#94A3B8', fontSize: 13 }}>
           Escreve uma competência e prime Enter para adicionar
         </div>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, position: 'relative' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {skills.map(skill => (
           <SkillTag key={skill.id} skill={skill} />
         ))}

@@ -22,20 +22,20 @@ import AIButton from '../AIButton'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: '#0f172a',
-  border: '1px solid #334155',
-  borderRadius: 8,
-  padding: '8px 12px',
-  color: '#f8fafc',
-  fontSize: 13,
+  background: '#FFFFFF',
+  border: '1px solid #E2E8F0',
+  borderRadius: 10,
+  padding: '10px 12px',
+  color: '#1E293B',
+  fontSize: 14,
   outline: 'none',
-  transition: 'border-color 0.15s',
+  transition: 'border-color 0.15s, box-shadow 0.15s',
 }
 
 const labelStyle: React.CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
-  color: '#64748b',
+  color: '#64748B',
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
   display: 'block',
@@ -55,10 +55,11 @@ Escreve apenas os bullets, sem título.`
   return (
     <div
       style={{
-        background: '#0f172a',
-        border: '1px solid #1e293b',
-        borderRadius: 10,
+        background: '#FFFFFF',
+        border: '1px solid #E2E8F0',
+        borderRadius: 12,
         overflow: 'hidden',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
       <div
@@ -67,13 +68,13 @@ Escreve apenas os bullets, sem título.`
           alignItems: 'center',
           gap: 8,
           padding: '10px 12px',
-          background: '#0f172a',
+          background: '#F8FAFC',
         }}
       >
         {/* Drag handle */}
         <span
           {...dragListeners}
-          style={{ color: '#334155', cursor: 'grab', display: 'flex', padding: 2, flexShrink: 0 }}
+          style={{ color: '#CBD5E1', cursor: 'grab', display: 'flex', padding: 2, flexShrink: 0 }}
           onClick={e => e.stopPropagation()}
         >
           <GripVertical size={14} />
@@ -81,10 +82,10 @@ Escreve apenas os bullets, sem título.`
 
         {/* Title — click to expand */}
         <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => setOpen(o => !o)}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
             {item.role || 'Novo cargo'}
           </p>
-          <p style={{ fontSize: 11, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+          <p style={{ fontSize: 11, color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
             {item.company || 'Empresa'}
           </p>
         </div>
@@ -92,11 +93,13 @@ Escreve apenas os bullets, sem título.`
         <button
           type="button"
           onClick={e => { e.stopPropagation(); removeExperience(item.id) }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 4, flexShrink: 0 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#CBD5E1', padding: 4, flexShrink: 0, display: 'flex', alignItems: 'center' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#CBD5E1')}
         >
           <Trash2 size={14} />
         </button>
-        <div style={{ cursor: 'pointer', color: '#475569' }} onClick={() => setOpen(o => !o)}>
+        <div style={{ cursor: 'pointer', color: '#CBD5E1' }} onClick={() => setOpen(o => !o)}>
           {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
       </div>
@@ -107,28 +110,36 @@ Escreve apenas os bullets, sem título.`
             <div>
               <label style={labelStyle}>Cargo</label>
               <input style={inputStyle} value={item.role} onChange={e => updateExperience(item.id, { role: e.target.value })}
-                placeholder="Eng. de Software" onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = '#334155')} />
+                placeholder="Eng. de Software"
+                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
             <div>
               <label style={labelStyle}>Empresa</label>
               <input style={inputStyle} value={item.company} onChange={e => updateExperience(item.id, { company: e.target.value })}
-                placeholder="Empresa Lda" onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = '#334155')} />
+                placeholder="Empresa Lda"
+                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={labelStyle}>Localização</label>
               <input style={inputStyle} value={item.location} onChange={e => updateExperience(item.id, { location: e.target.value })}
-                placeholder="Lisboa, Portugal" onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = '#334155')} />
+                placeholder="Lisboa, Portugal"
+                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
             <div>
               <label style={labelStyle}>Data início</label>
               <input type="month" style={inputStyle} value={item.startDate} onChange={e => updateExperience(item.id, { startDate: e.target.value })}
-                onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = '#334155')} />
+                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
             <div>
               <label style={labelStyle}>Data fim</label>
               <input type="month" style={{ ...inputStyle, opacity: item.current ? 0.4 : 1 }} value={item.endDate}
                 disabled={item.current} onChange={e => updateExperience(item.id, { endDate: e.target.value })}
-                onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = '#334155')} />
+                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
             </div>
           </div>
 
@@ -136,11 +147,11 @@ Escreve apenas os bullets, sem título.`
             <button
               type="button"
               onClick={() => updateExperience(item.id, { current: !item.current })}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: item.current ? '#f59e0b' : '#475569' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: item.current ? '#1E40AF' : '#CBD5E1' }}
             >
               {item.current ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
             </button>
-            <span style={{ fontSize: 12, color: '#94a3b8' }}>Emprego actual</span>
+            <span style={{ fontSize: 12, color: '#94A3B8' }}>Emprego actual</span>
           </div>
 
           <div>
@@ -161,8 +172,8 @@ Escreve apenas os bullets, sem título.`
                 lineHeight: 1.6,
                 fontFamily: 'inherit',
               }}
-              onFocus={e => (e.target.style.borderColor = '#f59e0b')}
-              onBlur={e => (e.target.style.borderColor = '#334155')}
+              onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
             />
           </div>
         </div>
@@ -205,7 +216,7 @@ export default function ExperienceSection() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {experience.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '20px 0', color: '#475569', fontSize: 13 }}>
+        <div style={{ textAlign: 'center', padding: '20px 0', color: '#94A3B8', fontSize: 13 }}>
           Ainda não tens experiências — adiciona a primeira!
         </div>
       )}
@@ -228,16 +239,16 @@ export default function ExperienceSection() {
           gap: 6,
           width: '100%',
           padding: '9px 16px',
-          background: '#1e293b',
-          border: '1px dashed #334155',
+          background: '#F8FAFC',
+          border: '1px dashed #CBD5E1',
           borderRadius: 8,
-          color: '#94a3b8',
+          color: '#94A3B8',
           fontSize: 13,
           cursor: 'pointer',
           transition: 'all 0.15s',
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#f59e0b'; (e.currentTarget as HTMLButtonElement).style.color = '#f59e0b' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#334155'; (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#1E40AF'; (e.currentTarget as HTMLButtonElement).style.color = '#1E40AF' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#CBD5E1'; (e.currentTarget as HTMLButtonElement).style.color = '#94A3B8' }}
       >
         <Plus size={15} />
         Adicionar Experiência

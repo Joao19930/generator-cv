@@ -18,7 +18,7 @@ export default function SummarySection() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: '#64748b' }}>
+        <span style={{ fontSize: 12, color: '#94A3B8' }}>
           {summary.length}/{MAX_CHARS} caracteres
         </span>
         <AIButton prompt={aiPrompt} onResult={setSummary}>
@@ -32,23 +32,24 @@ export default function SummarySection() {
         rows={5}
         style={{
           width: '100%',
-          background: '#0f172a',
-          border: '1px solid #334155',
-          borderRadius: 8,
-          padding: '10px 12px',
-          color: '#f8fafc',
-          fontSize: 13,
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: 12,
+          padding: '12px 14px',
+          color: '#1E293B',
+          fontSize: 14,
           lineHeight: 1.6,
           resize: 'vertical',
           outline: 'none',
           fontFamily: 'inherit',
-          transition: 'border-color 0.15s',
+          transition: 'border-color 0.15s, box-shadow 0.15s',
+          boxSizing: 'border-box',
         }}
-        onFocus={e => (e.target.style.borderColor = '#f59e0b')}
-        onBlur={e => (e.target.style.borderColor = '#334155')}
+        onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+        onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
       />
       {summary.length >= MAX_CHARS * 0.9 && (
-        <p style={{ fontSize: 11, color: '#f59e0b' }}>
+        <p style={{ fontSize: 12, color: '#F59E0B' }}>
           A aproximar-se do limite de caracteres
         </p>
       )}
