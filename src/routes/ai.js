@@ -69,7 +69,7 @@ function localFallback(prompt) {
     // Parar no primeiro delimitador (vírgula, ponto, newline) para não capturar instruções
     const cargoMatch = prompt.match(/cargo[:\s]+([^,.\n]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
-    return `${cargo} com sólida experiência na área, orientado(a) para resultados e com capacidade de trabalhar em ambientes exigentes. Destaco-me pela proactividade, rigor técnico e compromisso com a qualidade do trabalho entregue.`;
+    return `${cargo} com sólida experiência na área, orientado(a) para resultados e com capacidade de trabalhar em ambientes dinâmicos e exigentes. Ao longo da carreira, desenvolvi competências técnicas e relacionais que me permitem contribuir de forma consistente para os objectivos das organizações. Destaco-me pela proactividade, rigor técnico e compromisso com a qualidade do trabalho entregue. Procuro continuamente evoluir e acrescentar valor em cada projecto em que me envolvo.`;
   }
 
   // Caso 2: melhorar bullet de experiência

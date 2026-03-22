@@ -10,7 +10,7 @@ export default function SummarySection() {
   const aiPrompt = [
     `Escreve um resumo profissional em português para um CV.`,
     `Nome: ${personal.fullName || 'não especificado'}`,
-    `Cargo actual: ${personal.jobTitle || 'não especificado'}`,
+    `Cargo: ${personal.jobTitle || 'não especificado'}`,
     `Experiências: ${expList}`,
     `Regras: máximo 3 frases, máximo 350 caracteres, começa directamente com o cargo ou nome, sem aspas, sem títulos, sem explicações — apenas o texto do resumo.`,
   ].join('\n')
