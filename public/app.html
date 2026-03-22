@@ -2876,11 +2876,33 @@ function copyCover() {
 }
 
 /* ── COURSES ───────────────────────────────────── */
+function buildCourseLink(c) {
+  const raw  = (c.Url || c.url || '').trim();
+  const type = (c.ContactType || c.contact_type || 'url').toLowerCase();
+  if (!raw) return null;
+  if (type === 'whatsapp') {
+    // normalizar número: remover espaços/traços, garantir código de país
+    const num = raw.replace(/[\s\-\(\)]/g, '');
+    const full = num.startsWith('+') ? num.replace('+','') : (num.startsWith('244') ? num : '244' + num);
+    const msg  = encodeURIComponent('Olá! Tenho interesse em obter mais informações sobre este curso.');
+    return { href: `https://wa.me/${full}?text=${msg}`, icon: '💬', label: 'Contactar via WhatsApp' };
+  }
+  if (type === 'email') {
+    const subj = encodeURIComponent('Informações sobre o curso');
+    return { href: `mailto:${raw}?subject=${subj}`, icon: '✉️', label: 'Enviar Email' };
+  }
+  // url — garantir protocolo
+  const href = /^https?:\/\//.test(raw) ? raw : 'https://' + raw;
+  return { href, icon: '🔗', label: 'Aceder ao curso' };
+}
+
 function renderCourses(list) {
   const g = document.getElementById('coursesList');
   if (!list.length) { g.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="empty-t">Nenhum curso disponível</div><div class="empty-s">O administrador ainda não publicou cursos.</div></div></div>`; return; }
   const stars = n => Array(5).fill(0).map((_,i) => `<span style="color:${i < Math.round(parseFloat(n||5)) ? 'var(--gold)' : '#E2E8F0'}">★</span>`).join('');
-  g.innerHTML = list.map(c => `
+  g.innerHTML = list.map(c => {
+    const link = buildCourseLink(c);
+    return `
     <div class="c-card">
       <div class="c-card-hdr">
         <div>
@@ -2892,9 +2914,12 @@ function renderCourses(list) {
       <div class="c-stars">${stars(c.Rating)}</div>
       ${c.Rating ? `<div style="font-size:11px;color:var(--t3);">Avaliação: <strong>${c.Rating}/5</strong></div>` : ''}
       <div class="c-actions">
-        ${c.Url ? `<a href="${c.Url}" target="_blank" class="btn-sm btn-blue-sm">Aceder ao curso</a>` : `<span class="btn-sm btn-out-sm">Em breve</span>`}
+        ${link
+          ? `<a href="${link.href}" target="_blank" rel="noopener" class="btn-sm btn-blue-sm">${link.icon} ${link.label}</a>`
+          : `<span class="btn-sm btn-out-sm">Em breve</span>`}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function filterCourses(q) {
