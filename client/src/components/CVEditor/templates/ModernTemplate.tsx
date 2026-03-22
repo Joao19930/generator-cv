@@ -52,9 +52,10 @@ export default function ModernTemplate() {
   }, [])
 
   const lh = lineSpacing === 'compact' ? 1.3 : lineSpacing === 'spacious' ? 1.9 : 1.6
+  const fs = fontSize // base font size from store (default 11)
 
   const sidebarSecTitleStyle: React.CSSProperties = {
-    fontSize: 9,
+    fontSize: fs - 1,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '2px',
@@ -65,7 +66,7 @@ export default function ModernTemplate() {
   }
 
   const mainSecTitleStyle: React.CSSProperties = {
-    fontSize: 9,
+    fontSize: fs,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '2px',
@@ -82,15 +83,15 @@ export default function ModernTemplate() {
           <div style={sidebarSecTitleStyle}>Formação</div>
           {education.map((edu, i) => (
             <div key={edu.id} style={{ marginBottom: i < education.length - 1 ? 10 : 0 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#111827' }}>
+              <div style={{ fontSize: fs + 1, fontWeight: 700, color: '#111827' }}>
                 {edu.degree}{edu.field ? `, ${edu.field}` : ''}
               </div>
-              <div style={{ fontSize: 9, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
-              <div style={{ fontSize: 8, color: '#6b7280',  }}>
+              <div style={{ fontSize: fs, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
+              <div style={{ fontSize: fs - 1, color: '#6b7280' }}>
                 {fmtDateRange(edu.startDate, edu.endDate, false)}
               </div>
               {edu.description && (
-                <div style={{ fontSize: 8, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
+                <div style={{ fontSize: fs - 1, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
                   {edu.description}
                 </div>
               )}
@@ -108,8 +109,8 @@ export default function ModernTemplate() {
             {skills.map(sk => (
               <div key={sk.id}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: 9, color: '#374151', fontWeight: 500 }}>{sk.name}</span>
-                  <span style={{ fontSize: 8, color: '#9ca3af' }}>{sk.level}</span>
+                  <span style={{ fontSize: fs, color: '#374151', fontWeight: 500 }}>{sk.name}</span>
+                  <span style={{ fontSize: fs - 1, color: '#9ca3af' }}>{sk.level}</span>
                 </div>
                 <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
                   <div style={{
@@ -133,8 +134,8 @@ export default function ModernTemplate() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {languages.map(lang => (
               <div key={lang.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 9, fontWeight: 500, color: '#374151' }}>{lang.name}</span>
-                <span style={{ fontSize: 9, color: '#9ca3af' }}>{lang.level}</span>
+                <span style={{ fontSize: fs, fontWeight: 500, color: '#374151' }}>{lang.name}</span>
+                <span style={{ fontSize: fs, color: '#9ca3af' }}>{lang.level}</span>
               </div>
             ))}
           </div>
@@ -155,7 +156,7 @@ export default function ModernTemplate() {
               {habilidades.map(h => (
                 <div key={h.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontSize: 9, color: '#374151', fontWeight: 500 }}>{h.name}</span>
+                    <span style={{ fontSize: fs, color: '#374151', fontWeight: 500 }}>{h.name}</span>
                   </div>
                   <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
                     <div style={{
@@ -176,12 +177,12 @@ export default function ModernTemplate() {
             <div style={sidebarSecTitleStyle}>Cursos</div>
             {cursos.slice(0, 5).map((c, i) => (
               <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
-                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
-                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{c}</span>
+                <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: fs - 1, color: '#374151', lineHeight: 1.4 }}>{c}</span>
               </div>
             ))}
             {cursos.length > 5 && (
-              <div style={{ fontSize: 8, color: '#9ca3af', marginTop: 2 }}>+{cursos.length - 5} mais</div>
+              <div style={{ fontSize: fs - 1, color: '#9ca3af', marginTop: 2 }}>+{cursos.length - 5} mais</div>
             )}
           </div>
         )}
@@ -191,8 +192,8 @@ export default function ModernTemplate() {
             <div style={sidebarSecTitleStyle}>Interesses</div>
             {interesses.map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
-                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
-                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{item}</span>
+                <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: fs - 1, color: '#374151', lineHeight: 1.4 }}>{item}</span>
               </div>
             ))}
           </div>
@@ -211,8 +212,7 @@ export default function ModernTemplate() {
           <div style={{
             borderLeft: `1.5px solid ${primaryColor}`,
             paddingLeft: 10,
-            
-            fontSize: 9,
+            fontSize: fs,
             fontWeight: 300,
             color: '#374151',
             lineHeight: 1.6,
@@ -251,15 +251,15 @@ export default function ModernTemplate() {
               </div>
               {/* Content */}
               <div style={{ flex: 1, paddingBottom: 4 }}>
-                <div style={{ fontWeight: 700, fontSize: 11, color: '#111827' }}>{exp.role}</div>
-                <div style={{ fontWeight: 600, fontSize: 10, color: primaryColor }}>
+                <div style={{ fontWeight: 700, fontSize: fs + 2, color: '#111827' }}>{exp.role}</div>
+                <div style={{ fontWeight: 600, fontSize: fs + 1, color: primaryColor }}>
                   {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                 </div>
-                <div style={{ fontSize: 9, color: '#6b7280',  marginBottom: 3 }}>
+                <div style={{ fontSize: fs - 1, color: '#6b7280', marginBottom: 3 }}>
                   {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
                 </div>
                 {exp.description && (
-                  <div style={{ marginTop: 4, fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: 1.5 }}>
+                  <div style={{ marginTop: 4, fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: 1.5 }}>
                     {exp.description}
                   </div>
                 )}
@@ -277,11 +277,11 @@ export default function ModernTemplate() {
           {certifications.map(cert => (
             <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
               <div>
-                <span style={{ fontWeight: 600, fontSize: 9, color: '#111827' }}>{cert.name}</span>
-                {cert.issuer && <span style={{ color: '#6b7280', fontSize: 9 }}> — {cert.issuer}</span>}
+                <span style={{ fontWeight: 600, fontSize: fs, color: '#111827' }}>{cert.name}</span>
+                {cert.issuer && <span style={{ color: '#6b7280', fontSize: fs }}> — {cert.issuer}</span>}
               </div>
               {cert.date && (
-                <span style={{ fontSize: 8, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
+                <span style={{ fontSize: fs - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
                   {fmtDate(cert.date)}
                 </span>
               )}
@@ -298,7 +298,7 @@ export default function ModernTemplate() {
       return (
         <div key={key} style={{ marginBottom: 16 }}>
           <div style={mainSecTitleStyle}>{cs.title}</div>
-          <p style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0, whiteSpace: 'pre-line' }}>
+          <p style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0, whiteSpace: 'pre-line' }}>
             {cs.content}
           </p>
         </div>
@@ -339,7 +339,7 @@ export default function ModernTemplate() {
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{
-            fontSize: 22,
+            fontSize: fs + 12,
             fontWeight: 700,
             color: '#111827',
             fontFamily: "'Poppins', sans-serif",
@@ -350,7 +350,7 @@ export default function ModernTemplate() {
           </h1>
           {personal.jobTitle && (
             <p style={{
-              fontSize: 9,
+              fontSize: fs - 1,
               fontWeight: 500,
               textTransform: 'uppercase',
               letterSpacing: '2.8px',
@@ -360,7 +360,7 @@ export default function ModernTemplate() {
               {personal.jobTitle}
             </p>
           )}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: 9, color: '#6b7280' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: fs, color: '#6b7280' }}>
             {personal.email && <span>{personal.email}</span>}
             {personal.phone && <span>{personal.phone}</span>}
             {personal.address && <span>{personal.address}</span>}

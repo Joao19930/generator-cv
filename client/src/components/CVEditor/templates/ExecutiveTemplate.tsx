@@ -52,9 +52,10 @@ export default function ExecutiveTemplate() {
   }, [])
 
   const lh = lineSpacing === 'compact' ? 1.3 : lineSpacing === 'spacious' ? 1.9 : 1.6
+  const fs = fontSize // base font size from store (default 11)
 
   const sidebarSecTitleStyle: React.CSSProperties = {
-    fontSize: 8,
+    fontSize: fs - 1,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '2px',
@@ -65,7 +66,7 @@ export default function ExecutiveTemplate() {
   }
 
   const mainSecTitleStyle: React.CSSProperties = {
-    fontSize: 9,
+    fontSize: fs,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '2px',
@@ -82,7 +83,7 @@ export default function ExecutiveTemplate() {
       return (
         <div key="summary" style={{ marginBottom: 18 }}>
           <div style={mainSecTitleStyle}>Resumo Profissional</div>
-          <p style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0 }}>
+          <p style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0 }}>
             {summary}
           </p>
         </div>
@@ -95,11 +96,11 @@ export default function ExecutiveTemplate() {
           <div style={mainSecTitleStyle}>Experiência Profissional</div>
           {experience.map((exp, i) => (
             <div key={exp.id} style={{ marginBottom: i < experience.length - 1 ? 12 : 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>{exp.role}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: primaryColor }}>
+              <div style={{ fontSize: fs + 2, fontWeight: 700, color: '#111827' }}>{exp.role}</div>
+              <div style={{ fontSize: fs + 1, fontWeight: 600, color: primaryColor }}>
                 {exp.company}{exp.location ? ` — ${exp.location}` : ''}
               </div>
-              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280',  marginBottom: 3 }}>
+              <div style={{ fontSize: fs - 1, fontWeight: 400, color: '#6b7280', marginBottom: 3 }}>
                 {fmtDateRange(exp.startDate, exp.endDate, exp.current)}
               </div>
               {exp.description && (
@@ -107,8 +108,8 @@ export default function ExecutiveTemplate() {
                   {exp.description.split('\n').map((line, li) => (
                     line.trim() ? (
                       <div key={li} style={{ display: 'flex', gap: 5, marginBottom: 2 }}>
-                        <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0, lineHeight: lh }}>–</span>
-                        <span style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh }}>{line.trim()}</span>
+                        <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0, lineHeight: lh }}>–</span>
+                        <span style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh }}>{line.trim()}</span>
                       </div>
                     ) : null
                   ))}
@@ -126,15 +127,15 @@ export default function ExecutiveTemplate() {
           <div style={mainSecTitleStyle}>Formação Académica</div>
           {education.map((edu, i) => (
             <div key={edu.id} style={{ marginBottom: i < education.length - 1 ? 10 : 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>
+              <div style={{ fontSize: fs + 2, fontWeight: 700, color: '#111827' }}>
                 {edu.degree}{edu.field ? `, ${edu.field}` : ''}
               </div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
-              <div style={{ fontSize: 9, fontWeight: 400, color: '#6b7280',  }}>
+              <div style={{ fontSize: fs + 1, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
+              <div style={{ fontSize: fs - 1, fontWeight: 400, color: '#6b7280' }}>
                 {fmtDateRange(edu.startDate, edu.endDate, false)}
               </div>
               {edu.description && (
-                <div style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
+                <div style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>
                   {edu.description}
                 </div>
               )}
@@ -151,11 +152,11 @@ export default function ExecutiveTemplate() {
           {certifications.map(cert => (
             <div key={cert.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <div>
-                <span style={{ fontWeight: 600, fontSize: 9, color: '#111827' }}>{cert.name}</span>
-                {cert.issuer && <span style={{ color: '#6b7280', fontSize: 9 }}> — {cert.issuer}</span>}
+                <span style={{ fontWeight: 600, fontSize: fs, color: '#111827' }}>{cert.name}</span>
+                {cert.issuer && <span style={{ color: '#6b7280', fontSize: fs }}> — {cert.issuer}</span>}
               </div>
               {cert.date && (
-                <span style={{ fontSize: 8, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
+                <span style={{ fontSize: fs - 1, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>
                   {fmtDate(cert.date)}
                 </span>
               )}
@@ -172,7 +173,7 @@ export default function ExecutiveTemplate() {
       return (
         <div key={key} style={{ marginBottom: 18 }}>
           <div style={mainSecTitleStyle}>{cs.title}</div>
-          <p style={{ fontSize: 9, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0, whiteSpace: 'pre-line' }}>
+          <p style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh, margin: 0, whiteSpace: 'pre-line' }}>
             {cs.content}
           </p>
         </div>
@@ -215,14 +216,14 @@ export default function ExecutiveTemplate() {
         )}
 
         {/* Name */}
-        <div style={{ fontSize: 20, fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>
+        <div style={{ fontSize: fs + 10, fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>
           {personal.fullName || 'Nome Completo'}
         </div>
 
         {/* Job title */}
         {personal.jobTitle && (
           <div style={{
-            fontSize: 9,
+            fontSize: fs - 1,
             fontWeight: 500,
             textTransform: 'uppercase',
             letterSpacing: '2.8px',
@@ -240,35 +241,35 @@ export default function ExecutiveTemplate() {
         <div style={{ marginBottom: 18 }}>
           <div style={sidebarSecTitleStyle}>Contacto</div>
           {personal.email && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: 9, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: fs, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
               {personal.email}
             </div>
           )}
           {personal.phone && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: 9, color: '#374151', fontWeight: 400 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: fs, color: '#374151', fontWeight: 400 }}>
               {personal.phone}
             </div>
           )}
           {personal.address && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: 9, color: '#374151', fontWeight: 400 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: fs, color: '#374151', fontWeight: 400 }}>
               {personal.address}
             </div>
           )}
           {personal.linkedin && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: 9, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: fs, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
               {personal.linkedin}
             </div>
           )}
           {personal.website && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: 9, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, fontSize: fs, color: '#374151', fontWeight: 400, wordBreak: 'break-all' }}>
               {personal.website}
             </div>
           )}
           {personal.showNationality && personal.nationality && (
-            <div style={{ fontSize: 9, color: '#374151', marginBottom: 4 }}>{personal.nationality}</div>
+            <div style={{ fontSize: fs, color: '#374151', marginBottom: 4 }}>{personal.nationality}</div>
           )}
           {personal.showBirthDate && personal.birthDate && (
-            <div style={{ fontSize: 9, color: '#374151', marginBottom: 4 }}>{personal.birthDate}</div>
+            <div style={{ fontSize: fs, color: '#374151', marginBottom: 4 }}>{personal.birthDate}</div>
           )}
         </div>
 
@@ -286,7 +287,7 @@ export default function ExecutiveTemplate() {
                     border: '1px solid #ddd9d2',
                     background: '#fafaf9',
                     borderRadius: 20,
-                    fontSize: 8,
+                    fontSize: fs - 1,
                     fontWeight: 600,
                     color: '#374151',
                     margin: '0 3px 4px 0',
@@ -304,7 +305,7 @@ export default function ExecutiveTemplate() {
           <div style={{ marginBottom: 18 }}>
             <div style={sidebarSecTitleStyle}>Idiomas</div>
             {languages.map(lang => (
-              <div key={lang.id} style={{ fontSize: 9, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
+              <div key={lang.id} style={{ fontSize: fs, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
                 <strong style={{ color: '#111827' }}>{lang.name}</strong>
                 {lang.level ? ` — ${lang.level}` : ''}
               </div>
@@ -320,7 +321,7 @@ export default function ExecutiveTemplate() {
               {habilidades.map(h => (
                 <div key={h.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontSize: 9, color: '#374151', fontWeight: 500 }}>{h.name}</span>
+                    <span style={{ fontSize: fs, color: '#374151', fontWeight: 500 }}>{h.name}</span>
                   </div>
                   <div style={{ height: 3, background: '#e5e7eb', borderRadius: 2 }}>
                     <div style={{
@@ -342,12 +343,12 @@ export default function ExecutiveTemplate() {
             <div style={sidebarSecTitleStyle}>Cursos</div>
             {cursos.slice(0, 5).map((c, i) => (
               <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
-                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
-                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{c}</span>
+                <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: fs - 1, color: '#374151', lineHeight: 1.4 }}>{c}</span>
               </div>
             ))}
             {cursos.length > 5 && (
-              <div style={{ fontSize: 8, color: '#9ca3af', marginTop: 2 }}>+{cursos.length - 5} mais</div>
+              <div style={{ fontSize: fs - 1, color: '#9ca3af', marginTop: 2 }}>+{cursos.length - 5} mais</div>
             )}
           </div>
         )}
@@ -358,8 +359,8 @@ export default function ExecutiveTemplate() {
             <div style={sidebarSecTitleStyle}>Interesses</div>
             {interesses.map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 5, marginBottom: 3 }}>
-                <span style={{ color: primaryColor, fontSize: 9, fontWeight: 700, flexShrink: 0 }}>–</span>
-                <span style={{ fontSize: 8, color: '#374151', lineHeight: 1.4 }}>{item}</span>
+                <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0 }}>–</span>
+                <span style={{ fontSize: fs - 1, color: '#374151', lineHeight: 1.4 }}>{item}</span>
               </div>
             ))}
           </div>
