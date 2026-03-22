@@ -45,20 +45,6 @@ const STEPS = [
   },
 ] as const
 
-function calcProgress(store: ReturnType<typeof useCVStore.getState>): number {
-  let score = 0
-  if (store.personal.fullName) score += 1
-  if (store.personal.email) score += 1
-  if (store.personal.phone) score += 0.5
-  if (store.personal.jobTitle) score += 1
-  if (store.personal.address) score += 0.5
-  if (store.summary && store.summary.length > 50) score += 1.5
-  if (store.experience.length > 0) score += 1.5
-  if (store.education.length > 0) score += 1
-  if (store.skills.length >= 3) score += 1
-  if (store.languages.length > 0) score += 0.5
-  return Math.min(100, Math.round((score / 10) * 100))
-}
 
 function isStepDone(i: number, store: ReturnType<typeof useCVStore.getState>): boolean {
   if (i === 0) return !!(store.personal.fullName && store.personal.email)
@@ -118,7 +104,6 @@ function JobsBanner({ jobTitle }: { jobTitle: string }) {
 export default function WizardPanel() {
   const [step, setStep] = useState(0)
   const store = useCVStore()
-  const progress = calcProgress(store)
   const totalSteps = STEPS.length
   const currentStep = STEPS[step]
   const Icon = currentStep.icon
@@ -126,10 +111,10 @@ export default function WizardPanel() {
   const cvDone = isLastStep && isStepDone(4, store)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e293b' }}>
 
-      {/* Step indicators */}
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', background: '#FAFBFC' }}>
+      {/* Step indicators — dark */}
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #334155', background: '#0f172a' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {STEPS.map((s, i) => {
             const done = isStepDone(i, store)
@@ -183,44 +168,45 @@ export default function WizardPanel() {
         </div>
       </div>
 
-      {/* Section header + inline tip */}
-      <div style={{ padding: '18px 24px 12px', borderBottom: '1px solid #F1F5F9' }}>
+      {/* Section header + inline tip — dark */}
+      <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #334155', background: '#1e293b' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: 11,
-            background: '#EFF6FF',
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: '#0f172a',
+            border: '1px solid #334155',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <Icon size={19} style={{ color: '#1E40AF' }} />
+            <Icon size={18} style={{ color: '#f59e0b' }} />
           </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#1E293B' }}>{currentStep.label}</h2>
-            <p style={{ margin: 0, fontSize: 11, color: '#94A3B8', marginTop: 1 }}>{currentStep.subtitle}</p>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f1f5f9' }}>{currentStep.label}</h2>
+            <p style={{ margin: 0, fontSize: 11, color: '#64748b', marginTop: 1 }}>{currentStep.subtitle}</p>
           </div>
         </div>
 
-        {/* Inline tip — always visible, per step */}
+        {/* Inline tip — amber left border, dark bg */}
         <div style={{
-          marginTop: 12,
-          padding: '8px 12px',
-          background: '#FAFBFC',
-          border: '1px solid #F1F5F9',
-          borderRadius: 8,
-          borderLeft: '3px solid #F59E0B',
+          marginTop: 10,
+          padding: '7px 11px',
+          background: '#0f172a',
+          border: '1px solid #1e293b',
+          borderRadius: 7,
+          borderLeft: '3px solid #f59e0b',
         }}>
-          <p style={{ margin: 0, fontSize: 11, color: '#64748B', lineHeight: 1.5 }}>
+          <p style={{ margin: 0, fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
             {currentStep.tip}
           </p>
         </div>
       </div>
 
-      {/* Section content — scrollable */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+      {/* Section content — fundo claro para os form cards */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px', background: '#F5F7FA' }}>
         {step === 0 && <PersonalSection />}
         {step === 1 && <ExperienceSection />}
         {step === 2 && <EducationSection />}
@@ -234,14 +220,14 @@ export default function WizardPanel() {
         )}
       </div>
 
-      {/* Navigation footer */}
+      {/* Navigation footer — dark */}
       <div style={{
-        padding: '14px 24px',
-        borderTop: '1px solid #F1F5F9',
+        padding: '12px 20px',
+        borderTop: '1px solid #334155',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: '#FAFBFC',
+        background: '#0f172a',
         flexShrink: 0,
       }}>
         <button
@@ -252,11 +238,11 @@ export default function WizardPanel() {
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            padding: '9px 16px',
-            background: step === 0 ? '#F8FAFC' : '#FFFFFF',
-            border: '1px solid #E2E8F0',
-            borderRadius: 10,
-            color: step === 0 ? '#CBD5E1' : '#64748B',
+            padding: '8px 14px',
+            background: 'transparent',
+            border: '1px solid #334155',
+            borderRadius: 8,
+            color: step === 0 ? '#334155' : '#94a3b8',
             fontSize: 13,
             fontWeight: 600,
             cursor: step === 0 ? 'not-allowed' : 'pointer',
@@ -266,7 +252,7 @@ export default function WizardPanel() {
           Anterior
         </button>
 
-        <span style={{ fontSize: 11, color: '#CBD5E1', fontWeight: 500 }}>
+        <span style={{ fontSize: 11, color: '#334155', fontWeight: 500 }}>
           {step + 1} / {totalSteps}
         </span>
 
