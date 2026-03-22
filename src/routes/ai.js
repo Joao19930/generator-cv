@@ -72,25 +72,24 @@ function localFallback(prompt) {
     return `${cargo} com sólida experiência na área, orientado(a) para resultados e com capacidade de trabalhar em ambientes dinâmicos e exigentes. Ao longo da carreira, desenvolvi competências técnicas e relacionais que me permitem contribuir de forma consistente para os objectivos das organizações. Destaco-me pela proactividade, rigor técnico e compromisso com a qualidade do trabalho entregue. Procuro continuamente evoluir e acrescentar valor em cada projecto em que me envolvo.`;
   }
 
-  // Caso 2: melhorar bullet de experiência
-  if (p.includes('melhora este') || p.includes('bullet') || p.includes('verbo de acção')) {
+  // Caso 2: melhorar bullet isolado (prompt curto, contém "melhora este" ou "verbo de acção")
+  if (p.includes('melhora este') || p.includes('verbo de ac')) {
     const textMatch = prompt.match(/texto[:\s]+([^\n]+)/i) || prompt.match(/"([^"]+)"/);
     if (textMatch) {
       const t = textMatch[1].trim();
       return `Implementei e optimizei ${t.charAt(0).toLowerCase() + t.slice(1)}, contribuindo directamente para a melhoria dos resultados da organização.`;
     }
-    return null;
   }
 
   // Caso 3: sugerir competências
-  if (p.includes('competências') || p.includes('lista') || p.includes('skills')) {
+  if (p.includes('compet') || p.includes('lista') || p.includes('skills')) {
     const cargoMatch = prompt.match(/profissional de ([^\n,]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim().toLowerCase() : '';
     if (/inform|software|programa|ti\b|it\b/.test(cargo))
       return 'JavaScript, Python, SQL, Git, React, Node.js, Docker, APIs REST';
     if (/market|comunica|digital/.test(cargo))
       return 'Google Analytics, SEO, Redes Sociais, Copywriting, Canva, Email Marketing';
-    if (/gestão|director|manager|lider/.test(cargo))
+    if (/gest|director|manager|lider/.test(cargo))
       return 'Liderança de Equipas, Gestão de Projectos, KPIs, Orçamentação, Excel Avançado';
     if (/contabil|financ|audit/.test(cargo))
       return 'Excel Avançado, SAP, Reconciliação Bancária, Relatórios Financeiros, IRT, INSS';
@@ -98,9 +97,10 @@ function localFallback(prompt) {
   }
 
   // Caso 4: descrição de experiência (ExperienceSection do editor React)
-  if (p.includes('descrição profissional para experiência') || p.includes('escreve uma descrição') || p.includes('bullets com •')) {
-    const cargoMatch = prompt.match(/cargo[:\s]+([^\n]+)/i);
-    const empresaMatch = prompt.match(/empresa[:\s]+([^\n]+)/i);
+  // Detectar pelo par Cargo+Empresa que é exclusivo deste prompt
+  if (p.includes('cargo:') && p.includes('empresa:')) {
+    const cargoMatch = prompt.match(/Cargo[:\s]+([^\n]+)/i);
+    const empresaMatch = prompt.match(/Empresa[:\s]+([^\n]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
     const empresa = empresaMatch ? empresaMatch[1].trim() : '';
     const ctx = empresa && empresa !== 'não especificada' ? ` na ${empresa}` : '';
