@@ -93,6 +93,9 @@ app.get('/linkedin-import', (req, res) => { noCache(res); res.sendFile(path.join
 app.get('/admin-chat-training', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'admin-chat-training.html')));
 
+app.get('/admin-job-templates', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin-job-templates.html')));
+
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'admin-login.html')));

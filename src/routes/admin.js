@@ -837,4 +837,30 @@ router.post('/chat-knowledge/generate', async (req, res) => {
   }
 });
 
+// ── GET /api/admin/job-templates — ler templates de experiência/resumo
+router.get('/job-templates', (req, res) => {
+  const file = path.join(__dirname, '../data/jobTemplates.json');
+  try {
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: 'Não foi possível ler o ficheiro de templates.' });
+  }
+});
+
+// ── PUT /api/admin/job-templates — guardar templates editados
+router.put('/job-templates', (req, res) => {
+  const file = path.join(__dirname, '../data/jobTemplates.json');
+  try {
+    const existing = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const { experience, summary } = req.body;
+    if (experience) existing.experience = experience;
+    if (summary) existing.summary = summary;
+    fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

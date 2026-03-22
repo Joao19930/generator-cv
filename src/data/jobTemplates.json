@@ -1,0 +1,56 @@
+{
+  "_info": "Edita estes bullets para personalizar o texto gerado pelo assistente de IA quando não há créditos Anthropic. Cada área pode ter até 6 bullets. Usa \\n para separar linhas no campo de experiência.",
+  "experience": {
+    "rh": [
+      "Liderou processos de recrutamento e selecção de quadros{ctx}, assegurando contratações alinhadas com a cultura organizacional",
+      "Implementou políticas de avaliação de desempenho e planos de desenvolvimento individual para os colaboradores",
+      "Geriu relações laborais e assegurou conformidade com a legislação angolana do trabalho",
+      "Coordenou formações internas e programas de integração para novos colaboradores"
+    ],
+    "comercial": [
+      "Geriu carteira de clientes{ctx}, cumprindo e superando as metas comerciais definidas pela direcção",
+      "Negociou contratos e parcerias estratégicas com empresas e instituições em Angola",
+      "Identificou oportunidades de mercado e desenvolveu propostas comerciais competitivas",
+      "Elaborou relatórios de desempenho comercial e apresentou resultados à direcção"
+    ],
+    "financeiro": [
+      "Supervisionou a contabilidade geral e preparação de demonstrações financeiras{ctx}",
+      "Garantiu conformidade fiscal e cumprimento das obrigações com AGT e INSS",
+      "Elaborou orçamentos, previsões de cash-flow e análises de desvios mensais",
+      "Coordenou auditorias internas e implementou melhorias nos controlos financeiros"
+    ],
+    "ti": [
+      "Desenvolveu e manteve sistemas e aplicações{ctx} utilizando tecnologias adequadas às necessidades do negócio",
+      "Implementou melhorias técnicas que aumentaram a estabilidade e performance dos sistemas",
+      "Colaborou com equipas multidisciplinares em projectos de transformação digital",
+      "Documentou processos e assegurou a segurança e integridade dos dados organizacionais"
+    ],
+    "gestao": [
+      "Liderou equipa de colaboradores{ctx}, promovendo cultura de responsabilidade e orientação para resultados",
+      "Definiu objectivos estratégicos e acompanhou indicadores de desempenho mensais",
+      "Optimizou processos operacionais, garantindo qualidade e eficiência no cumprimento dos prazos",
+      "Reportou à administração e propôs planos de melhoria contínua baseados em dados"
+    ],
+    "marketing": [
+      "Planeou e executou campanhas de marketing digital e tradicional{ctx}",
+      "Geriu redes sociais e conteúdos, aumentando o alcance e a notoriedade da marca",
+      "Analisou métricas de desempenho e ajustou estratégias para maximizar o retorno",
+      "Coordenou produção de materiais de comunicação e identidade visual da organização"
+    ],
+    "default": [
+      "Desempenhou as funções de {cargo}{ctx} com elevado sentido de responsabilidade e orientação para resultados",
+      "Optimizou processos internos, contribuindo para a melhoria da eficiência operacional",
+      "Colaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos",
+      "Elaborou relatórios de actividade e propôs melhorias implementadas com sucesso"
+    ]
+  },
+  "summary": {
+    "rh": "Gestor(a) de Recursos Humanos com {anos} em organizações angolanas, especializado(a) em recrutamento, avaliação de desempenho e relações laborais. {skills}. Liderou processos de gestão de talento que fortaleceram a cultura organizacional e reduziram a rotatividade. Procura contribuir para organizações que valorizam o capital humano como vantagem competitiva.",
+    "comercial": "{cargo} com {anos}{ctx}, especializado(a) em desenvolvimento de negócio e fidelização de clientes B2B e B2C. {skills}. Historial consistente de cumprimento e superação de metas comerciais, com foco em negociação e identificação de oportunidades no mercado angolano. Tem como objectivo integrar uma equipa comercial de referência e continuar a gerar impacto mensurável.",
+    "financeiro": "{cargo} com {anos}{ctx}, especializado(a) em contabilidade geral, reporte financeiro e conformidade fiscal. {skills}. Sólido conhecimento das obrigações perante a AGT e INSS, com experiência na melhoria de controlos internos e fiabilidade dos relatórios mensais. Procura contribuir para a solidez financeira de organizações em crescimento em Angola.",
+    "ti": "{cargo} com {anos}{ctx}, especializado(a) em desenvolvimento de sistemas e transformação digital. {skills}. Experiência em gestão de projectos tecnológicos e entrega de soluções que melhoram a performance operacional. Pretende aplicar competências técnicas em organizações angolanas em processo de modernização.",
+    "gestao": "{cargo} com {anos}{ctx}, com experiência comprovada em liderança de equipas e gestão por objectivos. {skills}. Foco em optimização de processos e desenvolvimento de talento interno, com resultados consistentes na melhoria da eficiência organizacional. Pretende liderar projectos de crescimento em organizações com visão estratégica em Angola.",
+    "marketing": "{cargo} com {anos}{ctx}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. {skills}. Campanha com foco em crescimento orgânico e ROI mensurável, combinando criatividade com análise de dados. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.",
+    "default": "{cargo} com {anos}{ctx}, com historial consistente na entrega de resultados em ambientes exigentes. {skills}. Reconhecido(a) pela capacidade analítica e resolução eficaz de problemas, com contribuição para a melhoria contínua dos processos organizacionais. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola."
+  }
+}

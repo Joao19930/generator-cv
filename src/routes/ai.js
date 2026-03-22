@@ -1,6 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const Anthropic = require('@anthropic-ai/sdk');
+const path = require('path');
+const fs = require('fs');
+
+const TEMPLATES_FILE = path.join(__dirname, '../data/jobTemplates.json');
+
+function loadTemplates() {
+  try {
+    return JSON.parse(fs.readFileSync(TEMPLATES_FILE, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 
 let _client;
 const getClient = () => {
@@ -87,25 +99,37 @@ function localFallback(prompt) {
       ? `Domina ${skillArr.join(', ')}`
       : 'Possui competências técnicas sólidas na área';
 
+    // Tentar usar templates personalizados do ficheiro JSON
+    const tpl = loadTemplates();
+    const sumTpl = tpl && tpl.summary;
+    function applySumTpl(key) {
+      if (!sumTpl || !sumTpl[key]) return null;
+      return sumTpl[key]
+        .replace('{cargo}', cargo)
+        .replace('{anos}', anosStr)
+        .replace(/\{ctx\}/g, ctxEmpresa)
+        .replace('{skills}', skillsFrase);
+    }
+
     if (/rh|recursos humanos|people|talento/.test(c)) {
-      return `Gestor(a) de Recursos Humanos com ${anosStr}${ctxEmpresa}, especializado(a) em recrutamento, avaliação de desempenho e relações laborais. ${skillsFrase}, com profundo conhecimento da legislação laboral angolana. Liderou processos que reduziram o turnover em 20% e melhoraram o clima organizacional. Procura contribuir para organizações que valorizam o capital humano como vantagem competitiva.`;
+      return applySumTpl('rh') || `Gestor(a) de Recursos Humanos com ${anosStr}${ctxEmpresa}, especializado(a) em recrutamento, avaliação de desempenho e relações laborais. ${skillsFrase}, com profundo conhecimento da legislação laboral angolana. Liderou processos de gestão de talento que fortaleceram a cultura organizacional. Procura contribuir para organizações que valorizam o capital humano como vantagem competitiva.`;
     }
     if (/comercial|vendas|sales|negócios|negoc/.test(c)) {
-      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de negócio e fidelização de clientes B2B e B2C. ${skillsFrase}, com historial de superação de metas — aumentou o volume de vendas em 30% no último ano fiscal. Referência em negociação de contratos e identificação de oportunidades no mercado angolano. Tem como objectivo integrar uma equipa comercial de referência e continuar a gerar impacto mensurável.`;
+      return applySumTpl('comercial') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de negócio e fidelização de clientes B2B e B2C. ${skillsFrase}. Historial consistente de cumprimento e superação de metas comerciais, com foco em negociação e identificação de oportunidades no mercado angolano. Tem como objectivo integrar uma equipa comercial de referência e continuar a gerar impacto mensurável.`;
     }
     if (/financ|contab|audit|tesour/.test(c)) {
-      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em contabilidade geral, reporte financeiro e conformidade fiscal. ${skillsFrase}, com sólido conhecimento das obrigações perante a AGT e INSS. Implementou controlos que reduziram erros de reconciliação em 35% e melhoraram a fiabilidade dos relatórios mensais. Procura contribuir para a solidez financeira de organizações em crescimento em Angola.`;
+      return applySumTpl('financeiro') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em contabilidade geral, reporte financeiro e conformidade fiscal. ${skillsFrase}. Sólido conhecimento das obrigações perante a AGT e INSS, com experiência na melhoria de controlos internos e fiabilidade dos relatórios mensais. Procura contribuir para a solidez financeira de organizações em crescimento em Angola.`;
     }
     if (/inform|ti\b|software|programa|system|develop|dados/.test(c)) {
-      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de sistemas e transformação digital. ${skillsFrase}, com experiência em gestão de projectos tecnológicos e arquitectura de soluções. Entregou sistemas que melhoraram a performance operacional em 40% e reduziram custos de manutenção. Pretende aplicar competências técnicas em organizações angolanas em processo de modernização.`;
+      return applySumTpl('ti') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de sistemas e transformação digital. ${skillsFrase}. Experiência em gestão de projectos tecnológicos e entrega de soluções que melhoram a performance operacional. Pretende aplicar competências técnicas em organizações angolanas em processo de modernização.`;
     }
     if (/gest|direct|manager|lider|coord/.test(c)) {
-      return `${cargo} com ${anosStr}${ctxEmpresa}, com experiência comprovada em liderança de equipas e gestão por objectivos. ${skillsFrase}, com foco em optimização de processos e desenvolvimento de talento interno. Conduziu iniciativas que reduziram custos operacionais em 20% mantendo elevados padrões de qualidade. Pretende liderar projectos de crescimento em organizações com visão estratégica em Angola.`;
+      return applySumTpl('gestao') || `${cargo} com ${anosStr}${ctxEmpresa}, com experiência comprovada em liderança de equipas e gestão por objectivos. ${skillsFrase}. Foco em optimização de processos e desenvolvimento de talento interno, com resultados consistentes na melhoria da eficiência organizacional. Pretende liderar projectos de crescimento em organizações com visão estratégica em Angola.`;
     }
     if (/market|comunic|digital|publicid/.test(c)) {
-      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. ${skillsFrase}, com campanhas que aumentaram o reconhecimento de marca em 50% e geraram leads qualificados. Combina criatividade com análise de dados para maximizar o ROI das acções de marketing. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.`;
+      return applySumTpl('marketing') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. ${skillsFrase}. Combina criatividade com análise de dados para maximizar o retorno das acções de marketing. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.`;
     }
-    return `${cargo} com ${anosStr}${ctxEmpresa}, com historial comprovado na entrega de resultados em ambientes exigentes. ${skillsFrase}, sendo reconhecido(a) pela capacidade analítica e resolução eficaz de problemas. Contribuiu para a melhoria de processos que aumentaram a produtividade das equipas em mais de 25%. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
+    return applySumTpl('default') || `${cargo} com ${anosStr}${ctxEmpresa}, com historial consistente na entrega de resultados em ambientes exigentes. ${skillsFrase}. Reconhecido(a) pela capacidade analítica e resolução eficaz de problemas, com contribuição para a melhoria contínua dos processos organizacionais. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
   }
 
   // Caso 2: melhorar bullet isolado (prompt curto, contém "melhora este" ou "verbo de acção")
@@ -143,25 +167,43 @@ function localFallback(prompt) {
     const ctx = temEmpresa ? ` na ${empresa}` : '';
     const c = cargo.toLowerCase();
 
+    // Carregar templates personalizados (editáveis pelo admin)
+    const tpl = loadTemplates();
+    const expTpl = tpl && tpl.experience;
+
+    function applyExpTpl(key) {
+      if (!expTpl || !expTpl[key]) return null;
+      return expTpl[key]
+        .map(b => b.replace(/\{ctx\}/g, ctx).replace('{cargo}', cargo))
+        .join('\n');
+    }
+
     if (/rh|recursos humanos|people|talento/.test(c)) {
-      return `Liderou processos de recrutamento e selecção de quadros${ctx}, reduzindo o tempo de contratação\nImplementou políticas de avaliação de desempenho e planos de desenvolvimento individual\nGeriu relações laborais e assegurou conformidade com a legislação angolana do trabalho\nCoordená formações internas e programas de integração para novos colaboradores`;
+      return applyExpTpl('rh') ||
+        `Liderou processos de recrutamento e selecção de quadros${ctx}, assegurando contratações alinhadas com a cultura organizacional\nImplementou políticas de avaliação de desempenho e planos de desenvolvimento individual\nGeriu relações laborais e assegurou conformidade com a legislação angolana do trabalho\nCoordenou formações internas e programas de integração para novos colaboradores`;
     }
     if (/comercial|vendas|sales|negócios|negoc/.test(c)) {
-      return `Geriu carteira de clientes${ctx}, superando as metas comerciais em 30% no último ano\nNegociou contratos e parcerias estratégicas com empresas e instituições em Luanda\nIdentificou oportunidades de mercado e desenvolveu propostas comerciais competitivas\nElaborou relatórios de desempenho comercial e apresentou resultados à direcção`;
+      return applyExpTpl('comercial') ||
+        `Geriu carteira de clientes${ctx}, cumprindo e superando as metas comerciais definidas pela direcção\nNegociou contratos e parcerias estratégicas com empresas e instituições em Angola\nIdentificou oportunidades de mercado e desenvolveu propostas comerciais competitivas\nElaborou relatórios de desempenho comercial e apresentou resultados à direcção`;
     }
     if (/financ|contab|audit|tesour/.test(c)) {
-      return `Supervisionou a contabilidade geral e preparação de demonstrações financeiras${ctx}\nGarantiu conformidade fiscal e cumprimento das obrigações com AGT e INSS\nElaborou orçamentos, previsões de cash-flow e análises de desvios mensais\nCoordená auditorias internas e implementou melhorias nos controlos financeiros`;
+      return applyExpTpl('financeiro') ||
+        `Supervisionou a contabilidade geral e preparação de demonstrações financeiras${ctx}\nGarantiu conformidade fiscal e cumprimento das obrigações com AGT e INSS\nElaborou orçamentos, previsões de cash-flow e análises de desvios mensais\nCoordenou auditorias internas e implementou melhorias nos controlos financeiros`;
     }
     if (/inform|ti\b|software|programa|system|develop|dados/.test(c)) {
-      return `Desenvolveu e manteve sistemas e aplicações${ctx} utilizando tecnologias modernas\nImplementou melhorias que reduziram falhas e aumentaram a performance em 40%\nColaborou com equipas multidisciplinares em projectos de transformação digital\nDocumentou processos e assegurou a segurança e integridade dos dados`;
+      return applyExpTpl('ti') ||
+        `Desenvolveu e manteve sistemas e aplicações${ctx} utilizando tecnologias adequadas às necessidades do negócio\nImplementou melhorias técnicas que aumentaram a estabilidade e performance dos sistemas\nColaborou com equipas multidisciplinares em projectos de transformação digital\nDocumentou processos e assegurou a segurança e integridade dos dados organizacionais`;
     }
     if (/gest|direct|manager|lider|coord/.test(c)) {
-      return `Liderou equipa de colaboradores${ctx}, promovendo cultura de responsabilidade e resultados\nDefiniu objectivos estratégicos e acompanhou indicadores de desempenho mensais\nOptimizou processos operacionais, reduzindo custos em 20% sem comprometer a qualidade\nReportou à administração e propôs planos de melhoria contínua`;
+      return applyExpTpl('gestao') ||
+        `Liderou equipa de colaboradores${ctx}, promovendo cultura de responsabilidade e orientação para resultados\nDefiniu objectivos estratégicos e acompanhou indicadores de desempenho mensais\nOptimizou processos operacionais, garantindo qualidade e eficiência no cumprimento dos prazos\nReportou à administração e propôs planos de melhoria contínua baseados em dados`;
     }
     if (/market|comunic|digital|publicid/.test(c)) {
-      return `Planeou e executou campanhas de marketing digital e tradicional${ctx}\nGestionou redes sociais e conteúdos, aumentando o alcance em 50% em 6 meses\nAnalisou métricas de desempenho e ajustou estratégias para maximizar o ROI\nCoordená produção de materiais de comunicação e identidade de marca`;
+      return applyExpTpl('marketing') ||
+        `Planeou e executou campanhas de marketing digital e tradicional${ctx}\nGeriu redes sociais e conteúdos, aumentando o alcance e a notoriedade da marca\nAnalisou métricas de desempenho e ajustou estratégias para maximizar o retorno\nCoordenou produção de materiais de comunicação e identidade visual da organização`;
     }
-    return `Desempenhou as funções de ${cargo}${ctx} com elevado sentido de responsabilidade e orientação para resultados\nOptimizou processos internos, contribuindo para a melhoria da eficiência operacional\nColaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos\nElaborou relatórios de actividade e propôs melhorias implementadas com sucesso`;
+    return applyExpTpl('default') ||
+      `Desempenhou as funções de ${cargo}${ctx} com elevado sentido de responsabilidade e orientação para resultados\nOptimizou processos internos, contribuindo para a melhoria da eficiência operacional\nColaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos\nElaborou relatórios de actividade e propôs melhorias implementadas com sucesso`;
   }
 
   // Fallback genérico — nunca retornar null para prompts longos
