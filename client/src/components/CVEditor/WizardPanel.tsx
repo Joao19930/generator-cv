@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { User, Briefcase, GraduationCap, Zap, FileText, Globe, ChevronRight, ChevronLeft, Check, ExternalLink } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { User, Briefcase, GraduationCap, Zap, FileText, Globe, ChevronRight, ChevronLeft, Check, ExternalLink, MapPin, Building2 } from 'lucide-react'
 import PersonalSection from './sections/PersonalSection'
 import ExperienceSection from './sections/ExperienceSection'
 import EducationSection from './sections/EducationSection'
@@ -27,22 +27,132 @@ function isStepDone(i: number, store: ReturnType<typeof useCVStore.getState>): b
   return false
 }
 
-function JobsBanner({ jobTitle }: { jobTitle: string }) {
+type Job = {
+  id: number
+  title: string
+  company: string
+  city: string
+  country: string
+  url: string
+  salary?: string
+}
+
+function MatchingJobs({ jobTitle }: { jobTitle: string }) {
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState('')
+
+  useEffect(() => {
+    const q = jobTitle.trim()
+    if (!q || q === searched) return
+    setLoading(true)
+    setSearched(q)
+    fetch(`/api/empregos?search=${encodeURIComponent(q)}&limit=3`)
+      .then(r => r.ok ? r.json() : { jobs: [] })
+      .then(d => setJobs(d.jobs || []))
+      .catch(() => setJobs([]))
+      .finally(() => setLoading(false))
+  }, [jobTitle])
+
+  if (!jobTitle.trim()) return null
+
   return (
-    <div style={{ marginTop: 16, padding: '14px 16px', background: 'linear-gradient(135deg,#EFF6FF,#F0F9FF)', border: '1px solid #BFDBFE', borderRadius: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <span style={{ fontSize: 18 }}>🎯</span>
-        <div>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#1E40AF' }}>CV pronto? Candidata-te agora</p>
-          <p style={{ margin: 0, fontSize: 11, color: '#64748B', marginTop: 1 }}>Vagas{jobTitle ? ` para ${jobTitle}` : ''} em Angola</p>
+    <div style={{ marginTop: 16 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontSize: 15 }}>🎯</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#1E293B' }}>Vagas compatíveis</span>
+          <span style={{ fontSize: 11, color: '#94A3B8' }}>para {jobTitle}</span>
         </div>
+        <a
+          href={`/empregos?search=${encodeURIComponent(jobTitle)}`}
+          target="_blank"
+          rel="noreferrer"
+          style={{ fontSize: 11, color: '#1E40AF', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}
+        >
+          Ver todas <ExternalLink size={10} />
+        </a>
       </div>
-      <a href="/empregos" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 14px', background: '#1E40AF', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}
-        onMouseEnter={e => (e.currentTarget.style.background = '#1D4ED8')}
-        onMouseLeave={e => (e.currentTarget.style.background = '#1E40AF')}
-      >
-        Ver vagas recomendadas <ExternalLink size={12} />
-      </a>
+
+      {/* Skeletons */}
+      {loading && [0,1,2].map(i => (
+        <div key={i} style={{
+          height: 64, background: '#F1F5F9', borderRadius: 10, marginBottom: 8,
+          animation: 'pulse 1.4s ease-in-out infinite',
+        }} />
+      ))}
+
+      {/* Empty */}
+      {!loading && jobs.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '14px 0', color: '#94A3B8', fontSize: 12 }}>
+          Sem vagas encontradas para esta função.{' '}
+          <a href="/empregos" target="_blank" rel="noreferrer" style={{ color: '#1E40AF' }}>Ver todas as vagas →</a>
+        </div>
+      )}
+
+      {/* Job cards */}
+      {!loading && jobs.map(job => (
+        <div key={job.id} style={{
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: 10,
+          padding: '10px 12px',
+          marginBottom: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: 34, height: 34, borderRadius: 8, flexShrink: 0,
+            background: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Briefcase size={14} color="#1E40AF" />
+          </div>
+
+          {/* Info */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {job.title}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#64748B' }}>
+                <Building2 size={9} /> {job.company || 'Empresa'}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#64748B' }}>
+                <MapPin size={9} /> {job.city || job.country || 'Angola'}
+              </span>
+              {job.salary && (
+                <span style={{ fontSize: 10, color: '#16A34A', fontWeight: 600 }}>{job.salary}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Apply button */}
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              flexShrink: 0,
+              padding: '5px 10px',
+              background: 'linear-gradient(135deg,#1E40AF,#1D4ED8)',
+              borderRadius: 7,
+              color: '#fff',
+              fontSize: 10,
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}
+          >
+            Aplicar <ExternalLink size={9} />
+          </a>
+        </div>
+      ))}
+
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
     </div>
   )
 }
@@ -149,7 +259,7 @@ export default function WizardPanel() {
         {step === 5 && (
           <>
             <SummarySection />
-            {cvDone && <JobsBanner jobTitle={store.personal.jobTitle} />}
+            <MatchingJobs jobTitle={store.personal.jobTitle} />
           </>
         )}
       </div>
