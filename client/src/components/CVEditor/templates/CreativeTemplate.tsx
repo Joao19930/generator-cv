@@ -1,6 +1,12 @@
 import React from 'react' // eslint-disable-line @typescript-eslint/no-unused-vars
 import { useCVStore } from '../../../store/cvStore'
 
+function firstLast(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length <= 2) return name
+  return `${parts[0]} ${parts[parts.length - 1]}`
+}
+
 function fmtDate(d: string) {
   if (!d) return ''
   const [y, m] = d.split('-')
@@ -181,13 +187,13 @@ export default function CreativeTemplate() {
   return (
     <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', background: '#fff', minHeight: '100%' }}>
       {/* Full-width colored header */}
-      <div style={{ background: primaryColor, padding: '40px 75px', display: 'flex', alignItems: 'center', gap: 20 }}>
+      <div style={{ background: primaryColor, padding: '40px 75px 40px 38px', display: 'flex', alignItems: 'center', gap: 20 }}>
         {personal.photo && (
           <img src={personal.photo} alt="foto" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.6)', flexShrink: 0 }} />
         )}
         <div>
           <h1 style={{ fontSize: fontSize + 14, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.1 }}>
-            {personal.fullName || 'Nome Completo'}
+            {firstLast(personal.fullName) || 'Nome Completo'}
           </h1>
           {personal.jobTitle && (
             <div style={{ fontSize: fontSize + 2, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>{personal.jobTitle}</div>
@@ -198,7 +204,7 @@ export default function CreativeTemplate() {
       {/* Contact bar */}
       <div style={{
         background: `${primaryColor}18`,
-        padding: '8px 75px',
+        padding: '8px 75px 8px 38px',
         display: 'flex',
         flexWrap: 'wrap',
         gap: '3px 20px',
@@ -218,7 +224,7 @@ export default function CreativeTemplate() {
       {/* Two-column body */}
       <div style={{ display: 'flex', gap: 0 }}>
         {/* Left 35% */}
-        <div style={{ width: '35%', borderRight: `1px solid ${primaryColor}20`, padding: '24px 20px 75px 75px', flexShrink: 0 }}>
+        <div style={{ width: '35%', borderRight: `1px solid ${primaryColor}20`, padding: '24px 20px 75px 38px', flexShrink: 0 }}>
           {leftKeys.map(k => renderLeft(k))}
         </div>
         {/* Right 65% */}

@@ -11,6 +11,12 @@ function injectPoppins() {
   ;(window as any)[POPPINS_INJECTED_KEY] = true
 }
 
+function firstLast(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length <= 2) return name
+  return `${parts[0]} ${parts[parts.length - 1]}`
+}
+
 function fmtDate(d: string): string {
   if (!d) return ''
   const [y, m] = d.split('-')
@@ -195,7 +201,7 @@ export default function ExecutiveTemplate() {
       <aside style={{
         width: 222,
         background: '#fafaf9',
-        padding: '75px 20px 75px 75px',
+        padding: '75px 20px 75px 38px',
         flexShrink: 0,
         boxSizing: 'border-box',
       }}>
@@ -218,7 +224,7 @@ export default function ExecutiveTemplate() {
 
         {/* Name */}
         <div style={{ fontSize: fs + 10, fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>
-          {personal.fullName || 'Nome Completo'}
+          {firstLast(personal.fullName) || 'Nome Completo'}
         </div>
 
         {/* Job title */}

@@ -1,6 +1,12 @@
 import React from 'react'
 import { useCVStore } from '../../../store/cvStore'
 
+function firstLast(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length <= 2) return name
+  return `${parts[0]} ${parts[parts.length - 1]}`
+}
+
 function fmtDate(d: string) {
   if (!d) return ''
   const [y, m] = d.split('-')
@@ -37,11 +43,11 @@ export default function ClassicTemplate() {
   }
 
   return (
-    <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', padding: '75px', background: '#fff', lineHeight: lh, minHeight: '100%' }}>
+    <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', padding: '75px 75px 75px 38px', background: '#fff', lineHeight: lh, minHeight: '100%' }}>
       {/* Header - centered */}
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <h1 style={{ fontSize: fontSize + 10, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
-          {personal.fullName || 'Nome Completo'}
+          {firstLast(personal.fullName) || 'Nome Completo'}
         </h1>
         {personal.jobTitle && (
           <div style={{ fontSize: fontSize + 1, color: '#374151', marginBottom: 6, fontWeight: 500 }}>

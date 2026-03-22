@@ -11,6 +11,12 @@ function injectPoppins() {
   ;(window as any)[POPPINS_INJECTED_KEY] = true
 }
 
+function firstLast(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length <= 2) return name
+  return `${parts[0]} ${parts[parts.length - 1]}`
+}
+
 function fmtDate(d: string): string {
   if (!d) return ''
   const [y, m] = d.split('-')
@@ -318,7 +324,7 @@ export default function ModernTemplate() {
     }}>
       {/* HEADER */}
       <header style={{
-        padding: '75px 75px 20px',
+        padding: '75px 75px 20px 38px',
         background: '#fff',
         display: 'flex',
         alignItems: 'center',
@@ -347,7 +353,7 @@ export default function ModernTemplate() {
             margin: 0,
             lineHeight: 1.2,
           }}>
-            {personal.fullName || 'Nome Completo'}
+            {firstLast(personal.fullName) || 'Nome Completo'}
           </h1>
           {personal.jobTitle && (
             <p style={{
@@ -386,7 +392,7 @@ export default function ModernTemplate() {
         <aside style={{
           width: 230,
           background: '#fafaf9',
-          padding: '20px 16px 75px 75px',
+          padding: '20px 16px 75px 38px',
           flexShrink: 0,
           boxSizing: 'border-box',
         }}>
