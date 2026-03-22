@@ -50,7 +50,7 @@ export default function PreviewPanel() {
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.15s',
-    border: '1px solid #334155',
+    border: '1px solid #E1DFDD',
   }
 
   return (
@@ -58,19 +58,20 @@ export default function PreviewPanel() {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      background: '#0f172a',
+      background: '#EDEBE9',
       overflow: 'hidden',
     }}>
       {/* Sub-toolbar */}
       <div style={{
-        background: '#1e293b',
-        borderBottom: '1px solid #334155',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E1DFDD',
         height: 44,
         padding: '0 16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexShrink: 0,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}>
         {/* Group 1 — Templates */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -83,9 +84,9 @@ export default function PreviewPanel() {
                 onClick={() => setTemplate(opt.id)}
                 style={{
                   ...subToolbarBtnBase,
-                  background: active ? '#f59e0b' : 'transparent',
-                  color: active ? '#fff' : '#64748b',
-                  borderColor: active ? '#f59e0b' : '#334155',
+                  background: active ? '#f59e0b' : '#FAF9F8',
+                  color: active ? '#fff' : '#605E5C',
+                  borderColor: active ? '#f59e0b' : '#E1DFDD',
                 }}
               >
                 {opt.label}
@@ -131,9 +132,9 @@ export default function PreviewPanel() {
                 onClick={() => setZoom(opt.value)}
                 style={{
                   ...subToolbarBtnBase,
-                  background: active ? '#f59e0b' : 'transparent',
-                  color: active ? '#fff' : '#64748b',
-                  borderColor: active ? '#f59e0b' : '#334155',
+                  background: active ? '#f59e0b' : '#FAF9F8',
+                  color: active ? '#fff' : '#605E5C',
+                  borderColor: active ? '#f59e0b' : '#E1DFDD',
                 }}
               >
                 {opt.label}
@@ -149,8 +150,9 @@ export default function PreviewPanel() {
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         paddingTop: 24,
+        paddingLeft: 20,
       }}>
         {/* Paper container */}
         <div style={{
@@ -174,7 +176,7 @@ export default function PreviewPanel() {
                 width: 794,
                 minHeight: 1123,
                 background: '#fff',
-                boxShadow: '0 4px 32px rgba(0,0,0,0.4)',
+                boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
                 borderRadius: 2,
                 overflow: 'hidden',
               }}
@@ -190,15 +192,16 @@ export default function PreviewPanel() {
         position: 'fixed',
         bottom: 24,
         right: 204,
-        background: 'rgba(30,41,59,0.85)',
-        border: '1px solid #334155',
+        background: 'rgba(255,255,255,0.92)',
+        border: '1px solid #E1DFDD',
         borderRadius: 8,
         padding: '4px 10px',
         fontSize: 11,
-        color: '#64748b',
+        color: '#8A8886',
         backdropFilter: 'blur(8px)',
         zIndex: 40,
         pointerEvents: 'none',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}>
         Página 1 de {pageCount}
       </div>

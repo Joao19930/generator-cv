@@ -57,13 +57,13 @@ export default function WizardPanel() {
   const cvDone = isLastStep && isStepDone(5, store)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0A2540' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <style>{`
         @keyframes fadeSection { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
 
       {/* ── TOPO COMPACTO ──────────────────────────────────── */}
-      <div style={{ flexShrink: 0, background: '#0A2540', borderBottom: '1px solid #1a3a5c' }}>
+      <div style={{ flexShrink: 0, background: '#FFFFFF', borderBottom: '1px solid #E1DFDD' }}>
 
         {/* Linha 1 — Steps horizontais (30px) */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', height: 36, gap: 0 }}>
@@ -86,12 +86,12 @@ export default function WizardPanel() {
                 >
                   {done && !active
                     ? <Check size={11} style={{ color: '#22c55e', flexShrink: 0 }} />
-                    : <StepIcon size={11} style={{ color: active ? '#f59e0b' : '#475569', flexShrink: 0 }} />
+                    : <StepIcon size={11} style={{ color: active ? '#f59e0b' : '#8A8886', flexShrink: 0 }} />
                   }
                   <span style={{
                     fontSize: 10,
                     fontWeight: active ? 700 : 500,
-                    color: active ? '#f59e0b' : done ? '#22c55e' : '#475569',
+                    color: active ? '#f59e0b' : done ? '#22c55e' : '#8A8886',
                     whiteSpace: 'nowrap',
                   }}>
                     {s.label}
@@ -99,7 +99,7 @@ export default function WizardPanel() {
                 </button>
 
                 {i < STEPS.length - 1 && (
-                  <div style={{ flex: 1, height: 1, background: isStepDone(i, store) ? '#22c55e' : '#1a3a5c', minWidth: 8, maxWidth: 28 }} />
+                  <div style={{ flex: 1, height: 1, background: isStepDone(i, store) ? '#22c55e' : '#EDEBE9', minWidth: 8, maxWidth: 28 }} />
                 )}
               </React.Fragment>
             )
@@ -110,19 +110,20 @@ export default function WizardPanel() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '0 16px', height: 28,
-          borderTop: '1px solid #0d2d4a',
+          borderTop: '1px solid #F3F2F1',
+          background: '#FAFAF9',
         }}>
           <Icon size={13} style={{ color: '#f59e0b', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#201F1E', whiteSpace: 'nowrap' }}>
             {currentStep.label}
           </span>
-          <span style={{ fontSize: 10, color: '#475569', whiteSpace: 'nowrap' }}>—</span>
-          <span style={{ fontSize: 10, color: '#475569', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 10, color: '#8A8886', whiteSpace: 'nowrap' }}>—</span>
+          <span style={{ fontSize: 10, color: '#8A8886', whiteSpace: 'nowrap' }}>
             {currentStep.subtitle}
           </span>
-          <div style={{ width: 1, height: 14, background: '#1a3a5c', flexShrink: 0, margin: '0 2px' }} />
+          <div style={{ width: 1, height: 14, background: '#E1DFDD', flexShrink: 0, margin: '0 2px' }} />
           <span style={{
-            fontSize: 10, color: '#64748b', overflow: 'hidden',
+            fontSize: 10, color: '#A19F9D', overflow: 'hidden',
             textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
           }}>
             💡 {currentStep.tip}
@@ -136,7 +137,7 @@ export default function WizardPanel() {
         style={{
           flex: 1, minHeight: 0, overflowY: 'auto',
           padding: '16px 16px 0',
-          background: '#F5F7FA',
+          background: '#F8F7F6',
           animation: 'fadeSection 0.2s ease',
         }}
       >
@@ -157,8 +158,8 @@ export default function WizardPanel() {
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 16px', height: 38,
-        borderTop: '1px solid #1a3a5c',
-        background: '#0A2540', flexShrink: 0,
+        borderTop: '1px solid #E1DFDD',
+        background: '#FFFFFF', flexShrink: 0,
       }}>
         {/* Anterior */}
         <button
@@ -168,7 +169,7 @@ export default function WizardPanel() {
           style={{
             display: 'flex', alignItems: 'center', gap: 4,
             background: 'none', border: 'none',
-            color: step === 0 ? '#1a3a5c' : '#64748b',
+            color: step === 0 ? '#EDEBE9' : '#8A8886',
             fontSize: 11, fontWeight: 600,
             cursor: step === 0 ? 'not-allowed' : 'pointer',
             padding: '4px 6px',
@@ -178,7 +179,7 @@ export default function WizardPanel() {
         </button>
 
         {/* Step count */}
-        <span style={{ fontSize: 10, color: '#334155', fontWeight: 500, letterSpacing: '0.04em' }}>
+        <span style={{ fontSize: 10, color: '#A19F9D', fontWeight: 500, letterSpacing: '0.04em' }}>
           {step + 1} / {totalSteps}
         </span>
 
