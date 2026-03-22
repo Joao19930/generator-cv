@@ -853,9 +853,10 @@ router.put('/job-templates', (req, res) => {
   const file = path.join(__dirname, '../data/jobTemplates.json');
   try {
     const existing = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const { experience, summary } = req.body;
+    const { experience, summary, _customAreas } = req.body;
     if (experience) existing.experience = experience;
     if (summary) existing.summary = summary;
+    if (_customAreas !== undefined) existing._customAreas = _customAreas;
     fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
     res.json({ ok: true });
   } catch (e) {

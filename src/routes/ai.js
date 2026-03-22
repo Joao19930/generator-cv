@@ -129,6 +129,17 @@ function localFallback(prompt) {
     if (/market|comunic|digital|publicid/.test(c)) {
       return applySumTpl('marketing') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. ${skillsFrase}. Combina criatividade com análise de dados para maximizar o retorno das acções de marketing. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.`;
     }
+
+    // Verificar áreas personalizadas criadas pelo admin
+    const customAreasSum = (tpl && tpl._customAreas) || [];
+    for (const area of customAreasSum) {
+      const keywords = area.keywords || [];
+      if (keywords.length && keywords.some(kw => c.includes(kw.toLowerCase()))) {
+        const result = applySumTpl(area.key);
+        if (result) return result;
+      }
+    }
+
     return applySumTpl('default') || `${cargo} com ${anosStr}${ctxEmpresa}, com historial consistente na entrega de resultados em ambientes exigentes. ${skillsFrase}. Reconhecido(a) pela capacidade analítica e resolução eficaz de problemas, com contribuição para a melhoria contínua dos processos organizacionais. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
   }
 
@@ -202,6 +213,17 @@ function localFallback(prompt) {
       return applyExpTpl('marketing') ||
         `Planeou e executou campanhas de marketing digital e tradicional${ctx}\nGeriu redes sociais e conteúdos, aumentando o alcance e a notoriedade da marca\nAnalisou métricas de desempenho e ajustou estratégias para maximizar o retorno\nCoordenou produção de materiais de comunicação e identidade visual da organização`;
     }
+
+    // Verificar áreas personalizadas criadas pelo admin
+    const customAreas = (tpl && tpl._customAreas) || [];
+    for (const area of customAreas) {
+      const keywords = area.keywords || [];
+      if (keywords.length && keywords.some(kw => c.includes(kw.toLowerCase()))) {
+        const result = applyExpTpl(area.key);
+        if (result) return result;
+      }
+    }
+
     return applyExpTpl('default') ||
       `Desempenhou as funções de ${cargo}${ctx} com elevado sentido de responsabilidade e orientação para resultados\nOptimizou processos internos, contribuindo para a melhoria da eficiência operacional\nColaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos\nElaborou relatórios de actividade e propôs melhorias implementadas com sucesso`;
   }

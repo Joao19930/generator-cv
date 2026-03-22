@@ -6,67 +6,89 @@
 <title>Templates de Funções — Admin</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;padding-bottom:72px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;padding-bottom:80px}
 a{text-decoration:none}
 
-/* TOPBAR */
 .topbar{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px}
 .topbar h1{font-size:18px;font-weight:700}
 .topbar p{font-size:12px;opacity:.8;margin-top:2px}
 .topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s}
 .btn:hover{opacity:.85}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-white{background:#fff;color:#92400e}
 .btn-green{background:#10b981;color:#fff}
 .btn-gray{background:#e2e8f0;color:#475569}
+.btn-red{background:#fef2f2;color:#ef4444;border:1px solid #fecaca}
+.btn-amber{background:#f59e0b;color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
 
-/* LAYOUT */
 .container{max-width:1060px;margin:0 auto;padding:24px 20px}
 
-/* AUTH ERROR */
 #auth-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center}
 #auth-error p{font-size:14px;color:#991b1b;margin-bottom:12px}
 
-/* NOTICE */
 .notice{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:12px;color:#92400e;margin-bottom:20px;line-height:1.6}
 .notice strong{font-weight:700}
-.notice code{background:#fef3c7;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px}
+code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px}
+.notice code{background:#fef3c7}
 
-/* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid #e2e8f0;padding-bottom:0}
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid #e2e8f0}
 .tab{padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:#64748b;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
 .tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
 .tab:hover:not(.active){color:#1e293b}
 
-/* PANELS */
 .panel{display:none}
 .panel.active{display:block}
-.panel-title{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:3px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.panel-title{font-size:14px;font-weight:700;color:#1e293b}
 .panel-sub{font-size:12px;color:#64748b;margin-bottom:18px}
 
-/* AREA GRID */
 .area-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.area-grid{grid-template-columns:1fr}}
 
-/* AREA CARD */
-.area-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.area-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;position:relative}
+.area-card.custom{border-color:#fde68a;background:#fffdf5}
 .area-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
 .area-label em{font-style:normal;font-size:15px}
+.area-badge{font-size:9px;padding:2px 6px;border-radius:10px;background:#fef3c7;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.area-keywords{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}
+.keyword-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#f1f5f9;border-radius:20px;font-size:10px;color:#475569;border:1px solid #e2e8f0}
+.keyword-tag button{border:none;background:none;cursor:pointer;color:#94a3b8;font-size:11px;line-height:1;padding:0}
+.keyword-tag button:hover{color:#ef4444}
+
 textarea{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.65;resize:vertical;outline:none;color:#1e293b;font-family:inherit;transition:border-color .15s}
 textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 .hint{font-size:10.5px;color:#94a3b8;line-height:1.5}
 
-/* LOADING SKELETON */
+.delete-area{position:absolute;top:10px;right:10px}
+
+/* ADD AREA MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:12px;color:#64748b;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
+.form-group input{width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;transition:border-color .15s}
+.form-group input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+.form-group small{font-size:11px;color:#94a3b8;margin-top:4px;display:block}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.emoji-opt{width:32px;height:32px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:.15s;background:#f8fafc}
+.emoji-opt:hover,.emoji-opt.selected{border-color:#f59e0b;background:#fffbeb}
+.modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end}
+
+/* SKELETON */
 .skeleton{background:#e2e8f0;border-radius:8px;animation:pulse 1.5s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
 /* SAVE BAR */
-.save-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;justify-content:flex-end;gap:10px;z-index:50;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;gap:10px;z-index:50;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
 .save-ok{font-size:13px;color:#10b981;font-weight:600;opacity:0;transition:.3s;margin-right:auto}
 .save-ok.show{opacity:1}
 
-/* TOAST */
 #toast{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:9999;pointer-events:none;color:#fff}
 #toast.show{opacity:1}
 </style>
@@ -86,33 +108,35 @@ textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 
 <div class="container">
 
-  <!-- AUTH ERROR -->
   <div id="auth-error">
     <p>⚠️ Sessão expirada ou sem permissões de administrador.</p>
     <a href="/admin-login" class="btn btn-gray">Fazer login novamente →</a>
   </div>
 
-  <!-- NOTICE -->
   <div class="notice">
-    <strong>Como funciona:</strong> Quando o utilizador clica "Gerar com IA" e não há créditos Anthropic, o sistema usa estes templates.<br>
+    <strong>Como funciona:</strong> Quando o utilizador clica "Gerar com IA" e não há créditos, o sistema usa estes templates como fallback. O cargo do utilizador é comparado com os <strong>termos-chave</strong> de cada área para escolher o template correcto.<br>
     <strong>Variáveis:</strong>
-    <code>{ctx}</code> → " na [Empresa]" &nbsp;|&nbsp;
-    <code>{cargo}</code> → título do cargo &nbsp;|&nbsp;
-    <code>{anos}</code> → anos de experiência &nbsp;|&nbsp;
-    <code>{skills}</code> → competências listadas<br>
-    <strong>Bullets de Experiência:</strong> cada linha = um bullet. Linhas em branco são ignoradas.
+    <code>{ctx}</code> " na [Empresa]" &nbsp;|&nbsp;
+    <code>{cargo}</code> título do cargo &nbsp;|&nbsp;
+    <code>{anos}</code> anos de experiência &nbsp;|&nbsp;
+    <code>{skills}</code> competências. &nbsp;
+    <strong>Bullets:</strong> cada linha = um bullet.
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('exp',this)">📋 Bullets de Experiência</button>
     <button class="tab" onclick="switchTab('sum',this)">📝 Resumo Profissional</button>
   </div>
 
-  <!-- PANEL: EXPERIÊNCIA -->
+  <!-- EXPERIÊNCIA -->
   <div id="panel-exp" class="panel active">
-    <p class="panel-title">Bullets de Experiência por Área</p>
-    <p class="panel-sub">Cada linha é um bullet independente. Usa <code>{ctx}</code> para inserir automaticamente " na [Empresa]".</p>
+    <div class="panel-header">
+      <div>
+        <p class="panel-title">Bullets de Experiência por Área</p>
+        <p class="panel-sub">Cada linha = 1 bullet. <code>{ctx}</code> insere " na [Empresa]" automaticamente.</p>
+      </div>
+      <button class="btn btn-amber" onclick="openModal('exp')">+ Nova Área</button>
+    </div>
     <div class="area-grid" id="exp-grid">
       <div class="skeleton" style="height:200px;border-radius:12px"></div>
       <div class="skeleton" style="height:200px;border-radius:12px"></div>
@@ -121,10 +145,15 @@ textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
     </div>
   </div>
 
-  <!-- PANEL: RESUMO -->
+  <!-- RESUMO -->
   <div id="panel-sum" class="panel">
-    <p class="panel-title">Resumo Profissional por Área</p>
-    <p class="panel-sub">Parágrafo único. Usa <code>{cargo}</code>, <code>{anos}</code>, <code>{ctx}</code> e <code>{skills}</code>.</p>
+    <div class="panel-header">
+      <div>
+        <p class="panel-title">Resumo Profissional por Área</p>
+        <p class="panel-sub">Parágrafo único. Usa <code>{cargo}</code>, <code>{anos}</code>, <code>{ctx}</code> e <code>{skills}</code>.</p>
+      </div>
+      <button class="btn btn-amber" onclick="openModal('sum')">+ Nova Área</button>
+    </div>
     <div class="area-grid" id="sum-grid">
       <div class="skeleton" style="height:160px;border-radius:12px"></div>
       <div class="skeleton" style="height:160px;border-radius:12px"></div>
@@ -140,66 +169,113 @@ textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
   <button class="btn btn-green" id="save-btn" onclick="saveData()">💾 Guardar Tudo</button>
 </div>
 
+<!-- ADD AREA MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>➕ Nova Área de Função</h2>
+    <p>Adiciona uma nova área profissional. O assistente de IA usa os <strong>termos-chave</strong> para identificar o cargo do utilizador e aplicar o template correcto.</p>
+
+    <div class="form-group">
+      <label>Emoji da área</label>
+      <div class="emoji-grid" id="emoji-grid">
+        <!-- preenchido por JS -->
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Nome da área *</label>
+      <input type="text" id="new-name" placeholder="Ex: Engenharia Civil, Saúde, Direito..." maxlength="50">
+      <small>Este nome aparece como título no painel de edição.</small>
+    </div>
+
+    <div class="form-group">
+      <label>Termos-chave para identificação *</label>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="new-kw-input" placeholder="Ex: engenheiro, obra, construção..." style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none">
+        <button class="btn btn-gray" onclick="addKeyword()">Adicionar</button>
+      </div>
+      <div class="area-keywords" id="new-kw-list" style="margin-top:8px"></div>
+      <small>O cargo do utilizador é verificado contra estes termos (insensível a maiúsculas).</small>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-amber" onclick="confirmAdd()">Criar Área</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-const AREAS = [
-  { key:'rh',         icon:'👥', label:'Recursos Humanos' },
-  { key:'comercial',  icon:'💼', label:'Comercial / Vendas' },
-  { key:'financeiro', icon:'📊', label:'Financeiro / Contabilidade' },
-  { key:'ti',         icon:'💻', label:'TI / Informática' },
-  { key:'gestao',     icon:'🏢', label:'Gestão / Direcção' },
-  { key:'marketing',  icon:'📣', label:'Marketing / Comunicação' },
-  { key:'default',    icon:'⚙️', label:'Padrão (outras funções)' },
+// ── ÁREAS FIXAS (não removíveis) ──────────────────────────────
+const FIXED = [
+  { key:'rh',         icon:'👥', label:'Recursos Humanos',          keywords:['rh','recursos humanos','people','talento'] },
+  { key:'comercial',  icon:'💼', label:'Comercial / Vendas',         keywords:['comercial','vendas','sales','negócios','negoc'] },
+  { key:'financeiro', icon:'📊', label:'Financeiro / Contabilidade', keywords:['financ','contab','audit','tesour'] },
+  { key:'ti',         icon:'💻', label:'TI / Informática',           keywords:['inform','ti','software','programa','system','develop','dados'] },
+  { key:'gestao',     icon:'🏢', label:'Gestão / Direcção',          keywords:['gest','direct','manager','lider','coord'] },
+  { key:'marketing',  icon:'📣', label:'Marketing / Comunicação',    keywords:['market','comunic','digital','publicid'] },
+  { key:'default',    icon:'⚙️', label:'Padrão (outras funções)',    keywords:[] },
 ];
 
-// Token — igual ao usado pelo admin-panel e admin-chat-training
+const EMOJIS = ['🏗️','⚕️','⚖️','🎓','🛡️','✈️','🌾','🏨','🎨','🔬','🏋️','🚚','🏦','📡','🔧','🛒','🎵','🏫','🌍','💡'];
+
 const TOKEN = localStorage.getItem('cv_token') || localStorage.getItem('adminToken') || localStorage.getItem('token') || '';
+function headers() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN }; }
 
-function headers() {
-  return { 'Content-Type':'application/json', 'Authorization':'Bearer ' + TOKEN };
-}
-
-let data = {};
+let data = {};            // carregado da API
+let customAreas = [];     // áreas criadas pelo admin
+let modalTarget = 'exp';  // qual painel está a criar
+let selectedEmoji = EMOJIS[0];
+let newKeywords = [];
 
 // ── LOAD ─────────────────────────────────────────────────────
 async function loadData() {
-  document.getElementById('auth-error').style.display = 'none';
-  // reset skeletons
-  setSkeletons('exp-grid', 4, 200);
-  setSkeletons('sum-grid', 4, 160);
-
+  document.getElementById('auth-error').style.display='none';
+  setSkeletons('exp-grid',4,200);
+  setSkeletons('sum-grid',4,160);
   try {
-    const r = await fetch('/api/admin/job-templates', { headers: headers() });
-    if (r.status === 401 || r.status === 403) { showAuthError(); return; }
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const r = await fetch('/api/admin/job-templates',{headers:headers()});
+    if(r.status===401||r.status===403){showAuthError();return;}
+    if(!r.ok) throw new Error('HTTP '+r.status);
     data = await r.json();
+    customAreas = data._customAreas || [];
     renderExp();
     renderSum();
-  } catch(e) {
-    toast('Erro ao carregar: ' + e.message, 'red');
-    document.getElementById('exp-grid').innerHTML = '<p style="color:#ef4444;font-size:13px;padding:12px">Erro ao carregar templates. Verifica a ligação.</p>';
+  } catch(e){
+    toast('Erro ao carregar: '+e.message,'red');
+    document.getElementById('exp-grid').innerHTML='<p style="color:#ef4444;font-size:13px;padding:12px">Erro ao carregar. Verifica a ligação.</p>';
   }
 }
 
-function setSkeletons(id, n, h) {
-  document.getElementById(id).innerHTML = Array(n).fill(
-    `<div class="skeleton" style="height:${h}px;border-radius:12px"></div>`
-  ).join('');
+function setSkeletons(id,n,h){
+  document.getElementById(id).innerHTML=Array(n).fill(`<div class="skeleton" style="height:${h}px;border-radius:12px"></div>`).join('');
+}
+
+// ── TODAS AS ÁREAS (fixas + personalizadas) ───────────────────
+function allAreas() {
+  return [...FIXED, ...customAreas];
 }
 
 // ── RENDER EXPERIÊNCIA ────────────────────────────────────────
 function renderExp() {
   const grid = document.getElementById('exp-grid');
-  grid.innerHTML = '';
-  AREAS.forEach(area => {
+  grid.innerHTML='';
+  allAreas().forEach(area => {
     const bullets = (data.experience && data.experience[area.key]) || [];
+    const isCustom = customAreas.some(c=>c.key===area.key);
     const card = document.createElement('div');
-    card.className = 'area-card';
+    card.className = 'area-card'+(isCustom?' custom':'');
     card.innerHTML = `
-      <div class="area-label"><em>${area.icon}</em>${area.label}</div>
+      <div class="area-label">
+        <em>${area.icon}</em>${area.label}
+        ${isCustom?'<span class="area-badge">Personalizada</span>':''}
+      </div>
+      ${area.keywords&&area.keywords.length?`<div class="area-keywords">${area.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join('')}</div>`:''}
       <textarea id="exp-${area.key}" rows="7" placeholder="Escreve um bullet por linha...">${bullets.join('\n')}</textarea>
-      <p class="hint">Cada linha = 1 bullet. <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-family:monospace">{ctx}</code> insere " na [Empresa]"</p>
+      <p class="hint">Cada linha = 1 bullet. <code>{ctx}</code> insere " na [Empresa]"</p>
+      ${isCustom?`<div class="delete-area"><button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button></div>`:''}
     `;
     grid.appendChild(card);
   });
@@ -208,15 +284,21 @@ function renderExp() {
 // ── RENDER RESUMO ─────────────────────────────────────────────
 function renderSum() {
   const grid = document.getElementById('sum-grid');
-  grid.innerHTML = '';
-  AREAS.forEach(area => {
+  grid.innerHTML='';
+  allAreas().forEach(area => {
     const text = (data.summary && data.summary[area.key]) || '';
+    const isCustom = customAreas.some(c=>c.key===area.key);
     const card = document.createElement('div');
-    card.className = 'area-card';
+    card.className = 'area-card'+(isCustom?' custom':'');
     card.innerHTML = `
-      <div class="area-label"><em>${area.icon}</em>${area.label}</div>
+      <div class="area-label">
+        <em>${area.icon}</em>${area.label}
+        ${isCustom?'<span class="area-badge">Personalizada</span>':''}
+      </div>
+      ${area.keywords&&area.keywords.length?`<div class="area-keywords">${area.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join('')}</div>`:''}
       <textarea id="sum-${area.key}" rows="5" placeholder="Parágrafo de resumo...">${text}</textarea>
-      <p class="hint">Variáveis: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-family:monospace">{cargo}</code> <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-family:monospace">{anos}</code> <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-family:monospace">{ctx}</code> <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-family:monospace">{skills}</code></p>
+      <p class="hint"><code>{cargo}</code> <code>{anos}</code> <code>{ctx}</code> <code>{skills}</code></p>
+      ${isCustom?`<div class="delete-area"><button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button></div>`:''}
     `;
     grid.appendChild(card);
   });
@@ -225,62 +307,135 @@ function renderSum() {
 // ── SAVE ──────────────────────────────────────────────────────
 async function saveData() {
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'A guardar...';
+  btn.disabled=true; btn.textContent='A guardar...';
 
-  const experience = {};
-  AREAS.forEach(area => {
-    const el = document.getElementById('exp-' + area.key);
-    if (el) experience[area.key] = el.value.split('\n').map(l => l.trim()).filter(Boolean);
-  });
-
-  const summary = {};
-  AREAS.forEach(area => {
-    const el = document.getElementById('sum-' + area.key);
-    if (el) summary[area.key] = el.value.trim();
+  const experience={};
+  const summary={};
+  allAreas().forEach(area=>{
+    const eEl = document.getElementById('exp-'+area.key);
+    const sEl = document.getElementById('sum-'+area.key);
+    if(eEl) experience[area.key]=eEl.value.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(sEl) summary[area.key]=sEl.value.trim();
   });
 
   try {
-    const r = await fetch('/api/admin/job-templates', {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify({ experience, summary })
+    const r = await fetch('/api/admin/job-templates',{
+      method:'PUT', headers:headers(),
+      body:JSON.stringify({experience, summary, _customAreas: customAreas})
     });
-    if (r.status === 401 || r.status === 403) { showAuthError(); return; }
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const ok = document.getElementById('save-ok');
+    if(r.status===401||r.status===403){showAuthError();return;}
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const ok=document.getElementById('save-ok');
     ok.classList.add('show');
-    setTimeout(() => ok.classList.remove('show'), 3000);
-  } catch(e) {
-    toast('Erro ao guardar: ' + e.message, 'red');
-  } finally {
-    btn.disabled = false; btn.textContent = '💾 Guardar Tudo';
-  }
+    setTimeout(()=>ok.classList.remove('show'),3000);
+  } catch(e){ toast('Erro ao guardar: '+e.message,'red'); }
+  finally{ btn.disabled=false; btn.textContent='💾 Guardar Tudo'; }
+}
+
+// ── REMOVE CUSTOM AREA ────────────────────────────────────────
+function removeArea(key) {
+  if(!confirm('Remover esta área personalizada? Os bullets serão perdidos ao guardar.')) return;
+  customAreas = customAreas.filter(a=>a.key!==key);
+  renderExp();
+  renderSum();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function openModal(target) {
+  modalTarget=target;
+  newKeywords=[];
+  selectedEmoji=EMOJIS[0];
+  document.getElementById('new-name').value='';
+  document.getElementById('new-kw-input').value='';
+  document.getElementById('new-kw-list').innerHTML='';
+
+  // emoji grid
+  const eg=document.getElementById('emoji-grid');
+  eg.innerHTML=EMOJIS.map((e,i)=>`<div class="emoji-opt${i===0?' selected':''}" onclick="selectEmoji(this,'${e}')">${e}</div>`).join('');
+
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('new-name').focus();
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+function selectEmoji(el,emoji){
+  document.querySelectorAll('.emoji-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEmoji=emoji;
+}
+
+function addKeyword(){
+  const inp=document.getElementById('new-kw-input');
+  const kw=inp.value.trim().toLowerCase();
+  if(!kw||newKeywords.includes(kw)) return;
+  newKeywords.push(kw);
+  inp.value='';
+  renderKeywords();
+}
+
+function renderKeywords(){
+  document.getElementById('new-kw-list').innerHTML=newKeywords.map((k,i)=>
+    `<span class="keyword-tag">${k}<button onclick="removeKw(${i})">×</button></span>`
+  ).join('');
+}
+
+function removeKw(i){ newKeywords.splice(i,1); renderKeywords(); }
+
+function confirmAdd(){
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){ toast('Indica o nome da área','red'); return; }
+  if(!newKeywords.length){ toast('Adiciona pelo menos um termo-chave','red'); return; }
+
+  // gerar chave única
+  const key='custom_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')+'_'+Date.now().toString(36);
+
+  const area={ key, icon:selectedEmoji, label:name, keywords:[...newKeywords] };
+  customAreas.push(area);
+  closeModal();
+  renderExp();
+  renderSum();
+
+  // scroll para a nova área
+  setTimeout(()=>{
+    const el=document.getElementById((modalTarget==='exp'?'exp':'sum')+'-'+key);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },100);
+  toast(`Área "${name}" criada! Preenche os bullets e guarda.`,'ok');
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
 }
 
-function showAuthError() {
-  document.getElementById('auth-error').style.display = 'block';
-  document.getElementById('exp-grid').innerHTML = '';
-  document.getElementById('sum-grid').innerHTML = '';
+function showAuthError(){
+  document.getElementById('auth-error').style.display='block';
+  document.getElementById('exp-grid').innerHTML='';
+  document.getElementById('sum-grid').innerHTML='';
 }
 
-function toast(msg, color) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = color === 'red' ? '#ef4444' : '#1e293b';
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=type==='red'?'#ef4444':type==='ok'?'#10b981':'#1e293b';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveData(); }
+// Enter na input de termos-chave
+document.getElementById('new-kw-input')&&document.getElementById('new-kw-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();addKeyword();}
+});
+
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}
+  if(e.key==='Escape') closeModal();
 });
 
 loadData();
