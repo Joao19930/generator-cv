@@ -5,18 +5,47 @@ import { useCVStore } from '../../../store/cvStore'
 const MAX_CHARS = 700
 
 export default function SummarySection() {
-  const { summary, setSummary, personal, experience } = useCVStore()
+  const { summary, setSummary, personal, experience, skills, languages } = useCVStore()
   const [aiLoading, setAiLoading] = useState(false)
   const [draft, setDraft] = useState<string | null>(null)
   const [prevSummary, setPrevSummary] = useState('')
 
-  const expList = experience.map(e => `${e.role} na ${e.company}`).join('; ') || 'não especificado'
+  // Calcular anos de experiência total
+  function calcYears(): number {
+    if (!experience.length) return 0
+    const starts = experience.map(e => {
+      const y = e.startDate ? parseInt(e.startDate.split('-')[0]) : 0
+      return y
+    }).filter(y => y > 0)
+    if (!starts.length) return 0
+    const earliest = Math.min(...starts)
+    return new Date().getFullYear() - earliest
+  }
+
+  const anos = calcYears()
+  const expList = experience.map(e => `${e.role} na ${e.company}${e.current ? ' (actual)' : ''}`).join('; ') || 'não especificado'
+  const skillsList = skills.slice(0, 6).map(s => s.name).join(', ') || 'não especificado'
+  const langList = languages.map(l => `${l.name} (${l.level})`).join(', ') || 'não especificado'
+
   const aiPrompt = [
-    `Escreve um resumo profissional em português para um CV.`,
-    `Nome: ${personal.fullName || 'não especificado'}`,
-    `Cargo: ${personal.jobTitle || 'não especificado'}`,
+    `Escreve um resumo profissional em português europeu para um CV angolano. Segue EXACTAMENTE esta estrutura em 3-4 frases:`,
+    `1ª frase: "[Cargo] com [X] anos de experiência em [área/sector específico]" — usa os dados reais abaixo.`,
+    `2ª frase: Menciona 2-3 competências técnicas concretas da lista fornecida.`,
+    `3ª frase: Inclui um resultado ou conquista concreta com número/percentagem (inventa se necessário mas que seja realista para Angola).`,
+    `4ª frase: Objectivo profissional claro e específico para a área.`,
+    ``,
+    `DADOS:`,
+    `Cargo: ${personal.jobTitle || 'Profissional'}`,
+    `Anos de experiência: ${anos > 0 ? anos : 'não calculado'}`,
     `Experiências: ${expList}`,
-    `Regras: máximo 4 frases, máximo 600 caracteres, começa directamente com o cargo ou nome, sem aspas, sem títulos, sem explicações — apenas o texto do resumo.`,
+    `Competências: ${skillsList}`,
+    `Idiomas: ${langList}`,
+    ``,
+    `REGRAS OBRIGATÓRIAS:`,
+    `- Começa directamente com o cargo (sem "Olá", sem "Eu sou", sem introdução)`,
+    `- NUNCA uses frases genéricas como "sou dedicado", "pessoa trabalhadora", "orientado para resultados"`,
+    `- Máximo 550 caracteres`,
+    `- Sem aspas, sem títulos, sem explicações — apenas o parágrafo final`,
   ].join('\n')
 
   async function handleGenerate() {

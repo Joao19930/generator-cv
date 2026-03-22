@@ -66,10 +66,46 @@ function localFallback(prompt) {
 
   // Caso 1: gerar resumo profissional
   if (p.includes('resumo profissional') || p.includes('escreve um resumo')) {
-    // Parar no primeiro delimitador (vírgula, ponto, newline) para não capturar instruções
-    const cargoMatch = prompt.match(/cargo[:\s]+([^,.\n]+)/i);
+    const cargoMatch = prompt.match(/Cargo[:\s]+([^,.\n]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
-    return `${cargo} com sólida experiência na área, orientado(a) para resultados e com capacidade de trabalhar em ambientes dinâmicos e exigentes. Ao longo da carreira, desenvolvi competências técnicas e relacionais que me permitem contribuir de forma consistente para os objectivos das organizações. Destaco-me pela proactividade, rigor técnico e compromisso com a qualidade do trabalho entregue. Procuro continuamente evoluir e acrescentar valor em cada projecto em que me envolvo.`;
+    const anosMatch = prompt.match(/Anos de experiência[:\s]+(\d+)/i);
+    const anos = anosMatch ? parseInt(anosMatch[1]) : 0;
+    const skillsMatch = prompt.match(/Competências[:\s]+([^\n]+)/i);
+    const skills = skillsMatch ? skillsMatch[1].trim() : '';
+    const expMatch = prompt.match(/Experiências[:\s]+([^\n]+)/i);
+    const expRaw = expMatch ? expMatch[1].trim() : '';
+
+    const anosStr = anos > 0 ? `${anos} anos de experiência` : 'vasta experiência';
+    const c = cargo.toLowerCase();
+
+    const empresaMatch = expRaw.match(/na ([^;(]+)/i);
+    const empresa = empresaMatch ? empresaMatch[1].trim() : '';
+    const ctxEmpresa = empresa && empresa !== 'não especificado' ? ` em organizações como ${empresa}` : ' no mercado angolano';
+
+    const skillArr = skills.split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+    const skillsFrase = skillArr.length >= 2
+      ? `Domina ${skillArr.join(', ')}`
+      : 'Possui competências técnicas sólidas na área';
+
+    if (/rh|recursos humanos|people|talento/.test(c)) {
+      return `Gestor(a) de Recursos Humanos com ${anosStr}${ctxEmpresa}, especializado(a) em recrutamento, avaliação de desempenho e relações laborais. ${skillsFrase}, com profundo conhecimento da legislação laboral angolana. Liderou processos que reduziram o turnover em 20% e melhoraram o clima organizacional. Procura contribuir para organizações que valorizam o capital humano como vantagem competitiva.`;
+    }
+    if (/comercial|vendas|sales|negócios|negoc/.test(c)) {
+      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de negócio e fidelização de clientes B2B e B2C. ${skillsFrase}, com historial de superação de metas — aumentou o volume de vendas em 30% no último ano fiscal. Referência em negociação de contratos e identificação de oportunidades no mercado angolano. Tem como objectivo integrar uma equipa comercial de referência e continuar a gerar impacto mensurável.`;
+    }
+    if (/financ|contab|audit|tesour/.test(c)) {
+      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em contabilidade geral, reporte financeiro e conformidade fiscal. ${skillsFrase}, com sólido conhecimento das obrigações perante a AGT e INSS. Implementou controlos que reduziram erros de reconciliação em 35% e melhoraram a fiabilidade dos relatórios mensais. Procura contribuir para a solidez financeira de organizações em crescimento em Angola.`;
+    }
+    if (/inform|ti\b|software|programa|system|develop|dados/.test(c)) {
+      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em desenvolvimento de sistemas e transformação digital. ${skillsFrase}, com experiência em gestão de projectos tecnológicos e arquitectura de soluções. Entregou sistemas que melhoraram a performance operacional em 40% e reduziram custos de manutenção. Pretende aplicar competências técnicas em organizações angolanas em processo de modernização.`;
+    }
+    if (/gest|direct|manager|lider|coord/.test(c)) {
+      return `${cargo} com ${anosStr}${ctxEmpresa}, com experiência comprovada em liderança de equipas e gestão por objectivos. ${skillsFrase}, com foco em optimização de processos e desenvolvimento de talento interno. Conduziu iniciativas que reduziram custos operacionais em 20% mantendo elevados padrões de qualidade. Pretende liderar projectos de crescimento em organizações com visão estratégica em Angola.`;
+    }
+    if (/market|comunic|digital|publicid/.test(c)) {
+      return `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. ${skillsFrase}, com campanhas que aumentaram o reconhecimento de marca em 50% e geraram leads qualificados. Combina criatividade com análise de dados para maximizar o ROI das acções de marketing. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.`;
+    }
+    return `${cargo} com ${anosStr}${ctxEmpresa}, com historial comprovado na entrega de resultados em ambientes exigentes. ${skillsFrase}, sendo reconhecido(a) pela capacidade analítica e resolução eficaz de problemas. Contribuiu para a melhoria de processos que aumentaram a produtividade das equipas em mais de 25%. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
   }
 
   // Caso 2: melhorar bullet isolado (prompt curto, contém "melhora este" ou "verbo de acção")
