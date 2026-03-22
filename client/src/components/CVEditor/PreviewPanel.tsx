@@ -17,7 +17,7 @@ type TemplateOption = {
 const TEMPLATE_OPTIONS: TemplateOption[] = [
   { id: 'executive', label: 'Executivo' },
   { id: 'modern', label: 'Moderno' },
-  { id: 'classic', label: 'Clássico' },
+  { id: 'classic', label: 'ATS' },
 ]
 
 const ZOOM_OPTIONS: { value: number; label: string }[] = [

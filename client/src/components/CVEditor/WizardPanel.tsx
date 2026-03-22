@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { User, Briefcase, GraduationCap, Zap, FileText, ChevronRight, ChevronLeft, Check, ExternalLink } from 'lucide-react'
+import { User, Briefcase, GraduationCap, Zap, FileText, Globe, ChevronRight, ChevronLeft, Check, ExternalLink } from 'lucide-react'
 import PersonalSection from './sections/PersonalSection'
 import ExperienceSection from './sections/ExperienceSection'
 import EducationSection from './sections/EducationSection'
 import SkillsSection from './sections/SkillsSection'
+import LanguagesSection from './sections/LanguagesSection'
 import SummarySection from './sections/SummarySection'
 import { useCVStore } from '../../store/cvStore'
 
@@ -12,6 +13,7 @@ const STEPS = [
   { key: 'experience', label: 'Experiência',  subtitle: 'Historial profissional',       icon: Briefcase,     tip: 'Use verbos de acção: "implementei", "liderei", "reduzi custos em 30%".' },
   { key: 'education',  label: 'Educação',     subtitle: 'Formação académica',           icon: GraduationCap, tip: 'Inclua a área de estudo — os sistemas ATS usam-na para filtrar candidatos.' },
   { key: 'skills',     label: 'Competências', subtitle: 'Habilidades e nível',          icon: Zap,           tip: 'Mínimo 5 competências para um bom score ATS.' },
+  { key: 'languages',  label: 'Idiomas',      subtitle: 'Línguas que dominas',          icon: Globe,         tip: 'Incluir idiomas aumenta o score ATS e abre oportunidades internacionais.' },
   { key: 'summary',    label: 'Resumo',       subtitle: 'Apresentação profissional',    icon: FileText,      tip: 'Adapte o resumo a cada vaga com palavras-chave da oferta.' },
 ] as const
 
@@ -20,7 +22,8 @@ function isStepDone(i: number, store: ReturnType<typeof useCVStore.getState>): b
   if (i === 1) return store.experience.length > 0
   if (i === 2) return store.education.length > 0
   if (i === 3) return store.skills.length >= 2
-  if (i === 4) return store.summary.length > 30
+  if (i === 4) return store.languages.length > 0
+  if (i === 5) return store.summary.length > 30
   return false
 }
 
@@ -51,7 +54,7 @@ export default function WizardPanel() {
   const currentStep = STEPS[step]
   const Icon = currentStep.icon
   const isLastStep = step === totalSteps - 1
-  const cvDone = isLastStep && isStepDone(4, store)
+  const cvDone = isLastStep && isStepDone(5, store)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0A2540' }}>
@@ -141,7 +144,8 @@ export default function WizardPanel() {
         {step === 1 && <ExperienceSection />}
         {step === 2 && <EducationSection />}
         {step === 3 && <SkillsSection />}
-        {step === 4 && (
+        {step === 4 && <LanguagesSection />}
+        {step === 5 && (
           <>
             <SummarySection />
             {cvDone && <JobsBanner jobTitle={store.personal.jobTitle} />}
