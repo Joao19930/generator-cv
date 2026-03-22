@@ -1,5 +1,22 @@
 import React, { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronUp, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, ToggleLeft, ToggleRight, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useCVStore, Experience } from '../../../store/cvStore'
 import AIButton from '../AIButton'
 
@@ -25,7 +42,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 4,
 }
 
-function ExperienceItem({ item }: { item: Experience }) {
+function ExperienceItem({ item, dragListeners }: { item: Experience; dragListeners?: React.HTMLAttributes<HTMLElement> }) {
   const { updateExperience, removeExperience } = useCVStore()
   const [open, setOpen] = useState(true)
 
@@ -48,29 +65,40 @@ Escreve apenas os bullets, sem título.`
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: 8,
           padding: '10px 12px',
-          cursor: 'pointer',
           background: '#0f172a',
         }}
-        onClick={() => setOpen(o => !o)}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {/* Drag handle */}
+        <span
+          {...dragListeners}
+          style={{ color: '#334155', cursor: 'grab', display: 'flex', padding: 2, flexShrink: 0 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <GripVertical size={14} />
+        </span>
+
+        {/* Title — click to expand */}
+        <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => setOpen(o => !o)}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
             {item.role || 'Novo cargo'}
           </p>
-          <p style={{ fontSize: 11, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ fontSize: 11, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
             {item.company || 'Empresa'}
           </p>
         </div>
+
         <button
           type="button"
           onClick={e => { e.stopPropagation(); removeExperience(item.id) }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 4 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 4, flexShrink: 0 }}
         >
           <Trash2 size={14} />
         </button>
-        {open ? <ChevronUp size={14} style={{ color: '#475569' }} /> : <ChevronDown size={14} style={{ color: '#475569' }} />}
+        <div style={{ cursor: 'pointer', color: '#475569' }} onClick={() => setOpen(o => !o)}>
+          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </div>
       </div>
 
       {open && (
@@ -143,8 +171,36 @@ Escreve apenas os bullets, sem título.`
   )
 }
 
+function SortableExperienceItem({ item }: { item: Experience }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+    >
+      <ExperienceItem item={item} dragListeners={listeners} />
+    </div>
+  )
+}
+
 export default function ExperienceSection() {
-  const { experience, addExperience } = useCVStore()
+  const { experience, addExperience, reorderExperience } = useCVStore()
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const ids = experience.map(e => e.id)
+      const oldIndex = ids.indexOf(active.id as string)
+      const newIndex = ids.indexOf(over.id as string)
+      reorderExperience(arrayMove(ids, oldIndex, newIndex))
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -153,9 +209,15 @@ export default function ExperienceSection() {
           Ainda não tens experiências — adiciona a primeira!
         </div>
       )}
-      {experience.map(item => (
-        <ExperienceItem key={item.id} item={item} />
-      ))}
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={experience.map(e => e.id)} strategy={verticalListSortingStrategy}>
+          {experience.map(item => (
+            <SortableExperienceItem key={item.id} item={item} />
+          ))}
+        </SortableContext>
+      </DndContext>
+
       <button
         type="button"
         onClick={addExperience}

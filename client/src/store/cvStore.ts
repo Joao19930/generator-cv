@@ -105,6 +105,7 @@ export interface CVState extends DataSnapshot {
   addExperience: () => void
   updateExperience: (id: string, data: Partial<Experience>) => void
   removeExperience: (id: string) => void
+  reorderExperience: (ids: string[]) => void
   addEducation: () => void
   updateEducation: (id: string, data: Partial<Education>) => void
   removeEducation: (id: string) => void
@@ -273,6 +274,10 @@ export const useCVStore = create<CVState>((set, get) => {
 
     removeExperience: (id) => withHistory(s => ({
       experience: s.experience.filter(e => e.id !== id)
+    })),
+
+    reorderExperience: (ids) => withHistory(s => ({
+      experience: ids.map(id => s.experience.find(e => e.id === id)!).filter(Boolean)
     })),
 
     addEducation: () => withHistory(s => ({
