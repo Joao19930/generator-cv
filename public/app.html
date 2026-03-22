@@ -560,6 +560,10 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Score ATS
     </a>
+    <a class="sb-item" onclick="nav('salary',this)">
+      <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Análise Salarial <span style="font-size:9px;background:linear-gradient(90deg,#f59e0b,#ef4444);color:#fff;padding:2px 6px;border-radius:8px;font-weight:700;margin-left:4px;">NOVO</span>
+    </a>
     <a href="#" class="sb-item">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       Candidaturas
@@ -1161,6 +1165,253 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       </div>
     </div>
 
+    <!-- ══ ANÁLISE SALARIAL ══════════════════════════ -->
+    <div id="panel-salary" class="panel">
+      <style>
+        .sal-wrap{max-width:620px;margin:0 auto;}
+        .sal-steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:32px;}
+        .sal-step-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:.2s;flex-shrink:0;}
+        .sal-step-dot.done{background:#16a34a;color:#fff;}
+        .sal-step-dot.active{background:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15);}
+        .sal-step-dot.pending{background:var(--border);color:var(--t3);}
+        .sal-step-line{flex:1;height:2px;background:var(--border);max-width:60px;transition:.2s;}
+        .sal-step-line.done{background:#16a34a;}
+        .sal-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px 28px 24px;}
+        .sal-step-title{font-size:17px;font-weight:800;margin-bottom:4px;}
+        .sal-step-sub{font-size:13px;color:var(--t3);margin-bottom:24px;}
+        .sal-field{margin-bottom:16px;}
+        .sal-field label{display:block;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px;}
+        .sal-field select,.sal-field input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:'Sora',sans-serif;outline:none;background:#fff;color:var(--text);transition:border .15s;}
+        .sal-field select:focus,.sal-field input:focus{border-color:var(--blue);}
+        .sal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        @media(max-width:480px){.sal-row{grid-template-columns:1fr;}}
+        .sal-slider-wrap{position:relative;padding-top:4px;}
+        .sal-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;}
+        .sal-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 2px 6px rgba(37,99,235,.3);}
+        .sal-slider-val{text-align:right;font-size:12px;font-weight:700;color:var(--blue);margin-top:4px;}
+        .sal-benefit{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:8px;user-select:none;}
+        .sal-benefit:hover{border-color:var(--blue);background:var(--blue-light);}
+        .sal-benefit.checked{border-color:var(--blue);background:#EFF6FF;}
+        .sal-benefit-ico{font-size:22px;flex-shrink:0;}
+        .sal-benefit-info{flex:1;}
+        .sal-benefit-title{font-size:13px;font-weight:700;color:var(--text);}
+        .sal-benefit-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+        .sal-benefit-val{font-size:11px;font-weight:700;color:#16a34a;flex-shrink:0;}
+        .sal-chk{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+        .sal-benefit.checked .sal-chk{background:var(--blue);border-color:var(--blue);}
+        .sal-nav{display:flex;align-items:center;justify-content:space-between;margin-top:24px;}
+        .sal-btn-back{display:flex;align-items:center;gap:6px;padding:10px 18px;border:1px solid var(--border);border-radius:10px;background:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--t2);transition:.15s;}
+        .sal-btn-back:hover{border-color:var(--blue);color:var(--blue);}
+        .sal-btn-next{display:flex;align-items:center;gap:6px;padding:10px 24px;border:none;border-radius:10px;background:var(--blue);font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#fff;transition:.15s;}
+        .sal-btn-next:hover{background:#1d4ed8;}
+        /* RESULT */
+        .sal-result-hero{text-align:center;padding:24px 0 16px;}
+        .sal-range-bar{height:12px;border-radius:6px;background:linear-gradient(90deg,#fef3c7,#fde68a,#f59e0b,#16a34a,#15803d);margin:12px 0;position:relative;}
+        .sal-range-needle{position:absolute;top:-6px;width:3px;height:24px;background:#1e293b;border-radius:2px;transform:translateX(-50%);transition:left .8s cubic-bezier(.34,1.56,.64,1);}
+        .sal-range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px;}
+        .sal-stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0;}
+        .sal-stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+        .sal-stat-val{font-size:16px;font-weight:800;color:var(--text);}
+        .sal-stat-lbl{font-size:10px;color:var(--t3);margin-top:2px;}
+        .sal-tip{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400e;margin-bottom:8px;display:flex;gap:8px;}
+        .sal-percentile{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+        .sal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+        .sal-tag{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+      </style>
+
+      <div class="sal-wrap">
+        <!-- PROGRESS -->
+        <div class="sal-steps" id="salSteps">
+          <div class="sal-step-dot active" id="sdot0">1</div>
+          <div class="sal-step-line" id="sline0"></div>
+          <div class="sal-step-dot pending" id="sdot1">2</div>
+          <div class="sal-step-line" id="sline1"></div>
+          <div class="sal-step-dot pending" id="sdot2">3</div>
+          <div class="sal-step-line" id="sline2"></div>
+          <div class="sal-step-dot pending" id="sdot3">✓</div>
+        </div>
+
+        <!-- STEP 1 — Dados do Cargo -->
+        <div class="sal-card" id="salS1">
+          <div class="sal-step-title">💼 Dados do Cargo</div>
+          <div class="sal-step-sub">Preenche os dados da tua posição actual ou de uma oferta que recebeste</div>
+          <div class="sal-field">
+            <label>Área Profissional</label>
+            <select id="salArea">
+              <option value="">-- Selecciona a área --</option>
+              <option value="ti">Tecnologia & Informática</option>
+              <option value="financ">Finanças & Contabilidade</option>
+              <option value="gestao">Gestão & Direcção</option>
+              <option value="rh">Recursos Humanos</option>
+              <option value="comercial">Comercial & Vendas</option>
+              <option value="marketing">Marketing & Comunicação</option>
+              <option value="engenharia">Engenharia (Civil/Mecânica)</option>
+              <option value="petroleo">Petróleo & Gás</option>
+              <option value="saude">Saúde & Medicina</option>
+              <option value="juridico">Jurídico & Direito</option>
+              <option value="educacao">Educação & Formação</option>
+              <option value="logistica">Logística & Transportes</option>
+              <option value="construcao">Construção & Imobiliário</option>
+              <option value="admin">Administração & Secretariado</option>
+            </select>
+          </div>
+          <div class="sal-field">
+            <label>Título do Cargo (opcional — para maior precisão)</label>
+            <input type="text" id="salTitle" placeholder="ex: Gestor Financeiro Sénior, Desenvolvedor Full Stack...">
+          </div>
+          <div class="sal-row">
+            <div class="sal-field">
+              <label>Sector de Actividade</label>
+              <select id="salSector">
+                <option value="privado">Sector Privado</option>
+                <option value="publico">Estado / Sector Público</option>
+                <option value="petroleo">Petróleo & Multinacional</option>
+                <option value="banca">Banca & Seguros</option>
+                <option value="ong">ONG / Internacional</option>
+              </select>
+            </div>
+            <div class="sal-field">
+              <label>Localização</label>
+              <select id="salCity">
+                <option value="luanda">Luanda</option>
+                <option value="benguela">Benguela</option>
+                <option value="huambo">Huambo</option>
+                <option value="lubango">Lubango</option>
+                <option value="cabinda">Cabinda</option>
+                <option value="outro">Outra Província</option>
+              </select>
+            </div>
+          </div>
+          <div class="sal-field">
+            <label>Anos de Experiência — <span id="salExpLbl" style="color:var(--blue);font-weight:700;">3 anos</span></label>
+            <div class="sal-slider-wrap">
+              <input type="range" class="sal-slider" id="salExp" min="0" max="25" value="3" oninput="document.getElementById('salExpLbl').textContent=this.value==1?'1 ano':this.value+' anos'">
+            </div>
+            <div class="sal-range-labels"><span>Recém-licenciado</span><span>5 anos</span><span>10 anos</span><span>15+ anos</span><span>25+ anos</span></div>
+          </div>
+          <div class="sal-nav">
+            <div></div>
+            <button class="sal-btn-next" onclick="salNext(1)">Seguinte — Benefícios →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2 — Benefícios -->
+        <div class="sal-card" id="salS2" style="display:none">
+          <div class="sal-step-title">🎁 Pacote de Benefícios</div>
+          <div class="sal-step-sub">Selecciona os benefícios incluídos na oferta ou pacote actual</div>
+          <div id="salBenefitsList">
+            <!-- renderizado por JS -->
+          </div>
+          <div class="sal-nav">
+            <button class="sal-btn-back" onclick="salBack(2)">← Anterior</button>
+            <button class="sal-btn-next" onclick="salNext(2)">Seguinte — Contrato →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 — Contrato -->
+        <div class="sal-card" id="salS3" style="display:none">
+          <div class="sal-step-title">📋 Detalhes do Contrato</div>
+          <div class="sal-step-sub">Informação adicional para afinar a análise</div>
+          <div class="sal-row">
+            <div class="sal-field">
+              <label>Tipo de Contrato</label>
+              <select id="salContrato">
+                <option value="efectivo">Por tempo indeterminado (Efectivo)</option>
+                <option value="prazo">A prazo certo</option>
+                <option value="servicos">Prestação de Serviços</option>
+                <option value="estagio">Estágio Profissional</option>
+              </select>
+            </div>
+            <div class="sal-field">
+              <label>Período de Pré-aviso</label>
+              <select id="salNotice">
+                <option value="0">Sem pré-aviso</option>
+                <option value="15">15 dias</option>
+                <option value="30">30 dias</option>
+                <option value="60">60 dias</option>
+                <option value="90">90 dias ou mais</option>
+              </select>
+            </div>
+          </div>
+          <div class="sal-field">
+            <label>Salário Base Actual (Akz) — <span id="salCurLbl" style="color:var(--blue);font-weight:700;">Não informado</span></label>
+            <input type="number" id="salCurrent" placeholder="Deixa em branco se não tiveres referência" min="0" step="1000" oninput="document.getElementById('salCurLbl').textContent=this.value?parseInt(this.value).toLocaleString('pt-AO')+' Akz':'Não informado'">
+          </div>
+          <div class="sal-field" style="margin-bottom:0;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;font-size:13px;">
+              <input type="checkbox" id="salNonCompete" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">
+              Tenho cláusula de não concorrência no contrato
+            </label>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;margin-left:26px;">Pode limitar o acesso a oportunidades no mesmo sector</div>
+          </div>
+          <div class="sal-nav">
+            <button class="sal-btn-back" onclick="salBack(3)">← Anterior</button>
+            <button class="sal-btn-next" onclick="salAnalyze()">📊 Analisar Salário</button>
+          </div>
+        </div>
+
+        <!-- STEP 4 — RESULTADO -->
+        <div class="sal-card" id="salS4" style="display:none">
+          <div class="sal-result-hero">
+            <div style="font-size:13px;color:var(--t3);margin-bottom:4px;" id="salResultTitle">—</div>
+            <div style="font-size:32px;font-weight:800;color:var(--text);line-height:1.1;" id="salResultRange">—</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:4px;">Intervalo estimado · mercado angolano 2025</div>
+            <div id="salPercentileTag" style="margin-top:10px;"></div>
+          </div>
+
+          <!-- BARRA -->
+          <div style="margin:8px 0 20px;">
+            <div class="sal-range-bar" id="salBar">
+              <div class="sal-range-needle" id="salNeedle" style="left:50%"></div>
+            </div>
+            <div class="sal-range-labels">
+              <span>Mínimo</span><span>Abaixo média</span><span>Média</span><span>Acima média</span><span>Máximo</span>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="sal-stat-grid">
+            <div class="sal-stat">
+              <div class="sal-stat-val" id="salStatMin">—</div>
+              <div class="sal-stat-lbl">Mínimo mercado</div>
+            </div>
+            <div class="sal-stat">
+              <div class="sal-stat-val" id="salStatMed">—</div>
+              <div class="sal-stat-lbl">Salário médio</div>
+            </div>
+            <div class="sal-stat">
+              <div class="sal-stat-val" id="salStatMax">—</div>
+              <div class="sal-stat-lbl">Máximo mercado</div>
+            </div>
+          </div>
+
+          <!-- VALOR TOTAL PACOTE -->
+          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
+            <div style="font-size:11px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Valor total estimado do pacote (salário + benefícios)</div>
+            <div style="font-size:24px;font-weight:800;color:#15803d;margin:4px 0;" id="salTotalPkg">—</div>
+            <div style="font-size:11px;color:#4ade80;" id="salBenefitsValue">—</div>
+          </div>
+
+          <!-- TAGS DE BENEFÍCIOS -->
+          <div class="sal-tags" id="salBenTags" style="margin-bottom:16px;"></div>
+
+          <!-- DICAS DE NEGOCIAÇÃO -->
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px;">💡 Dicas para negociar melhor</div>
+          <div id="salTips"></div>
+
+          <!-- CTA -->
+          <div style="margin-top:24px;padding:18px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-radius:14px;text-align:center;">
+            <div style="font-size:14px;font-weight:700;color:#1e40af;margin-bottom:4px;">📄 CV actualizado = salário mais alto</div>
+            <div style="font-size:12px;color:#3b82f6;margin-bottom:14px;">Candidatos com CV profissional negociam em média 18% acima da oferta inicial</div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+              <button onclick="nav('cvs',null)" class="sal-btn-next" style="font-size:12px;padding:9px 18px;">Actualizar o meu CV</button>
+              <button onclick="salReset()" class="sal-btn-back" style="font-size:12px;padding:9px 18px;">↺ Nova Análise</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ DISTRIBUIÇÃO ══════════════════════════════ -->
     <div id="panel-distribution" class="panel">
       <div class="dist-hero">
@@ -1318,7 +1569,7 @@ const PANEL_TITLES = {
   overview:'Visão Geral', cvs:'CVs Criados', templates:'Templates de CV',
   jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos', ats:'Score ATS',
   plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições',
-  cover:'Carta de Apresentação'
+  cover:'Carta de Apresentação', salary:'Análise Salarial'
 };
 
 function catColor(cat) {
@@ -3472,6 +3723,180 @@ async function loadEmpregosDestacadas() {
   } catch (_) {}
 }
 loadEmpregosDestacadas();
+
+/* ══ SALARY ANALYZER ════════════════════════════════════════ */
+const SAL_DATA = {
+  ti:         { min:[150,220,320,450,580], med:[200,300,450,620,800], max:[280,420,620,900,1200], mult:{petroleo:1.5,banca:1.3,ong:1.35,publico:.8,privado:1} },
+  financ:     { min:[130,180,260,370,500], med:[180,250,370,520,700], max:[250,360,520,750,1000], mult:{petroleo:1.45,banca:1.5,ong:1.2,publico:.75,privado:1} },
+  gestao:     { min:[200,280,400,560,750], med:[280,400,580,800,1100], max:[400,580,820,1150,1600], mult:{petroleo:1.4,banca:1.25,ong:1.2,publico:.85,privado:1} },
+  rh:         { min:[120,170,240,340,460], med:[160,230,330,470,630], max:[220,310,460,660,900], mult:{petroleo:1.3,banca:1.2,ong:1.25,publico:.8,privado:1} },
+  comercial:  { min:[100,150,220,320,440], med:[150,220,330,480,650], max:[220,330,500,720,1000], mult:{petroleo:1.3,banca:1.2,ong:1.1,publico:.7,privado:1} },
+  marketing:  { min:[100,140,210,300,420], med:[140,200,300,430,580], max:[200,290,430,620,850], mult:{petroleo:1.2,banca:1.1,ong:1.2,publico:.75,privado:1} },
+  engenharia: { min:[200,290,420,600,800], med:[280,410,600,850,1150], max:[400,580,850,1200,1600], mult:{petroleo:1.6,banca:1.1,ong:1.15,publico:.9,privado:1} },
+  petroleo:   { min:[350,500,700,1000,1400], med:[500,750,1100,1600,2200], max:[800,1200,1800,2600,3500], mult:{petroleo:1,banca:1,ong:1,publico:1,privado:1} },
+  saude:      { min:[150,200,300,420,580], med:[200,280,420,600,820], max:[300,420,620,900,1250], mult:{petroleo:1.4,banca:1,ong:1.3,publico:.85,privado:1} },
+  juridico:   { min:[200,280,420,600,820], med:[280,400,600,880,1200], max:[420,620,920,1350,1900], mult:{petroleo:1.3,banca:1.2,ong:1.15,publico:.8,privado:1} },
+  educacao:   { min:[60,80,110,150,200], med:[80,110,150,200,270], max:[120,160,220,300,420], mult:{petroleo:1.1,banca:1,ong:1.4,publico:1,privado:1} },
+  logistica:  { min:[100,140,200,280,380], med:[140,200,290,410,560], max:[200,290,420,600,820], mult:{petroleo:1.35,banca:1,ong:1.1,publico:.8,privado:1} },
+  construcao: { min:[120,170,250,360,500], med:[170,250,370,530,730], max:[260,380,560,800,1100], mult:{petroleo:1.3,banca:1,ong:1.1,publico:.85,privado:1} },
+  admin:      { min:[80,100,130,170,220], med:[100,130,170,220,290], max:[140,180,240,320,430], mult:{petroleo:1.25,banca:1.2,ong:1.2,publico:.9,privado:1} },
+};
+const SAL_CITY_MULT = { luanda:1, benguela:.82, huambo:.75, lubango:.72, cabinda:1.1, outro:.70 };
+const SAL_EXP_IDX = e => e<=1?0:e<=4?1:e<=8?2:e<=14?3:4;
+const SAL_BENEFITS = [
+  { key:'saude',     icon:'🏥', title:'Seguro de Saúde',          sub:'Cobre despesas médicas do colaborador',         val:15000 },
+  { key:'viatura',   icon:'🚗', title:'Viatura da Empresa',        sub:'Uso profissional e pessoal de veículo',          val:60000 },
+  { key:'habitacao', icon:'🏠', title:'Subsídio de Habitação',     sub:'Apoio ao arrendamento ou residência',            val:40000 },
+  { key:'refeicao',  icon:'🍽️', title:'Subsídio de Alimentação',  sub:'Ticket refeição ou cantina incluída',            val:12000 },
+  { key:'bonus',     icon:'💰', title:'Bónus de Desempenho',       sub:'Bónus anual com base em objectivos',             val:30000 },
+  { key:'formacao',  icon:'🎓', title:'Formação Profissional',     sub:'Cursos, certificações e pós-graduações',         val:20000 },
+  { key:'ferias',    icon:'🌴', title:'13º Mês / Sub. Férias',    sub:'Pagamento adicional nas férias ou fim de ano',    val:25000 },
+  { key:'parental',  icon:'👶', title:'Licença Parental',          sub:'Licença paga para cuidar de filhos',             val:10000 },
+  { key:'remoto',    icon:'💻', title:'Trabalho Remoto / Híbrido','sub':'Flexibilidade de local de trabalho',            val:18000 },
+];
+const SAL_TIPS = {
+  ti:         ['Apresenta portfólio de projectos concretos — aumenta o poder de negociação em 25%','Certifications AWS, Azure ou Google Cloud valorizam até 30% o salário em TI','Negoceia trabalho híbrido: pode equivaler a 15-20% de benefício extra'],
+  financ:     ['Conhecimento de PERT, IFRS e legislação angolana (AGT/INSS) é altamente valorizado','Sênior com experiência em multinacional consegue negociar 40% acima da média local','Solicita revisão salarial após 6 meses se não houver cláusula de bloqueio'],
+  gestao:     ['Demonstra resultados mensuráveis: percentagem de crescimento, equipas geridas, orçamentos controlados','Experiência em gestão de crise ou reestruturação pode valer um adicional de 20%','Inclui indicadores de liderança no CV — recrutadores validam antes da negociação'],
+  petroleo:   ['O sector petrolífero paga 60-80% acima da média — negoceia sempre em USD ou AOA indexado','Expatriates negoceiam pacote total (housing, per diem, flights) — quantifica tudo','Certificações HSE e experiência offshore valorizam significativamente o perfil'],
+  saude:      ['Especialização e pós-graduação podem aumentar o salário base em 35-50%','ONG e organismos internacionais (OMS, UNICEF) oferecem pacotes mais competitivos','Negocia guarda hospitalar remunerada separada do salário base'],
+  default:    ['Pesquisa 3 ofertas reais da tua área antes de negociar — usa o nosso board de vagas','Apresenta o teu CV actualizado e profissional — recrutadores usam-no para avaliar o perfil salarial','Não aceites a primeira oferta: 80% das empresas têm margem de negociação de 10-15%'],
+};
+const fmt = n => Math.round(n).toLocaleString('pt-AO') + ' Akz';
+let salSelected = new Set();
+
+function salRenderBenefits() {
+  document.getElementById('salBenefitsList').innerHTML = SAL_BENEFITS.map(b => `
+    <div class="sal-benefit ${salSelected.has(b.key)?'checked':''}" onclick="salToggleBenefit('${b.key}',this)">
+      <div class="sal-chk">${salSelected.has(b.key)?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+      <div class="sal-benefit-ico">${b.icon}</div>
+      <div class="sal-benefit-info">
+        <div class="sal-benefit-title">${b.title}</div>
+        <div class="sal-benefit-sub">${b.sub}</div>
+      </div>
+      <div class="sal-benefit-val">+${fmt(b.val)}/mês</div>
+    </div>`).join('');
+}
+
+function salToggleBenefit(key, el) {
+  salSelected.has(key) ? salSelected.delete(key) : salSelected.add(key);
+  el.classList.toggle('checked');
+  const chk = el.querySelector('.sal-chk');
+  chk.innerHTML = salSelected.has(key) ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+}
+
+function salNext(step) {
+  if (step === 1) {
+    if (!document.getElementById('salArea').value) { alert('Selecciona a área profissional.'); return; }
+    salRenderBenefits();
+  }
+  document.getElementById('salS'+step).style.display='none';
+  document.getElementById('salS'+(step+1)).style.display='';
+  document.getElementById('sdot'+(step-1)).className='sal-step-dot done';
+  document.getElementById('sdot'+(step-1)).innerHTML='✓';
+  document.getElementById('sline'+(step-1)).classList.add('done');
+  document.getElementById('sdot'+step).className='sal-step-dot active';
+}
+
+function salBack(step) {
+  document.getElementById('salS'+step).style.display='none';
+  document.getElementById('salS'+(step-1)).style.display='';
+  document.getElementById('sdot'+(step-2)).className='sal-step-dot active';
+  document.getElementById('sdot'+(step-2)).innerHTML=step-1;
+  document.getElementById('sline'+(step-2)).classList.remove('done');
+  document.getElementById('sdot'+(step-1)).className='sal-step-dot pending';
+}
+
+function salAnalyze() {
+  const area    = document.getElementById('salArea').value || 'admin';
+  const sector  = document.getElementById('salSector').value;
+  const city    = document.getElementById('salCity').value;
+  const exp     = parseInt(document.getElementById('salExp').value) || 0;
+  const current = parseInt(document.getElementById('salCurrent').value) || 0;
+  const nonComp = document.getElementById('salNonCompete').checked;
+  const contrato= document.getElementById('salContrato').value;
+
+  const d    = SAL_DATA[area] || SAL_DATA.admin;
+  const idx  = SAL_EXP_IDX(exp);
+  const mult = (d.mult[sector] || 1) * (SAL_CITY_MULT[city] || 1);
+
+  const minK = Math.round(d.min[idx] * mult) * 1000;
+  const medK = Math.round(d.med[idx] * mult) * 1000;
+  const maxK = Math.round(d.max[idx] * mult) * 1000;
+
+  const benTotal = [...salSelected].reduce((s,k) => s + (SAL_BENEFITS.find(b=>b.key===k)?.val||0), 0);
+  const totalPkg = medK + benTotal;
+
+  // percentil baseado no salário actual
+  let needle = 50, percLabel = '', percColor = '';
+  if (current > 0) {
+    const pct = Math.min(100, Math.max(0, ((current - minK) / (maxK - minK)) * 100));
+    needle = Math.round(pct);
+    if (pct < 30)       { percLabel='Abaixo da média';   percColor='#ef4444'; }
+    else if (pct < 55)  { percLabel='Na média do mercado'; percColor='#f59e0b'; }
+    else if (pct < 80)  { percLabel='Acima da média';    percColor='#16a34a'; }
+    else                { percLabel='Top 20% do mercado'; percColor='#0d9488'; }
+  } else {
+    percLabel='Salário actual não informado'; percColor='var(--t3)';
+  }
+
+  const areaLabel = document.getElementById('salArea').options[document.getElementById('salArea').selectedIndex].text;
+  const expStr = exp<=1?'<1 ano de experiência':exp+' anos de experiência';
+
+  // Tips
+  const tips = (SAL_TIPS[area] || SAL_TIPS.default).slice(0, nonComp ? 3 : 2);
+  if (nonComp) tips.push('⚠️ A cláusula de não concorrência pode limitar mobilidade — verifica validade e âmbito antes de aceitar nova oferta');
+  if (contrato === 'servicos') tips.push('Recibos verdes/prestação de serviços: negoceia 20-30% acima do salário equivalente efectivo para cobrir impostos e ausência de benefícios');
+
+  // Render
+  document.getElementById('salResultTitle').textContent = areaLabel + ' · ' + expStr;
+  document.getElementById('salResultRange').textContent = fmt(minK) + ' – ' + fmt(maxK);
+  document.getElementById('salStatMin').textContent = fmt(minK);
+  document.getElementById('salStatMed').textContent = fmt(medK);
+  document.getElementById('salStatMax').textContent = fmt(maxK);
+  document.getElementById('salTotalPkg').textContent = fmt(totalPkg) + '/mês';
+  document.getElementById('salBenefitsValue').textContent = benTotal > 0 ? `Benefícios estimados: +${fmt(benTotal)}/mês` : 'Sem benefícios seleccionados';
+  document.getElementById('salPercentileTag').innerHTML = `<span class="sal-percentile" style="background:${percColor}20;color:${percColor};border:1px solid ${percColor}40;">${percLabel}</span>`;
+  document.getElementById('salTips').innerHTML = tips.map(t => `<div class="sal-tip"><span>💡</span><span>${t}</span></div>`).join('');
+
+  const benTags = [...salSelected].map(k => {
+    const b = SAL_BENEFITS.find(x=>x.key===k);
+    return b ? `<span class="sal-tag" style="background:#dcfce7;color:#166534;">${b.icon} ${b.title}</span>` : '';
+  }).join('');
+  document.getElementById('salBenTags').innerHTML = benTags;
+
+  // Show result
+  document.getElementById('salS3').style.display='none';
+  document.getElementById('salS4').style.display='';
+  ['sdot0','sdot1','sdot2'].forEach((id,i)=>{
+    document.getElementById(id).className='sal-step-dot done';
+    document.getElementById(id).innerHTML='✓';
+    if(i<3) document.getElementById('sline'+i).classList.add('done');
+  });
+  document.getElementById('sdot3').className='sal-step-dot done';
+
+  setTimeout(() => {
+    document.getElementById('salNeedle').style.left = needle + '%';
+  }, 100);
+}
+
+function salReset() {
+  salSelected.clear();
+  ['salArea','salSector','salCity','salContrato','salNotice'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ['salTitle','salCurrent'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('salExp').value=3;
+  document.getElementById('salExpLbl').textContent='3 anos';
+  document.getElementById('salCurLbl').textContent='Não informado';
+  document.getElementById('salNonCompete').checked=false;
+  ['salS2','salS3','salS4'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('salS1').style.display='';
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('sdot'+i);
+    d.className='sal-step-dot '+(i===0?'active':'pending');
+    d.innerHTML=i===3?'✓':i+1;
+    if(i<3)document.getElementById('sline'+i).classList.remove('done');
+  }
+}
 </script>
 
 <!-- BOTTOM NAV (mobile) -->
