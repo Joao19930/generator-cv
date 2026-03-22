@@ -103,8 +103,29 @@ function localFallback(prompt) {
     const empresaMatch = prompt.match(/Empresa[:\s]+([^\n]+)/i);
     const cargo = cargoMatch ? cargoMatch[1].trim() : 'Profissional';
     const empresa = empresaMatch ? empresaMatch[1].trim() : '';
-    const ctx = empresa && empresa !== 'não especificada' ? ` na ${empresa}` : '';
-    return `• Executar as funções de ${cargo}${ctx} com rigor técnico e foco nos objectivos\n• Coordenar processos e actividades diárias garantindo eficiência operacional\n• Colaborar com as equipas internas para cumprimento de metas e prazos\n• Reportar indicadores de desempenho à chefia e propor melhorias contínuas`;
+    const temEmpresa = empresa && empresa !== 'não especificada';
+    const ctx = temEmpresa ? ` na ${empresa}` : '';
+    const c = cargo.toLowerCase();
+
+    if (/rh|recursos humanos|people|talento/.test(c)) {
+      return `Liderou processos de recrutamento e selecção de quadros${ctx}, reduzindo o tempo de contratação\nImplementou políticas de avaliação de desempenho e planos de desenvolvimento individual\nGeriu relações laborais e assegurou conformidade com a legislação angolana do trabalho\nCoordená formações internas e programas de integração para novos colaboradores`;
+    }
+    if (/comercial|vendas|sales|negócios|negoc/.test(c)) {
+      return `Geriu carteira de clientes${ctx}, superando as metas comerciais em 30% no último ano\nNegociou contratos e parcerias estratégicas com empresas e instituições em Luanda\nIdentificou oportunidades de mercado e desenvolveu propostas comerciais competitivas\nElaborou relatórios de desempenho comercial e apresentou resultados à direcção`;
+    }
+    if (/financ|contab|audit|tesour/.test(c)) {
+      return `Supervisionou a contabilidade geral e preparação de demonstrações financeiras${ctx}\nGarantiu conformidade fiscal e cumprimento das obrigações com AGT e INSS\nElaborou orçamentos, previsões de cash-flow e análises de desvios mensais\nCoordená auditorias internas e implementou melhorias nos controlos financeiros`;
+    }
+    if (/inform|ti\b|software|programa|system|develop|dados/.test(c)) {
+      return `Desenvolveu e manteve sistemas e aplicações${ctx} utilizando tecnologias modernas\nImplementou melhorias que reduziram falhas e aumentaram a performance em 40%\nColaborou com equipas multidisciplinares em projectos de transformação digital\nDocumentou processos e assegurou a segurança e integridade dos dados`;
+    }
+    if (/gest|direct|manager|lider|coord/.test(c)) {
+      return `Liderou equipa de colaboradores${ctx}, promovendo cultura de responsabilidade e resultados\nDefiniu objectivos estratégicos e acompanhou indicadores de desempenho mensais\nOptimizou processos operacionais, reduzindo custos em 20% sem comprometer a qualidade\nReportou à administração e propôs planos de melhoria contínua`;
+    }
+    if (/market|comunic|digital|publicid/.test(c)) {
+      return `Planeou e executou campanhas de marketing digital e tradicional${ctx}\nGestionou redes sociais e conteúdos, aumentando o alcance em 50% em 6 meses\nAnalisou métricas de desempenho e ajustou estratégias para maximizar o ROI\nCoordená produção de materiais de comunicação e identidade de marca`;
+    }
+    return `Desempenhou as funções de ${cargo}${ctx} com elevado sentido de responsabilidade e orientação para resultados\nOptimizou processos internos, contribuindo para a melhoria da eficiência operacional\nColaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos\nElaborou relatórios de actividade e propôs melhorias implementadas com sucesso`;
   }
 
   // Fallback genérico — nunca retornar null para prompts longos

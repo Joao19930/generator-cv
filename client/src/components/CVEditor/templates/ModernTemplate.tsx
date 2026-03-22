@@ -318,7 +318,7 @@ export default function ModernTemplate() {
     }}>
       {/* HEADER */}
       <header style={{
-        padding: '28px 36px 20px',
+        padding: '75px 75px 20px',
         background: '#fff',
         display: 'flex',
         alignItems: 'center',
@@ -386,7 +386,7 @@ export default function ModernTemplate() {
         <aside style={{
           width: 230,
           background: '#fafaf9',
-          padding: '20px 16px',
+          padding: '20px 16px 75px 75px',
           flexShrink: 0,
           boxSizing: 'border-box',
         }}>
@@ -397,7 +397,7 @@ export default function ModernTemplate() {
         {/* Main */}
         <main style={{
           flex: 1,
-          padding: '20px 24px',
+          padding: '20px 75px 75px 24px',
           boxSizing: 'border-box',
         }}>
           {sectionOrder.map(key => renderMainSection(key))}

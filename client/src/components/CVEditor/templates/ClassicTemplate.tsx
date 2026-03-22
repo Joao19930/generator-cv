@@ -37,7 +37,7 @@ export default function ClassicTemplate() {
   }
 
   return (
-    <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', padding: '32px 40px', background: '#fff', lineHeight: lh, minHeight: '100%' }}>
+    <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', padding: '75px', background: '#fff', lineHeight: lh, minHeight: '100%' }}>
       {/* Header - centered */}
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <h1 style={{ fontSize: fontSize + 10, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>

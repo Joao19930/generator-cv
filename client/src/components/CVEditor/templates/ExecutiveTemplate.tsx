@@ -110,7 +110,7 @@ export default function ExecutiveTemplate() {
                     line.trim() ? (
                       <div key={li} style={{ display: 'flex', gap: 5, marginBottom: 2 }}>
                         <span style={{ color: primaryColor, fontSize: fs, fontWeight: 700, flexShrink: 0, lineHeight: lh }}>–</span>
-                        <span style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh }}>{line.trim()}</span>
+                        <span style={{ fontSize: fs, fontWeight: 300, color: '#374151', lineHeight: lh }}>{line.trim().replace(/^[•\-–]\s*/, '')}</span>
                       </div>
                     ) : null
                   ))}
@@ -195,7 +195,7 @@ export default function ExecutiveTemplate() {
       <aside style={{
         width: 222,
         background: '#fafaf9',
-        padding: '36px 20px',
+        padding: '75px 20px 75px 75px',
         flexShrink: 0,
         boxSizing: 'border-box',
       }}>
@@ -371,7 +371,7 @@ export default function ExecutiveTemplate() {
       {/* MAIN */}
       <main style={{
         flex: 1,
-        padding: '36px 24px 36px 28px',
+        padding: '75px 75px 75px 28px',
         background: '#fff',
         boxSizing: 'border-box',
       }}>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react' // eslint-disable-line @typescript-eslint/no-unused-vars
 import { useCVStore } from '../../../store/cvStore'
 
 function fmtDate(d: string) {
@@ -181,7 +181,7 @@ export default function CreativeTemplate() {
   return (
     <div style={{ fontFamily: ff, fontSize, color: '#1a1a1a', background: '#fff', minHeight: '100%' }}>
       {/* Full-width colored header */}
-      <div style={{ background: primaryColor, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 20 }}>
+      <div style={{ background: primaryColor, padding: '40px 75px', display: 'flex', alignItems: 'center', gap: 20 }}>
         {personal.photo && (
           <img src={personal.photo} alt="foto" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.6)', flexShrink: 0 }} />
         )}
@@ -198,7 +198,7 @@ export default function CreativeTemplate() {
       {/* Contact bar */}
       <div style={{
         background: `${primaryColor}18`,
-        padding: '8px 32px',
+        padding: '8px 75px',
         display: 'flex',
         flexWrap: 'wrap',
         gap: '3px 20px',
@@ -218,11 +218,11 @@ export default function CreativeTemplate() {
       {/* Two-column body */}
       <div style={{ display: 'flex', gap: 0 }}>
         {/* Left 35% */}
-        <div style={{ width: '35%', borderRight: `1px solid ${primaryColor}20`, padding: '24px 20px 24px 28px', flexShrink: 0 }}>
+        <div style={{ width: '35%', borderRight: `1px solid ${primaryColor}20`, padding: '24px 20px 75px 75px', flexShrink: 0 }}>
           {leftKeys.map(k => renderLeft(k))}
         </div>
         {/* Right 65% */}
-        <div style={{ flex: 1, padding: '24px 28px 24px 20px', lineHeight: lh }}>
+        <div style={{ flex: 1, padding: '24px 75px 75px 20px', lineHeight: lh }}>
           {rightKeys.map(k => renderRight(k))}
         </div>
       </div>
