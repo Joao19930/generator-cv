@@ -409,13 +409,14 @@ export const useCVStore = create<CVState>((set, get) => {
 
     loadFromData: (data: any) => {
       if (!data) return
-      const content = data.contentJson
-        ? (typeof data.contentJson === 'string' ? JSON.parse(data.contentJson) : data.contentJson)
-        : (data.content ? (typeof data.content === 'string' ? JSON.parse(data.content) : data.content) : {})
+      const rawContent = data.contentJson ?? data.ContentJson ?? data.content ?? data.Content
+      const content = rawContent
+        ? (typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent)
+        : {}
 
       set(s => ({
         ...s,
-        id: data.id ? String(data.id) : s.id,
+        id: (data.id ?? data.Id) ? String(data.id ?? data.Id) : s.id,
         title: data.title || data.Title || s.title,
         personal: { ...s.personal, ...(content.personal || {}) },
         summary: content.summary ?? s.summary,
