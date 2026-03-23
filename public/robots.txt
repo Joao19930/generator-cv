@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /editor
+Disallow: /app
+Disallow: /admin
+
+Sitemap: https://cvpremium.net/sitemap.xml
