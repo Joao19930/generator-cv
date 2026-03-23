@@ -1612,7 +1612,7 @@ function cleanLine(l) {
   return l.replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF\uFE0F]/g, '').trim();
 }
 // Linhas que indicam fim da lista de cargos (passam a ser campos partilhados)
-const SHARED_FIELD_RX = /^(local|cidade|contacto|contact|email|cv para|envie|apenas|requisitos?|horário|horario|salário|salario|prazo|data\s*limite|candidatura|informaç)/i;
+const SHARED_FIELD_RX = /^(local|cidade|contacto|contact|email|cv para|envie|apenas|requisitos?|horário|horario|salário|salario|prazo|data\s*limite|candidatura|informaç|nota[:\s]|atenção|atencao|obs[:\s]|observaç|exclusivamente|destinad|candidatos\s+locais|importante[:\s]|aviso[:\s])/i;
 
 function detectMultipleJobs(raw) {
   const lines = raw.split('\n').map(cleanLine).filter(l => l.length > 0);
@@ -1896,6 +1896,12 @@ async function publishMultipleJobs() {
   const contactType = document.getElementById('mContactType').value;
   const jobDate     = new Date().toISOString().split('T')[0];
   if (!company) { alert('Preencha o nome da empresa.'); return; }
+  // Normalizar número WhatsApp (adicionar 244 se for número angola de 9 dígitos)
+  let normalContact = contact;
+  if (contactType === 'whatsapp' && contact) {
+    const d = contact.replace(/\D/g,'');
+    normalContact = /^9\d{8}$/.test(d) ? '244' + d : d || contact;
+  }
   const btn = preview.querySelector('button[onclick="publishMultipleJobs()"]');
   btn.textContent = '⏳ A publicar…'; btn.disabled = true;
   let ok = 0, fail = 0;
@@ -1904,7 +1910,7 @@ async function publishMultipleJobs() {
       const res = await fetch(API + '/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
-        body: JSON.stringify({ title: j.title, company, city, country: 'Angola', description: j.description || null, url: contact, contactType, jobDate, category: j.category || 'Outro' })
+        body: JSON.stringify({ title: j.title, company, city, country: 'Angola', description: j.description || null, url: normalContact, contactType, jobDate, category: j.category || 'Outro' })
       });
       if (res.ok) ok++; else fail++;
     } catch { fail++; }
@@ -1929,6 +1935,11 @@ async function saveJob() {
     contactType: document.getElementById('jContactType').value
   };
   if (!j.title || !j.company) { alert('Preencha cargo e empresa.'); return; }
+  // Normalizar número WhatsApp
+  if (j.contactType === 'whatsapp' && j.url) {
+    const d = j.url.replace(/\D/g,'');
+    j.url = /^9\d{8}$/.test(d) ? '244' + d : d || j.url;
+  }
   try {
     const method = state.editId ? 'PUT' : 'POST';
     const url    = API + '/api/admin/jobs' + (state.editId ? '/' + state.editId : '');

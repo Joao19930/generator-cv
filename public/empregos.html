@@ -257,7 +257,18 @@ function renderCard(j, i) {
   const desc   = j.description || j.Description || '';
   const salary = j.salary  || j.Salary  || '';
   const cat    = j.category|| j.Category|| '';
-  const url    = j.url     || j.Url     || '#';
+  const rawUrl = j.url     || j.Url     || '';
+  const ctype  = (j.contact_type || j.ContactType || 'url').toLowerCase();
+  let url = rawUrl;
+  if (ctype === 'whatsapp' && rawUrl) {
+    const digits = rawUrl.replace(/\D/g,'');
+    const num = /^9\d{8}$/.test(digits) ? '244' + digits : digits;
+    url = 'https://wa.me/' + num;
+  } else if (ctype === 'email' && rawUrl && !rawUrl.startsWith('mailto:')) {
+    url = 'mailto:' + rawUrl;
+  } else if (!rawUrl) {
+    url = '#';
+  }
   const ago    = timeAgo(j.job_date || j.JobDate || j.created_at || j.CreatedAt);
   const isNew  = ago === 'Hoje' || ago === 'Ontem';
 
