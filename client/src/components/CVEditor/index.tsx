@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Download, Lock, X, Check } from 'lucide-react'
 import { useCVStore } from '../../store/cvStore'
 import { useAutosave } from '../../hooks/useAutosave'
@@ -169,9 +169,17 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  const [showMobilePreview, setShowMobilePreview] = useState(false)
 
   const handleSaved = useCallback(() => setSavedAt(new Date()), [])
   useAutosave(cvId, token, handleSaved)
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -202,22 +210,100 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
     return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`
   }
 
+  /* ── MOBILE LAYOUT ─────────────────────────────────────────── */
+  if (isMobile) {
+    return (
+      <div style={{ height: '100dvh', overflow: 'hidden', background: '#FAF9F8', fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
+        <style>{`
+          @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+          @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+        `}</style>
+
+        {/* Wizard ocupa tudo */}
+        <WizardPanel isMobile onShowPreview={() => setShowMobilePreview(true)} />
+
+        {/* Preview overlay — desliza de baixo */}
+        {showMobilePreview && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 300,
+            display: 'flex', flexDirection: 'column',
+            background: '#EDEBE9',
+            animation: 'slideUp 0.35s cubic-bezier(0.32,0.72,0,1)',
+          }}>
+            {/* Barra topo */}
+            <div style={{
+              height: 54, background: '#FFFFFF',
+              borderBottom: '1px solid #E1DFDD',
+              display: 'flex', alignItems: 'center',
+              padding: '0 16px', gap: 12,
+              flexShrink: 0,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+            }}>
+              <button
+                type="button"
+                onClick={() => setShowMobilePreview(false)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none',
+                  color: '#605E5C', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  padding: '6px 0',
+                }}
+              >
+                <Check size={14} style={{ transform: 'rotate(180deg)' }} />
+                Voltar
+              </button>
+
+              <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#201F1E' }}>
+                CV<span style={{ color: '#f59e0b' }}>Premium</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={handleDownload}
+                disabled={exporting}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 14px',
+                  background: isPremium ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#F3F2F1',
+                  border: isPremium ? 'none' : '1px solid #E1DFDD',
+                  borderRadius: 8,
+                  color: isPremium ? '#fff' : '#605E5C',
+                  fontSize: 12, fontWeight: 700,
+                  cursor: exporting ? 'wait' : 'pointer',
+                  opacity: exporting ? 0.7 : 1,
+                  boxShadow: isPremium ? '0 2px 8px rgba(245,158,11,0.3)' : 'none',
+                }}
+              >
+                {isPremium ? <Download size={13} /> : <Lock size={13} />}
+                PDF
+              </button>
+            </div>
+
+            {/* Preview scrollável */}
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <PreviewPanel />
+            </div>
+          </div>
+        )}
+
+        {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+      </div>
+    )
+  }
+
+  /* ── DESKTOP LAYOUT ────────────────────────────────────────── */
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#FAF9F8', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* HEADER — premium light */}
+      {/* HEADER */}
       <header style={{
         height: 52,
         background: '#FFFFFF',
         borderBottom: '1px solid #E1DFDD',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        padding: '0 18px',
-        flexShrink: 0,
-        zIndex: 50,
+        display: 'flex', alignItems: 'center',
+        gap: 14, padding: '0 18px',
+        flexShrink: 0, zIndex: 50,
         boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        {/* Logo */}
         <a href="/app" style={{ textDecoration: 'none', flexShrink: 0 }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: '#201F1E', letterSpacing: '-0.02em' }}>
             CV<span style={{ color: '#f59e0b' }}>Premium</span>
@@ -226,42 +312,31 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
 
         <div style={{ width: 1, height: 18, background: '#E1DFDD', flexShrink: 0 }} />
 
-        {/* Title */}
         <input
           value={store.title}
           onChange={e => store.setTitle(e.target.value)}
           style={{
-            background: 'transparent',
-            border: '1px solid transparent',
-            borderRadius: 6,
-            padding: '4px 8px',
-            color: '#8A8886',
-            fontSize: 13,
-            fontWeight: 500,
-            outline: 'none',
-            minWidth: 80,
-            maxWidth: 180,
+            background: 'transparent', border: '1px solid transparent',
+            borderRadius: 6, padding: '4px 8px',
+            color: '#8A8886', fontSize: 13, fontWeight: 500,
+            outline: 'none', minWidth: 80, maxWidth: 180,
           }}
           onFocus={e => { (e.target as HTMLInputElement).style.borderColor = '#E1DFDD'; (e.target as HTMLInputElement).style.color = '#201F1E' }}
           onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'transparent'; (e.target as HTMLInputElement).style.color = '#8A8886' }}
         />
 
-        {/* Progress + ATS badge */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1, height: 4, background: '#EDEBE9', borderRadius: 2, overflow: 'hidden', maxWidth: 160 }}>
             <div style={{
-              height: '100%',
-              width: `${progress}%`,
+              height: '100%', width: `${progress}%`,
               background: progress < 40 ? '#ef4444' : progress < 70 ? '#f59e0b' : '#22c55e',
-              borderRadius: 2,
-              transition: 'width 0.5s ease',
+              borderRadius: 2, transition: 'width 0.5s ease',
             }} />
           </div>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#605E5C', flexShrink: 0 }}>{progress}%</span>
           <ATSBadge store={store} />
         </div>
 
-        {/* Save status */}
         {savedAt ? (
           <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <Check size={12} /> {formatTime(savedAt)}
@@ -272,22 +347,18 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
 
         <div style={{ width: 1, height: 18, background: '#E1DFDD', flexShrink: 0 }} />
 
-        {/* Download PDF */}
         <button
           type="button"
           onClick={handleDownload}
           disabled={exporting}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
+            display: 'flex', alignItems: 'center', gap: 6,
             padding: '7px 14px',
             background: isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#F3F2F1',
             border: isPremium ? 'none' : '1px solid #E1DFDD',
             borderRadius: 8,
             color: isPremium ? '#fff' : '#605E5C',
-            fontSize: 12,
-            fontWeight: 700,
+            fontSize: 12, fontWeight: 700,
             cursor: exporting ? 'wait' : 'pointer',
             opacity: exporting ? 0.7 : 1,
             flexShrink: 0,
@@ -298,22 +369,14 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
           {exporting ? 'A exportar...' : 'PDF'}
         </button>
 
-        {/* Close */}
         <button
           type="button"
           onClick={() => { window.location.href = '/app' }}
           style={{
-            width: 30,
-            height: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-            border: '1px solid #E1DFDD',
-            borderRadius: 7,
-            color: '#8A8886',
-            cursor: 'pointer',
-            flexShrink: 0,
+            width: 30, height: 30,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'transparent', border: '1px solid #E1DFDD',
+            borderRadius: 7, color: '#8A8886', cursor: 'pointer', flexShrink: 0,
           }}
         >
           <X size={14} />
@@ -322,12 +385,9 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
 
       {/* BODY */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Wizard Left Panel — premium light */}
         <div style={{ width: 520, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#FFFFFF', boxShadow: '2px 0 8px rgba(0,0,0,0.06)' }}>
           <WizardPanel />
         </div>
-
-        {/* Preview Right — warm gray */}
         <div style={{ flex: 1, overflow: 'auto', background: '#EDEBE9' }}>
           <PreviewPanel />
         </div>
