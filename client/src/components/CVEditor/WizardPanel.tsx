@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { User, Briefcase, GraduationCap, Zap, FileText, Globe, ChevronRight, ChevronLeft, Check, ExternalLink, MapPin, Building2 } from 'lucide-react'
+import { User, Briefcase, GraduationCap, Zap, FileText, Globe, ChevronRight, ChevronLeft, Check, ExternalLink, MapPin, Building2, X } from 'lucide-react'
 import PersonalSection from './sections/PersonalSection'
 import ExperienceSection from './sections/ExperienceSection'
 import EducationSection from './sections/EducationSection'
@@ -171,21 +171,23 @@ export default function WizardPanel({ isMobile = false, onShowPreview }: WizardP
   const isLastStep = step === totalSteps - 1
   const cvDone = isLastStep && isStepDone(5, store)
 
-  const StepContent = () => (
-    <>
-      {step === 0 && <PersonalSection />}
-      {step === 1 && <ExperienceSection />}
-      {step === 2 && <EducationSection />}
-      {step === 3 && <SkillsSection />}
-      {step === 4 && <LanguagesSection />}
-      {step === 5 && (
-        <>
-          <SummarySection />
-          <MatchingJobs jobTitle={store.personal.jobTitle} />
-        </>
-      )}
-    </>
-  )
+  function renderStepContent() {
+    return (
+      <>
+        {step === 0 && <PersonalSection />}
+        {step === 1 && <ExperienceSection />}
+        {step === 2 && <EducationSection />}
+        {step === 3 && <SkillsSection />}
+        {step === 4 && <LanguagesSection />}
+        {step === 5 && (
+          <>
+            <SummarySection />
+            <MatchingJobs jobTitle={store.personal.jobTitle} />
+          </>
+        )}
+      </>
+    )
+  }
 
   /* ══════════════════════════════════════════════════════════
      MOBILE — Ultra-leve: preto / branco / cinza + azul
@@ -256,7 +258,7 @@ export default function WizardPanel({ isMobile = false, onShowPreview }: WizardP
 
         {/* FORMULÁRIO */}
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 16px 16px', background: '#fafafa' }}>
-          <StepContent />
+          {renderStepContent()}
         </div>
 
         {/* RODAPÉ */}
