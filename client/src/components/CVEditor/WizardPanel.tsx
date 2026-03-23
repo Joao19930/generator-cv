@@ -414,7 +414,7 @@ export default function WizardPanel({ isMobile = false, onShowPreview }: WizardP
           animation: 'fadeSection 0.2s ease',
         }}
       >
-        <StepContent />
+        {renderStepContent()}
       </div>
 
       {/* ── RODAPÉ ─────────────────────────────────────────── */}
