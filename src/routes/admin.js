@@ -271,8 +271,21 @@ router.delete('/courses/:id', async (req, res) => {
 // ── JOBS CRUD ─────────────────────────────────────────────────
 router.get('/jobs', async (req, res) => {
   try {
-    const r = await req.db.request().query('SELECT * FROM jobs ORDER BY created_at DESC');
+    // Garantir coluna pinned existe
+    await req.db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS pinned BOOLEAN DEFAULT FALSE`).catch(()=>{});
+    const r = await req.db.request().query('SELECT * FROM jobs ORDER BY pinned DESC NULLS LAST, created_at DESC');
     res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PATCH /api/admin/jobs/:id/pin — Afixar / desafixar vaga ──
+router.patch('/jobs/:id/pin', async (req, res) => {
+  try {
+    const r = await req.db.request()
+      .input('id', sql.Int, req.params.id)
+      .query('UPDATE jobs SET pinned = NOT COALESCE(pinned, FALSE) WHERE id = @id RETURNING id, pinned');
+    const row = r.recordset[0];
+    res.json({ success: true, pinned: row?.Pinned ?? row?.pinned ?? false });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/jobs', async (req, res) => {

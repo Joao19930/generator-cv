@@ -2909,6 +2909,7 @@ function renderJobs(list) {
     const init    = (j.Company||'E')[0].toUpperCase();
     const ago     = jobsAgo(j.JobDate);
     const newBadge = isNew(j.JobDate);
+    const pinned  = j.Pinned || j.pinned || false;
     const saved   = savedJobs.includes(j.Id);
     const loc     = [j.City, j.Country].filter(Boolean).join(', ');
     const catTag  = j.Category ? `<span class="jb-tag jb-tag-blue">${j.Category}</span>` : '';
@@ -2930,6 +2931,7 @@ function renderJobs(list) {
           </div>
         </div>
         <div class="jb-badges">
+          ${pinned  ? '<span class="jb-new" style="background:#f59e0b;">📌 Afixada</span>' : ''}
           ${newBadge ? '<span class="jb-new">NOVO</span>' : ''}
           <button class="jb-save${saved?' saved':''}" title="${saved?'Guardado':'Guardar'}" onclick="event.stopPropagation();toggleSaveJob(${j.Id},this)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="${saved?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>

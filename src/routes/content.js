@@ -38,6 +38,7 @@ router.get('/courses', async (req, res) => {
 router.get('/jobs', async (req, res) => {
   // Tenta queries progressivamente mais simples até uma funcionar
   const attempts = [
+    'SELECT * FROM jobs WHERE active=TRUE ORDER BY pinned DESC NULLS LAST, created_at DESC',
     'SELECT * FROM jobs WHERE active=TRUE ORDER BY created_at DESC',
     'SELECT * FROM jobs WHERE active=TRUE',
     'SELECT * FROM jobs ORDER BY created_at DESC',

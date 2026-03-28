@@ -457,7 +457,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="table-toolbar">
       <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar vagas..." oninput="filterJobs(this.value)"></div>
     </div>
-    <table><thead><tr><th>Imagem</th><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th>Acções</th></tr></thead>
+    <table><thead><tr><th>Imagem</th><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th style="width:160px;">Acções</th></tr></thead>
     <tbody id="jobsTable"></tbody></table>
     <div class="pagination"><span id="jobsPagInfo">0 vagas</span></div>
   </div>
@@ -1952,21 +1952,36 @@ function renderJobs() {
     const country = j.Country  || j.country || '';
     const cat     = j.Category || j.category|| '—';
     const date    = j.JobDate  || j.date    || '—';
-    const img = j.ImageUrl || j.image_url || '';
-    return `<tr>
+    const img     = j.ImageUrl || j.image_url || '';
+    const pinned  = j.Pinned   || j.pinned  || false;
+    return `<tr style="${pinned ? 'background:#fffbeb;' : ''}">
       <td>${img ? `<img src="${img}" style="width:60px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" onerror="this.style.display='none'">` : '<span style="font-size:10px;color:var(--t4);">—</span>'}</td>
-      <td><span style="font-weight:600;">${title}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px;">${pinned ? '<span title="Afixada" style="font-size:14px;">📌</span>' : ''}<span style="font-weight:600;">${title}</span></div></td>
       <td>${company}</td>
       <td>${city}${city && country ? ', ' : ''}${country}</td>
       <td><span class="badge badge-blue">${cat}</span></td>
       <td><span class="badge badge-green">Activo</span></td>
       <td>${date && date !== '—' ? String(date).substring(0,10) : '—'}</td>
       <td><div class="action-btns">
+        <button class="btn btn-xs" onclick="togglePinJob(${id})" style="background:${pinned?'#f59e0b':'#f3f4f6'};color:${pinned?'#fff':'var(--t2)'};border:none;" title="${pinned?'Desafixar':'Afixar'}">${pinned?'📌 Afixada':'📌 Afixar'}</button>
         <button class="btn btn-ghost btn-xs" onclick="editJob(${id})">Editar</button>
         <button class="btn btn-red btn-xs" onclick="deleteJob(${id})">Remover</button>
       </div></td>
     </tr>`;
   }).join('');
+}
+
+async function togglePinJob(id) {
+  const h = { Authorization: 'Bearer ' + (localStorage.getItem('cv_token') || localStorage.getItem('adminToken') || '') };
+  try {
+    const res = await fetch(API + '/api/admin/jobs/' + id + '/pin', { method: 'PATCH', headers: h });
+    const d   = await res.json();
+    if (d.success) {
+      const j = state.jobs.find(x => (x.Id||x.id) === id);
+      if (j) { j.pinned = d.pinned; j.Pinned = d.pinned; }
+      renderJobs();
+    }
+  } catch(e) { alert('Erro ao afixar vaga.'); }
 }
 
 function filterJobs(v) {
