@@ -109,6 +109,13 @@ app.get('/admin-panel', (req, res) => {
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
 
+// OG image — serve o SVG como imagem para Open Graph / Twitter Card
+app.get('/og-image.png', (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=604800');
+  res.sendFile(require('path').join(__dirname, '../public/og-image.svg'));
+});
+
 // ── Debug jobs (remover após diagnóstico) ─────────────────────
 app.get('/debug-jobs', async (req, res) => {
   const results = {};

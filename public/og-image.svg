@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.15)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="1050" cy="80" r="220" fill="rgba(255,255,255,0.06)"/>
+  <circle cx="150" cy="550" r="180" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="1100" cy="500" r="140" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Card mockup -->
+  <rect x="720" y="100" width="380" height="440" rx="20" fill="url(#card)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+  <!-- Card lines -->
+  <rect x="755" y="145" width="120" height="12" rx="6" fill="rgba(255,255,255,0.5)"/>
+  <rect x="755" y="168" width="80" height="8" rx="4" fill="rgba(255,255,255,0.3)"/>
+  <rect x="755" y="210" width="305" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+  <rect x="755" y="226" width="270" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+  <rect x="755" y="242" width="290" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+  <rect x="755" y="278" width="100" height="8" rx="4" fill="rgba(255,255,255,0.4)"/>
+  <rect x="755" y="298" width="305" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+  <rect x="755" y="313" width="280" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+  <rect x="755" y="328" width="260" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+  <rect x="755" y="360" width="100" height="8" rx="4" fill="rgba(255,255,255,0.4)"/>
+  <rect x="755" y="380" width="305" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+  <rect x="755" y="395" width="250" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+  <!-- Avatar placeholder -->
+  <circle cx="1045" cy="155" r="32" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Logo icon -->
+  <rect x="80" y="90" width="56" height="56" rx="14" fill="rgba(255,255,255,0.2)"/>
+  <text x="108" y="129" font-family="Arial" font-size="28" fill="white" text-anchor="middle">📄</text>
+
+  <!-- Main title -->
+  <text x="80" y="230" font-family="Arial, sans-serif" font-size="64" font-weight="900" fill="white" letter-spacing="-1">CV Premium</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="292" font-family="Arial, sans-serif" font-size="26" fill="rgba(255,255,255,0.85)">Cria o teu currículo profissional</text>
+  <text x="80" y="328" font-family="Arial, sans-serif" font-size="26" fill="rgba(255,255,255,0.85)">em minutos — Angola &amp; Portugal</text>
+
+  <!-- Feature pills -->
+  <rect x="80" y="370" width="170" height="38" rx="19" fill="rgba(255,255,255,0.2)"/>
+  <text x="165" y="394" font-family="Arial, sans-serif" font-size="15" fill="white" text-anchor="middle">✓ 200+ Templates</text>
+
+  <rect x="264" y="370" width="150" height="38" rx="19" fill="rgba(255,255,255,0.2)"/>
+  <text x="339" y="394" font-family="Arial, sans-serif" font-size="15" fill="white" text-anchor="middle">✓ Score ATS</text>
+
+  <rect x="428" y="370" width="180" height="38" rx="19" fill="rgba(255,255,255,0.2)"/>
+  <text x="518" y="394" font-family="Arial, sans-serif" font-size="15" fill="white" text-anchor="middle">✓ IA Integrada</text>
+
+  <!-- Domain -->
+  <text x="80" y="500" font-family="Arial, sans-serif" font-size="22" fill="rgba(255,255,255,0.65)">cvpremium.net</text>
+
+  <!-- Bottom tagline -->
+  <rect x="0" y="560" width="1200" height="70" fill="rgba(0,0,0,0.25)"/>
+  <text x="600" y="602" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.8)" text-anchor="middle">A plataforma líder de CVs profissionais em Angola 🇦🇴</text>
+</svg>

@@ -1,8 +1,29 @@
 User-agent: *
 Allow: /
+Allow: /empregos
+Allow: /ats
+Allow: /demo
+Allow: /pricing
+Allow: /free
+Allow: /login
+
 Disallow: /api/
-Disallow: /editor
 Disallow: /app
+Disallow: /app.html
+Disallow: /editor
+Disallow: /editor-app/
+Disallow: /form
+Disallow: /form.html
+Disallow: /preview
+Disallow: /preview.html
+Disallow: /free-preview
+Disallow: /dashboard
+Disallow: /definicoes
 Disallow: /admin
+Disallow: /admin-panel
+Disallow: /admin-login
+Disallow: /admin-chat-training
+Disallow: /admin-job-templates
+Disallow: /linkedin-import
 
 Sitemap: https://cvpremium.net/sitemap.xml
