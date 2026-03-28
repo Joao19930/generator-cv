@@ -403,7 +403,8 @@ const zapierConnector = {
   fire: (url, data) => url ? axios.post(url, data).catch(() => {}) : Promise.resolve(),
   onNewUser:  (user)          => zapierConnector.fire(process.env.ZAPIER_NEW_USER_WEBHOOK,  { event: 'new_user',  ...user, ts: new Date().toISOString() }),
   onPurchase: (user, amt, pl) => zapierConnector.fire(process.env.ZAPIER_PURCHASE_WEBHOOK,  { event: 'purchase', email: user.email, amount: amt, plan: pl, ts: new Date().toISOString() }),
-  onLead:     (email, score)  => zapierConnector.fire(process.env.ZAPIER_LEAD_WEBHOOK,      { event: 'new_lead', email, ats_score: score, ts: new Date().toISOString() })
+  onLead:     (email, score)  => zapierConnector.fire(process.env.ZAPIER_LEAD_WEBHOOK,      { event: 'new_lead', email, ats_score: score, ts: new Date().toISOString() }),
+  onNewJob:   (job)           => zapierConnector.fire(process.env.ZAPIER_NEW_JOB_WEBHOOK,   { event: 'new_job', ...job, ts: new Date().toISOString() })
 };
 
 // ═══════════════════════════════════════════════════════
