@@ -708,7 +708,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <!-- 1. VAGAS RECENTES -->
       <div class="sec-mb" id="overviewJobsWrap" style="display:none;">
         <div class="sec-hdr">
-          <span class="sec-title">Vagas recentes</span>
+          <span class="sec-title">🇦🇴 Vagas Nacionais</span>
           <a class="sec-link" onclick="nav('jobs',null)">Ver todas →</a>
         </div>
         <div class="jobs-grid" id="overviewJobsList"></div>
@@ -3059,8 +3059,9 @@ function shareJobTo(platform, title, url) {
 function renderOverviewJobs() {
   if (!allJobs.length) return;
   document.getElementById('overviewJobsWrap').style.display = 'block';
-  /* reuse same jb-card renderer but limited to 6 */
-  const list = allJobs.slice(0, 6);
+  /* Mostrar apenas vagas nacionais (Angola) na visão geral */
+  const nacionais = allJobs.filter(j => isNacional(j));
+  const list = (nacionais.length ? nacionais : allJobs).slice(0, 6);
   const g = document.getElementById('overviewJobsList');
   g.innerHTML = list.map((j, i) => {
     const grad = JOB_GRADIENTS[i % JOB_GRADIENTS.length];
