@@ -427,7 +427,7 @@ tbody tr:hover{background:#fafafa;}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
         Importar Tudo
       </button>
-      <button class="btn btn-blue" onclick="openModal('jobModal');state.editId=null;resetPasteArea();">
+      <button class="btn btn-blue" onclick="openModal('jobModal');state.editId=null;resetPasteArea();document.getElementById('jImageUrl').value='';updateJobImgPreview('');document.getElementById('jImgFile').value='';">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Adicionar Vaga
       </button>
@@ -438,7 +438,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="table-toolbar">
       <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar vagas..." oninput="filterJobs(this.value)"></div>
     </div>
-    <table><thead><tr><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th>Acções</th></tr></thead>
+    <table><thead><tr><th>Imagem</th><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th>Acções</th></tr></thead>
     <tbody id="jobsTable"></tbody></table>
     <div class="pagination"><span id="jobsPagInfo">0 vagas</span></div>
   </div>
@@ -983,6 +983,20 @@ tbody tr:hover{background:#fafafa;}
         </div>
       </div>
       <div class="f-field"><label id="jUrlLabel">URL de Candidatura</label><input type="text" id="jUrl" placeholder="https://..." oninput="autoDetectContactType(this.value)"></div>
+      <div class="f-field">
+        <label>Imagem da Vaga <span style="font-weight:400;color:var(--t4);">(opcional)</span></label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div id="jImgPreview" style="width:72px;height:48px;border-radius:8px;border:2px dashed var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div style="flex:1;">
+            <label for="jImgFile" style="display:inline-block;padding:5px 12px;background:var(--blue);color:#fff;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px;">Carregar ficheiro</label>
+            <input type="file" id="jImgFile" accept="image/*" style="display:none;" onchange="previewJobImage(this)">
+            <div class="f-hint">ou cole um URL abaixo</div>
+          </div>
+        </div>
+        <input type="text" id="jImageUrl" placeholder="https://exemplo.com/imagem.jpg" oninput="updateJobImgPreview(this.value)">
+      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancelar</button><button class="btn btn-blue" onclick="saveJob()">Publicar Vaga</button></div>
   </div>
@@ -1815,7 +1829,9 @@ function renderJobs() {
     const country = j.Country  || j.country || '';
     const cat     = j.Category || j.category|| '—';
     const date    = j.JobDate  || j.date    || '—';
+    const img = j.ImageUrl || j.image_url || '';
     return `<tr>
+      <td>${img ? `<img src="${img}" style="width:60px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" onerror="this.style.display='none'">` : '<span style="font-size:10px;color:var(--t4);">—</span>'}</td>
       <td><span style="font-weight:600;">${title}</span></td>
       <td>${company}</td>
       <td>${city}${city && country ? ', ' : ''}${country}</td>
@@ -2234,6 +2250,24 @@ async function publishMultipleJobs() {
   showAlert('alertJobs', `✅ ${ok} vaga(s) publicada(s) com sucesso${fail ? ` — ${fail} com erro` : ''}.`, 'green');
 }
 
+function previewJobImage(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('jImageUrl').value = e.target.result;
+    updateJobImgPreview(e.target.result);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function updateJobImgPreview(src) {
+  const el = document.getElementById('jImgPreview');
+  if (src) {
+    el.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<svg width=20 height=20 viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'var(--t4)\\' stroke-width=\\'1.5\\'><rect x=3 y=3 width=18 height=18 rx=2/><circle cx=8.5 cy=8.5 r=1.5/><polyline points=\\'21 15 16 10 5 21\\'/></svg>'">`;
+  } else {
+    el.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+  }
+}
+
 async function saveJob() {
   const j = {
     title:       document.getElementById('jTitle').value.trim(),
@@ -2246,7 +2280,8 @@ async function saveJob() {
     startDate:   document.getElementById('jStartDate').value || null,
     endDate:     document.getElementById('jEndDate').value || null,
     url:         document.getElementById('jUrl').value.trim(),
-    contactType: document.getElementById('jContactType').value
+    contactType: document.getElementById('jContactType').value,
+    imageUrl:    document.getElementById('jImageUrl').value.trim() || null
   };
   if (!j.title || !j.company) { alert('Preencha cargo e empresa.'); return; }
   // Normalizar número WhatsApp
@@ -2284,6 +2319,10 @@ function editJob(id) {
   document.getElementById('jUrl').value         = j.Url         || j.url          || '';
   document.getElementById('jContactType').value = j.ContactType || j.contact_type || 'url';
   updateContactPlaceholder();
+  const img = j.ImageUrl || j.image_url || '';
+  document.getElementById('jImageUrl').value = img;
+  updateJobImgPreview(img);
+  document.getElementById('jImgFile').value = '';
   document.getElementById('jobModalTitle').textContent = 'Editar Vaga';
   openModal('jobModal');
 }
