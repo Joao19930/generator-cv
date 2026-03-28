@@ -978,7 +978,7 @@ router.post('/staff', async (req, res) => {
       .input('pass',  sql.NVarChar, hash)
       .input('role',  sql.NVarChar, role)
       .query(`INSERT INTO users (name, email, password_hash, role, plan, is_active, created_at)
-              VALUES (@name, @email, @pass, @role, 'free', 1, GETDATE())`);
+              VALUES (@name, @email, @pass, @role, 'free', TRUE, NOW())`);
     res.json({ success: true });
   } catch (e) {
     if (e.number === 2627 || (e.message || '').toLowerCase().includes('duplicate') || (e.message || '').toLowerCase().includes('unique'))
