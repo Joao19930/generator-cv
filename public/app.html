@@ -195,6 +195,12 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .jwa-close{position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(253,186,116,.5);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;}
 .jwa-close:hover{color:#fed7aa;}
 
+.origin-tabs{display:flex;background:#f1f5f9;border-radius:10px;padding:3px;gap:2px;margin-bottom:14px;width:fit-content;}
+.origin-tab{padding:7px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--t3);transition:all .2s;font-family:'Sora',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.origin-tab:hover{color:var(--text);}
+.origin-tab.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.origin-tab .otab-cnt{font-size:10px;font-weight:800;padding:1px 6px;border-radius:20px;background:var(--blue-l);color:var(--blue);}
+.origin-tab.active .otab-cnt{background:var(--blue);color:#fff;}
 .jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
 @keyframes jobFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .jb-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:12px;transition:all .25s;cursor:pointer;animation:jobFadeUp .4s ease both;position:relative;overflow:hidden;}
@@ -808,6 +814,16 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
           </ul>
         </div>
         <button class="jwa-close" onclick="dismissWeekAlert()" title="Fechar">✕</button>
+      </div>
+
+      <!-- TABS NACIONAIS / INTERNACIONAIS -->
+      <div class="origin-tabs" id="originTabs">
+        <button class="origin-tab active" id="tabNacional" onclick="setOrigin('nacional')">
+          🇦🇴 Nacionais <span class="otab-cnt" id="cntNacional">0</span>
+        </button>
+        <button class="origin-tab" id="tabInternacional" onclick="setOrigin('internacional')">
+          🌍 Internacionais <span class="otab-cnt" id="cntInternacional">0</span>
+        </button>
       </div>
 
       <!-- FILTROS -->
@@ -2755,32 +2771,64 @@ function toggleSaveJob(id, btn) {
   localStorage.setItem('saved_jobs', JSON.stringify(savedJobs));
 }
 
+let _activeOrigin = 'nacional';
+
+function isNacional(j) {
+  const c = (j.Country || j.country || '').toLowerCase().trim();
+  return c === 'angola' || c === '' || c === 'ao';
+}
+
+function getJobsByOrigin(origin) {
+  if (origin === 'nacional')       return allJobs.filter(j =>  isNacional(j));
+  if (origin === 'internacional')  return allJobs.filter(j => !isNacional(j));
+  return allJobs;
+}
+
+function setOrigin(origin) {
+  _activeOrigin = origin;
+  ['nacional','internacional'].forEach(o => {
+    document.getElementById('tab' + o.charAt(0).toUpperCase() + o.slice(1))
+      .classList.toggle('active', o === origin);
+  });
+  buildJobsCatTabs();
+}
+
 function buildJobsCatTabs() {
-  const cats = ['Todos', ...new Set(allJobs.map(j => j.Category || j.category).filter(Boolean))];
+  // Actualizar contadores nas tabs de origem
+  const nCount = allJobs.filter(j =>  isNacional(j)).length;
+  const iCount = allJobs.filter(j => !isNacional(j)).length;
+  document.getElementById('cntNacional').textContent      = nCount;
+  document.getElementById('cntInternacional').textContent = iCount;
+
+  const jobsForOrigin = getJobsByOrigin(_activeOrigin);
+
+  const cats = ['Todos', ...new Set(jobsForOrigin.map(j => j.Category || j.category).filter(Boolean))];
   const el   = document.getElementById('jobsCatTabs'); el.innerHTML = '';
   cats.forEach((c, i) => {
-    const cnt = c === 'Todos' ? allJobs.length : allJobs.filter(j => (j.Category||j.category) === c).length;
+    const cnt = c === 'Todos' ? jobsForOrigin.length : jobsForOrigin.filter(j => (j.Category||j.category) === c).length;
     const d   = document.createElement('div');
     d.className = 'cat-tab' + (i === 0 ? ' active' : '');
     d.innerHTML = `${c} <span style="opacity:.6;font-size:10px;margin-left:3px;">${cnt}</span>`;
     d.onclick   = () => {
       el.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
       d.classList.add('active');
-      const filtered = c === 'Todos' ? allJobs : allJobs.filter(j => (j.Category||j.category) === c);
+      const filtered = c === 'Todos' ? jobsForOrigin : jobsForOrigin.filter(j => (j.Category||j.category) === c);
       renderJobs(filtered);
     };
     el.appendChild(d);
   });
-  // stats
-  const now = new Date();
-  const newCount = allJobs.filter(j => j.JobDate && (now - new Date(j.JobDate)) < 7*86400000).length;
+
+  renderJobs(jobsForOrigin);
+
+  // stats (baseados no total de vagas nacionais)
+  const now      = new Date();
+  const newCount = jobsForOrigin.filter(j => j.JobDate && (now - new Date(j.JobDate)) < 7*86400000).length;
   document.getElementById('jobsStatCount').textContent = allJobs.length;
   document.getElementById('jobsStatNew').textContent   = newCount;
   document.getElementById('jobsHeroSub').textContent   =
     allJobs.length === 0 ? 'Nenhuma vaga disponível de momento.'
     : `${allJobs.length} vaga${allJobs.length !== 1 ? 's' : ''} disponíve${allJobs.length !== 1 ? 'is' : 'l'} de empresas parceiras`;
 
-  // Actualizar alerta da semana com categorias reais
   updateWeekAlert();
 }
 
@@ -2843,7 +2891,7 @@ function dismissWeekAlertOv() {
 function filterByCat(cat) {
   const tabs = document.querySelectorAll('#jobsCatTabs .cat-tab');
   tabs.forEach(t => { t.classList.toggle('active', t.textContent.trim().startsWith(cat)); });
-  renderJobs(allJobs.filter(j => (j.Category||j.category) === cat));
+  renderJobs(getJobsByOrigin(_activeOrigin).filter(j => (j.Category||j.category) === cat));
 }
 
 function renderJobs(list) {
@@ -2956,17 +3004,17 @@ function renderJobs(list) {
 
 let _jobsCurrentList = [];
 function filterJobs(q) {
-  const base = _jobsCurrentList.length ? _jobsCurrentList : allJobs;
-  const f = q ? allJobs.filter(j =>
+  const base = getJobsByOrigin(_activeOrigin);
+  const f = q ? base.filter(j =>
     (j.Title||'').toLowerCase().includes(q.toLowerCase()) ||
     (j.Company||'').toLowerCase().includes(q.toLowerCase()) ||
     (j.Category||'').toLowerCase().includes(q.toLowerCase())
-  ) : allJobs;
+  ) : base;
   renderJobs(f);
 }
 
 function sortJobs(by) {
-  const list = [...allJobs];
+  const list = [...getJobsByOrigin(_activeOrigin)];
   if (by === 'title')   list.sort((a,b) => (a.Title||'').localeCompare(b.Title||''));
   if (by === 'company') list.sort((a,b) => (a.Company||'').localeCompare(b.Company||''));
   if (by === 'date')    list.sort((a,b) => new Date(b.JobDate||0) - new Date(a.JobDate||0));
