@@ -56,6 +56,12 @@ app.use(express.urlencoded({ extended: true }));
 // ── Ficheiros estáticos públicos (sem DB) ────────────────────
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// ── Google Search Console verification ───────────────────────
+app.get('/googleddedda02fe275dbb.html', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send('google-site-verification: googleddedda02fe275dbb.html');
+});
+
 // ── Landing page principal ───────────────────────────────────
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
