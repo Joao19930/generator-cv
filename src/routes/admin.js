@@ -353,29 +353,33 @@ router.get('/testimonials', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/testimonials', async (req, res) => {
-  const { name, role, text, stars } = req.body;
+  const { name, role, text, stars, image_url } = req.body;
   if (!name) return res.status(400).json({ error: 'Nome obrigatório.' });
   try {
+    await req.db.request().query(`ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS image_url TEXT`).catch(()=>{});
     const r = await req.db.request()
-      .input('name',  sql.NVarChar, name)
-      .input('role',  sql.NVarChar, role||null)
-      .input('text',  sql.NVarChar, text||null)
-      .input('stars', sql.Int,      parseInt(stars)||5)
-      .query(`INSERT INTO testimonials (name, role, text, stars, active, created_at)
-              VALUES (@name, @role, @text, @stars, TRUE, NOW()) RETURNING id`);
-    res.json({ success: true, id: r.recordset[0].Id });
+      .input('name',      sql.NVarChar, name)
+      .input('role',      sql.NVarChar, role||null)
+      .input('text',      sql.NVarChar, text||null)
+      .input('stars',     sql.Int,      parseInt(stars)||5)
+      .input('image_url', sql.NVarChar, image_url||null)
+      .query(`INSERT INTO testimonials (name, role, text, stars, image_url, active, created_at)
+              VALUES (@name, @role, @text, @stars, @image_url, TRUE, NOW()) RETURNING id`);
+    res.json({ success: true, id: r.recordset[0]?.id || r.recordset[0]?.Id });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/testimonials/:id', async (req, res) => {
-  const { name, role, text, stars } = req.body;
+  const { name, role, text, stars, image_url } = req.body;
   try {
+    await req.db.request().query(`ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS image_url TEXT`).catch(()=>{});
     await req.db.request()
-      .input('id',    sql.Int,      req.params.id)
-      .input('name',  sql.NVarChar, name)
-      .input('role',  sql.NVarChar, role||null)
-      .input('text',  sql.NVarChar, text||null)
-      .input('stars', sql.Int,      parseInt(stars)||5)
-      .query('UPDATE testimonials SET name=@name, role=@role, text=@text, stars=@stars WHERE id=@id');
+      .input('id',        sql.Int,      req.params.id)
+      .input('name',      sql.NVarChar, name)
+      .input('role',      sql.NVarChar, role||null)
+      .input('text',      sql.NVarChar, text||null)
+      .input('stars',     sql.Int,      parseInt(stars)||5)
+      .input('image_url', sql.NVarChar, image_url||null)
+      .query('UPDATE testimonials SET name=@name, role=@role, text=@text, stars=@stars, image_url=@image_url WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
