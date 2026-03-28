@@ -57,7 +57,7 @@ router.get('/jobs', async (req, res) => {
 router.get('/testimonials', async (req, res) => {
   try {
     const r = await req.db.request()
-      .query('SELECT id, name, role, text, stars, created_at FROM testimonials WHERE active=TRUE ORDER BY created_at DESC');
+      .query('SELECT id, name, role, text, stars, image_url, created_at FROM testimonials WHERE active=TRUE ORDER BY created_at DESC');
     const real = r.recordset || [];
     // Mostrar testemunhos reais primeiro, depois hipotéticos como complemento
     const combined = [...real, ...HYPOTHETICAL_TESTIS];
