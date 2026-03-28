@@ -400,6 +400,10 @@ tbody tr:hover{background:#fafafa;}
   <div class="panel-hdr">
     <div><div class="panel-title">Utilizadores</div><div class="panel-sub">Gerir todos os utilizadores da plataforma</div></div>
     <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" onclick="openModal('emailBroadcastModal')" style="background:#6366f1;border-color:#6366f1;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Enviar Email
+      </button>
       <button class="btn btn-blue" onclick="openModal('waModal')" style="background:#25D366;border-color:#25D366;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         Convidar para WhatsApp
@@ -826,6 +830,44 @@ tbody tr:hover{background:#fafafa;}
 </main>
 
 <!-- ══ MODALS ══════════════════════════════════════════════ -->
+
+<!-- EMAIL BROADCAST MODAL -->
+<div class="modal-overlay" id="emailBroadcastModal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hdr">
+      <div class="modal-title" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">📧</span> Enviar Email a Utilizadores
+      </div>
+      <button class="modal-close" onclick="closeModal('emailBroadcastModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-field">
+        <label>Destinatários</label>
+        <select id="ebPlan" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+          <option value="all">Todos os utilizadores activos</option>
+          <option value="free">Apenas utilizadores Gratuitos</option>
+          <option value="premium">Apenas utilizadores Premium</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label>Assunto</label>
+        <input type="text" id="ebSubject" placeholder="Ex: Novidades do CV Premium 🚀" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      </div>
+      <div class="f-field">
+        <label>Mensagem</label>
+        <textarea id="ebMessage" rows="7" placeholder="Escreva aqui o conteúdo do email..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;"></textarea>
+        <div style="font-size:11px;color:var(--t4);margin-top:4px;">O texto será enviado como email formatado com o logótipo do CV Premium.</div>
+      </div>
+      <div id="ebResult" style="display:none;" class="alert alert-green"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('emailBroadcastModal')">Cancelar</button>
+      <button class="btn btn-blue" id="ebSendBtn" onclick="sendEmailBroadcast()" style="background:#6366f1;border-color:#6366f1;">
+        📧 Enviar Emails
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- WHATSAPP BROADCAST MODAL -->
 <div class="modal-overlay" id="waModal">
@@ -1634,6 +1676,44 @@ async function sendWaBroadcast() {
   } finally {
     btn.disabled = false;
     btn.textContent = '📲 Enviar Convites';
+  }
+}
+
+async function sendEmailBroadcast() {
+  const plan    = document.getElementById('ebPlan').value;
+  const subject = document.getElementById('ebSubject').value.trim();
+  const message = document.getElementById('ebMessage').value.trim();
+  const btn     = document.getElementById('ebSendBtn');
+  const result  = document.getElementById('ebResult');
+  result.style.display = 'none';
+
+  if (!subject) { alert('Preencha o assunto do email.'); return; }
+  if (!message) { alert('Escreva o conteúdo do email.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ A enviar...';
+  try {
+    const res = await fetch(API + '/api/admin/broadcast/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ plan, subject, message })
+    });
+    const d = await res.json();
+    if (!res.ok) { result.className = 'alert alert-red'; result.textContent = d.error || 'Erro ao enviar.'; }
+    else {
+      result.className = 'alert alert-green';
+      result.textContent = `✅ ${d.sent} email(s) enviado(s) com sucesso${d.failed ? ` · ${d.failed} falharam` : ''}.`;
+      document.getElementById('ebSubject').value = '';
+      document.getElementById('ebMessage').value = '';
+    }
+    result.style.display = 'flex';
+  } catch(e) {
+    result.className = 'alert alert-red';
+    result.textContent = 'Erro de ligação.';
+    result.style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📧 Enviar Emails';
   }
 }
 

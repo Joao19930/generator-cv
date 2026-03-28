@@ -829,6 +829,77 @@ router.post('/broadcast/whatsapp', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── POST /api/admin/broadcast/email ─────────────────────────
+// Envia email personalizado a todos os utilizadores (admin, analista, superadmin)
+router.post('/broadcast/email', async (req, res) => {
+  const { plan = 'all', subject, message } = req.body;
+  if (!subject || !message) return res.status(400).json({ error: 'Assunto e mensagem são obrigatórios.' });
+
+  try {
+    let query = `SELECT id, name, email FROM users WHERE is_active = TRUE AND role = 'user' AND email IS NOT NULL`;
+    if (plan === 'free')    query += ` AND (plan = 'free' OR plan IS NULL)`;
+    if (plan === 'premium') query += ` AND plan = 'premium'`;
+
+    const r = await req.db.request().query(query);
+    const users = r.recordset;
+    if (!users.length) return res.json({ sent: 0, failed: 0, total: 0 });
+
+    const appName = process.env.APP_NAME || 'CV Premium';
+    const appUrl  = process.env.APP_URL  || 'https://cvpremium.net';
+    const from    = process.env.EMAIL_FROM || `noreply@cvpremium.net`;
+
+    // Converter quebras de linha em parágrafos HTML
+    const bodyHtml = message.split(/\n+/).filter(Boolean)
+      .map(p => `<p style="margin:0 0 14px;color:#374151;line-height:1.6;">${p}</p>`).join('');
+
+    let sent = 0, failed = 0;
+    const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+
+    for (const batch of chunk(users, 10)) {
+      await Promise.allSettled(batch.map(async u => {
+        const name  = u.Name || u.name || 'Utilizador';
+        const email = u.Email || u.email;
+        const html  = `
+<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08);">
+  <tr><td style="background:linear-gradient(135deg,#1a56db 0%,#6366f1 100%);padding:28px 36px;text-align:center;">
+    <div style="font-size:22px;font-weight:800;color:#fff;">${appName}</div>
+  </td></tr>
+  <tr><td style="padding:32px 36px;">
+    <p style="margin:0 0 18px;font-size:15px;color:#374151;">Olá <strong>${name}</strong>,</p>
+    ${bodyHtml}
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${appUrl}" style="display:inline-block;background:#1a56db;color:#fff;font-size:14px;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:10px;">
+        Aceder ao ${appName}
+      </a>
+    </div>
+  </td></tr>
+  <tr><td style="background:#f9fafb;padding:16px 36px;text-align:center;font-size:11px;color:#9ca3af;">
+    © ${new Date().getFullYear()} ${appName} · <a href="${appUrl}/unsubscribe" style="color:#9ca3af;">Cancelar subscrição</a>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`;
+        try {
+          const nodemailer = require('nodemailer');
+          const transport  = nodemailer.createTransport({
+            host: process.env.SMTP_HOST, port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: false, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+          });
+          await transport.sendMail({ from: `"${appName}" <${from}>`, to: email, subject, html });
+          sent++;
+        } catch(e) {
+          console.warn('email broadcast failed for', email, e.message);
+          failed++;
+        }
+      }));
+    }
+
+    res.json({ success: true, sent, failed, total: users.length });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Chatbot Knowledge — CRUD ──────────────────────────────────
 const { invalidateKnowledgeCache } = require('./chat');
 
