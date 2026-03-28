@@ -136,8 +136,8 @@ async function doLogin() {
     }
 
     const user = data.user || data;
-    if (user.role !== 'admin') {
-      throw new Error('Esta conta não tem permissões de administrador.');
+    if (!['admin', 'analista', 'superadmin'].includes(user.role)) {
+      throw new Error('Esta conta não tem permissões de acesso ao painel.');
     }
 
     localStorage.setItem('cv_token', data.token);

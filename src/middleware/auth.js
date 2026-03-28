@@ -4,6 +4,8 @@
 // ─────────────────────────────────────────────────────────────
 const jwt = require('jsonwebtoken');
 
+const OWNER_EMAIL = 'candidofaustinojoao@gmail.com';
+
 const auth = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'Acesso negado' });
@@ -17,8 +19,19 @@ const auth = (req, res, next) => {
   }
 };
 
+// Permite admin, analista e superadmin aceder ao painel
 const adminOnly = (req, res, next) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
+  const role = req.user.role;
+  if (!['admin', 'superadmin', 'analista'].includes(role))
+    return res.status(403).json({ error: 'Acesso negado' });
+  next();
+};
+
+// Apenas o proprietário (candidofaustinojoao@gmail.com) ou role superadmin
+const superadminOnly = (req, res, next) => {
+  const { role, email } = req.user;
+  if (role !== 'superadmin' && email !== OWNER_EMAIL)
+    return res.status(403).json({ error: 'Acesso restrito ao super administrador' });
   next();
 };
 
@@ -38,4 +51,4 @@ const premiumOnly = async (req, res, next) => {
   return res.status(403).json({ error: 'Pagamento necessário. Acede ao painel para activar.' });
 };
 
-module.exports = { auth, adminOnly, premiumOnly };
+module.exports = { auth, adminOnly, superadminOnly, premiumOnly };

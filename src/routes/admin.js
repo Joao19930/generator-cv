@@ -3,12 +3,17 @@
 // Dashboard Admin — KPIs, utilizadores, receita, funil
 // Todas as rotas requerem: auth + adminOnly
 // ─────────────────────────────────────────────────────────────
-const express = require('express');
-const router  = express.Router();
-const path    = require('path');
-const fs      = require('fs');
-const { sql } = require('../config/database');
-const { redisConnector } = require('../connectors');
+const express  = require('express');
+const router   = express.Router();
+const path     = require('path');
+const fs       = require('fs');
+const bcrypt   = require('bcryptjs');
+const { sql }  = require('../config/database');
+const { redisConnector, zapierConnector } = require('../connectors');
+
+const OWNER_EMAIL   = 'candidofaustinojoao@gmail.com';
+const isSuperadmin  = (req) =>
+  req.user.role === 'superadmin' || req.user.email === OWNER_EMAIL;
 
 // ── GET /api/admin/overview ──────────────────────────────────
 router.get('/overview', async (req, res) => {
@@ -289,7 +294,9 @@ router.post('/jobs', async (req, res) => {
       .input('contactType', sql.NVarChar, contactType||'url')
       .query(`INSERT INTO jobs (title, company, city, country, category, description, job_date, start_date, end_date, url, contact_type, active, created_at)
               VALUES (@title, @company, @city, @country, @cat, @desc, @date, @startDate, @endDate, @url, @contactType, TRUE, NOW()) RETURNING id`);
-    res.json({ success: true, id: r.recordset[0].Id });
+    const jobId = r.recordset[0].Id;
+    zapierConnector.onNewJob({ id: jobId, title, company, city, country, category, description, url, contactType });
+    res.json({ success: true, id: jobId });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/jobs/:id', async (req, res) => {
@@ -862,6 +869,61 @@ router.put('/job-templates', (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// ── GET /api/admin/staff ─────────────────────────────────────
+// Lista os utilizadores do painel (admin e analista)
+router.get('/staff', async (req, res) => {
+  if (!isSuperadmin(req)) return res.status(403).json({ error: 'Acesso restrito ao super administrador' });
+  try {
+    const r = await req.db.request().query(`
+      SELECT id, name, email, role, is_active, created_at, last_login
+      FROM users
+      WHERE role IN ('admin','analista','superadmin')
+      ORDER BY created_at DESC
+    `);
+    res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── POST /api/admin/staff ────────────────────────────────────
+// Cria um novo utilizador do painel (admin ou analista)
+router.post('/staff', async (req, res) => {
+  if (!isSuperadmin(req)) return res.status(403).json({ error: 'Acesso restrito ao super administrador' });
+  const { name, email, password, role } = req.body;
+  if (!name || !email || !password)
+    return res.status(400).json({ error: 'Nome, email e password obrigatórios.' });
+  if (!['admin', 'analista'].includes(role))
+    return res.status(400).json({ error: 'Role inválido. Use "admin" ou "analista".' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await req.db.request()
+      .input('name',  sql.NVarChar, name.trim())
+      .input('email', sql.NVarChar, email.trim().toLowerCase())
+      .input('pass',  sql.NVarChar, hash)
+      .input('role',  sql.NVarChar, role)
+      .query(`INSERT INTO users (name, email, password_hash, role, plan, is_active, created_at)
+              VALUES (@name, @email, @pass, @role, 'free', 1, GETDATE())`);
+    res.json({ success: true });
+  } catch (e) {
+    if (e.number === 2627 || (e.message || '').toLowerCase().includes('duplicate') || (e.message || '').toLowerCase().includes('unique'))
+      return res.status(400).json({ error: 'Este email já está registado.' });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── DELETE /api/admin/staff/:id ──────────────────────────────
+// Remove um utilizador do painel (apenas admin/analista, não superadmin)
+router.delete('/staff/:id', async (req, res) => {
+  if (!isSuperadmin(req)) return res.status(403).json({ error: 'Acesso restrito ao super administrador' });
+  try {
+    const r = await req.db.request()
+      .input('id', sql.Int, parseInt(req.params.id))
+      .query(`DELETE FROM users WHERE id = @id AND role IN ('admin','analista')`);
+    if (r.rowsAffected[0] === 0)
+      return res.status(404).json({ error: 'Utilizador não encontrado ou não pode ser removido.' });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
