@@ -987,6 +987,24 @@ router.post('/staff', async (req, res) => {
   }
 });
 
+// ── PATCH /api/admin/staff/:id/password ─────────────────────
+router.patch('/staff/:id/password', async (req, res) => {
+  if (!isSuperadmin(req)) return res.status(403).json({ error: 'Acesso restrito ao super administrador' });
+  const { password } = req.body;
+  if (!password || password.length < 6)
+    return res.status(400).json({ error: 'Password deve ter pelo menos 6 caracteres.' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const r = await req.db.request()
+      .input('id',   sql.Int,      parseInt(req.params.id))
+      .input('hash', sql.NVarChar, hash)
+      .query(`UPDATE users SET password_hash = @hash WHERE id = @id AND role IN ('admin','analista')`);
+    if (r.rowsAffected[0] === 0)
+      return res.status(404).json({ error: 'Utilizador não encontrado.' });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── DELETE /api/admin/staff/:id ──────────────────────────────
 // Remove um utilizador do painel (apenas admin/analista, não superadmin)
 router.delete('/staff/:id', async (req, res) => {

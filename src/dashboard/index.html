@@ -910,6 +910,32 @@ tbody tr:hover{background:#fafafa;}
   </div>
 </div>
 
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="chPwdModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-hdr">
+      <div class="modal-title">🔑 Alterar Password</div>
+      <button class="modal-close" onclick="closeModal('chPwdModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="chPwdName" style="font-size:13px;color:var(--t3);margin-bottom:16px;"></p>
+      <div class="f-field">
+        <label>Nova Password</label>
+        <input type="password" id="chPwdNew" placeholder="Nova password (mín. 6 caracteres)">
+      </div>
+      <div class="f-field">
+        <label>Confirmar Password</label>
+        <input type="password" id="chPwdConfirm" placeholder="Repetir password">
+      </div>
+      <div id="chPwdAlert"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('chPwdModal')">Cancelar</button>
+      <button class="btn btn-blue" onclick="saveStaffPwd()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- JOB MODAL -->
 <div class="modal-overlay" id="jobModal">
   <div class="modal">
@@ -1663,7 +1689,7 @@ function renderStaff(list) {
       <td><span class="badge ${active?'badge-green':'badge-gray'}">${active?'Activo':'Inactivo'}</span></td>
       <td style="font-size:12px;color:var(--t3);">${created}</td>
       <td style="font-size:12px;color:var(--t3);">${lastLogin}</td>
-      <td>${isSelf ? '<span style="font-size:11px;color:var(--t4);">Proprietário</span>' : `<button class="btn btn-red btn-xs" onclick="deleteStaff(${u.Id||u.id})">Remover</button>`}</td>
+      <td>${isSelf ? '<span style="font-size:11px;color:var(--t4);">Proprietário</span>' : `<div class="action-btns"><button class="btn btn-ghost btn-xs" onclick="openChangePwd(${u.Id||u.id},'${name.replace(/'/g,"\\'")}')">🔑 Password</button><button class="btn btn-red btn-xs" onclick="deleteStaff(${u.Id||u.id})">Remover</button></div>`}</td>
     </tr>`;
   }).join('');
 }
@@ -1690,6 +1716,47 @@ async function saveStaff() {
     _loaded.delete('staff');
     await loadStaff();
   } catch(e) { showAlert('alertStaff', 'Erro de ligação.', 'red'); }
+}
+
+let _chPwdId = null;
+function openChangePwd(id, name) {
+  _chPwdId = id;
+  document.getElementById('chPwdName').textContent = 'Utilizador: ' + name;
+  document.getElementById('chPwdNew').value = '';
+  document.getElementById('chPwdConfirm').value = '';
+  document.getElementById('chPwdAlert').innerHTML = '';
+  openModal('chPwdModal');
+}
+
+async function saveStaffPwd() {
+  const pwd     = document.getElementById('chPwdNew').value;
+  const confirm = document.getElementById('chPwdConfirm').value;
+  const alertEl = document.getElementById('chPwdAlert');
+  alertEl.innerHTML = '';
+  if (!pwd || pwd.length < 6) {
+    alertEl.innerHTML = '<div class="alert alert-red" style="margin-top:8px;">Password deve ter pelo menos 6 caracteres.</div>';
+    return;
+  }
+  if (pwd !== confirm) {
+    alertEl.innerHTML = '<div class="alert alert-red" style="margin-top:8px;">As passwords não coincidem.</div>';
+    return;
+  }
+  try {
+    const res = await fetch(API + '/api/admin/staff/' + _chPwdId + '/password', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ password: pwd })
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      alertEl.innerHTML = `<div class="alert alert-red" style="margin-top:8px;">${d.error || 'Erro ao alterar password.'}</div>`;
+      return;
+    }
+    closeModal('chPwdModal');
+    showAlert('alertStaff', 'Password alterada com sucesso.', 'green');
+  } catch(e) {
+    alertEl.innerHTML = '<div class="alert alert-red" style="margin-top:8px;">Erro de ligação.</div>';
+  }
 }
 
 async function deleteStaff(id) {
