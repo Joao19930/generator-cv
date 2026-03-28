@@ -115,6 +115,19 @@ app.get('/admin-panel', (req, res) => {
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
 
+// Sitemap explícito
+app.get('/sitemap.xml', (req, res) => {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(require('path').join(__dirname, '../public/sitemap.xml'));
+});
+
+// Robots.txt explícito
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.sendFile(require('path').join(__dirname, '../public/robots.txt'));
+});
+
 // OG image — serve o SVG como imagem para Open Graph / Twitter Card
 app.get('/og-image.png', (req, res) => {
   res.setHeader('Content-Type', 'image/svg+xml');
