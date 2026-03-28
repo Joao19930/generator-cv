@@ -519,6 +519,41 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
   .dist-hero h2{font-size:17px;}
   .dist-form{padding:16px;}
 }
+
+/* ── ONBOARDING ──────────────────────────────────── */
+.ob-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(10,15,30,.72);backdrop-filter:blur(2px);pointer-events:all;}
+.ob-spot{position:fixed;z-index:9994;border-radius:12px;box-shadow:0 0 0 4px #fff,0 0 0 9999px rgba(10,15,30,.72);transition:all .38s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+.ob-tooltip{position:fixed;z-index:9999;background:#fff;border-radius:18px;padding:24px 26px 20px;width:320px;box-shadow:0 24px 64px rgba(0,0,0,.22);transition:all .38s cubic-bezier(.4,0,.2,1);}
+.ob-tooltip::before{content:'';position:absolute;width:12px;height:12px;background:#fff;transform:rotate(45deg);}
+.ob-tooltip.arrow-left::before{left:-5px;top:22px;}
+.ob-tooltip.arrow-right::before{right:-5px;top:22px;}
+.ob-tooltip.arrow-top::before{top:-5px;left:30px;}
+.ob-tooltip.arrow-bottom::before{bottom:-5px;left:30px;}
+.ob-badge{display:inline-block;font-size:10px;font-weight:700;color:#2563eb;background:#eff6ff;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:.3px;}
+.ob-tt-title{font-size:16px;font-weight:800;color:#0f172a;margin-bottom:8px;line-height:1.3;}
+.ob-tt-desc{font-size:13px;color:#475569;line-height:1.65;margin-bottom:20px;}
+.ob-tt-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.ob-dots{display:flex;gap:5px;align-items:center;}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;transition:all .25s;}
+.ob-dot.on{background:#2563eb;width:20px;border-radius:4px;}
+.ob-btns{display:flex;gap:8px;align-items:center;}
+.ob-btn-skip{font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;font-family:'Sora',sans-serif;padding:4px 0;}
+.ob-btn-skip:hover{color:#64748b;}
+.ob-btn-back{font-size:12px;font-weight:600;color:#475569;background:#f1f5f9;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s;}
+.ob-btn-back:hover{background:#e2e8f0;}
+.ob-btn-next{font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);border:none;border-radius:8px;padding:8px 18px;cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .15s;}
+.ob-btn-next:hover{opacity:.88;}
+.ob-welcome{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(10,15,30,.82);backdrop-filter:blur(6px);}
+.ob-welcome-card{background:#fff;border-radius:24px;padding:44px 40px 36px;width:460px;max-width:92vw;text-align:center;animation:ob-pop .45s cubic-bezier(.34,1.56,.64,1);}
+@keyframes ob-pop{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+.ob-welcome-icon{font-size:52px;margin-bottom:16px;display:block;}
+.ob-welcome-title{font-size:22px;font-weight:800;color:#0f172a;margin-bottom:10px;}
+.ob-welcome-desc{font-size:14px;color:#475569;line-height:1.7;margin-bottom:28px;}
+.ob-welcome-btns{display:flex;flex-direction:column;gap:10px;}
+.ob-welcome-start{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.ob-welcome-start:hover{opacity:.88;}
+.ob-welcome-skip{font-size:12px;color:#94a3b8;background:none;border:none;cursor:pointer;font-family:'Sora',sans-serif;}
+.ob-welcome-skip:hover{color:#64748b;}
 </style>
 </head>
 <body>
@@ -545,7 +580,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       CVs Criados <span class="sb-cnt" id="cvsBadge">0</span>
     </a>
-    <a class="sb-item" onclick="nav('templates',this)">
+    <a class="sb-item" id="ob-templates" onclick="nav('templates',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
       Templates <span class="sb-cnt" id="tplBadge">200+</span>
     </a>
@@ -559,7 +594,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Empregos
     </a>
-    <a class="sb-item" onclick="nav('jobs',this)">
+    <a class="sb-item" id="ob-jobs" onclick="nav('jobs',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
       Vagas de Emprego <span class="sb-cnt" id="jobsBadge">0</span>
     </a>
@@ -567,7 +602,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
       Cursos <span class="sb-cnt" id="coursesBadge">0</span>
     </a>
-    <a class="sb-item" onclick="nav('coaches',this)">
+    <a class="sb-item" id="ob-coaches" onclick="nav('coaches',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       Mentoria de Carreira <span class="sb-cnt" id="coachesBadge">0</span>
     </a>
@@ -587,7 +622,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     </a>
 
     <div class="sb-sec">Ferramentas</div>
-    <a class="sb-item" onclick="nav('ats',this)">
+    <a class="sb-item" id="ob-ats" onclick="nav('ats',this)">
       <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Score ATS
     </a>
@@ -632,7 +667,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h1 class="tb-title" id="tbTitle">Visão Geral</h1>
-      <button class="btn-primary" onclick="openModal()">
+      <button class="btn-primary" id="ob-novo-cv" onclick="openModal()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo CV
       </button>
@@ -4205,5 +4240,153 @@ async function sendSupportMsg() {
 <script src="/track.js"></script>
 <script src="/upgrade-modal.js"></script>
 <script src="/chat-widget.js"></script>
+
+<!-- ══ ONBOARDING ══════════════════════════════════════════════ -->
+<!-- Welcome screen -->
+<div id="ob-welcome" class="ob-welcome" style="display:none;">
+  <div class="ob-welcome-card">
+    <span class="ob-welcome-icon">👋</span>
+    <div class="ob-welcome-title">Bem-vindo ao CV Premium!</div>
+    <div class="ob-welcome-desc">
+      Cria CVs profissionais, encontra vagas de emprego em Angola e no mundo, e recebe mentoria de carreira — tudo num só lugar.<br><br>
+      Vamos fazer um tour rápido pela plataforma?
+    </div>
+    <div class="ob-welcome-btns">
+      <button class="ob-welcome-start" onclick="startTour()">Iniciar tour guiado →</button>
+      <button class="ob-welcome-skip" onclick="skipOnboarding()">Não, obrigado — já conheço</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tour spotlight + tooltip -->
+<div id="ob-spot" class="ob-spot" style="display:none;"></div>
+<div id="ob-tooltip" class="ob-tooltip" style="display:none;">
+  <div class="ob-badge" id="ob-badge">Passo 1 de 6</div>
+  <div class="ob-tt-title" id="ob-title"></div>
+  <div class="ob-tt-desc" id="ob-desc"></div>
+  <div class="ob-tt-footer">
+    <div class="ob-dots" id="ob-dots"></div>
+    <div class="ob-btns">
+      <button class="ob-btn-skip" onclick="skipOnboarding()">Saltar</button>
+      <button class="ob-btn-back" id="ob-back" onclick="obStep(-1)">← Anterior</button>
+      <button class="ob-btn-next" onclick="obStep(1)" id="ob-next">Próximo →</button>
+    </div>
+  </div>
+</div>
+<div id="ob-backdrop" class="ob-backdrop" style="display:none;" onclick=""></div>
+
+<script>
+const OB_KEY = 'cv_ob_done_v2';
+const OB_STEPS = [
+  { id: 'ob-novo-cv',   title: 'Cria o teu CV',             desc: 'Clica aqui para criar um novo CV profissional. Tens mais de 200 templates para escolher — em segundos tens um CV pronto.', pos: 'bottom' },
+  { id: 'ob-templates', title: '200+ Templates Profissionais', desc: 'Escolhe o design perfeito para a tua área. Temos templates modernos para todas as indústrias: TI, finanças, saúde, gestão e muito mais.', pos: 'right' },
+  { id: 'ob-jobs',      title: 'Vagas de Emprego',           desc: 'Encontra as melhores oportunidades em Angola e no mundo. As vagas são actualizadas diariamente — nacionais e internacionais separadas para facilitar a pesquisa.', pos: 'right' },
+  { id: 'ob-coaches',   title: 'Mentoria de Carreira',       desc: 'Os nossos coaches ajudam-te a preparares entrevistas, negociares salários e traçares o teu plano de carreira. Marcar sessão nunca foi tão fácil.', pos: 'right' },
+  { id: 'ob-ats',       title: 'Score ATS 🎯',               desc: 'Verifica se o teu CV passa nos filtros automáticos que as empresas usam. A maioria dos CVs é eliminada antes de chegar a um recrutador humano — o ATS ajuda-te a evitar isso.', pos: 'right' },
+  { id: 'upgradeBox',   title: 'Activa o Plano Premium ⚡',  desc: 'Desbloqueia todos os templates, downloads ilimitados, geração por IA e acesso completo. Investimento único de apenas 5.000 Akz.', pos: 'top' },
+];
+
+let _obStep = 0;
+
+function _shouldShowOnboarding() {
+  return !localStorage.getItem(OB_KEY);
+}
+
+function initOnboarding() {
+  if (!_shouldShowOnboarding()) return;
+  setTimeout(() => {
+    document.getElementById('ob-welcome').style.display = 'flex';
+  }, 1200);
+}
+
+function startTour() {
+  document.getElementById('ob-welcome').style.display = 'none';
+  _obStep = 0;
+  _renderStep();
+}
+
+function skipOnboarding() {
+  localStorage.setItem(OB_KEY, '1');
+  document.getElementById('ob-welcome').style.display = 'none';
+  document.getElementById('ob-spot').style.display = 'none';
+  document.getElementById('ob-tooltip').style.display = 'none';
+  document.getElementById('ob-backdrop').style.display = 'none';
+}
+
+function obStep(dir) {
+  _obStep += dir;
+  if (_obStep >= OB_STEPS.length) { skipOnboarding(); return; }
+  if (_obStep < 0) _obStep = 0;
+  _renderStep();
+}
+
+function _renderStep() {
+  const step = OB_STEPS[_obStep];
+  const el = document.getElementById(step.id);
+  if (!el) { obStep(1); return; }
+
+  // Scroll element into view if needed
+  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  const spot = document.getElementById('ob-spot');
+  const tip  = document.getElementById('ob-tooltip');
+  const back = document.getElementById('ob-backdrop');
+
+  back.style.display = 'block';
+  spot.style.display = 'block';
+  tip.style.display  = 'block';
+
+  // Position spotlight on element
+  const r = el.getBoundingClientRect();
+  const PAD = 8;
+  spot.style.left   = (r.left   - PAD) + 'px';
+  spot.style.top    = (r.top    - PAD) + 'px';
+  spot.style.width  = (r.width  + PAD*2) + 'px';
+  spot.style.height = (r.height + PAD*2) + 'px';
+
+  // Content
+  document.getElementById('ob-badge').textContent = 'Passo ' + (_obStep+1) + ' de ' + OB_STEPS.length;
+  document.getElementById('ob-title').textContent  = step.title;
+  document.getElementById('ob-desc').textContent   = step.desc;
+  document.getElementById('ob-back').style.display = _obStep === 0 ? 'none' : '';
+  document.getElementById('ob-next').textContent   = _obStep === OB_STEPS.length - 1 ? 'Concluir ✓' : 'Próximo →';
+
+  // Dots
+  const dots = document.getElementById('ob-dots');
+  dots.innerHTML = OB_STEPS.map((_,i) => `<div class="ob-dot${i===_obStep?' on':''}"></div>`).join('');
+
+  // Position tooltip
+  tip.className = 'ob-tooltip';
+  const TW = 320, TH = 200;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let tx, ty;
+
+  if (step.pos === 'right' && r.right + 20 + TW < vw) {
+    tx = r.right + 20;
+    ty = Math.min(r.top, vh - TH - 16);
+    tip.classList.add('arrow-left');
+  } else if (step.pos === 'bottom' && r.bottom + 20 + TH < vh) {
+    tx = Math.min(r.left, vw - TW - 16);
+    ty = r.bottom + 20;
+    tip.classList.add('arrow-top');
+  } else if (step.pos === 'top' || r.top - 20 - TH > 0) {
+    tx = Math.min(r.left, vw - TW - 16);
+    ty = r.top - TH - 20;
+    tip.classList.add('arrow-bottom');
+  } else {
+    tx = Math.min(r.right + 20, vw - TW - 16);
+    ty = Math.max(r.top, 16);
+    tip.classList.add('arrow-left');
+  }
+
+  tip.style.left = Math.max(12, tx) + 'px';
+  tip.style.top  = Math.max(12, ty) + 'px';
+}
+
+// Launch after data loads
+window.addEventListener('load', () => {
+  setTimeout(initOnboarding, 600);
+});
+</script>
 </body>
 </html>
