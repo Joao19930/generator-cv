@@ -681,6 +681,12 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Plano Gratuito
       </div>
+      <button onclick="document.getElementById('quemSomosModal').style.display='flex'"
+        style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:#f8fafc;color:#334155;border:1px solid #e2e8f0;border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;"
+        onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Quem Somos
+      </button>
       <a href="https://chat.whatsapp.com/HIQLR1v6rCY9yc5l7KyzDS" target="_blank" rel="noopener"
          title="Grupo WhatsApp CV Premium" class="wa-btn"
          style="display:inline-flex;align-items:center;gap:6px;padding:6px 13px;background:#25D366;color:#fff;border-radius:var(--rs);font-family:'Sora',sans-serif;font-size:11px;font-weight:700;text-decoration:none;transition:background .2s;white-space:nowrap;"
@@ -4240,6 +4246,101 @@ async function sendSupportMsg() {
 <script src="/track.js"></script>
 <script src="/upgrade-modal.js"></script>
 <script src="/chat-widget.js"></script>
+
+<!-- ══ QUEM SOMOS ══════════════════════════════════════════════ -->
+<div id="quemSomosModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(10,15,30,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:24px;width:700px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.25);animation:ob-pop .38s cubic-bezier(.34,1.56,.64,1);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1D4ED8,#7C3AED);border-radius:24px 24px 0 0;padding:36px 36px 28px;position:relative;">
+      <button onclick="document.getElementById('quemSomosModal').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;border-radius:8px;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      <div style="width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;">Caos Criativo</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500;">Consultoria de Pessoas & Cultura Organizacional</div>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:32px 36px;">
+
+      <!-- Sobre nós -->
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px;font-weight:700;color:#2563eb;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Sobre Nós</div>
+        <p style="font-size:14px;color:#334155;line-height:1.75;">
+          A <strong>Caos Criativo</strong> nasce da visão do seu fundador, <strong>João Manuel</strong>, profissional com mais de 8 anos de experiência nos sectores bancário, tecnológico e corporativo, que acredita que o verdadeiro crescimento das empresas começa nas pessoas.
+        </p>
+        <p style="font-size:14px;color:#334155;line-height:1.75;margin-top:12px;">
+          Trabalhamos lado a lado com Pequenas e Médias Empresas (PME) que enfrentam diariamente o desafio de estruturar equipas, tomar decisões estratégicas e crescer de forma sustentável. Compreendemos a realidade de quem constrói negócios com ambição, mas também com recursos limitados — e é exactamente aí que fazemos a diferença.
+        </p>
+        <p style="font-size:14px;color:#334155;line-height:1.75;margin-top:12px;">
+          Apoiamos empresas desde a aquisição e gestão de talentos até à implementação de políticas remuneratórias, avaliação de desempenho e cultura organizacional, sempre com uma abordagem prática, humana e orientada para resultados.
+        </p>
+        <p style="font-size:14px;font-weight:700;color:#0f172a;line-height:1.75;margin-top:14px;padding:16px 20px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border-radius:12px;border-left:4px solid #2563eb;">
+          Mais do que consultoria, entregamos confiança, estrutura e direção.<br>
+          Porque quando as pessoas certas estão no lugar certo, as empresas deixam de apenas sobreviver — e passam a crescer com consistência.
+        </p>
+      </div>
+
+      <!-- Cards: Missão, Visão, Objectivo -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#dbeafe,#eff6ff);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:8px;">Missão</div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">Capacitar PMEs angolanas com as ferramentas, estruturas e talentos necessários para crescerem de forma sustentável e competitiva.</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#ede9fe,#faf5ff);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:8px;">Visão</div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">Ser a referência em consultoria de pessoas e cultura organizacional em Angola, reconhecidos pela excelência, impacto real e transformação humana.</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#dcfce7,#f0fdf4);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:8px;">Objectivo</div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">Conectar talentos às empresas certas, alinhar estratégia com cultura e transformar equipas em motores de crescimento organizacional.</div>
+        </div>
+      </div>
+
+      <!-- Valores -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#2563eb;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Os Nossos Valores</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#eff6ff;border-radius:10px;">
+            <span style="font-size:18px;">🤝</span>
+            <span style="font-size:12px;font-weight:700;color:#1d4ed8;">Confiança</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f5f3ff;border-radius:10px;">
+            <span style="font-size:18px;">💡</span>
+            <span style="font-size:12px;font-weight:700;color:#6d28d9;">Inovação</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fef3c7;border-radius:10px;">
+            <span style="font-size:18px;">⚡</span>
+            <span style="font-size:12px;font-weight:700;color:#b45309;">Impacto</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#dcfce7;border-radius:10px;">
+            <span style="font-size:18px;">🌱</span>
+            <span style="font-size:12px;font-weight:700;color:#15803d;">Crescimento</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fce7f3;border-radius:10px;">
+            <span style="font-size:18px;">❤️</span>
+            <span style="font-size:12px;font-weight:700;color:#be185d;">Humanidade</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f0fdf4;border-radius:10px;">
+            <span style="font-size:18px;">🎯</span>
+            <span style="font-size:12px;font-weight:700;color:#166534;">Resultados</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- ══ ONBOARDING ══════════════════════════════════════════════ -->
 <!-- Welcome screen -->
