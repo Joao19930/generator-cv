@@ -378,6 +378,21 @@ tbody tr:hover{background:#fafafa;}
     <table><thead><tr><th>Utilizador</th><th>Email</th><th>Plano</th><th>Registado</th><th>Acções</th></tr></thead>
     <tbody id="recentUsers"><tr><td colspan="5" style="text-align:center;color:var(--t4);padding:24px;">A carregar...</td></tr></tbody></table>
   </div>
+
+  <!-- VAGAS NACIONAIS WIDGET -->
+  <div class="table-card" style="margin-top:18px;">
+    <div class="table-toolbar">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:14px;font-weight:700;">🇦🇴 Vagas Nacionais</span>
+        <span id="ovNacionalBadge" style="font-size:11px;font-weight:700;background:#EFF6FF;color:var(--blue);padding:2px 8px;border-radius:20px;">0</span>
+      </div>
+      <button class="btn btn-blue btn-sm" onclick="showPanel('jobs',document.getElementById('si-jobs'))">Gerir vagas →</button>
+    </div>
+    <table>
+      <thead><tr><th>Cargo</th><th>Empresa</th><th>Cidade</th><th>Categoria</th><th>Publicado</th></tr></thead>
+      <tbody id="ovNacionalJobs"><tr><td colspan="5" style="text-align:center;color:var(--t4);padding:20px;">A carregar...</td></tr></tbody>
+    </table>
+  </div>
 </div>
 
 <!-- ══ USERS ═════════════════════════════════════════════ -->
@@ -1314,6 +1329,34 @@ async function loadOverview() {
         state.users = d.users || [];
         renderRecentUsers();
         updatePlanCounts();
+      }
+    }
+    // Carregar vagas nacionais
+    const jr = await fetch(API + '/api/admin/jobs', h);
+    if (jr.ok) {
+      const jobs = await jr.json();
+      const nacionais = jobs.filter(j => {
+        const c = (j.country || j.Country || '').toLowerCase().trim();
+        return c === 'angola' || c === 'ao';
+      });
+      const badge = document.getElementById('ovNacionalBadge');
+      if (badge) badge.textContent = nacionais.length;
+      const tbody = document.getElementById('ovNacionalJobs');
+      if (tbody) {
+        if (!nacionais.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t4);padding:20px;">Nenhuma vaga nacional publicada.</td></tr>';
+        } else {
+          tbody.innerHTML = nacionais.slice(0, 10).map(j => {
+            const date = j.created_at || j.CreatedAt ? new Date(j.created_at || j.CreatedAt).toLocaleDateString('pt-PT') : '—';
+            return `<tr>
+              <td style="font-weight:600;">${j.title||j.Title||'—'}</td>
+              <td>${j.company||j.Company||'—'}</td>
+              <td>${j.city||j.City||'—'}</td>
+              <td><span style="font-size:11px;background:#EFF6FF;color:var(--blue);padding:2px 8px;border-radius:20px;">${j.category||j.Category||'—'}</span></td>
+              <td style="color:var(--t3);font-size:12px;">${date}</td>
+            </tr>`;
+          }).join('');
+        }
       }
     }
   } catch(e) { console.error('overview load error:', e); }
