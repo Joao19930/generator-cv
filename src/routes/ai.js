@@ -69,6 +69,14 @@ router.post('/', async (req, res) => {
   const { prompt, max_tokens = 800 } = req.body;
   if (!prompt) return res.status(400).json({ error: 'prompt required' });
 
+  // Garantir templates carregados da BD
+  if (!_tplCache && req.db) await refreshTemplatesCache(req.db);
+
+  // Templates do admin têm prioridade sobre a IA
+  const tplText = localFallback(prompt);
+  if (tplText) return res.json({ text: tplText });
+
+  // Sem template configurado → gerar com Anthropic
   try {
     const msg = await getClient().messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -78,10 +86,6 @@ router.post('/', async (req, res) => {
     const text = msg.content?.[0]?.text || '';
     res.json({ text });
   } catch (err) {
-    // Fallback local quando não há créditos — garante cache da BD actualizado
-    if (!_tplCache && req.db) await refreshTemplatesCache(req.db);
-    const text = localFallback(prompt);
-    if (text) return res.json({ text });
     res.status(503).json({ error: 'Serviço IA indisponível. Adiciona créditos em console.anthropic.com.' });
   }
 });
