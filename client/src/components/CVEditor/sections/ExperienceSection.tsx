@@ -53,11 +53,22 @@ function MonthYearInput({
 }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean }) {
   const parts = value ? value.split('-') : ['', '']
   const yr = parts[0] || ''
-  const mo = parts[1] || ''
+  const externalMo = parts[1] || ''
 
-  function update(newYr: string, newMo: string) {
-    if (newYr && newMo) onChange(`${newYr}-${newMo}`)
-    else if (newYr) onChange(newYr)
+  // Keep month in local state so selecting month before year doesn't lose it
+  const [localMo, setLocalMo] = useState(externalMo)
+  if (externalMo && externalMo !== localMo) setLocalMo(externalMo)
+
+  function onMonthChange(newMo: string) {
+    setLocalMo(newMo)
+    if (yr && newMo) onChange(`${yr}-${newMo}`)
+    else if (yr) onChange(yr)
+  }
+
+  function onYearChange(newYr: string) {
+    const v = newYr.replace(/\D/g, '').slice(0, 4)
+    if (v && localMo) onChange(`${v}-${localMo}`)
+    else if (v) onChange(v)
     else onChange('')
   }
 
@@ -72,8 +83,8 @@ function MonthYearInput({
       <label style={labelStyle}>{label}</label>
       <div style={{ display: 'flex', gap: 6 }}>
         <select
-          value={mo}
-          onChange={e => update(yr, e.target.value)}
+          value={localMo}
+          onChange={e => onMonthChange(e.target.value)}
           disabled={disabled}
           style={{ ...baseStyle, flex: 1 }}
           onFocus={e => { if (!disabled) { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' } }}
@@ -85,7 +96,7 @@ function MonthYearInput({
         <input
           type="text"
           value={yr}
-          onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); update(v, mo) }}
+          onChange={e => onYearChange(e.target.value)}
           placeholder="Ano"
           disabled={disabled}
           style={{ ...baseStyle, width: 72 }}
