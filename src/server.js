@@ -204,14 +204,14 @@ app.post('/api/track/event', async (req, res) => {
 // ── Rate limiting global ─────────────────────────────────────
 app.use(rateLimiter(300, 3600));
 
-// ── AI Copiloto — não precisa de DB, montar antes do middleware de DB ──
-app.use('/api/ai',      aiRoutes);
-
 // ── Injectar pool DB em cada request ────────────────────────
 app.use(async (req, res, next) => {
   try { req.db = await getPool(); next(); }
   catch (err) { res.status(503).json({ error: 'Base de dados indisponível' }); }
 });
+
+// ── AI Copiloto ──────────────────────────────────────────────
+app.use('/api/ai',      aiRoutes);
 
 app.use('/api/chat',      chatRoutes);         // Chatbot IA (público)
 app.use('/api/auth',      authRoutes);
