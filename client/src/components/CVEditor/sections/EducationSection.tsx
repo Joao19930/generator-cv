@@ -24,6 +24,16 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 4,
 }
 
+const DEGREES = [
+  'Licenciatura',
+  'Frequência Universitária',
+  'Doutoramento',
+  'MBA',
+  'Pós Graduação',
+  'Ensino Médio Técnico',
+  'Ensino Médio Geral',
+]
+
 const MONTHS = [
   { v: '01', l: 'Jan' }, { v: '02', l: 'Fev' }, { v: '03', l: 'Mar' },
   { v: '04', l: 'Abr' }, { v: '05', l: 'Mai' }, { v: '06', l: 'Jun' },
@@ -74,6 +84,17 @@ function EducationItem({ item }: { item: Education }) {
   const { updateEducation, removeEducation } = useCVStore()
   const [open, setOpen] = useState(true)
 
+  const isFrequencia = item.degree === 'Frequência Universitária'
+
+  function selectDegree(deg: string) {
+    const isFreq = deg === 'Frequência Universitária'
+    updateEducation(item.id, {
+      degree: deg,
+      current: isFreq,
+      endDate: isFreq ? '' : item.endDate,
+    })
+  }
+
   return (
     <div style={{
       background: '#FFFFFF',
@@ -108,43 +129,81 @@ function EducationItem({ item }: { item: Education }) {
 
       {open && (
         <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Instituição</label>
-              <input style={inputStyle} value={item.institution} onChange={e => updateEducation(item.id, { institution: e.target.value })}
-                placeholder="Universidade Agostinho Neto"
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Grau / Título</label>
-              <input style={inputStyle} value={item.degree} onChange={e => updateEducation(item.id, { degree: e.target.value })}
-                placeholder="Licenciatura"
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Área</label>
-              <input style={inputStyle} value={item.field} onChange={e => updateEducation(item.id, { field: e.target.value })}
-                placeholder="Gestão de Empresas"
-                onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
-            </div>
-            <MonthYearInput label="Data início" value={item.startDate} onChange={v => updateEducation(item.id, { startDate: v })} />
-            <MonthYearInput label="Data fim" value={item.endDate} onChange={v => updateEducation(item.id, { endDate: v })} />
-          </div>
+
+          {/* Grau / Título — chips clicáveis */}
           <div>
-            <label style={labelStyle}>Notas / Descrição</label>
-            <textarea
-              value={item.description}
-              onChange={e => updateEducation(item.id, { description: e.target.value })}
-              placeholder="Média: 15/20, tese sobre gestão de recursos..."
-              rows={2}
-              style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, fontFamily: 'inherit' }}
-              onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
-              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
-            />
+            <label style={labelStyle}>Grau / Título</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {DEGREES.map(deg => {
+                const active = item.degree === deg
+                return (
+                  <button
+                    key={deg}
+                    type="button"
+                    onClick={() => selectDegree(deg)}
+                    style={{
+                      padding: '5px 11px',
+                      borderRadius: 20,
+                      border: active ? '1.5px solid #1E40AF' : '1.5px solid #E2E8F0',
+                      background: active ? '#EFF6FF' : '#F8FAFC',
+                      color: active ? '#1E40AF' : '#64748B',
+                      fontSize: 12,
+                      fontWeight: active ? 700 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.borderColor = '#1E40AF'; (e.currentTarget as HTMLButtonElement).style.color = '#1E40AF' } }}
+                    onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.borderColor = '#E2E8F0'; (e.currentTarget as HTMLButtonElement).style.color = '#64748B' } }}
+                  >
+                    {deg}
+                  </button>
+                )
+              })}
+            </div>
           </div>
+
+          {/* Instituição */}
+          <div>
+            <label style={labelStyle}>Instituição</label>
+            <input style={inputStyle} value={item.institution} onChange={e => updateEducation(item.id, { institution: e.target.value })}
+              placeholder="Universidade Agostinho Neto"
+              onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
+          </div>
+
+          {/* Curso */}
+          <div>
+            <label style={labelStyle}>Curso</label>
+            <input style={inputStyle} value={item.field} onChange={e => updateEducation(item.id, { field: e.target.value })}
+              placeholder="Gestão de Empresas"
+              onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }} />
+          </div>
+
+          {/* Datas */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <MonthYearInput label="Data início" value={item.startDate} onChange={v => updateEducation(item.id, { startDate: v })} />
+            {isFrequencia ? (
+              <div>
+                <label style={labelStyle}>Data fim</label>
+                <div style={{
+                  ...inputStyle,
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: '#F0FDF4',
+                  border: '1.5px solid #86EFAC',
+                  color: '#16A34A',
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}>
+                  Actual
+                </div>
+              </div>
+            ) : (
+              <MonthYearInput label="Data fim" value={item.endDate} onChange={v => updateEducation(item.id, { endDate: v })} />
+            )}
+          </div>
+
         </div>
       )}
     </div>

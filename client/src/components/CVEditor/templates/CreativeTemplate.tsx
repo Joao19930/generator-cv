@@ -169,7 +169,7 @@ export default function CreativeTemplate() {
                   <div style={{ fontWeight: 700, fontSize: fontSize + 1, color: '#111827' }}>{edu.degree}{edu.field ? `, ${edu.field}` : ''}</div>
                   <div style={{ color: primaryColor, fontWeight: 600, fontSize: smallFs }}>{edu.institution}</div>
                 </div>
-                <div style={{ fontSize: smallFs, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>{fmtDateRange(edu.startDate, edu.endDate, false)}</div>
+                <div style={{ fontSize: smallFs, color: '#9ca3af', flexShrink: 0, marginLeft: 8 }}>{fmtDateRange(edu.startDate, edu.endDate, edu.current ?? false)}</div>
               </div>
               {edu.description && <div style={{ marginTop: 3, fontSize: smallFs, color: '#374151' }}>{edu.description}</div>}
             </div>

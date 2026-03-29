@@ -100,7 +100,7 @@ export default function ClassicTemplate() {
                 <div key={edu.id} style={{ marginBottom: i < education.length - 1 ? 10 : 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <strong style={{ fontSize: fontSize + 1, color: '#111827' }}>{edu.degree}{edu.field ? `, ${edu.field}` : ''}</strong>
-                    <span style={{ fontSize: fontSize - 1, color: '#6b7280' }}>{fmtDateRange(edu.startDate, edu.endDate, false)}</span>
+                    <span style={{ fontSize: fontSize - 1, color: '#6b7280' }}>{fmtDateRange(edu.startDate, edu.endDate, edu.current ?? false)}</span>
                   </div>
                   <div style={{ fontSize: smallFs, color: '#374151', fontStyle: 'italic' }}>{edu.institution}</div>
                   {edu.description && <div style={{ fontSize: smallFs, marginTop: 2, color: '#374151' }}>{edu.description}</div>}

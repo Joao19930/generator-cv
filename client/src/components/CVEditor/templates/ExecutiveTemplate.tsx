@@ -139,7 +139,7 @@ export default function ExecutiveTemplate() {
               </div>
               <div style={{ fontSize: fs + 1, fontWeight: 600, color: primaryColor }}>{edu.institution}</div>
               <div style={{ fontSize: fs - 1, fontWeight: 400, color: '#6b7280' }}>
-                {fmtDateRange(edu.startDate, edu.endDate, false)}
+                {fmtDateRange(edu.startDate, edu.endDate, edu.current ?? false)}
               </div>
               {edu.description && (
                 <div style={{ fontSize: smallFs, fontWeight: 300, color: '#374151', lineHeight: lh, marginTop: 2 }}>

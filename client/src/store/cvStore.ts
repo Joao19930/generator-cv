@@ -38,6 +38,7 @@ export interface Education {
   startDate: string
   endDate: string
   description: string
+  current?: boolean
 }
 
 export type SkillLevel = 'Básico' | 'Intermédio' | 'Avançado' | 'Expert'
@@ -289,7 +290,7 @@ export const useCVStore = create<CVState>((set, get) => {
     addEducation: () => withHistory(s => ({
       education: [...s.education, {
         id: uid(), institution: '', degree: '', field: '',
-        startDate: '', endDate: '', description: ''
+        startDate: '', endDate: '', description: '', current: false
       }]
     })),
 
