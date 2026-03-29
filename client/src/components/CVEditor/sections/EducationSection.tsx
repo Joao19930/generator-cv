@@ -130,36 +130,19 @@ function EducationItem({ item }: { item: Education }) {
       {open && (
         <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-          {/* Grau / Título — chips clicáveis */}
+          {/* Grau / Título — dropdown */}
           <div>
             <label style={labelStyle}>Grau / Título</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {DEGREES.map(deg => {
-                const active = item.degree === deg
-                return (
-                  <button
-                    key={deg}
-                    type="button"
-                    onClick={() => selectDegree(deg)}
-                    style={{
-                      padding: '5px 11px',
-                      borderRadius: 20,
-                      border: active ? '1.5px solid #1E40AF' : '1.5px solid #E2E8F0',
-                      background: active ? '#EFF6FF' : '#F8FAFC',
-                      color: active ? '#1E40AF' : '#64748B',
-                      fontSize: 12,
-                      fontWeight: active ? 700 : 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.borderColor = '#1E40AF'; (e.currentTarget as HTMLButtonElement).style.color = '#1E40AF' } }}
-                    onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.borderColor = '#E2E8F0'; (e.currentTarget as HTMLButtonElement).style.color = '#64748B' } }}
-                  >
-                    {deg}
-                  </button>
-                )
-              })}
-            </div>
+            <select
+              value={item.degree}
+              onChange={e => selectDegree(e.target.value)}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+              onFocus={e => { e.target.style.borderColor = '#1E40AF'; e.target.style.boxShadow = '0 0 0 3px rgba(30,64,175,0.1)' }}
+              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+            >
+              <option value="">Seleccionar grau...</option>
+              {DEGREES.map(deg => <option key={deg} value={deg}>{deg}</option>)}
+            </select>
           </div>
 
           {/* Instituição */}
