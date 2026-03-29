@@ -62,9 +62,9 @@ textarea{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px
 textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 .hint{font-size:10.5px;color:#94a3b8;line-height:1.5}
 
-.delete-area{position:absolute;top:10px;right:10px}
+.card-actions{position:absolute;top:10px;right:10px;display:flex;gap:5px}
 
-/* ADD AREA MODAL */
+/* ADD/EDIT AREA MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:16px;padding:28px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
@@ -172,8 +172,8 @@ textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 <!-- ADD AREA MODAL -->
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <h2>➕ Nova Área de Função</h2>
-    <p>Adiciona uma nova área profissional. O assistente de IA usa os <strong>termos-chave</strong> para identificar o cargo do utilizador e aplicar o template correcto.</p>
+    <h2 id="modal-title">➕ Nova Área de Função</h2>
+    <p id="modal-desc">Adiciona uma nova área profissional. O assistente de IA usa os <strong>termos-chave</strong> para identificar o cargo do utilizador e aplicar o template correcto.</p>
 
     <div class="form-group">
       <label>Emoji da área</label>
@@ -200,7 +200,7 @@ textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 
     <div class="modal-actions">
       <button class="btn btn-gray" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-amber" onclick="confirmAdd()">Criar Área</button>
+      <button class="btn btn-amber" id="modal-confirm-btn" onclick="confirmAdd()">Criar Área</button>
     </div>
   </div>
 </div>
@@ -226,7 +226,10 @@ function headers() { return { 'Content-Type':'application/json', 'Authorization'
 
 let data = {};            // carregado da API
 let customAreas = [];     // áreas criadas pelo admin
+let removedFixed = [];    // chaves de áreas fixas removidas
+let areaOverrides = {};   // edições a áreas fixas {key: {icon, label, keywords}}
 let modalTarget = 'exp';  // qual painel está a criar
+let editingKey = null;    // chave da área em edição (null = nova)
 let selectedEmoji = EMOJIS[0];
 let newKeywords = [];
 
@@ -240,7 +243,9 @@ async function loadData() {
     if(r.status===401||r.status===403){showAuthError();return;}
     if(!r.ok) throw new Error('HTTP '+r.status);
     data = await r.json();
-    customAreas = data._customAreas || [];
+    customAreas  = data._customAreas  || [];
+    removedFixed = data._removedFixed || [];
+    areaOverrides= data._areaOverrides|| {};
     renderExp();
     renderSum();
   } catch(e){
@@ -253,9 +258,12 @@ function setSkeletons(id,n,h){
   document.getElementById(id).innerHTML=Array(n).fill(`<div class="skeleton" style="height:${h}px;border-radius:12px"></div>`).join('');
 }
 
-// ── TODAS AS ÁREAS (fixas + personalizadas) ───────────────────
+// ── TODAS AS ÁREAS (fixas + personalizadas, sem removidas) ────
 function allAreas() {
-  return [...FIXED, ...customAreas];
+  const fixed = FIXED
+    .filter(a => !removedFixed.includes(a.key))
+    .map(a => areaOverrides[a.key] ? {...a, ...areaOverrides[a.key]} : a);
+  return [...fixed, ...customAreas];
 }
 
 // ── RENDER EXPERIÊNCIA ────────────────────────────────────────
@@ -275,7 +283,10 @@ function renderExp() {
       ${area.keywords&&area.keywords.length?`<div class="area-keywords">${area.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join('')}</div>`:''}
       <textarea id="exp-${area.key}" rows="7" placeholder="Escreve um bullet por linha...">${bullets.join('\n')}</textarea>
       <p class="hint">Cada linha = 1 bullet. <code>{ctx}</code> insere " na [Empresa]"</p>
-      ${isCustom?`<div class="delete-area"><button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button></div>`:''}
+      <div class="card-actions">
+        <button class="btn btn-gray btn-sm" onclick="editArea('${area.key}')">✏️ Editar</button>
+        <button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button>
+      </div>
     `;
     grid.appendChild(card);
   });
@@ -298,7 +309,10 @@ function renderSum() {
       ${area.keywords&&area.keywords.length?`<div class="area-keywords">${area.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join('')}</div>`:''}
       <textarea id="sum-${area.key}" rows="5" placeholder="Parágrafo de resumo...">${text}</textarea>
       <p class="hint"><code>{cargo}</code> <code>{anos}</code> <code>{ctx}</code> <code>{skills}</code></p>
-      ${isCustom?`<div class="delete-area"><button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button></div>`:''}
+      <div class="card-actions">
+        <button class="btn btn-gray btn-sm" onclick="editArea('${area.key}')">✏️ Editar</button>
+        <button class="btn btn-red btn-sm" onclick="removeArea('${area.key}')">🗑 Remover</button>
+      </div>
     `;
     grid.appendChild(card);
   });
@@ -321,7 +335,7 @@ async function saveData() {
   try {
     const r = await fetch('/api/admin/job-templates',{
       method:'PUT', headers:headers(),
-      body:JSON.stringify({experience, summary, _customAreas: customAreas})
+      body:JSON.stringify({experience, summary, _customAreas: customAreas, _removedFixed: removedFixed, _areaOverrides: areaOverrides})
     });
     if(r.status===401||r.status===403){showAuthError();return;}
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -332,22 +346,63 @@ async function saveData() {
   finally{ btn.disabled=false; btn.textContent='💾 Guardar Tudo'; }
 }
 
-// ── REMOVE CUSTOM AREA ────────────────────────────────────────
+// ── REMOVE AREA ───────────────────────────────────────────────
 function removeArea(key) {
-  if(!confirm('Remover esta área personalizada? Os bullets serão perdidos ao guardar.')) return;
-  customAreas = customAreas.filter(a=>a.key!==key);
+  const isFixed = FIXED.some(a=>a.key===key);
+  const label = isFixed
+    ? (areaOverrides[key]?.label || FIXED.find(a=>a.key===key)?.label || key)
+    : (customAreas.find(a=>a.key===key)?.label || key);
+  if(!confirm(`Remover a área "${label}"? Os bullets serão perdidos ao guardar.`)) return;
+  if(isFixed) {
+    if(!removedFixed.includes(key)) removedFixed.push(key);
+  } else {
+    customAreas = customAreas.filter(a=>a.key!==key);
+  }
   renderExp();
   renderSum();
 }
 
+// ── EDIT AREA ─────────────────────────────────────────────────
+function editArea(key) {
+  const isFixed = FIXED.some(a=>a.key===key);
+  const area = isFixed
+    ? (areaOverrides[key] ? {...FIXED.find(a=>a.key===key), ...areaOverrides[key]} : FIXED.find(a=>a.key===key))
+    : customAreas.find(a=>a.key===key);
+  if(!area) return;
+
+  editingKey = key;
+  modalTarget = document.getElementById('panel-exp').classList.contains('active') ? 'exp' : 'sum';
+
+  newKeywords = [...(area.keywords||[])];
+  selectedEmoji = area.icon || EMOJIS[0];
+
+  document.getElementById('modal-title').textContent = '✏️ Editar Área';
+  document.getElementById('modal-desc').innerHTML = 'Actualiza o ícone, nome ou termos-chave desta área profissional.';
+  document.getElementById('modal-confirm-btn').textContent = 'Guardar Alterações';
+  document.getElementById('new-name').value = area.label;
+
+  // emoji grid — highlight current
+  const eg=document.getElementById('emoji-grid');
+  const allEmojis = EMOJIS.includes(area.icon) ? EMOJIS : [area.icon, ...EMOJIS];
+  eg.innerHTML=allEmojis.map(e=>`<div class="emoji-opt${e===selectedEmoji?' selected':''}" onclick="selectEmoji(this,'${e}')">${e}</div>`).join('');
+
+  renderKeywords();
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('new-name').focus();
+}
+
 // ── MODAL ─────────────────────────────────────────────────────
 function openModal(target) {
-  modalTarget=target;
-  newKeywords=[];
-  selectedEmoji=EMOJIS[0];
+  editingKey = null;
+  modalTarget = target;
+  newKeywords = [];
+  selectedEmoji = EMOJIS[0];
   document.getElementById('new-name').value='';
   document.getElementById('new-kw-input').value='';
   document.getElementById('new-kw-list').innerHTML='';
+  document.getElementById('modal-title').textContent = '➕ Nova Área de Função';
+  document.getElementById('modal-desc').innerHTML = 'Adiciona uma nova área profissional. O assistente de IA usa os <strong>termos-chave</strong> para identificar o cargo do utilizador e aplicar o template correcto.';
+  document.getElementById('modal-confirm-btn').textContent = 'Criar Área';
 
   // emoji grid
   const eg=document.getElementById('emoji-grid');
@@ -358,6 +413,7 @@ function openModal(target) {
 }
 
 function closeModal(){
+  editingKey = null;
   document.getElementById('modal').classList.remove('open');
 }
 
@@ -389,9 +445,24 @@ function confirmAdd(){
   if(!name){ toast('Indica o nome da área','red'); return; }
   if(!newKeywords.length){ toast('Adiciona pelo menos um termo-chave','red'); return; }
 
-  // gerar chave única
-  const key='custom_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')+'_'+Date.now().toString(36);
+  if(editingKey !== null) {
+    // MODO EDIÇÃO
+    const isFixed = FIXED.some(a=>a.key===editingKey);
+    if(isFixed) {
+      areaOverrides[editingKey] = { icon:selectedEmoji, label:name, keywords:[...newKeywords] };
+    } else {
+      const idx = customAreas.findIndex(a=>a.key===editingKey);
+      if(idx>=0) customAreas[idx] = { ...customAreas[idx], icon:selectedEmoji, label:name, keywords:[...newKeywords] };
+    }
+    closeModal();
+    renderExp();
+    renderSum();
+    toast(`Área "${name}" actualizada! Guarda para confirmar.`,'ok');
+    return;
+  }
 
+  // MODO CRIAÇÃO
+  const key='custom_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')+'_'+Date.now().toString(36);
   const area={ key, icon:selectedEmoji, label:name, keywords:[...newKeywords] };
   customAreas.push(area);
   closeModal();
