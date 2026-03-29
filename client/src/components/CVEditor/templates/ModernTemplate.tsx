@@ -34,7 +34,12 @@ function fmtDateRange(start: string, end: string, current: boolean): string {
 }
 
 function fmtLinkedin(url: string) {
-  return url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')
+  try {
+    const m = decodeURIComponent(url).match(/linkedin\.com\/in\/([^/?#]+)/i)
+    if (m) return m[1]
+  } catch {}
+  const m2 = url.match(/linkedin\.com\/in\/([^/?#]+)/i)
+  return m2 ? m2[1] : url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')
 }
 
 const IcoEmail = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
