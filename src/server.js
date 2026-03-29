@@ -361,6 +361,12 @@ async function autoMigrate(pool) {
       replied_at  TIMESTAMP,
       created_at  TIMESTAMP DEFAULT NOW()
     )`,
+    `CREATE TABLE IF NOT EXISTS app_settings (
+      key        VARCHAR(100) PRIMARY KEY,
+      value      TEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS image_url TEXT`,
   ];
   for (const sql of stmts) {
     try { await pool.request().query(sql); }
