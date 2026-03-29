@@ -135,11 +135,15 @@ router.get('/google/callback', async (req, res) => {
         .input('email',    sql.NVarChar, payload.email)
         .input('googleId', sql.NVarChar, payload.sub)
         .input('avatar',   sql.NVarChar, payload.picture || '')
-        .query(`INSERT INTO users (name, email, google_id, avatar_url, plan, role, created_at)
-                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', NOW())
+        .query(`INSERT INTO users (name, email, google_id, avatar_url, plan, role, created_at, last_login)
+                VALUES (@name, @email, @googleId, @avatar, 'free', 'user', NOW(), NOW())
                 RETURNING id, name, email, plan, role`);
       user = ins.recordset[0];
       zapierConnector.onNewUser({ email: user.Email, name: user.Name, source: 'google' }).catch(() => {});
+    } else {
+      await pool.request()
+        .input('id', sql.Int, user.Id)
+        .query('UPDATE users SET last_login = NOW() WHERE id = @id');
     }
 
     const token = signToken(user);
@@ -249,7 +253,7 @@ router.get('/linkedin/callback', async (req, res) => {
           .input('id',         sql.Int,      byEmail.Id)
           .input('linkedinId', sql.NVarChar, linkedinId)
           .input('avatar',     sql.NVarChar, avatar)
-          .query('UPDATE users SET linkedin_id = @linkedinId, avatar_url = @avatar WHERE id = @id');
+          .query('UPDATE users SET linkedin_id = @linkedinId, avatar_url = @avatar, last_login = NOW() WHERE id = @id');
         user = byEmail;
       } else {
         const ins = await pool.request()
@@ -257,12 +261,17 @@ router.get('/linkedin/callback', async (req, res) => {
           .input('email',      sql.NVarChar, email)
           .input('linkedinId', sql.NVarChar, linkedinId)
           .input('avatar',     sql.NVarChar, avatar)
-          .query(`INSERT INTO users (name, email, linkedin_id, avatar_url, plan, role, created_at)
-                  VALUES (@name, @email, @linkedinId, @avatar, 'free', 'user', NOW())
+          .query(`INSERT INTO users (name, email, linkedin_id, avatar_url, plan, role, created_at, last_login)
+                  VALUES (@name, @email, @linkedinId, @avatar, 'free', 'user', NOW(), NOW())
                   RETURNING id, name, email, plan, role`);
         user = ins.recordset[0];
         zapierConnector.onNewUser({ email: user.Email, name: user.Name, source: 'linkedin' }).catch(() => {});
       }
+    } else {
+      // utilizador já existia por linkedin_id — actualizar last_login
+      await pool.request()
+        .input('id', sql.Int, user.Id)
+        .query('UPDATE users SET last_login = NOW() WHERE id = @id');
     }
 
     const token = signToken(user);

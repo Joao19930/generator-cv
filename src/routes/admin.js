@@ -60,13 +60,16 @@ router.get('/users', async (req, res) => {
       .input('limit',  sql.Int, Number(limit))
       .query(`
         SELECT u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login,
+               CASE WHEN u.linkedin_id IS NOT NULL THEN 'linkedin'
+                    WHEN u.google_id   IS NOT NULL THEN 'google'
+                    ELSE 'email' END AS auth_source,
                COUNT(DISTINCT c.id) AS cv_count,
                COALESCE(SUM(p.amount),0) AS total_spent
         FROM users u
         LEFT JOIN cvs c      ON c.user_id = u.id
         LEFT JOIN payments p ON p.user_id = u.id AND p.status = 'paid'
         WHERE (u.name ILIKE @s OR u.email ILIKE @s) AND (@plan='' OR u.plan=@plan)
-        GROUP BY u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login
+        GROUP BY u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login, u.linkedin_id, u.google_id
         ORDER BY u.created_at DESC
         LIMIT @limit OFFSET @offset
       `);
