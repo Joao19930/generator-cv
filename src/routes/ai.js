@@ -90,6 +90,37 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Normaliza género: remove sufixo '-a' de formas femininas em '-ora'/'-ora'
+// para que "gestora" bata em keyword "gestor" e vice-versa.
+function normGender(text) {
+  return text.toLowerCase().replace(/\b(\w+or)a\b/g, '$1');
+}
+
+// Verifica se o cargo contém o keyword, com normalização de género.
+function matchesKeyword(cargo, kw) {
+  const c = cargo.toLowerCase();
+  const k = kw.toLowerCase();
+  if (c.includes(k)) return true;
+  // normalizar -ora → -or em ambos os lados
+  return normGender(c).includes(normGender(k));
+}
+
+// Devolve a área personalizada do admin que melhor corresponde ao cargo.
+// "Melhor" = keyword mais longo que fizer match (maior especificidade).
+function bestCustomArea(cargo, customAreas) {
+  let best = null;
+  let bestLen = 0;
+  for (const area of (customAreas || [])) {
+    for (const kw of (area.keywords || [])) {
+      if (matchesKeyword(cargo, kw) && kw.length > bestLen) {
+        bestLen = kw.length;
+        best = area;
+      }
+    }
+  }
+  return best;
+}
+
 // Fallback local para quando não há créditos Anthropic
 function localFallback(prompt) {
   const p = prompt.toLowerCase();
@@ -117,7 +148,6 @@ function localFallback(prompt) {
       ? `Domina ${skillArr.join(', ')}`
       : 'Possui competências técnicas sólidas na área';
 
-    // Tentar usar templates personalizados do ficheiro JSON
     const tpl = loadTemplates();
     const sumTpl = tpl && tpl.summary;
     function applySumTpl(key) {
@@ -129,6 +159,14 @@ function localFallback(prompt) {
         .replace('{skills}', skillsFrase);
     }
 
+    // Áreas personalizadas do admin têm prioridade — keyword mais específico ganha
+    const customMatch = bestCustomArea(c, tpl && tpl._customAreas);
+    if (customMatch) {
+      const result = applySumTpl(customMatch.key);
+      if (result) return result;
+    }
+
+    // Áreas fixas (fallback)
     if (/rh|recursos humanos|people|talento/.test(c)) {
       return applySumTpl('rh') || `Gestor(a) de Recursos Humanos com ${anosStr}${ctxEmpresa}, especializado(a) em recrutamento, avaliação de desempenho e relações laborais. ${skillsFrase}, com profundo conhecimento da legislação laboral angolana. Liderou processos de gestão de talento que fortaleceram a cultura organizacional. Procura contribuir para organizações que valorizam o capital humano como vantagem competitiva.`;
     }
@@ -146,16 +184,6 @@ function localFallback(prompt) {
     }
     if (/market|comunic|digital|publicid/.test(c)) {
       return applySumTpl('marketing') || `${cargo} com ${anosStr}${ctxEmpresa}, especializado(a) em marketing digital, gestão de marca e comunicação estratégica. ${skillsFrase}. Combina criatividade com análise de dados para maximizar o retorno das acções de marketing. Procura aplicar esta visão em marcas angolanas com ambição de crescimento acelerado.`;
-    }
-
-    // Verificar áreas personalizadas criadas pelo admin
-    const customAreasSum = (tpl && tpl._customAreas) || [];
-    for (const area of customAreasSum) {
-      const keywords = area.keywords || [];
-      if (keywords.length && keywords.some(kw => c.includes(kw.toLowerCase()))) {
-        const result = applySumTpl(area.key);
-        if (result) return result;
-      }
     }
 
     return applySumTpl('default') || `${cargo} com ${anosStr}${ctxEmpresa}, com historial consistente na entrega de resultados em ambientes exigentes. ${skillsFrase}. Reconhecido(a) pela capacidade analítica e resolução eficaz de problemas, com contribuição para a melhoria contínua dos processos organizacionais. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
@@ -196,7 +224,6 @@ function localFallback(prompt) {
     const ctx = temEmpresa ? ` na ${empresa}` : '';
     const c = cargo.toLowerCase();
 
-    // Carregar templates personalizados (editáveis pelo admin)
     const tpl = loadTemplates();
     const expTpl = tpl && tpl.experience;
 
@@ -207,6 +234,14 @@ function localFallback(prompt) {
         .join('\n');
     }
 
+    // Áreas personalizadas do admin têm prioridade — keyword mais específico ganha
+    const customMatch = bestCustomArea(c, tpl && tpl._customAreas);
+    if (customMatch) {
+      const result = applyExpTpl(customMatch.key);
+      if (result) return result;
+    }
+
+    // Áreas fixas (fallback)
     if (/rh|recursos humanos|people|talento/.test(c)) {
       return applyExpTpl('rh') ||
         `Liderou processos de recrutamento e selecção de quadros${ctx}, assegurando contratações alinhadas com a cultura organizacional\nImplementou políticas de avaliação de desempenho e planos de desenvolvimento individual\nGeriu relações laborais e assegurou conformidade com a legislação angolana do trabalho\nCoordenou formações internas e programas de integração para novos colaboradores`;
@@ -230,16 +265,6 @@ function localFallback(prompt) {
     if (/market|comunic|digital|publicid/.test(c)) {
       return applyExpTpl('marketing') ||
         `Planeou e executou campanhas de marketing digital e tradicional${ctx}\nGeriu redes sociais e conteúdos, aumentando o alcance e a notoriedade da marca\nAnalisou métricas de desempenho e ajustou estratégias para maximizar o retorno\nCoordenou produção de materiais de comunicação e identidade visual da organização`;
-    }
-
-    // Verificar áreas personalizadas criadas pelo admin
-    const customAreas = (tpl && tpl._customAreas) || [];
-    for (const area of customAreas) {
-      const keywords = area.keywords || [];
-      if (keywords.length && keywords.some(kw => c.includes(kw.toLowerCase()))) {
-        const result = applyExpTpl(area.key);
-        if (result) return result;
-      }
     }
 
     return applyExpTpl('default') ||
