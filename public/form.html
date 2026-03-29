@@ -414,14 +414,14 @@
                         <div class="form-group"><label>Educação *</label>
                             <select>
                                 <option value="">Seleccionar nível...</option>
+                                <option>Ensino Médio Concluído</option>
+                                <option>Formação Técnica</option>
                                 <option>Frequência Universitária</option>
                                 <option>Licenciatura</option>
                                 <option>Pós-Graduação</option>
                                 <option>Mestrado</option>
-                                <option>Doutoramento</option>
                                 <option>MBA</option>
-                                <option>Ensino Médio</option>
-                                <option>Ensino Técnico</option>
+                                <option>Doutoramento</option>
                                 <option>Outro</option>
                             </select>
                         </div>
@@ -564,7 +564,7 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group"><input type="text" placeholder="Ex: Português"></div>
-                        <div class="form-group"><select><option>Nativo</option><option>Fluente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div>
+                        <div class="form-group"><select><option>Nativo</option><option>Fluente</option><option>Corrente</option><option>Avançado</option><option>Intermédio</option><option>Básico</option></select></div>
                     </div>
                 </div>
             </div>
@@ -993,7 +993,7 @@
         function addEduCard(e, i) {
             var id = 'edu-' + i;
             var d = e || {};
-            var levels = ['','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','Doutoramento','MBA','Ensino Médio','Ensino Técnico','Outro'];
+            var levels = ['','Ensino Médio Concluído','Formação Técnica','Frequência Universitária','Licenciatura','Pós-Graduação','Mestrado','MBA','Doutoramento','Outro'];
             var degreeVal = esc(d.degree||d.course||'');
             var opts = levels.map(function(lv){ return '<option value="'+lv+'"'+(lv===degreeVal?' selected':'')+'>'+( lv||'Seleccionar nível...')+'</option>'; }).join('');
             var sy = monthYearSelects('edu', d.start||d.year||'', d.end||d.endYear||'');
@@ -1036,7 +1036,7 @@
             var id = 'lang-' + i;
             var name = d.language || d.name || '';
             var level = d.level || 'Nativo';
-            var levels = ['Nativo','Fluente','Avançado','Intermédio','Básico'];
+            var levels = ['Nativo','Fluente','Corrente','Avançado','Intermédio','Básico'];
             var opts = levels.map(function(lv) { return '<option' + (lv === level ? ' selected' : '') + '>' + lv + '</option>'; }).join('');
             var html = '<div class="item-card" id="' + id + '" style="padding:14px 18px;">' +
                 '<div class="item-card-header" style="margin-bottom:10px;"><span class="item-card-title">Idioma</span>' +
@@ -1952,6 +1952,22 @@
             });
         }
         populateYearSelects();
+
+        // ── Mês → Ano: ao seleccionar o mês, foca o ano se ainda estiver vazio ──
+        document.querySelector('.container').addEventListener('change', function(ev) {
+            var sel = ev.target;
+            if (!sel || sel.tagName !== 'SELECT') return;
+            var cls = sel.className || '';
+            var isMonthSel = cls.indexOf('month-start') !== -1 || cls.indexOf('month-end') !== -1;
+            if (!isMonthSel || !sel.value) return;
+            // Encontrar o select de ano imediatamente a seguir no mesmo .date-row
+            var row = sel.closest('.date-row');
+            if (!row) return;
+            var yearSel = row.querySelector('[class*="year-start"],[class*="year-end"]');
+            if (yearSel && !yearSel.value && !yearSel.disabled) {
+                yearSel.focus();
+            }
+        });
 
         // ══════════════════════════════════════════════
         // IA — EDUCAÇÃO (descrição)
