@@ -163,7 +163,8 @@ function localFallback(prompt) {
     const customMatch = bestCustomArea(c, tpl && tpl._customAreas);
     if (customMatch) {
       const result = applySumTpl(customMatch.key);
-      if (result) return result;
+      // Área custom encontrada mas sem resumo → saltar fixas para não usar conteúdo errado
+      return result || applySumTpl('default') || `${cargo} com ${anosStr}${ctxEmpresa}, com historial consistente na entrega de resultados em ambientes exigentes. ${skillsFrase}. Reconhecido(a) pela capacidade analítica e resolução eficaz de problemas, com contribuição para a melhoria contínua dos processos organizacionais. Procura um desafio profissional onde possa aplicar a sua experiência e gerar impacto real em Angola.`;
     }
 
     // Áreas fixas (fallback)
@@ -238,7 +239,9 @@ function localFallback(prompt) {
     const customMatch = bestCustomArea(c, tpl && tpl._customAreas);
     if (customMatch) {
       const result = applyExpTpl(customMatch.key);
-      if (result) return result;
+      // Área custom encontrada mas sem bullets → saltar fixas para não usar conteúdo errado
+      return result || applyExpTpl('default') ||
+        `Desempenhou as funções de ${cargo}${ctx} com elevado sentido de responsabilidade e orientação para resultados\nOptimizou processos internos, contribuindo para a melhoria da eficiência operacional\nColaborou activamente com as diferentes áreas, assegurando o cumprimento de prazos e objectivos\nElaborou relatórios de actividade e propôs melhorias implementadas com sucesso`;
     }
 
     // Áreas fixas (fallback)
