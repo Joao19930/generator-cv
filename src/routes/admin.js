@@ -1012,27 +1012,61 @@ router.post('/chat-knowledge/generate', async (req, res) => {
   }
 });
 
-// ── GET /api/admin/job-templates — ler templates de experiência/resumo
-router.get('/job-templates', (req, res) => {
+// ── GET /api/admin/job-templates — ler da BD (fallback: ficheiro)
+router.get('/job-templates', async (req, res) => {
   const file = path.join(__dirname, '../data/jobTemplates.json');
   try {
+    const r = await req.db.request()
+      .query(`SELECT value FROM app_settings WHERE key = 'job_templates'`);
+    if (r.recordset.length > 0) {
+      return res.json(JSON.parse(r.recordset[0].value));
+    }
+    // fallback: ficheiro local (primeira vez)
     const data = JSON.parse(fs.readFileSync(file, 'utf8'));
     res.json(data);
   } catch {
-    res.status(500).json({ error: 'Não foi possível ler o ficheiro de templates.' });
+    try {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      res.json(data);
+    } catch {
+      res.status(500).json({ error: 'Não foi possível ler os templates.' });
+    }
   }
 });
 
-// ── PUT /api/admin/job-templates — guardar templates editados
-router.put('/job-templates', (req, res) => {
+// ── PUT /api/admin/job-templates — gravar na BD
+router.put('/job-templates', async (req, res) => {
   const file = path.join(__dirname, '../data/jobTemplates.json');
   try {
-    const existing = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const { experience, summary, _customAreas } = req.body;
-    if (experience) existing.experience = experience;
-    if (summary) existing.summary = summary;
-    if (_customAreas !== undefined) existing._customAreas = _customAreas;
-    fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf8');
+    // ler estado actual (BD ou ficheiro)
+    let existing = {};
+    try {
+      const r = await req.db.request()
+        .query(`SELECT value FROM app_settings WHERE key = 'job_templates'`);
+      if (r.recordset.length > 0) {
+        existing = JSON.parse(r.recordset[0].value);
+      } else {
+        existing = JSON.parse(fs.readFileSync(file, 'utf8'));
+      }
+    } catch { existing = {}; }
+
+    const { experience, summary, _customAreas, _removedFixed, _areaOverrides } = req.body;
+    if (experience)               existing.experience     = experience;
+    if (summary)                  existing.summary        = summary;
+    if (_customAreas  !== undefined) existing._customAreas  = _customAreas;
+    if (_removedFixed !== undefined) existing._removedFixed = _removedFixed;
+    if (_areaOverrides !== undefined) existing._areaOverrides = _areaOverrides;
+
+    const json = JSON.stringify(existing);
+    await req.db.request()
+      .input('val', json)
+      .query(`
+        INSERT INTO app_settings (key, value, updated_at)
+        VALUES ('job_templates', @val, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = @val, updated_at = NOW()
+      `);
+    // invalidar cache em memória do módulo ai.js
+    try { require('./ai')._invalidateCache && require('./ai')._invalidateCache(); } catch {}
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });

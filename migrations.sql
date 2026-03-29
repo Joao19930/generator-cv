@@ -240,3 +240,10 @@ CREATE TABLE IF NOT EXISTS user_events (
 CREATE INDEX IF NOT EXISTS ix_events_type    ON user_events(event_type, created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_events_user    ON user_events(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_events_created ON user_events(created_at DESC);
+
+-- ── App Settings (chave/valor persistente) ────────────────────
+CREATE TABLE IF NOT EXISTS app_settings (
+  key        VARCHAR(100) PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW()
+);

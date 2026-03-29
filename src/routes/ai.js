@@ -6,12 +6,25 @@ const fs = require('fs');
 
 const TEMPLATES_FILE = path.join(__dirname, '../data/jobTemplates.json');
 
-function loadTemplates() {
+// Cache em memória — populado na 1ª chamada à BD
+let _tplCache = null;
+
+async function refreshTemplatesCache(db) {
   try {
-    return JSON.parse(fs.readFileSync(TEMPLATES_FILE, 'utf8'));
-  } catch {
-    return null;
-  }
+    const r = await db.request()
+      .query(`SELECT value FROM app_settings WHERE key = 'job_templates'`);
+    if (r.recordset.length > 0) {
+      _tplCache = JSON.parse(r.recordset[0].value);
+      return;
+    }
+  } catch {}
+  // fallback: ficheiro local
+  try { _tplCache = JSON.parse(fs.readFileSync(TEMPLATES_FILE, 'utf8')); } catch {}
+}
+
+function loadTemplates() {
+  if (_tplCache) return _tplCache;
+  try { return JSON.parse(fs.readFileSync(TEMPLATES_FILE, 'utf8')); } catch { return null; }
 }
 
 let _client;
@@ -65,7 +78,8 @@ router.post('/', async (req, res) => {
     const text = msg.content?.[0]?.text || '';
     res.json({ text });
   } catch (err) {
-    // Fallback local quando não há créditos
+    // Fallback local quando não há créditos — garante cache da BD actualizado
+    if (!_tplCache && req.db) await refreshTemplatesCache(req.db);
     const text = localFallback(prompt);
     if (text) return res.json({ text });
     res.status(503).json({ error: 'Serviço IA indisponível. Adiciona créditos em console.anthropic.com.' });
@@ -237,3 +251,4 @@ function localFallback(prompt) {
 }
 
 module.exports = router;
+module.exports._invalidateCache = () => { _tplCache = null; };
