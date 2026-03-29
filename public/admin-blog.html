@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Admin</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;padding-bottom:60px}
+a{text-decoration:none}
+
+.topbar{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px}
+.topbar h1{font-size:18px;font-weight:700}
+.topbar p{font-size:12px;opacity:.8;margin-top:2px}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-white{background:#fff;color:#4338ca}
+.btn-indigo{background:#6366f1;color:#fff}
+.btn-green{background:#10b981;color:#fff}
+.btn-red{background:#fef2f2;color:#ef4444;border:1px solid #fecaca}
+.btn-gray{background:#e2e8f0;color:#475569}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+.container{max-width:1100px;margin:0 auto;padding:24px 20px}
+
+#auth-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center}
+#auth-error p{font-size:14px;color:#991b1b;margin-bottom:12px}
+
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:18px;font-weight:700}
+.page-sub{font-size:12px;color:#64748b;margin-top:2px}
+
+/* TABLE */
+.tbl-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+tbody td{padding:12px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafafa}
+.badge{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-gray{background:#f1f5f9;color:#64748b}
+.td-actions{display:flex;gap:6px}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:720px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e2e8f0}
+.modal-header h2{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;line-height:1;padding:4px}
+.modal-close:hover{color:#1e293b}
+.modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.modal-footer{padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:8px}
+
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:#475569}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-group textarea{resize:vertical;line-height:1.6}
+
+.img-preview{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;display:none}
+.img-preview.show{display:block}
+
+.toggle-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0}
+.toggle-row label{font-size:13px;font-weight:600;flex:1}
+input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#6366f1}
+
+#toast{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:9999;pointer-events:none;color:#fff}
+#toast.show{opacity:1}
+
+.empty{text-align:center;padding:48px 20px;color:#94a3b8;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>✍️ Blog</h1>
+    <p>Gerir publicações do blog</p>
+  </div>
+  <div class="topbar-right">
+    <a href="/admin-panel" class="btn btn-white">← Admin Panel</a>
+    <a href="/blog" target="_blank" class="btn btn-white">Ver Blog →</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="auth-error">
+    <p>⚠️ Sessão expirada ou sem permissões de administrador.</p>
+    <a href="/admin-login" class="btn btn-gray">Fazer login →</a>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <p class="page-title">Publicações</p>
+      <p class="page-sub" id="posts-sub">A carregar...</p>
+    </div>
+    <button class="btn btn-indigo" onclick="openModal()">+ Novo Post</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Categoria</th>
+          <th>Estado</th>
+          <th>Visualizações</th>
+          <th>Data</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="posts-tbody">
+        <tr><td colspan="6" class="empty">A carregar...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Novo Post</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" id="f-title" placeholder="Título do artigo..." maxlength="255">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="f-category">
+            <option>Geral</option>
+            <option>Dicas de CV</option>
+            <option>Mercado de Trabalho</option>
+            <option>Entrevistas</option>
+            <option>Carreira</option>
+            <option>LinkedIn</option>
+            <option>Soft Skills</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Autor</label>
+          <input type="text" id="f-author" placeholder="Nome do autor" maxlength="100">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Imagem de Capa</label>
+        <input type="file" id="f-image" accept="image/*" onchange="previewImg(this)">
+        <img id="img-preview" class="img-preview" alt="preview">
+      </div>
+
+      <div class="form-group">
+        <label>Resumo / Excerpt <span style="font-weight:400;color:#94a3b8">(máx 300 caracteres)</span></label>
+        <textarea id="f-excerpt" rows="2" maxlength="300" placeholder="Breve descrição para listagem e SEO..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Conteúdo *</label>
+        <textarea id="f-content" rows="10" placeholder="Conteúdo completo do artigo. Podes usar HTML para formatação básica (<b>, <i>, <ul>, <h2>, etc.)"></textarea>
+      </div>
+
+      <div class="toggle-row">
+        <label>Publicar imediatamente</label>
+        <input type="checkbox" id="f-published">
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-indigo" id="modal-save-btn" onclick="savePost()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const TOKEN = localStorage.getItem('cv_token') || localStorage.getItem('adminToken') || localStorage.getItem('token') || '';
+const headers = () => ({ 'Authorization': 'Bearer ' + TOKEN });
+
+let posts = [];
+let editingId = null;
+
+async function load() {
+  try {
+    const r = await fetch('/api/blog/admin/all', { headers: headers() });
+    if (r.status === 401 || r.status === 403) { showAuthError(); return; }
+    const d = await r.json();
+    posts = d.posts || [];
+    document.getElementById('posts-sub').textContent = `${d.total || posts.length} publicações no total`;
+    render();
+  } catch(e) { toast('Erro ao carregar: ' + e.message, 'red'); }
+}
+
+function render() {
+  const tbody = document.getElementById('posts-tbody');
+  if (!posts.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Ainda não há posts. Cria o primeiro!</td></tr>'; return; }
+  tbody.innerHTML = posts.map(p => `
+    <tr>
+      <td><strong style="font-size:13px">${esc(p.title)}</strong></td>
+      <td><span style="font-size:12px;color:#64748b">${esc(p.category||'Geral')}</span></td>
+      <td><span class="badge ${p.published ? 'badge-green' : 'badge-gray'}">${p.published ? 'Publicado' : 'Rascunho'}</span></td>
+      <td style="color:#64748b;font-size:12px">${p.views||0}</td>
+      <td style="color:#94a3b8;font-size:11px">${fmtDate(p.created_at)}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-gray btn-sm" onclick="editPost(${p.id})">✏️ Editar</button>
+          <button class="btn btn-red btn-sm" onclick="deletePost(${p.id},'${esc(p.title)}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal(id) {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Novo Post';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-category').value = 'Geral';
+  document.getElementById('f-author').value = '';
+  document.getElementById('f-excerpt').value = '';
+  document.getElementById('f-content').value = '';
+  document.getElementById('f-published').checked = false;
+  document.getElementById('f-image').value = '';
+  document.getElementById('img-preview').classList.remove('show');
+  document.getElementById('modal-save-btn').textContent = '💾 Publicar';
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('f-title').focus();
+}
+
+function editPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  // carregar post completo
+  fetch(`/api/blog/admin/all`, { headers: headers() }).then(() => {
+    fetch(`/api/blog/${p.slug}?admin=1`, { headers: headers() })
+      .then(r => r.ok ? r.json() : null)
+      .then(full => {
+        document.getElementById('modal-title').textContent = 'Editar Post';
+        document.getElementById('f-title').value = p.title;
+        document.getElementById('f-category').value = p.category || 'Geral';
+        document.getElementById('f-author').value = p.author || '';
+        document.getElementById('f-excerpt').value = full?.excerpt || '';
+        document.getElementById('f-content').value = full?.content || '';
+        document.getElementById('f-published').checked = !!p.published;
+        document.getElementById('f-image').value = '';
+        const prev = document.getElementById('img-preview');
+        if (full?.image_url) { prev.src = full.image_url; prev.classList.add('show'); }
+        else prev.classList.remove('show');
+        document.getElementById('modal-save-btn').textContent = '💾 Guardar';
+        document.getElementById('overlay').classList.add('open');
+        document.getElementById('f-title').focus();
+      });
+  });
+}
+
+async function savePost() {
+  const title   = document.getElementById('f-title').value.trim();
+  const content = document.getElementById('f-content').value.trim();
+  if (!title) { toast('Título obrigatório', 'red'); return; }
+  if (!content) { toast('Conteúdo obrigatório', 'red'); return; }
+
+  const btn = document.getElementById('modal-save-btn');
+  btn.disabled = true; btn.textContent = 'A guardar...';
+
+  const fd = new FormData();
+  fd.append('title',     title);
+  fd.append('content',   content);
+  fd.append('excerpt',   document.getElementById('f-excerpt').value.trim());
+  fd.append('category',  document.getElementById('f-category').value);
+  fd.append('published', document.getElementById('f-published').checked ? 'true' : 'false');
+  const imgFile = document.getElementById('f-image').files[0];
+  if (imgFile) fd.append('image', imgFile);
+
+  const url    = editingId ? `/api/blog/admin/${editingId}` : '/api/blog/admin';
+  const method = editingId ? 'PUT' : 'POST';
+
+  try {
+    const r = await fetch(url, { method, headers: headers(), body: fd });
+    if (r.status === 401 || r.status === 403) { showAuthError(); return; }
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error); }
+    closeModal();
+    toast(editingId ? 'Post actualizado!' : 'Post criado!', 'ok');
+    load();
+  } catch(e) { toast('Erro: ' + e.message, 'red'); }
+  finally { btn.disabled = false; btn.textContent = '💾 Guardar'; }
+}
+
+async function deletePost(id, title) {
+  if (!confirm(`Apagar "${title}"?`)) return;
+  try {
+    const r = await fetch(`/api/blog/admin/${id}`, { method: 'DELETE', headers: headers() });
+    if (!r.ok) throw new Error('Erro ao apagar');
+    toast('Post apagado', 'ok');
+    load();
+  } catch(e) { toast(e.message, 'red'); }
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editingId = null;
+}
+
+function previewImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('img-preview');
+    prev.src = e.target.result;
+    prev.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+function showAuthError() {
+  document.getElementById('auth-error').style.display = 'block';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'red' ? '#ef4444' : type === 'ok' ? '#10b981' : '#1e293b';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+load();
+</script>
+</body>
+</html>

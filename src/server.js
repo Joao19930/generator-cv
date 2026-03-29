@@ -102,6 +102,14 @@ app.get('/admin-chat-training', (req, res) =>
 app.get('/admin-job-templates', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'admin-job-templates.html')));
 
+app.get('/admin-blog', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin-blog.html')));
+
+app.get('/blog', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'blog.html')));
+app.get('/blog/:slug', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'blog-post.html')));
+
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'admin-login.html')));
@@ -219,6 +227,7 @@ app.use('/api/growth',    growthRoutes);       // Sitemap, ATS, referral, OG
 app.use('/api/templates', templatesRoutes);    // Templates (GET público, POST protegido)
 app.use('/api/content',  contentRoutes);       // Coaches, Courses, Jobs, Testimonials (público)
 app.use('/api/empregos', empregosRoutes);      // Módulo Vagas de Emprego (público)
+app.use('/api/blog',     require('./routes/blog'));  // Blog (GET público, admin protegido)
 
 // ── Rotas protegidas (JWT) ───────────────────────────────────
 app.use('/api/cv',      auth, cvRoutes);
@@ -365,6 +374,20 @@ async function autoMigrate(pool) {
       key        VARCHAR(100) PRIMARY KEY,
       value      TEXT NOT NULL,
       updated_at TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS blog_posts (
+      id           SERIAL PRIMARY KEY,
+      title        VARCHAR(255) NOT NULL,
+      slug         VARCHAR(300) NOT NULL UNIQUE,
+      content      TEXT NOT NULL,
+      excerpt      VARCHAR(300),
+      image_url    TEXT,
+      category     VARCHAR(100) DEFAULT 'Geral',
+      author       VARCHAR(100),
+      published    BOOLEAN DEFAULT FALSE,
+      published_at TIMESTAMP,
+      views        INTEGER DEFAULT 0,
+      created_at   TIMESTAMP DEFAULT NOW()
     )`,
     `ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS image_url TEXT`,
   ];

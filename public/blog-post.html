@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — CV Premium Angola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sora',sans-serif;background:#f8fafc;color:#1e293b}
+a{text-decoration:none;color:inherit}
+
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.nav-logo{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.nav-logo-dot{width:8px;height:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%}
+.nav-links{display:flex;align-items:center;gap:20px;font-size:13px;font-weight:600}
+.nav-links a{color:#64748b;transition:color .15s}
+.nav-links a:hover{color:#1e293b}
+.nav-cta{padding:7px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff!important;border-radius:8px;font-size:12px!important}
+
+.article-wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#6366f1;margin-bottom:28px}
+.back-link:hover{opacity:.8}
+
+.art-cat{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6366f1;margin-bottom:8px}
+.art-title{font-size:28px;font-weight:700;line-height:1.3;margin-bottom:12px}
+.art-meta{font-size:12px;color:#94a3b8;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.art-img{width:100%;max-height:400px;object-fit:cover;border-radius:14px;margin-bottom:32px}
+.art-content{font-size:15px;line-height:1.85;color:#374151}
+.art-content h2,.art-content h3{font-weight:700;margin:28px 0 12px;color:#1e293b}
+.art-content h2{font-size:20px}
+.art-content h3{font-size:17px}
+.art-content p{margin-bottom:16px}
+.art-content ul,.art-content ol{padding-left:24px;margin-bottom:16px}
+.art-content li{margin-bottom:8px}
+.art-content strong{color:#1e293b}
+.art-content a{color:#6366f1;text-decoration:underline}
+.art-content blockquote{border-left:4px solid #6366f1;padding:12px 20px;background:#eff6ff;border-radius:0 8px 8px 0;margin:20px 0;font-style:italic;color:#475569}
+
+.cta-box{background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:16px;padding:32px;text-align:center;margin-top:48px;color:#fff}
+.cta-box h3{font-size:20px;font-weight:700;margin-bottom:8px}
+.cta-box p{font-size:14px;opacity:.85;margin-bottom:20px}
+.cta-box a{display:inline-flex;padding:10px 24px;background:#fff;color:#4f46e5;border-radius:8px;font-weight:700;font-size:14px}
+.cta-box a:hover{opacity:.9}
+
+.skeleton{background:#e2e8f0;border-radius:8px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo"><div class="nav-logo-dot"></div>CV Premium</a>
+  <div class="nav-links">
+    <a href="/">Início</a>
+    <a href="/empregos">Empregos</a>
+    <a href="/blog">Blog</a>
+    <a href="/app" class="nav-cta">Criar CV</a>
+  </div>
+</nav>
+
+<div class="article-wrap">
+  <a href="/blog" class="back-link">← Voltar ao Blog</a>
+  <div id="article-body">
+    <div class="skeleton" style="height:14px;width:80px;margin-bottom:12px"></div>
+    <div class="skeleton" style="height:32px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:32px;width:70%;margin-bottom:16px"></div>
+    <div class="skeleton" style="height:12px;width:200px;margin-bottom:28px"></div>
+    <div class="skeleton" style="height:360px;border-radius:14px;margin-bottom:32px"></div>
+    <div class="skeleton" style="height:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:14px;width:80%;margin-bottom:10px"></div>
+  </div>
+</div>
+
+<script>
+const slug = location.pathname.split('/blog/')[1];
+
+async function load() {
+  try {
+    const r = await fetch(`/api/blog/${encodeURIComponent(slug)}`);
+    if (!r.ok) { document.getElementById('article-body').innerHTML = '<p style="color:#ef4444">Artigo não encontrado.</p>'; return; }
+    const p = await r.json();
+
+    document.title = p.title + ' — CV Premium Angola';
+
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'}) : '';
+
+    document.getElementById('article-body').innerHTML = `
+      <div class="art-cat">${esc(p.category||'Geral')}</div>
+      <h1 class="art-title">${esc(p.title)}</h1>
+      <div class="art-meta">
+        <span>Por ${esc(p.author||'CV Premium')}</span>
+        <span>·</span>
+        <span>${fmtDate(p.published_at)}</span>
+        <span>·</span>
+        <span>${p.views||0} leituras</span>
+      </div>
+      ${p.image_url ? `<img class="art-img" src="${p.image_url}" alt="${esc(p.title)}">` : ''}
+      <div class="art-content">${p.content}</div>
+      <div class="cta-box">
+        <h3>Pronto para criar o teu CV?</h3>
+        <p>Usa o CV Premium para criar um CV profissional em minutos, com templates optimizados para Angola.</p>
+        <a href="/app">Criar CV Grátis →</a>
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('article-body').innerHTML = '<p style="color:#ef4444">Erro ao carregar artigo.</p>';
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+load();
+</script>
+</body>
+</html>

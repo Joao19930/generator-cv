@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — CV Premium Angola</title>
+<meta name="description" content="Dicas de CV, carreira e mercado de trabalho em Angola.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sora',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.nav-logo{font-size:16px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px}
+.nav-logo-dot{width:8px;height:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%}
+.nav-links{display:flex;align-items:center;gap:20px;font-size:13px;font-weight:600}
+.nav-links a{color:#64748b;transition:color .15s}
+.nav-links a:hover,.nav-links a.active{color:#1e293b}
+.nav-cta{padding:7px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff!important;border-radius:8px;font-size:12px!important}
+
+/* HERO */
+.hero{text-align:center;padding:56px 20px 40px;max-width:640px;margin:0 auto}
+.hero h1{font-size:32px;font-weight:700;line-height:1.2;margin-bottom:12px}
+.hero p{font-size:15px;color:#64748b;line-height:1.7}
+
+/* CATEGORIES */
+.categories{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 20px 32px;max-width:800px;margin:0 auto}
+.cat-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.cat-btn:hover,.cat-btn.active{border-color:#6366f1;background:#eff6ff;color:#4f46e5}
+
+/* GRID */
+.grid-wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.grid{grid-template-columns:1fr}}
+
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:pointer}
+.card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);transform:translateY(-2px)}
+.card-img{width:100%;height:180px;object-fit:cover;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:40px}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-body{padding:16px}
+.card-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6366f1;margin-bottom:6px}
+.card-title{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:8px;color:#1e293b}
+.card-excerpt{font-size:12px;color:#64748b;line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#94a3b8}
+
+.pagination{display:flex;justify-content:center;gap:8px;padding:20px 0 40px}
+.page-btn{padding:7px 14px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.page-btn:hover{border-color:#6366f1;color:#4f46e5}
+.page-btn.active{background:#6366f1;color:#fff;border-color:#6366f1}
+
+.empty{text-align:center;padding:80px 20px;color:#94a3b8}
+.empty p{font-size:16px;margin-top:8px}
+
+.skeleton{background:#e2e8f0;border-radius:8px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    CV Premium
+  </a>
+  <div class="nav-links">
+    <a href="/">Início</a>
+    <a href="/empregos">Empregos</a>
+    <a href="/blog" class="active">Blog</a>
+    <a href="/app" class="nav-cta">Criar CV</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Blog CV Premium</h1>
+  <p>Dicas de carreira, conselhos de CV e tudo sobre o mercado de trabalho em Angola.</p>
+</div>
+
+<div class="categories" id="categories">
+  <button class="cat-btn active" onclick="filterCat('',this)">Todos</button>
+  <button class="cat-btn" onclick="filterCat('Dicas de CV',this)">Dicas de CV</button>
+  <button class="cat-btn" onclick="filterCat('Mercado de Trabalho',this)">Mercado de Trabalho</button>
+  <button class="cat-btn" onclick="filterCat('Entrevistas',this)">Entrevistas</button>
+  <button class="cat-btn" onclick="filterCat('Carreira',this)">Carreira</button>
+  <button class="cat-btn" onclick="filterCat('LinkedIn',this)">LinkedIn</button>
+  <button class="cat-btn" onclick="filterCat('Soft Skills',this)">Soft Skills</button>
+</div>
+
+<div class="grid-wrap">
+  <div class="grid" id="grid">
+    <!-- skeleton -->
+    ${Array(6).fill('<div class="card"><div class="card-img skeleton"></div><div class="card-body"><div class="skeleton" style="height:10px;width:60px;margin-bottom:8px"></div><div class="skeleton" style="height:16px;margin-bottom:8px"></div><div class="skeleton" style="height:12px;margin-bottom:4px"></div><div class="skeleton" style="height:12px;width:80%"></div></div></div>').join('')}
+  </div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+let currentPage = 1;
+let currentCat  = '';
+
+async function load(page=1, cat='') {
+  currentPage = page;
+  currentCat  = cat;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = Array(6).fill('<div class="card"><div class="card-img skeleton" style="height:180px"></div><div class="card-body"><div class="skeleton" style="height:10px;width:60px;margin-bottom:8px"></div><div class="skeleton" style="height:16px;margin-bottom:8px"></div><div class="skeleton" style="height:12px;margin-bottom:4px"></div><div class="skeleton" style="height:12px;width:80%"></div></div></div>').join('');
+
+  try {
+    const r = await fetch(`/api/blog?page=${page}&limit=9&category=${encodeURIComponent(cat)}`);
+    const d = await r.json();
+    renderPosts(d.posts||[]);
+    renderPagination(d.pages||1, page);
+  } catch { grid.innerHTML = '<p class="empty">Erro ao carregar posts.</p>'; }
+}
+
+function renderPosts(posts) {
+  const grid = document.getElementById('grid');
+  if (!posts.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1" class="empty"><div style="font-size:40px">✍️</div><p>Ainda não há posts nesta categoria.</p></div>';
+    return;
+  }
+  grid.innerHTML = posts.map(p => `
+    <div class="card" onclick="window.location='/blog/${p.slug}'">
+      <div class="card-img">${p.image_url ? `<img src="${p.image_url}" alt="${esc(p.title)}" loading="lazy">` : '✍️'}</div>
+      <div class="card-body">
+        <div class="card-cat">${esc(p.category||'Geral')}</div>
+        <div class="card-title">${esc(p.title)}</div>
+        <div class="card-excerpt">${esc(p.excerpt||'')}</div>
+        <div class="card-footer">
+          <span>${fmtDate(p.published_at)}</span>
+          <span>${p.views||0} leituras</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPagination(pages, current) {
+  const wrap = document.getElementById('pagination');
+  if (pages <= 1) { wrap.innerHTML=''; return; }
+  let html = '';
+  if (current > 1) html += `<button class="page-btn" onclick="load(${current-1},'${currentCat}')">← Anterior</button>`;
+  for (let i=1;i<=pages;i++) html += `<button class="page-btn${i===current?' active':''}" onclick="load(${i},'${currentCat}')">${i}</button>`;
+  if (current < pages) html += `<button class="page-btn" onclick="load(${current+1},'${currentCat}')">Próximo →</button>`;
+  wrap.innerHTML = html;
+}
+
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  load(1, cat);
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' });
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+load();
+</script>
+</body>
+</html>
