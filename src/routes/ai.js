@@ -97,12 +97,17 @@ function normGender(text) {
 }
 
 // Verifica se o cargo contém o keyword, com normalização de género.
+// Divide keywords compostos por / , | e aceita match em qualquer parte.
+// Ex: keyword "assistente comercial/vendas" → testa "assistente comercial" E "vendas"
 function matchesKeyword(cargo, kw) {
   const c = cargo.toLowerCase();
-  const k = kw.toLowerCase();
-  if (c.includes(k)) return true;
-  // normalizar -ora → -or em ambos os lados
-  return normGender(c).includes(normGender(k));
+  const cn = normGender(c);
+  // dividir por separadores comuns e testar cada segmento
+  const parts = kw.toLowerCase().split(/[\/,|]/).map(p => p.trim()).filter(Boolean);
+  return parts.some(part => {
+    if (c.includes(part)) return true;
+    return cn.includes(normGender(part));
+  });
 }
 
 // Devolve a área personalizada do admin que melhor corresponde ao cargo.
