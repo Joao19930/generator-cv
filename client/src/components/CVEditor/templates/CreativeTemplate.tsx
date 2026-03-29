@@ -23,6 +23,15 @@ function fmtDateRange(start: string, end: string, current: boolean) {
   return `${s} — ${e}`
 }
 
+function fmtLinkedin(url: string) {
+  return url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')
+}
+
+const IcoEmail = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+const IcoPhone = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><path d="M3 2h3l1 3.5-1.5 1.5a9 9 0 004.5 4.5L11.5 10l3.5 1V14a1 1 0 01-1 1C5.4 15 1 10.6 1 3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+const IcoLocation = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><path d="M8 1.5A4.5 4.5 0 0112.5 6c0 3.5-4.5 8.5-4.5 8.5S3.5 9.5 3.5 6A4.5 4.5 0 018 1.5z" stroke="currentColor" strokeWidth="1.5"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+const IcoLinkedIn = () => <svg width="9" height="9" viewBox="0 0 16 16" style={{ flexShrink: 0, marginTop: 1 }}><rect width="16" height="16" rx="2" fill="currentColor"/><rect x="3" y="6" width="2.2" height="6.5" fill="white"/><circle cx="4.1" cy="3.9" r="1.3" fill="white"/><path d="M8 6h1.8v.9a2.5 2.5 0 014.2 1.9V12.5H12V9.1a1 1 0 00-1-1 1 1 0 00-1 1v3.4H8V6z" fill="white"/></svg>
+
 export default function CreativeTemplate() {
   const store = useCVStore()
   const { personal, summary, experience, education, skills, languages, certifications, customSections, sectionOrder, primaryColor, fontFamily, fontSize, lineSpacing } = store
@@ -212,10 +221,10 @@ export default function CreativeTemplate() {
         color: '#374151',
         borderBottom: `1px solid ${primaryColor}30`,
       }}>
-        {personal.email && <span>{personal.email}</span>}
-        {personal.phone && <span>{personal.phone}</span>}
-        {personal.address && <span>{personal.address}</span>}
-        {personal.linkedin && <span>{personal.linkedin}</span>}
+        {personal.email && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><IcoEmail />{personal.email}</span>}
+        {personal.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><IcoPhone />{personal.phone}</span>}
+        {personal.address && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><IcoLocation />{personal.address}</span>}
+        {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><IcoLinkedIn />{fmtLinkedin(personal.linkedin)}</span>}
         {personal.website && <span>{personal.website}</span>}
         {personal.showNationality && personal.nationality && <span>{personal.nationality}</span>}
         {personal.showBirthDate && personal.birthDate && <span>{personal.birthDate}</span>}
