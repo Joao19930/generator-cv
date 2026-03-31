@@ -1855,7 +1855,7 @@ async function saveStaff() {
     document.getElementById('sfName').value = '';
     document.getElementById('sfEmail').value = '';
     document.getElementById('sfPwd').value = '';
-    showAlert('alertStaff', 'Membro criado com sucesso.', 'green');
+    showAlert('alertStaff', d.promoted ? 'Utilizadora existente promovida com sucesso.' : 'Membro criado com sucesso.', 'green');
     _loaded.delete('staff');
     await loadStaff();
   } catch(e) { showAlert('alertStaff', 'Erro de ligação.', 'red'); }

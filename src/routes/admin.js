@@ -1101,18 +1101,34 @@ router.post('/staff', async (req, res) => {
   if (!['admin', 'analista'].includes(role))
     return res.status(400).json({ error: 'Role inválido. Use "admin" ou "analista".' });
   try {
+    const emailNorm = email.trim().toLowerCase();
+    // Verificar se já existe
+    const existing = await req.db.request()
+      .input('email', sql.NVarChar, emailNorm)
+      .query(`SELECT id, role FROM users WHERE LOWER(email) = LOWER(@email)`);
+    if (existing.recordset.length > 0) {
+      const u = existing.recordset[0];
+      const currentRole = (u.Role || u.role || '').toLowerCase();
+      if (['admin','analista','superadmin'].includes(currentRole)) {
+        return res.status(400).json({ error: 'Este email já pertence a um membro da equipa.' });
+      }
+      // Utilizador normal → promover a admin/analista
+      await req.db.request()
+        .input('role',  sql.NVarChar, role)
+        .input('id',    sql.Int,      u.Id || u.id)
+        .query(`UPDATE users SET role = @role WHERE id = @id`);
+      return res.json({ success: true, promoted: true });
+    }
     const hash = await bcrypt.hash(password, 10);
     await req.db.request()
       .input('name',  sql.NVarChar, name.trim())
-      .input('email', sql.NVarChar, email.trim().toLowerCase())
+      .input('email', sql.NVarChar, emailNorm)
       .input('pass',  sql.NVarChar, hash)
       .input('role',  sql.NVarChar, role)
       .query(`INSERT INTO users (name, email, password_hash, role, plan, is_active, created_at)
               VALUES (@name, @email, @pass, @role, 'free', TRUE, NOW())`);
     res.json({ success: true });
   } catch (e) {
-    if (e.number === 2627 || (e.message || '').toLowerCase().includes('duplicate') || (e.message || '').toLowerCase().includes('unique'))
-      return res.status(400).json({ error: 'Este email já está registado.' });
     res.status(500).json({ error: e.message });
   }
 });
