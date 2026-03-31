@@ -1084,7 +1084,7 @@ router.get('/staff', async (req, res) => {
     const r = await req.db.request().query(`
       SELECT id, name, email, role, is_active, created_at, last_login
       FROM users
-      WHERE role IN ('admin','analista','superadmin')
+      WHERE LOWER(role) IN ('admin','analista','superadmin')
       ORDER BY created_at DESC
     `);
     res.json(r.recordset);
@@ -1128,7 +1128,7 @@ router.patch('/staff/:id/password', async (req, res) => {
     const r = await req.db.request()
       .input('id',   sql.Int,      parseInt(req.params.id))
       .input('hash', sql.NVarChar, hash)
-      .query(`UPDATE users SET password_hash = @hash WHERE id = @id AND role IN ('admin','analista')`);
+      .query(`UPDATE users SET password_hash = @hash WHERE id = @id AND LOWER(role) IN ('admin','analista')`);
     if (r.rowsAffected[0] === 0)
       return res.status(404).json({ error: 'Utilizador não encontrado.' });
     res.json({ success: true });
@@ -1142,7 +1142,7 @@ router.delete('/staff/:id', async (req, res) => {
   try {
     const r = await req.db.request()
       .input('id', sql.Int, parseInt(req.params.id))
-      .query(`DELETE FROM users WHERE id = @id AND role IN ('admin','analista')`);
+      .query(`DELETE FROM users WHERE id = @id AND LOWER(role) IN ('admin','analista')`);
     if (r.rowsAffected[0] === 0)
       return res.status(404).json({ error: 'Utilizador não encontrado ou não pode ser removido.' });
     res.json({ success: true });
