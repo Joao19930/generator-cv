@@ -108,6 +108,122 @@ app.get('/admin-blog', (req, res) =>
 app.get('/blog', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'blog.html')));
 
+// ── Cursos ────────────────────────────────────────────────────
+app.get('/cursos', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'cursos.html')));
+
+app.get('/cursos/:id(\\d+)', async (req, res) => {
+  try {
+    const pool = await getPool();
+    const row  = await pool.request()
+      .input('id', sql.Int, parseInt(req.params.id))
+      .query(`SELECT id, title, source, category, rating, url FROM courses WHERE id = @id AND active = TRUE`)
+      .then(r => r.recordset[0]).catch(() => null);
+
+    if (!row) { res.redirect('/cursos'); return; }
+    const BASE  = process.env.APP_URL || 'https://cvpremium.net';
+    const title = (row.Title||row.title||'Curso').replace(/"/g,'&quot;');
+    const src   = row.Source||row.source||'CV Premium';
+    const cat   = row.Category||row.category||'Formação';
+    const rat   = row.Rating||row.rating||'';
+    const url   = row.Url||row.url||'';
+    const pageUrl = `${BASE}/cursos/${req.params.id}`;
+    const desc  = `Curso de ${title} — ${src}. Categoria: ${cat}.`.replace(/"/g,'&quot;');
+
+    const schema = {
+      "@context":"https://schema.org","@type":"Course",
+      "name": title,
+      "description": desc,
+      "url": pageUrl,
+      "provider": { "@type":"Organization","name":src },
+      "educationalLevel": cat,
+      ...(rat ? {"aggregateRating":{"@type":"AggregateRating","ratingValue":rat,"bestRating":"5","ratingCount":"1"}} : {})
+    };
+    const html = `<!DOCTYPE html><html lang="pt"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${title} — ${src} | CV Premium Angola</title>
+<meta name="description" content="${desc}">
+<link rel="canonical" href="${pageUrl}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${pageUrl}">
+<meta property="og:title" content="${title} — ${src}">
+<meta property="og:description" content="${desc}">
+<meta property="og:image" content="${BASE}/og-image.png">
+<meta property="og:site_name" content="CV Premium Angola">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${desc}">
+<script type="application/ld+json">${JSON.stringify(schema)}<\/script>
+<meta http-equiv="refresh" content="0;url=/cursos">
+<style>body{font-family:sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#1e293b;}
+.box{background:#fff;border-radius:14px;padding:32px;max-width:480px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+h1{font-size:20px;margin-bottom:8px;}p{font-size:14px;color:#64748b;margin-bottom:20px;}
+a{background:#6366f1;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;}</style>
+</head><body><div class="box"><h1>${title}</h1><p>${src} · ${cat}</p><a href="/cursos">Ver todos os cursos →</a></div></body></html>`;
+    res.setHeader('Content-Type','text/html; charset=utf-8');
+    res.send(html);
+  } catch (_) { res.redirect('/cursos'); }
+});
+
+// ── Mentores ─────────────────────────────────────────────────
+app.get('/mentores', (req, res) =>
+  res.sendFile(path.join(__dirname, '..', 'public', 'mentores.html')));
+
+app.get('/mentores/:id(\\d+)', async (req, res) => {
+  try {
+    const pool = await getPool();
+    const row  = await pool.request()
+      .input('id', sql.Int, parseInt(req.params.id))
+      .query(`SELECT id, name, location, bio, skills, email, photo_url FROM coaches WHERE id = @id AND active = TRUE`)
+      .then(r => r.recordset[0]).catch(() => null);
+
+    if (!row) { res.redirect('/mentores'); return; }
+    const BASE     = process.env.APP_URL || 'https://cvpremium.net';
+    const name     = (row.Name||row.name||'Mentor').replace(/"/g,'&quot;');
+    const location = row.Location||row.location||'Angola';
+    const bio      = (row.Bio||row.bio||`Mentor de carreira em ${location}`).replace(/"/g,'&quot;').substring(0,200);
+    const skills   = (row.Skills||row.skills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const photo    = row.PhotoUrl||row.photo_url||`${BASE}/og-image.png`;
+    const email    = row.Email||row.email||'';
+    const pageUrl  = `${BASE}/mentores/${req.params.id}`;
+
+    const schema = {
+      "@context":"https://schema.org","@type":"Person",
+      "name": name,
+      "description": bio,
+      "url": pageUrl,
+      "image": photo,
+      "address": { "@type":"PostalAddress","addressLocality":location,"addressCountry":"AO" },
+      ...(skills.length ? {"knowsAbout": skills} : {}),
+      ...(email ? {"email": email} : {})
+    };
+    const html = `<!DOCTYPE html><html lang="pt"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${name} — Mentor de Carreira | CV Premium Angola</title>
+<meta name="description" content="${bio}">
+<link rel="canonical" href="${pageUrl}">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="${pageUrl}">
+<meta property="og:title" content="${name} — Mentor de Carreira">
+<meta property="og:description" content="${bio}">
+<meta property="og:image" content="${photo}">
+<meta property="og:site_name" content="CV Premium Angola">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${name}">
+<meta name="twitter:description" content="${bio}">
+<meta name="twitter:image" content="${photo}">
+<script type="application/ld+json">${JSON.stringify(schema)}<\/script>
+<meta http-equiv="refresh" content="0;url=/mentores">
+<style>body{font-family:sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#1e293b;}
+.box{background:#fff;border-radius:14px;padding:32px;max-width:480px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+h1{font-size:20px;margin-bottom:8px;}p{font-size:14px;color:#64748b;margin-bottom:20px;}
+a{background:#6366f1;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;}</style>
+</head><body><div class="box"><h1>${name}</h1><p>${location}</p><a href="/mentores">Ver todos os mentores →</a></div></body></html>`;
+    res.setHeader('Content-Type','text/html; charset=utf-8');
+    res.send(html);
+  } catch (_) { res.redirect('/mentores'); }
+});
+
 // ── Página individual de vaga com meta tags + JobPosting schema ──
 app.get('/empregos/:id(\\d+)', async (req, res) => {
   try {
@@ -257,6 +373,8 @@ app.get('/sitemap.xml', async (req, res) => {
       { url: '/',          pri: '1.0', freq: 'daily'   },
       { url: '/empregos',  pri: '0.9', freq: 'daily'   },
       { url: '/blog',      pri: '0.9', freq: 'daily'   },
+      { url: '/cursos',    pri: '0.8', freq: 'weekly'  },
+      { url: '/mentores',  pri: '0.8', freq: 'weekly'  },
       { url: '/demo',      pri: '0.8', freq: 'weekly'  },
       { url: '/pricing',   pri: '0.8', freq: 'weekly'  },
       { url: '/ats',       pri: '0.7', freq: 'weekly'  },
@@ -283,6 +401,22 @@ app.get('/sitemap.xml', async (req, res) => {
     for (const j of jobs.recordset) {
       const d = (j.CreatedAt || j.created_at || now).toString().split('T')[0];
       xml += `  <url><loc>${BASE}/empregos/${j.Id || j.id}</loc><lastmod>${d}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
+    }
+
+    // Cursos activos
+    const courses = await pool.request()
+      .query(`SELECT id, created_at FROM courses WHERE active = TRUE`)
+      .catch(() => ({ recordset: [] }));
+    for (const c of courses.recordset) {
+      xml += `  <url><loc>${BASE}/cursos/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+    }
+
+    // Mentores activos
+    const coaches = await pool.request()
+      .query(`SELECT id FROM coaches WHERE active = TRUE`)
+      .catch(() => ({ recordset: [] }));
+    for (const c of coaches.recordset) {
+      xml += `  <url><loc>${BASE}/mentores/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
     }
 
     xml += `</urlset>`;

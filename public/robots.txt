@@ -4,6 +4,10 @@ Allow: /empregos
 Allow: /empregos/
 Allow: /blog
 Allow: /blog/
+Allow: /cursos
+Allow: /cursos/
+Allow: /mentores
+Allow: /mentores/
 Allow: /ats
 Allow: /demo
 Allow: /pricing
