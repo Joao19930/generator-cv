@@ -54,6 +54,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Sitemap dinâmico (antes do express.static para não ser bloqueado pelo ficheiro antigo) ──
+app.get('/sitemap.xml/', (req, res) => res.redirect(301, '/sitemap.xml'));
 app.get('/sitemap.xml', async (req, res) => {
   try {
     const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
