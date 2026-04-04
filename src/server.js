@@ -107,8 +107,131 @@ app.get('/admin-blog', (req, res) =>
 
 app.get('/blog', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'blog.html')));
-app.get('/blog/:slug', (req, res) =>
-  res.sendFile(path.join(__dirname, '..', 'public', 'blog-post.html')));
+
+// ── Página individual de vaga com meta tags + JobPosting schema ──
+app.get('/empregos/:id(\\d+)', async (req, res) => {
+  try {
+    const pool = await getPool();
+    const row  = await pool.request()
+      .input('id', sql.Int, parseInt(req.params.id))
+      .query(`SELECT id, title, company, city, country, category, description, salary, url, contact_type, image_url, job_date, end_date
+              FROM jobs WHERE id = @id AND active = TRUE`)
+      .then(r => r.recordset[0]).catch(() => null);
+
+    const BASE = process.env.APP_URL || 'https://cvpremium.net';
+    const pageUrl = `${BASE}/empregos/${req.params.id}`;
+
+    if (!row) { res.redirect('/empregos'); return; }
+
+    const title   = (row.Title    || row.title    || 'Vaga de Emprego').replace(/"/g,'&quot;');
+    const company = (row.Company  || row.company  || '').replace(/"/g,'&quot;');
+    const city    = row.City      || row.city     || 'Angola';
+    const country = row.Country   || row.country  || 'Angola';
+    const desc    = (row.Description|| row.description || `Vaga de ${title} em ${company}`).replace(/"/g,'&quot;');
+    const img     = row.ImageUrl  || row.image_url|| `${BASE}/og-image.png`;
+    const salary  = row.Salary    || row.salary   || '';
+    const endDate = row.EndDate   || row.end_date;
+    const jobDate = row.JobDate   || row.job_date || new Date().toISOString();
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": title,
+      "description": desc,
+      "hiringOrganization": { "@type": "Organization", "name": company },
+      "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": city, "addressCountry": country } },
+      "datePosted": jobDate,
+      "validThrough": endDate || undefined,
+      "url": pageUrl,
+      ...(salary ? { "baseSalary": { "@type": "MonetaryAmount", "currency": "AOA", "value": { "@type": "QuantitativeValue", "value": salary } } } : {})
+    };
+
+    const html = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${title} — ${company} | CV Premium Angola</title>
+<meta name="description" content="${desc.substring(0,160)}">
+<link rel="canonical" href="${pageUrl}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${pageUrl}">
+<meta property="og:title" content="${title} — ${company}">
+<meta property="og:description" content="${desc.substring(0,160)}">
+<meta property="og:image" content="${img}">
+<meta property="og:site_name" content="CV Premium Angola">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title} — ${company}">
+<meta name="twitter:description" content="${desc.substring(0,160)}">
+<script type="application/ld+json">${JSON.stringify(schema)}</script>
+<meta http-equiv="refresh" content="0;url=/empregos?id=${req.params.id}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Sora',sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#1e293b;}
+.box{background:#fff;border-radius:14px;padding:32px;max-width:480px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+h1{font-size:20px;margin-bottom:8px;}p{font-size:14px;color:#64748b;margin-bottom:20px;}
+a{background:#6366f1;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;}</style>
+</head>
+<body>
+<div class="box">
+  <h1>${title}</h1>
+  <p>${company} · ${city}, ${country}</p>
+  <a href="/empregos">Ver todas as vagas →</a>
+</div>
+</body>
+</html>`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (_) {
+    res.redirect('/empregos');
+  }
+});
+
+// ── Blog post — injectar meta tags no HTML antes de servir ───
+app.get('/blog/:slug', async (req, res) => {
+  try {
+    const pool = await getPool();
+    const row  = await pool.request()
+      .input('slug', sql.NVarChar, req.params.slug)
+      .query(`SELECT title, excerpt, image_url, author, published_at, category
+              FROM blog_posts WHERE slug = @slug AND published = TRUE`)
+      .then(r => r.recordset[0]).catch(() => null);
+
+    const fs   = require('fs');
+    let html   = fs.readFileSync(path.join(__dirname, '..', 'public', 'blog-post.html'), 'utf8');
+
+    if (row) {
+      const title  = (row.Title  || row.title  || 'Blog').replace(/"/g, '&quot;');
+      const desc   = (row.Excerpt|| row.excerpt || 'Artigo do blog CV Premium Angola').replace(/"/g, '&quot;');
+      const img    = row.ImageUrl|| row.image_url|| 'https://cvpremium.net/og-image.png';
+      const url    = `https://cvpremium.net/blog/${req.params.slug}`;
+      const author = row.Author  || row.author  || 'CV Premium';
+      const date   = row.PublishedAt || row.published_at || new Date().toISOString();
+      const cat    = row.Category|| row.category|| 'Geral';
+
+      const meta = `
+  <title>${title} — CV Premium Angola</title>
+  <meta name="description" content="${desc}">
+  <link rel="canonical" href="${url}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${url}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${desc}">
+  <meta property="og:image" content="${img}">
+  <meta property="og:site_name" content="CV Premium Angola">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${desc}">
+  <meta name="twitter:image" content="${img}">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"${title}","description":"${desc}","image":"${img}","url":"${url}","datePublished":"${date}","author":{"@type":"Person","name":"${author}"},"publisher":{"@type":"Organization","name":"CV Premium","logo":{"@type":"ImageObject","url":"https://cvpremium.net/og-image.png"}},"articleSection":"${cat}"}</script>`;
+      html = html.replace('<title>Blog — CV Premium Angola</title>', meta);
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (_) {
+    res.sendFile(path.join(__dirname, '..', 'public', 'blog-post.html'));
+  }
+});
 
 // ── Dashboard admin ──────────────────────────────────────────
 app.get('/admin-login', (req, res) =>
@@ -123,11 +246,52 @@ app.get('/admin-panel', (req, res) => {
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
 
-// Sitemap explícito
-app.get('/sitemap.xml', (req, res) => {
-  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  res.sendFile(require('path').join(__dirname, '../public/sitemap.xml'));
+// Sitemap dinâmico — inclui blog posts, vagas e páginas estáticas
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const BASE = process.env.APP_URL || 'https://cvpremium.net';
+    const now  = new Date().toISOString().split('T')[0];
+    const pool = await getPool();
+
+    const statics = [
+      { url: '/',          pri: '1.0', freq: 'daily'   },
+      { url: '/empregos',  pri: '0.9', freq: 'daily'   },
+      { url: '/blog',      pri: '0.9', freq: 'daily'   },
+      { url: '/demo',      pri: '0.8', freq: 'weekly'  },
+      { url: '/pricing',   pri: '0.8', freq: 'weekly'  },
+      { url: '/ats',       pri: '0.7', freq: 'weekly'  },
+      { url: '/free',      pri: '0.6', freq: 'monthly' },
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    for (const s of statics)
+      xml += `  <url><loc>${BASE}${s.url}</loc><lastmod>${now}</lastmod><changefreq>${s.freq}</changefreq><priority>${s.pri}</priority></url>\n`;
+
+    // Blog posts publicados
+    const blogs = await pool.request()
+      .query(`SELECT slug, published_at FROM blog_posts WHERE published = TRUE ORDER BY published_at DESC`)
+      .catch(() => ({ recordset: [] }));
+    for (const b of blogs.recordset) {
+      const d = (b.PublishedAt || b.published_at || now).toString().split('T')[0];
+      xml += `  <url><loc>${BASE}/blog/${b.Slug || b.slug}</loc><lastmod>${d}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n`;
+    }
+
+    // Vagas activas
+    const jobs = await pool.request()
+      .query(`SELECT id, created_at FROM jobs WHERE active = TRUE ORDER BY created_at DESC`)
+      .catch(() => ({ recordset: [] }));
+    for (const j of jobs.recordset) {
+      const d = (j.CreatedAt || j.created_at || now).toString().split('T')[0];
+      xml += `  <url><loc>${BASE}/empregos/${j.Id || j.id}</loc><lastmod>${d}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
+    }
+
+    xml += `</urlset>`;
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(xml);
+  } catch (e) {
+    res.status(500).send('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+  }
 });
 
 // Robots.txt explícito

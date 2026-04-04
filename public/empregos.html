@@ -301,7 +301,9 @@ function renderCard(j, i) {
   const ago    = timeAgo(j.job_date || j.JobDate || j.created_at || j.CreatedAt);
   const isNew  = ago === 'Hoje' || ago === 'Ontem';
 
+  const jobId = j.id || j.Id || '';
   return `<div class="jb-card" style="animation:fadeIn .3s ease ${i*0.04}s both;">
+    ${jobId ? `<link rel="prefetch" href="/empregos/${jobId}">` : ''}
     <div class="jb-logo" style="background:${color};">${init}</div>
     <div class="jb-body">
       <div class="jb-top-row">

@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
 Allow: /empregos
+Allow: /empregos/
+Allow: /blog
+Allow: /blog/
 Allow: /ats
 Allow: /demo
 Allow: /pricing
