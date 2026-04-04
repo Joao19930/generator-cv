@@ -76,7 +76,7 @@ router.get('/sitemap.xml', async (req, res) => {
     xml += `  <url><loc>${BASE}${u}</loc><changefreq>weekly</changefreq><priority>${u===''?'1.0':'0.8'}</priority></url>\n`;
 
   try {
-    const tmpls = await req.db.request().query(`SELECT slug FROM templates WHERE active=TRUE`);
+    const tmpls = await req.db.request().query(`SELECT slug FROM templates WHERE active=1`);
     for (const t of tmpls.recordset)
       xml += `  <url><loc>${BASE}/templates/${t.Slug || t.slug}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
   } catch (_) {}

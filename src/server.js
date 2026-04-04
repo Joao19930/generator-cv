@@ -79,7 +79,7 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += `  <url><loc>${BASE}${s.url}</loc><lastmod>${now}</lastmod><changefreq>${s.freq}</changefreq><priority>${s.pri}</priority></url>\n`;
 
     const blogs = await pool.request()
-      .query(`SELECT slug, published_at FROM blog_posts WHERE published = TRUE ORDER BY published_at DESC`)
+      .query(`SELECT slug, published_at FROM blog_posts WHERE published = 1 ORDER BY published_at DESC`)
       .catch(() => ({ recordset: [] }));
     for (const b of blogs.recordset) {
       const d = (b.PublishedAt||b.published_at||now).toString().split('T')[0];
@@ -87,7 +87,7 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 
     const jobs = await pool.request()
-      .query(`SELECT id, created_at FROM jobs WHERE active = TRUE ORDER BY created_at DESC`)
+      .query(`SELECT id, created_at FROM jobs WHERE active = 1 ORDER BY created_at DESC`)
       .catch(() => ({ recordset: [] }));
     for (const j of jobs.recordset) {
       const d = (j.CreatedAt||j.created_at||now).toString().split('T')[0];
@@ -95,13 +95,13 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 
     const courses = await pool.request()
-      .query(`SELECT id FROM courses WHERE active = TRUE`)
+      .query(`SELECT id FROM courses WHERE active = 1`)
       .catch(() => ({ recordset: [] }));
     for (const c of courses.recordset)
       xml += `  <url><loc>${BASE}/cursos/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
 
     const coaches = await pool.request()
-      .query(`SELECT id FROM coaches WHERE active = TRUE`)
+      .query(`SELECT id FROM coaches WHERE active = 1`)
       .catch(() => ({ recordset: [] }));
     for (const c of coaches.recordset)
       xml += `  <url><loc>${BASE}/mentores/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
