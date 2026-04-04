@@ -68,15 +68,17 @@ router.get('/sitemap.xml', async (req, res) => {
   const cached = await redisConnector.get('sitemap').catch(() => null);
   if (cached) { res.set('Content-Type','text/xml'); return res.send(cached); }
 
+  const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+  const BASE = _raw.startsWith('http') ? _raw : 'https://' + _raw;
   const statics = ['','/templates','/pricing','/blog','/ferramentas/ats','/login','/registar','/sobre'];
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
   for (const u of statics)
-    xml += `  <url><loc>${process.env.APP_URL}${u}</loc><changefreq>weekly</changefreq><priority>${u===''?'1.0':'0.8'}</priority></url>\n`;
+    xml += `  <url><loc>${BASE}${u}</loc><changefreq>weekly</changefreq><priority>${u===''?'1.0':'0.8'}</priority></url>\n`;
 
   try {
     const tmpls = await req.db.request().query(`SELECT slug FROM templates WHERE active=TRUE`);
     for (const t of tmpls.recordset)
-      xml += `  <url><loc>${process.env.APP_URL}/templates/${t.Slug || t.slug}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+      xml += `  <url><loc>${BASE}/templates/${t.Slug || t.slug}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
   } catch (_) {}
   xml += `</urlset>`;
 

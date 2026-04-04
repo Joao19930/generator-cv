@@ -121,7 +121,8 @@ app.get('/cursos/:id(\\d+)', async (req, res) => {
       .then(r => r.recordset[0]).catch(() => null);
 
     if (!row) { res.redirect('/cursos'); return; }
-    const BASE  = process.env.APP_URL || 'https://cvpremium.net';
+    const _rawX = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+    const BASE  = _rawX.startsWith('http') ? _rawX : 'https://' + _rawX;
     const title = (row.Title||row.title||'Curso').replace(/"/g,'&quot;');
     const src   = row.Source||row.source||'CV Premium';
     const cat   = row.Category||row.category||'Formação';
@@ -178,7 +179,8 @@ app.get('/mentores/:id(\\d+)', async (req, res) => {
       .then(r => r.recordset[0]).catch(() => null);
 
     if (!row) { res.redirect('/mentores'); return; }
-    const BASE     = process.env.APP_URL || 'https://cvpremium.net';
+    const _rawM = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+    const BASE  = _rawM.startsWith('http') ? _rawM : 'https://' + _rawM;
     const name     = (row.Name||row.name||'Mentor').replace(/"/g,'&quot;');
     const location = row.Location||row.location||'Angola';
     const bio      = (row.Bio||row.bio||`Mentor de carreira em ${location}`).replace(/"/g,'&quot;').substring(0,200);
@@ -234,7 +236,8 @@ app.get('/empregos/:id(\\d+)', async (req, res) => {
               FROM jobs WHERE id = @id AND active = TRUE`)
       .then(r => r.recordset[0]).catch(() => null);
 
-    const BASE = process.env.APP_URL || 'https://cvpremium.net';
+    const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+    const BASE = _raw.startsWith('http') ? _raw : 'https://' + _raw;
     const pageUrl = `${BASE}/empregos/${req.params.id}`;
 
     if (!row) { res.redirect('/empregos'); return; }
@@ -365,7 +368,8 @@ app.get('/health', (req, res) =>
 // Sitemap dinâmico — inclui blog posts, vagas e páginas estáticas
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const BASE = process.env.APP_URL || 'https://cvpremium.net';
+    const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+    const BASE = _raw.startsWith('http') ? _raw : 'https://' + _raw;
     const now  = new Date().toISOString().split('T')[0];
     const pool = await getPool();
 
