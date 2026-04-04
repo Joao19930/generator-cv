@@ -112,7 +112,8 @@ app.get('/blog', (req, res) =>
 app.get('/cursos', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'cursos.html')));
 
-app.get('/cursos/:id(\\d+)', async (req, res) => {
+app.get('/cursos/:id', async (req, res) => {
+  if (!/^\d+$/.test(req.params.id)) { res.redirect('/cursos'); return; }
   try {
     const pool = await getPool();
     const row  = await pool.request()
@@ -170,7 +171,8 @@ a{background:#6366f1;color:#fff;padding:10px 24px;border-radius:8px;text-decorat
 app.get('/mentores', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'mentores.html')));
 
-app.get('/mentores/:id(\\d+)', async (req, res) => {
+app.get('/mentores/:id', async (req, res) => {
+  if (!/^\d+$/.test(req.params.id)) { res.redirect('/mentores'); return; }
   try {
     const pool = await getPool();
     const row  = await pool.request()
@@ -227,7 +229,8 @@ a{background:#6366f1;color:#fff;padding:10px 24px;border-radius:8px;text-decorat
 });
 
 // ── Página individual de vaga com meta tags + JobPosting schema ──
-app.get('/empregos/:id(\\d+)', async (req, res) => {
+app.get('/empregos/:id', async (req, res) => {
+  if (!/^\d+$/.test(req.params.id)) { res.redirect('/empregos'); return; }
   try {
     const pool = await getPool();
     const row  = await pool.request()
