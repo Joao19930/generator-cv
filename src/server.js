@@ -251,6 +251,16 @@ app.post('/api/support', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Documentos legais (leitura pública para utilizadores autenticados) ──
+app.get('/api/legal-docs', auth, async (req, res) => {
+  try {
+    const r = await req.db.request().query(
+      `SELECT id, title, filename, file_url, file_size, created_at FROM legal_documents ORDER BY created_at DESC`
+    ).catch(() => ({ recordset: [] }));
+    res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Rotas Admin (JWT + role=admin) ──────────────────────────
 app.use('/api/admin',   auth, adminOnly, adminRoutes);
 

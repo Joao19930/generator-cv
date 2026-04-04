@@ -42,6 +42,22 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .sb-cnt{margin-left:auto;background:var(--bg);color:var(--t3);font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;min-width:20px;text-align:center;border:1px solid var(--border);}
 .sb-item.active .sb-cnt{background:var(--blue);color:#fff;border-color:var(--blue);}
 .sb-dot{width:6px;height:6px;border-radius:50%;margin-left:auto;flex-shrink:0;}
+/* ── Grupo Documentos ── */
+.sb-group{margin:1px 6px;}
+.sb-group-hdr{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);cursor:pointer;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;user-select:none;}
+.sb-group-hdr:hover{background:var(--sb-h);color:var(--text);}
+.sb-group-hdr.open{color:var(--blue);font-weight:700;}
+.sb-group-hdr.open .sb-ic{opacity:1;color:var(--blue);}
+.sb-group-arrow{margin-left:auto;transition:transform .2s;opacity:.4;flex-shrink:0;}
+.sb-group-hdr.open .sb-group-arrow{transform:rotate(90deg);opacity:.8;}
+.sb-group-body{overflow:hidden;max-height:0;transition:max-height .25s ease;}
+.sb-group-body.open{max-height:300px;}
+.sb-sub{display:flex;align-items:center;gap:9px;padding:8px 12px 8px 34px;border-radius:var(--rs);cursor:pointer;text-decoration:none;color:var(--t3);font-size:12px;font-weight:500;transition:all .15s;position:relative;}
+.sb-sub:hover{background:var(--sb-h);color:var(--text);}
+.sb-sub.active{color:var(--blue);font-weight:700;background:var(--blue-l);}
+.sb-sub .sb-ic{width:14px;height:14px;opacity:.5;}
+.sb-sub.active .sb-ic{opacity:1;color:var(--blue);}
+.sb-sub .sb-cnt{margin-left:auto;}
 .sb-bottom{border-top:1px solid var(--sb-b);padding:8px;}
 .sb-upgrade{background:linear-gradient(135deg,#1D4ED8,#7C3AED);border-radius:var(--rs);padding:10px 11px;text-decoration:none;display:block;margin-bottom:6px;transition:opacity .2s;}
 .sb-upgrade:hover{opacity:.9;}
@@ -594,19 +610,31 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
       Visão Geral
     </a>
 
-    <div class="sb-sec">Documentos</div>
-    <a class="sb-item" onclick="nav('cvs',this)">
-      <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      CVs Criados <span class="sb-cnt" id="cvsBadge">0</span>
-    </a>
-    <a class="sb-item" id="ob-templates" onclick="nav('templates',this)">
-      <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-      Templates <span class="sb-cnt" id="tplBadge">200+</span>
-    </a>
-    <a class="sb-item" onclick="nav('cover',this)">
-      <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      Carta de Apresentação
-    </a>
+    <div class="sb-group" id="docsGroup">
+      <div class="sb-group-hdr open" id="docsGroupHdr" onclick="toggleAppDocsGroup()">
+        <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        Documentos
+        <svg class="sb-group-arrow sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="sb-group-body open" id="docsGroupBody">
+        <a class="sb-sub" id="sub-cvs" onclick="navSub('cvs',this)">
+          <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          CVs Criados <span class="sb-cnt" id="cvsBadge">0</span>
+        </a>
+        <a class="sb-sub" id="sub-templates" onclick="navSub('templates',this)">
+          <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          Templates <span class="sb-cnt" id="tplBadge">200+</span>
+        </a>
+        <a class="sb-sub" id="sub-cover" onclick="navSub('cover',this)">
+          <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Carta de Apresentação
+        </a>
+        <a class="sb-sub" id="sub-legal" onclick="navSub('legal',this)">
+          <svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Outros Documentos Legais
+        </a>
+      </div>
+    </div>
 
     <div class="sb-sec">Conteúdo</div>
     <a class="sb-item" href="/empregos">
@@ -986,6 +1014,17 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     <!-- ══ COACHES ═══════════════════════════════════ -->
     <div id="panel-coaches" class="panel">
       <div style="display:flex;flex-direction:column;gap:14px;" id="coachesList"></div>
+    </div>
+
+    <!-- ══ DOCUMENTOS LEGAIS ═══════════════════════════ -->
+    <div id="panel-legal" class="panel">
+      <div class="sec-hdr"><div><div class="sec-title">Outros Documentos Legais</div><div class="sec-sub">Documentos oficiais partilhados pela plataforma</div></div></div>
+      <div id="legalDocsUserList">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;color:var(--t4);">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:14px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <div style="font-size:15px;font-weight:600;color:var(--t2);margin-bottom:6px;">A carregar documentos…</div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ CARTA DE APRESENTAÇÃO ══════════════════════ -->
@@ -1746,7 +1785,7 @@ const PANEL_TITLES = {
   overview:'Visão Geral', cvs:'CVs Criados', templates:'Templates de CV',
   jobs:'Vagas de Emprego', courses:'Cursos', coaches:'Mentoria de Carreira', testimonials:'Testemunhos', ats:'Score ATS',
   plans:'Planos & Preços', distribution:'Distribuição', settings:'Definições',
-  cover:'Carta de Apresentação', salary:'Análise Salarial'
+  cover:'Carta de Apresentação', salary:'Análise Salarial', legal:'Outros Documentos Legais'
 };
 
 function catColor(cat) {
@@ -1868,6 +1907,23 @@ function logout() {
 }
 
 /* ── NAVIGATION ────────────────────────────────── */
+function toggleAppDocsGroup() {
+  const hdr  = document.getElementById('docsGroupHdr');
+  const body = document.getElementById('docsGroupBody');
+  const open = hdr.classList.toggle('open');
+  body.classList.toggle('open', open);
+}
+function navSub(id, el) {
+  // Abrir grupo se fechado
+  document.getElementById('docsGroupHdr').classList.add('open');
+  document.getElementById('docsGroupBody').classList.add('open');
+  // Limpar activos dos sub-itens e sb-items
+  document.querySelectorAll('.sb-sub').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // Reutilizar lógica do nav
+  nav(id, null);
+}
 function nav(id, el) {
   if (id === 'cover' && userPlan === 'free') {
     window.open('https://wa.me/244944524292?text=Ol%C3%A1!%20Gostaria%20de%20activar%20o%20Plano%20Premium%20para%20aceder%20%C3%A0%20Carta%20de%20Apresenta%C3%A7%C3%A3o.', '_blank');
@@ -1881,7 +1937,44 @@ function nav(id, el) {
   document.getElementById('tbTitle').textContent = PANEL_TITLES[id] || id;
   setBottomActive(id);
   if (id === 'ats') initATSPanel();
+  if (id === 'legal') loadUserLegalDocs();
   trackEvent('panel_viewed', { panel: id });
+}
+
+async function loadUserLegalDocs() {
+  const wrap = document.getElementById('legalDocsUserList');
+  if (!wrap) return;
+  try {
+    const token = localStorage.getItem('cv_token');
+    const res   = await fetch('/api/legal-docs', { headers: { Authorization: 'Bearer ' + token } });
+    const docs  = await res.json();
+    if (!Array.isArray(docs) || !docs.length) {
+      wrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;color:var(--t4);">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:14px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div style="font-size:15px;font-weight:600;color:var(--t2);margin-bottom:6px;">Sem documentos disponíveis</div>
+        <div style="font-size:13px;">A plataforma ainda não publicou nenhum documento.</div>
+      </div>`;
+      return;
+    }
+    wrap.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+      ${docs.map(d => {
+        const title = d.Title || d.title;
+        const url   = (d.FileUrl || d.file_url);
+        const size  = d.FileSize || d.file_size;
+        const sizeStr = size ? (size > 1048576 ? (size/1048576).toFixed(1)+' MB' : Math.round(size/1024)+' KB') : '';
+        const date  = new Date(d.CreatedAt || d.created_at).toLocaleDateString('pt-PT');
+        return `<a href="${url}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:18px 16px;text-decoration:none;transition:box-shadow .2s;cursor:pointer;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow=''">
+          <div style="width:40px;height:40px;background:#FEF2F2;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.4;">${title}</div>
+          <div style="font-size:11px;color:var(--t4);margin-top:auto;padding-top:10px;">${sizeStr ? sizeStr + ' · ' : ''}${date}</div>
+        </a>`;
+      }).join('')}
+    </div>`;
+  } catch(e) {
+    wrap.innerHTML = `<div style="padding:20px;color:var(--red-l);font-size:13px;">Erro ao carregar documentos.</div>`;
+  }
 }
 
 function setBottomActive(id) {
