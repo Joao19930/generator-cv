@@ -1032,16 +1032,16 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-field">
         <label>Imagem da Vaga <span style="font-weight:400;color:var(--t4);">(opcional)</span></label>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div id="jImgPreview" style="width:72px;height:48px;border-radius:8px;border:2px dashed var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          <div id="jImgPreview" tabindex="0" title="Clique e cole (Ctrl+V) uma imagem" style="width:72px;height:48px;border-radius:8px;border:2px dashed var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('jImgFile').click()" onpaste="handleJobImgPaste(event)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           </div>
           <div style="flex:1;">
             <label for="jImgFile" style="display:inline-block;padding:5px 12px;background:var(--blue);color:#fff;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px;">Carregar ficheiro</label>
             <input type="file" id="jImgFile" accept="image/*" style="display:none;" onchange="previewJobImage(this)">
-            <div class="f-hint">ou cole um URL abaixo</div>
+            <div class="f-hint">ou cole URL abaixo · ou <b>Ctrl+V</b> para colar imagem</div>
           </div>
         </div>
-        <input type="text" id="jImageUrl" placeholder="https://exemplo.com/imagem.jpg" oninput="updateJobImgPreview(this.value)">
+        <input type="text" id="jImageUrl" placeholder="https://exemplo.com/imagem.jpg" oninput="updateJobImgPreview(this.value)" onpaste="handleJobImgPaste(event)">
       </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancelar</button><button class="btn btn-blue" onclick="saveJob()">Publicar Vaga</button></div>
@@ -2402,6 +2402,23 @@ function previewJobImage(input) {
     updateJobImgPreview(e.target.result);
   };
   reader.readAsDataURL(input.files[0]);
+}
+function handleJobImgPaste(event) {
+  const items = (event.clipboardData || event.originalEvent && event.originalEvent.clipboardData || {}).items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      event.preventDefault();
+      const file = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('jImageUrl').value = e.target.result;
+        updateJobImgPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+  }
 }
 function updateJobImgPreview(src) {
   const el = document.getElementById('jImgPreview');
