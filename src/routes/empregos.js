@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
 
     const [rows, cnt] = await Promise.all([
       r1.query(`SELECT id, title, company, city, country, category, description,
-                       salary, url, source, job_date, created_at
+                       salary, url, source, job_date, created_at, image_url
                 FROM jobs ${where}
                 ORDER BY created_at DESC
                 LIMIT @lim OFFSET @off`),

@@ -95,7 +95,9 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-he
 .jb-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
 .jb-company{font-size:13px;font-weight:600;color:var(--t2);}
 .jb-loc{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:3px;}
-.jb-desc{font-size:13px;color:var(--t3);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.jb-desc{font-size:13px;color:var(--t3);line-height:1.55;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;}
+.jb-img-wrap{width:100%;height:90px;border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.jb-img-wrap img{width:100%;height:180px;object-fit:cover;object-position:top;display:block;}
 .jb-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;}
 .jb-tags{display:flex;gap:6px;flex-wrap:wrap;}
 .jb-tag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--border-light);color:var(--t3);}
@@ -280,6 +282,7 @@ function renderCard(j, i) {
   const country= j.country || j.Country || '';
   const loc    = [city, country].filter(Boolean).join(', ') || 'Angola';
   const desc   = j.description || j.Description || '';
+  const imgUrl = j.image_url  || j.ImageUrl    || '';
   const salary = j.salary  || j.Salary  || '';
   const cat    = j.category|| j.Category|| '';
   const rawUrl = j.url     || j.Url     || '';
@@ -312,6 +315,7 @@ function renderCard(j, i) {
         </span>
         ${ago ? `<span style="font-size:11px;color:var(--t4);">${ago}</span>` : ''}
       </div>
+      ${imgUrl ? `<div class="jb-img-wrap"><img src="${imgUrl}" alt="${title}" loading="lazy" onerror="this.closest('.jb-img-wrap').remove()"></div>` : ''}
       ${desc ? `<div class="jb-desc">${desc}</div>` : ''}
       <div class="jb-footer">
         <div class="jb-tags">
