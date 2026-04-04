@@ -53,6 +53,67 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ── Sitemap dinâmico (antes do express.static para não ser bloqueado pelo ficheiro antigo) ──
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
+    const BASE = _raw.startsWith('http') ? _raw : 'https://' + _raw;
+    const now  = new Date().toISOString().split('T')[0];
+    const pool = await getPool();
+
+    const statics = [
+      { url: '/',         pri: '1.0', freq: 'daily'   },
+      { url: '/empregos', pri: '0.9', freq: 'daily'   },
+      { url: '/blog',     pri: '0.9', freq: 'daily'   },
+      { url: '/cursos',   pri: '0.8', freq: 'weekly'  },
+      { url: '/mentores', pri: '0.8', freq: 'weekly'  },
+      { url: '/demo',     pri: '0.8', freq: 'weekly'  },
+      { url: '/pricing',  pri: '0.8', freq: 'weekly'  },
+      { url: '/ats',      pri: '0.7', freq: 'weekly'  },
+      { url: '/free',     pri: '0.6', freq: 'monthly' },
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    for (const s of statics)
+      xml += `  <url><loc>${BASE}${s.url}</loc><lastmod>${now}</lastmod><changefreq>${s.freq}</changefreq><priority>${s.pri}</priority></url>\n`;
+
+    const blogs = await pool.request()
+      .query(`SELECT slug, published_at FROM blog_posts WHERE published = TRUE ORDER BY published_at DESC`)
+      .catch(() => ({ recordset: [] }));
+    for (const b of blogs.recordset) {
+      const d = (b.PublishedAt||b.published_at||now).toString().split('T')[0];
+      xml += `  <url><loc>${BASE}/blog/${b.Slug||b.slug}</loc><lastmod>${d}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n`;
+    }
+
+    const jobs = await pool.request()
+      .query(`SELECT id, created_at FROM jobs WHERE active = TRUE ORDER BY created_at DESC`)
+      .catch(() => ({ recordset: [] }));
+    for (const j of jobs.recordset) {
+      const d = (j.CreatedAt||j.created_at||now).toString().split('T')[0];
+      xml += `  <url><loc>${BASE}/empregos/${j.Id||j.id}</loc><lastmod>${d}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
+    }
+
+    const courses = await pool.request()
+      .query(`SELECT id FROM courses WHERE active = TRUE`)
+      .catch(() => ({ recordset: [] }));
+    for (const c of courses.recordset)
+      xml += `  <url><loc>${BASE}/cursos/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+
+    const coaches = await pool.request()
+      .query(`SELECT id FROM coaches WHERE active = TRUE`)
+      .catch(() => ({ recordset: [] }));
+    for (const c of coaches.recordset)
+      xml += `  <url><loc>${BASE}/mentores/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+
+    xml += `</urlset>`;
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=1800');
+    res.send(xml);
+  } catch (e) {
+    res.status(500).send('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+  }
+});
+
 // ── Ficheiros estáticos públicos (sem DB) ────────────────────
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -368,72 +429,6 @@ app.get('/admin-panel', (req, res) => {
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
 
-// Sitemap dinâmico — inclui blog posts, vagas e páginas estáticas
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    const _raw = (process.env.APP_URL || 'https://cvpremium.net').replace(/\/+$/, '');
-    const BASE = _raw.startsWith('http') ? _raw : 'https://' + _raw;
-    const now  = new Date().toISOString().split('T')[0];
-    const pool = await getPool();
-
-    const statics = [
-      { url: '/',          pri: '1.0', freq: 'daily'   },
-      { url: '/empregos',  pri: '0.9', freq: 'daily'   },
-      { url: '/blog',      pri: '0.9', freq: 'daily'   },
-      { url: '/cursos',    pri: '0.8', freq: 'weekly'  },
-      { url: '/mentores',  pri: '0.8', freq: 'weekly'  },
-      { url: '/demo',      pri: '0.8', freq: 'weekly'  },
-      { url: '/pricing',   pri: '0.8', freq: 'weekly'  },
-      { url: '/ats',       pri: '0.7', freq: 'weekly'  },
-      { url: '/free',      pri: '0.6', freq: 'monthly' },
-    ];
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    for (const s of statics)
-      xml += `  <url><loc>${BASE}${s.url}</loc><lastmod>${now}</lastmod><changefreq>${s.freq}</changefreq><priority>${s.pri}</priority></url>\n`;
-
-    // Blog posts publicados
-    const blogs = await pool.request()
-      .query(`SELECT slug, published_at FROM blog_posts WHERE published = TRUE ORDER BY published_at DESC`)
-      .catch(() => ({ recordset: [] }));
-    for (const b of blogs.recordset) {
-      const d = (b.PublishedAt || b.published_at || now).toString().split('T')[0];
-      xml += `  <url><loc>${BASE}/blog/${b.Slug || b.slug}</loc><lastmod>${d}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n`;
-    }
-
-    // Vagas activas
-    const jobs = await pool.request()
-      .query(`SELECT id, created_at FROM jobs WHERE active = TRUE ORDER BY created_at DESC`)
-      .catch(() => ({ recordset: [] }));
-    for (const j of jobs.recordset) {
-      const d = (j.CreatedAt || j.created_at || now).toString().split('T')[0];
-      xml += `  <url><loc>${BASE}/empregos/${j.Id || j.id}</loc><lastmod>${d}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
-    }
-
-    // Cursos activos
-    const courses = await pool.request()
-      .query(`SELECT id, created_at FROM courses WHERE active = TRUE`)
-      .catch(() => ({ recordset: [] }));
-    for (const c of courses.recordset) {
-      xml += `  <url><loc>${BASE}/cursos/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
-    }
-
-    // Mentores activos
-    const coaches = await pool.request()
-      .query(`SELECT id FROM coaches WHERE active = TRUE`)
-      .catch(() => ({ recordset: [] }));
-    for (const c of coaches.recordset) {
-      xml += `  <url><loc>${BASE}/mentores/${c.Id||c.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
-    }
-
-    xml += `</urlset>`;
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.send(xml);
-  } catch (e) {
-    res.status(500).send('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
-  }
-});
 
 // Robots.txt explícito
 app.get('/robots.txt', (req, res) => {
