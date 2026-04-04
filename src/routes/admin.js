@@ -292,12 +292,12 @@ router.patch('/jobs/:id/pin', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/jobs', async (req, res) => {
-  const { title, company, city, country, category, description, date, jobDate, startDate, endDate, url, contactType, imageUrl } = req.body;
+  const { title, company, city, country, category, description, date, jobDate, startDate, endDate, url, contactType, imageUrl, vacancies } = req.body;
   if (!title) return res.status(400).json({ error: 'Título obrigatório.' });
   const d = jobDate || date || null;
   try {
-    // Garantir coluna image_url existe
     await req.db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS image_url TEXT`).catch(()=>{});
+    await req.db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS vacancies INT`).catch(()=>{});
     const r = await req.db.request()
       .input('title',       sql.NVarChar, title)
       .input('company',     sql.NVarChar, company||null)
@@ -311,18 +311,20 @@ router.post('/jobs', async (req, res) => {
       .input('url',         sql.NVarChar, url||null)
       .input('contactType', sql.NVarChar, contactType||'url')
       .input('imageUrl',    sql.NVarChar, imageUrl||null)
-      .query(`INSERT INTO jobs (title, company, city, country, category, description, job_date, start_date, end_date, url, contact_type, image_url, active, created_at)
-              VALUES (@title, @company, @city, @country, @cat, @desc, @date, @startDate, @endDate, @url, @contactType, @imageUrl, TRUE, NOW()) RETURNING id`);
+      .input('vacancies',   sql.Int,      vacancies||null)
+      .query(`INSERT INTO jobs (title, company, city, country, category, description, job_date, start_date, end_date, url, contact_type, image_url, vacancies, active, created_at)
+              VALUES (@title, @company, @city, @country, @cat, @desc, @date, @startDate, @endDate, @url, @contactType, @imageUrl, @vacancies, TRUE, NOW()) RETURNING id`);
     const jobId = r.recordset[0].Id;
     zapierConnector.onNewJob({ id: jobId, title, company, city, country, category, description, url, contactType });
     res.json({ success: true, id: jobId });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.put('/jobs/:id', async (req, res) => {
-  const { title, company, city, country, category, description, date, jobDate, startDate, endDate, url, contactType, imageUrl } = req.body;
+  const { title, company, city, country, category, description, date, jobDate, startDate, endDate, url, contactType, imageUrl, vacancies } = req.body;
   const d = jobDate || date || null;
   try {
     await req.db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS image_url TEXT`).catch(()=>{});
+    await req.db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS vacancies INT`).catch(()=>{});
     await req.db.request()
       .input('id',          sql.Int,      req.params.id)
       .input('title',       sql.NVarChar, title)
@@ -337,7 +339,8 @@ router.put('/jobs/:id', async (req, res) => {
       .input('url',         sql.NVarChar, url||null)
       .input('contactType', sql.NVarChar, contactType||'url')
       .input('imageUrl',    sql.NVarChar, imageUrl||null)
-      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, description=@desc, job_date=@date, start_date=@startDate, end_date=@endDate, url=@url, contact_type=@contactType, image_url=@imageUrl WHERE id=@id');
+      .input('vacancies',   sql.Int,      vacancies||null)
+      .query('UPDATE jobs SET title=@title, company=@company, city=@city, country=@country, category=@cat, description=@desc, job_date=@date, start_date=@startDate, end_date=@endDate, url=@url, contact_type=@contactType, image_url=@imageUrl, vacancies=@vacancies WHERE id=@id');
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

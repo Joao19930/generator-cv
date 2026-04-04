@@ -1019,7 +1019,10 @@ tbody tr:hover{background:#fafafa;}
       <div class="f-field"><label>Descrição</label><textarea id="jDesc" rows="3" placeholder="Descreva os requisitos e responsabilidades..."></textarea></div>
       <div class="f-row">
         <div class="f-field"><label>Salário (opcional)</label><input type="text" id="jSalary" placeholder="ex: 1.500–2.500€/mês"></div>
-        <div class="f-field">
+        <div class="f-field"><label>Nº de Vagas</label><input type="number" id="jVacancies" min="1" placeholder="ex: 3"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field" style="flex:2;">
           <label>Tipo de Contacto</label>
           <select id="jContactType" onchange="updateContactPlaceholder()">
             <option value="url">Link / URL</option>
@@ -2442,7 +2445,8 @@ async function saveJob() {
     endDate:     document.getElementById('jEndDate').value || null,
     url:         document.getElementById('jUrl').value.trim(),
     contactType: document.getElementById('jContactType').value,
-    imageUrl:    document.getElementById('jImageUrl').value.trim() || null
+    imageUrl:    document.getElementById('jImageUrl').value.trim() || null,
+    vacancies:   parseInt(document.getElementById('jVacancies').value) || null
   };
   if (!j.title || !j.company) { alert('Preencha cargo e empresa.'); return; }
   // Normalizar número WhatsApp
@@ -2484,6 +2488,7 @@ function editJob(id) {
   document.getElementById('jImageUrl').value = img;
   updateJobImgPreview(img);
   document.getElementById('jImgFile').value = '';
+  document.getElementById('jVacancies').value = j.Vacancies || j.vacancies || '';
   document.getElementById('jobModalTitle').textContent = 'Editar Vaga';
   openModal('jobModal');
 }

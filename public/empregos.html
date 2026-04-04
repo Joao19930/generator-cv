@@ -281,10 +281,11 @@ function renderCard(j, i) {
   const city   = j.city    || j.City    || '';
   const country= j.country || j.Country || '';
   const loc    = [city, country].filter(Boolean).join(', ') || 'Angola';
-  const desc   = j.description || j.Description || '';
-  const imgUrl = j.image_url  || j.ImageUrl    || '';
-  const salary = j.salary  || j.Salary  || '';
-  const cat    = j.category|| j.Category|| '';
+  const desc      = j.description || j.Description || '';
+  const imgUrl    = j.image_url   || j.ImageUrl    || '';
+  const salary    = j.salary      || j.Salary      || '';
+  const cat       = j.category    || j.Category    || '';
+  const vacancies = j.vacancies   || j.Vacancies   || 0;
   const rawUrl = j.url     || j.Url     || '';
   const ctype  = (j.contact_type || j.ContactType || 'url').toLowerCase();
   let url = rawUrl;
@@ -321,6 +322,7 @@ function renderCard(j, i) {
         <div class="jb-tags">
           ${cat ? `<span class="jb-tag jb-tag-cat">${cat}</span>` : ''}
           ${isNew ? `<span class="jb-tag jb-tag-new">✦ Nova</span>` : ''}
+          ${vacancies ? `<span class="jb-tag" style="background:#f0fdf4;color:#15803d;">${vacancies} vaga${vacancies > 1 ? 's' : ''}</span>` : ''}
         </div>
         <button class="jb-btn" onclick="handleApply(event,'${url.replace(/'/g,"\\'")}')">Ver vaga →</button>
       </div>
