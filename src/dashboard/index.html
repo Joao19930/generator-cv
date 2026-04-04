@@ -461,11 +461,45 @@ tbody tr:hover{background:#fafafa;}
 
 <!-- ══ OUTROS DOCUMENTOS LEGAIS ═══════════════════════════ -->
 <div id="panel-legal-docs" class="panel">
-  <div class="panel-hdr"><div><div class="panel-title">Outros Documentos Legais</div><div class="panel-sub">Declarações, procurações e outros documentos oficiais</div></div></div>
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center;color:var(--t3);">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:16px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-    <div style="font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px;">Em breve</div>
-    <div style="font-size:13px;">A gestão de documentos legais estará disponível em breve.</div>
+  <div class="panel-hdr">
+    <div><div class="panel-title">Outros Documentos Legais</div><div class="panel-sub">Carregue PDFs de declarações, procurações e outros documentos oficiais</div></div>
+    <button class="btn btn-blue" onclick="document.getElementById('legalUploadArea').style.display = document.getElementById('legalUploadArea').style.display === 'none' ? 'block' : 'none'">+ Adicionar Documento</button>
+  </div>
+
+  <!-- Área de upload -->
+  <div id="legalUploadArea" style="display:none;background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">Novo Documento</div>
+    <div class="f-field" style="margin-bottom:10px;">
+      <label>Título do Documento</label>
+      <input type="text" id="legalDocTitle" placeholder="ex: Declaração de Rendimentos 2024">
+    </div>
+    <div class="f-field" style="margin-bottom:14px;">
+      <label>Ficheiro PDF <span style="font-weight:400;color:var(--t4);">(máx. 20 MB)</span></label>
+      <div id="legalDropZone" style="border:2px dashed var(--border);border-radius:8px;padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .15s;"
+           onclick="document.getElementById('legalPdfFile').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+           ondragleave="this.style.borderColor='var(--border)'"
+           ondrop="handleLegalDrop(event)">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.5" style="margin-bottom:8px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div id="legalDropLabel" style="font-size:13px;color:var(--t3);">Arraste o PDF aqui ou clique para seleccionar</div>
+      </div>
+      <input type="file" id="legalPdfFile" accept="application/pdf" style="display:none;" onchange="handleLegalFileSelect(this)">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" onclick="uploadLegalDoc()">Carregar Documento</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('legalUploadArea').style.display='none';resetLegalUpload()">Cancelar</button>
+    </div>
+    <div id="legalUploadProgress" style="display:none;margin-top:10px;">
+      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+        <div id="legalProgressBar" style="height:100%;background:var(--blue);width:0%;transition:width .3s;border-radius:2px;"></div>
+      </div>
+      <div id="legalProgressLabel" style="font-size:12px;color:var(--t3);margin-top:4px;">A carregar…</div>
+    </div>
+  </div>
+
+  <!-- Lista de documentos -->
+  <div id="legalDocsList">
+    <div style="text-align:center;padding:40px;color:var(--t4);font-size:13px;">A carregar documentos…</div>
   </div>
 </div>
 
@@ -1502,6 +1536,8 @@ async function loadPanelData(id) {
       loadSupport().catch(()=>{});
     } else if (id === 'staff') {
       loadStaff().catch(()=>{});
+    } else if (id === 'legal-docs') {
+      loadLegalDocs().catch(()=>{});
     }
   } catch(e) {
     _loaded.delete(id); // permitir retry se falhar
@@ -1654,6 +1690,110 @@ function setPreviewDevice(device, btn) {
   btn.classList.add('active');
   const stage = document.getElementById('previewStage');
   stage.className = 'preview-stage' + (device !== 'desktop' ? ' ' + device : '');
+}
+
+// ── DOCUMENTOS LEGAIS ────────────────────────────────────────
+let _legalSelectedFile = null;
+
+function handleLegalFileSelect(input) {
+  if (!input.files || !input.files[0]) return;
+  _legalSelectedFile = input.files[0];
+  document.getElementById('legalDropLabel').textContent = '📄 ' + _legalSelectedFile.name;
+  document.getElementById('legalDropZone').style.borderColor = 'var(--blue)';
+  if (!document.getElementById('legalDocTitle').value.trim()) {
+    document.getElementById('legalDocTitle').value = _legalSelectedFile.name.replace(/\.pdf$/i, '');
+  }
+}
+function handleLegalDrop(event) {
+  event.preventDefault();
+  document.getElementById('legalDropZone').style.borderColor = 'var(--border)';
+  const file = event.dataTransfer.files[0];
+  if (!file || file.type !== 'application/pdf') { alert('Apenas ficheiros PDF.'); return; }
+  _legalSelectedFile = file;
+  document.getElementById('legalDropLabel').textContent = '📄 ' + file.name;
+  document.getElementById('legalDropZone').style.borderColor = 'var(--blue)';
+  if (!document.getElementById('legalDocTitle').value.trim()) {
+    document.getElementById('legalDocTitle').value = file.name.replace(/\.pdf$/i, '');
+  }
+}
+function resetLegalUpload() {
+  _legalSelectedFile = null;
+  document.getElementById('legalDocTitle').value = '';
+  document.getElementById('legalDropLabel').textContent = 'Arraste o PDF aqui ou clique para seleccionar';
+  document.getElementById('legalDropZone').style.borderColor = 'var(--border)';
+  document.getElementById('legalPdfFile').value = '';
+  document.getElementById('legalUploadProgress').style.display = 'none';
+}
+async function uploadLegalDoc() {
+  if (!_legalSelectedFile) { alert('Seleccione um ficheiro PDF.'); return; }
+  const title = document.getElementById('legalDocTitle').value.trim() || _legalSelectedFile.name;
+  const form  = new FormData();
+  form.append('pdf',   _legalSelectedFile);
+  form.append('title', title);
+
+  document.getElementById('legalUploadProgress').style.display = 'block';
+  document.getElementById('legalProgressBar').style.width = '30%';
+  document.getElementById('legalProgressLabel').textContent = 'A carregar…';
+
+  try {
+    const res = await fetch(API + '/api/admin/legal-docs', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + TOKEN },
+      body: form
+    });
+    document.getElementById('legalProgressBar').style.width = '100%';
+    if (!res.ok) { const d = await res.json(); alert('Erro: ' + (d.error || 'falha')); return; }
+    document.getElementById('legalProgressLabel').textContent = 'Concluído!';
+    setTimeout(() => {
+      document.getElementById('legalUploadArea').style.display = 'none';
+      resetLegalUpload();
+      loadLegalDocs();
+    }, 600);
+  } catch (e) { alert('Erro de ligação.'); }
+}
+async function loadLegalDocs() {
+  const wrap = document.getElementById('legalDocsList');
+  if (!wrap) return;
+  try {
+    const res  = await fetch(API + '/api/admin/legal-docs', { headers: { Authorization: 'Bearer ' + TOKEN } });
+    const docs = await res.json();
+    if (!docs.length) {
+      wrap.innerHTML = `<div style="text-align:center;padding:60px 24px;color:var(--t4);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:4px;">Nenhum documento</div>
+        <div style="font-size:13px;">Clique em "+ Adicionar Documento" para carregar o primeiro PDF.</div>
+      </div>`;
+      return;
+    }
+    wrap.innerHTML = `<div class="table-card"><table>
+      <thead><tr><th>Documento</th><th>Ficheiro</th><th>Tamanho</th><th>Data</th><th>Acções</th></tr></thead>
+      <tbody>${docs.map(d => {
+        const size = d.FileSize || d.file_size;
+        const sizeStr = size ? (size > 1048576 ? (size/1048576).toFixed(1)+' MB' : Math.round(size/1024)+' KB') : '—';
+        const date = new Date(d.CreatedAt || d.created_at).toLocaleDateString('pt-PT');
+        const url  = (API || '') + (d.FileUrl || d.file_url);
+        const title= d.Title || d.title;
+        const id   = d.Id || d.id;
+        return `<tr>
+          <td style="font-weight:600;">${title}</td>
+          <td style="font-size:12px;color:var(--t3);">${d.Filename || d.filename}</td>
+          <td style="font-size:12px;color:var(--t3);">${sizeStr}</td>
+          <td style="font-size:12px;color:var(--t3);">${date}</td>
+          <td style="display:flex;gap:8px;">
+            <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;">⬇ Download</a>
+            <button class="btn" style="font-size:11px;padding:4px 10px;background:#fee2e2;color:#b91c1c;border:none;" onclick="deleteLegalDoc(${id},'${title.replace(/'/g,"\\'")}')">🗑</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  } catch (e) { wrap.innerHTML = `<div style="padding:20px;color:var(--red);">Erro ao carregar documentos.</div>`; }
+}
+async function deleteLegalDoc(id, title) {
+  if (!confirm(`Remover "${title}"?`)) return;
+  try {
+    await fetch(API + '/api/admin/legal-docs/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + TOKEN } });
+    loadLegalDocs();
+  } catch (e) { alert('Erro ao remover.'); }
 }
 
 // ── SAVE ────────────────────────────────────────────────────

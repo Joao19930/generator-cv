@@ -8,8 +8,28 @@ const router   = express.Router();
 const path     = require('path');
 const fs       = require('fs');
 const bcrypt   = require('bcryptjs');
+const multer   = require('multer');
 const { sql }  = require('../config/database');
 const { redisConnector, zapierConnector } = require('../connectors');
+
+// ── Upload de PDFs para documentos legais ────────────────────
+const DOCS_DIR = path.join(__dirname, '..', '..', 'public', 'legal-docs');
+if (!fs.existsSync(DOCS_DIR)) fs.mkdirSync(DOCS_DIR, { recursive: true });
+const pdfStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, DOCS_DIR),
+  filename:    (_req, file, cb) => {
+    const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, Date.now() + '_' + safe);
+  }
+});
+const uploadPdf = multer({
+  storage: pdfStorage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Apenas ficheiros PDF são permitidos.'));
+  }
+});
 
 const OWNER_EMAIL   = 'candidofaustinojoao@gmail.com';
 const isSuperadmin  = (req) =>
@@ -1164,6 +1184,66 @@ router.delete('/staff/:id', async (req, res) => {
       .query(`DELETE FROM users WHERE id = @id AND LOWER(role) IN ('admin','analista')`);
     if (r.rowsAffected[0] === 0)
       return res.status(404).json({ error: 'Utilizador não encontrado ou não pode ser removido.' });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── DOCUMENTOS LEGAIS ─────────────────────────────────────────
+router.get('/legal-docs', async (req, res) => {
+  try {
+    await req.db.request().query(`
+      CREATE TABLE IF NOT EXISTS legal_documents (
+        id         SERIAL PRIMARY KEY,
+        title      VARCHAR(255) NOT NULL,
+        filename   VARCHAR(255) NOT NULL,
+        file_url   VARCHAR(500) NOT NULL,
+        file_size  INT,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `).catch(() => {});
+    const r = await req.db.request().query(
+      `SELECT id, title, filename, file_url, file_size, created_at FROM legal_documents ORDER BY created_at DESC`
+    );
+    res.json(r.recordset);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/legal-docs', uploadPdf.single('pdf'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Ficheiro PDF obrigatório.' });
+  const title = (req.body.title || req.file.originalname).trim();
+  const fileUrl = '/legal-docs/' + req.file.filename;
+  try {
+    await req.db.request().query(`
+      CREATE TABLE IF NOT EXISTS legal_documents (
+        id SERIAL PRIMARY KEY, title VARCHAR(255), filename VARCHAR(255),
+        file_url VARCHAR(500), file_size INT, created_at TIMESTAMP DEFAULT NOW()
+      )
+    `).catch(() => {});
+    await req.db.request()
+      .input('title',    sql.NVarChar, title)
+      .input('filename', sql.NVarChar, req.file.originalname)
+      .input('fileUrl',  sql.NVarChar, fileUrl)
+      .input('fileSize', sql.Int,      req.file.size)
+      .query(`INSERT INTO legal_documents (title, filename, file_url, file_size, created_at)
+              VALUES (@title, @filename, @fileUrl, @fileSize, NOW())`);
+    res.json({ success: true, fileUrl });
+  } catch (e) {
+    fs.unlink(req.file.path, () => {});
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.delete('/legal-docs/:id', async (req, res) => {
+  try {
+    const r = await req.db.request()
+      .input('id', sql.Int, req.params.id)
+      .query(`SELECT filename FROM legal_documents WHERE id = @id`);
+    const doc = r.recordset[0];
+    if (!doc) return res.status(404).json({ error: 'Documento não encontrado.' });
+    const filePath = path.join(DOCS_DIR, doc.Filename || doc.filename);
+    fs.unlink(filePath, () => {});
+    await req.db.request().input('id', sql.Int, req.params.id)
+      .query(`DELETE FROM legal_documents WHERE id = @id`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
