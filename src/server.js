@@ -748,24 +748,40 @@ async function migrateChatKnowledge(pool) {
   console.log('✅ chat_knowledge: tabela e dados iniciais verificados');
 }
 
-getPool().then(async (pool) => {
-  await autoMigrate(pool);
-  await migrateChatKnowledge(pool);
-  // Limpar cache do overview ao reiniciar (garante dados frescos após deploy)
-  redisConnector.del('admin:overview').catch(() => {});
-  setupCrons(pool);
-  // Importar vagas 10s após arranque (evita falhas de rede no boot)
-  setTimeout(() => importJobs(pool).catch(() => {}), 10000);
-  server.listen(PORT, () => {
-    console.log(`\n🚀 CV Premium`);
-    console.log(`   Local:   http://localhost:${PORT}`);
-    console.log(`   Admin:   http://localhost:${PORT}/api/admin/overview`);
-    console.log(`   Health:  http://localhost:${PORT}/health`);
-    console.log(`   Env:     ${process.env.NODE_ENV || 'development'}\n`);
-  });
-}).catch(err => {
-  console.error('❌ Falha ao iniciar:', err.message);
-  process.exit(1);
-});
+async function startWithRetry(maxRetries = 5, delayMs = 3000) {
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL não está definida. Define esta variável no painel do Render (Environment).');
+    process.exit(1);
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const pool = await getPool();
+      await autoMigrate(pool);
+      await migrateChatKnowledge(pool);
+      redisConnector.del('admin:overview').catch(() => {});
+      setupCrons(pool);
+      setTimeout(() => importJobs(pool).catch(() => {}), 10000);
+      server.listen(PORT, () => {
+        console.log(`\n🚀 CV Premium`);
+        console.log(`   Local:   http://localhost:${PORT}`);
+        console.log(`   Admin:   http://localhost:${PORT}/api/admin/overview`);
+        console.log(`   Health:  http://localhost:${PORT}/health`);
+        console.log(`   Env:     ${process.env.NODE_ENV || 'development'}\n`);
+      });
+      return;
+    } catch (err) {
+      console.error(`❌ Tentativa ${attempt}/${maxRetries} falhou: ${err.message}`);
+      if (attempt === maxRetries) {
+        console.error('❌ Não foi possível ligar à base de dados. Verifica DATABASE_URL no Render.');
+        process.exit(1);
+      }
+      console.log(`   A aguardar ${delayMs / 1000}s antes de tentar novamente...`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
+
+startWithRetry();
 
 module.exports = { app, server };

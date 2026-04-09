@@ -1,42 +1,66 @@
 // src/utils/migrate.js
 // Executar: npm run migrate
+// Cria todas as tabelas no PostgreSQL (Neon, Railway, Supabase, etc.)
 require('dotenv').config();
 const fs   = require('fs');
 const path = require('path');
-const sql  = require('mssql');
+const { Pool } = require('pg');
 
-const config = {
-  server:   process.env.DB_SERVER,
-  database: process.env.DB_NAME,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  options:  { encrypt: false, trustServerCertificate: true },
-  connectionTimeout: 15000
-};
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL não está definida. Verifica o ficheiro .env ou as variáveis de ambiente.');
+  process.exit(1);
+}
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 15000,
+});
 
 (async () => {
   console.log('🔄 Migrações a iniciar…');
-  let pool;
+  let client;
   try {
-    pool = await sql.connect(config);
+    client = await pool.connect();
+
     const sqlFile = path.join(__dirname, '..', '..', 'migrations.sql');
     const script  = fs.readFileSync(sqlFile, 'utf8');
 
-    // Dividir por GO e executar cada bloco
-    const blocks = script.split(/^\s*GO\s*$/im).map(b => b.trim()).filter(Boolean);
-    for (const block of blocks) {
-      await pool.request().query(block).catch(err => {
-        if (!err.message.includes('already exists') && !err.message.includes('já existe')) {
-          console.warn('  ⚠️ ', err.message.split('\n')[0]);
+    // Remover comentários de linha e dividir por ; (PostgreSQL não usa GO)
+    const statements = script
+      .replace(/--[^\n]*/g, '')          // remover comentários --
+      .split(';')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    let ok = 0, warn = 0;
+    for (const stmt of statements) {
+      try {
+        await client.query(stmt);
+        ok++;
+      } catch (err) {
+        // Ignorar erros de "já existe" — são normais em re-execuções
+        if (
+          err.message.includes('already exists') ||
+          err.message.includes('duplicate') ||
+          err.code === '42701' || // column already exists
+          err.code === '42P07'    // table already exists
+        ) {
+          warn++;
+        } else {
+          console.warn(`  ⚠️  ${err.message.split('\n')[0]}`);
+          warn++;
         }
-      });
+      }
     }
-    console.log('✅ Migrações concluídas com sucesso!');
+
+    console.log(`✅ Migrações concluídas! ${ok} statements executados, ${warn} avisos ignorados.`);
   } catch (err) {
     console.error('❌ Erro nas migrações:', err.message);
     process.exit(1);
   } finally {
-    if (pool) await pool.close();
+    if (client) client.release();
+    await pool.end();
     process.exit(0);
   }
 })();

@@ -4,8 +4,8 @@ services:
     env: node
     region: frankfurt
     plan: free
-    buildCommand: npm install && cd client && npm install && npm run build && cd .. && npx puppeteer browsers install chrome
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: npm run migrate && npm start
     envVars:
       - key: NODE_ENV
         value: production
