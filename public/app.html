@@ -1744,8 +1744,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
     <div class="modal-body">
       <div id="modalNotice" class="notice notice-gold" style="display:none;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        <strong style="margin-right:4px">1 template grátis</strong> disponível. Os restantes requerem plano Pro.
-        <a href="https://wa.me/244944524292?text=Olá!%20Gostaria%20de%20activar%20o%20Plano%20Pro%20do%20CV%20Premium." target="_blank" rel="noopener">Upgrade →</a>
+        <strong style="margin-right:4px">1 template grátis</strong> disponível. Os restantes requerem plano pago.
+        <a href="/pricing" style="font-weight:700;color:#d97706;">Ver Planos →</a>
       </div>
       <div class="cat-tabs" id="modalCatTabs" style="margin-bottom:14px;"></div>
       <div class="modal-tpl-grid" id="modalGrid"></div>
@@ -1917,8 +1917,8 @@ function applyPlanUI() {
   } else {
     const notice = `<div class="notice notice-gold" style="margin-bottom:16px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      Pode visualizar todos os templates. O download em PDF e guardar requerem plano <strong style="margin:0 3px">Pro</strong>.
-      <a href="https://wa.me/244944524292?text=Olá!%20Gostaria%20de%20activar%20o%20Plano%20Pro%20do%20CV%20Premium." target="_blank" rel="noopener">Fazer upgrade →</a></div>`;
+      Pode visualizar todos os templates. O download em PDF e guardar requerem plano pago (a partir de <strong style="margin:0 3px">4.000 Kz</strong>).
+      <a href="/pricing" style="font-weight:700;color:#d97706;">Ver Planos →</a></div>`;
     document.getElementById('lockNoticeWrap').innerHTML = notice;
     document.getElementById('lockNoticeCVs').innerHTML  = notice;
     document.getElementById('modalNotice').style.display = 'flex';
@@ -1950,7 +1950,7 @@ function navSub(id, el) {
 }
 function nav(id, el) {
   if (id === 'cover' && userPlan === 'free') {
-    window.open('https://wa.me/244944524292?text=Ol%C3%A1!%20Gostaria%20de%20activar%20o%20Plano%20Premium%20para%20aceder%20%C3%A0%20Carta%20de%20Apresenta%C3%A7%C3%A3o.', '_blank');
+    window.location.href = '/pricing';
     return;
   }
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -3447,7 +3447,7 @@ function setCoverType(type) {
 }
 function openCoverGenerator() {
   if (userPlan === 'free') {
-    window.open('https://wa.me/244944524292?text=Ol%C3%A1!%20Gostaria%20de%20activar%20o%20Plano%20Premium%20para%20aceder%20%C3%A0%20Carta%20de%20Apresenta%C3%A7%C3%A3o.', '_blank');
+    window.location.href = '/pricing';
     return;
   }
   document.getElementById('coverGenWrap').scrollIntoView({behavior:'smooth', block:'start'});
