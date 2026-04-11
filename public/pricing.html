@@ -961,7 +961,7 @@
 
     if (!ref) { erro.textContent = 'Por favor indica a referência ou comprovativo.'; erro.style.display = 'block'; return; }
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('cv_token') || localStorage.getItem('token');
     const btn = document.getElementById('btn-submeter');
     btn.textContent = 'A enviar...';
     btn.disabled = true;
