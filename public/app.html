@@ -1882,14 +1882,30 @@ function applyPlanUI() {
     document.getElementById('setPlanInfo').textContent = 'Tem acesso a todas as funcionalidades da plataforma.';
     document.getElementById('setPlanBtn').style.display = 'none';
     document.getElementById('statPlan').textContent = 'Premium';
-  } else if (userPlan === 'semanal') {
+  } else if (userPlan === 'semanal' || userPlan === 'week') {
     tag.className = 'plan-tag tag-pro';
-    tag.innerHTML = '⚡ Plano Semanal';
+    tag.innerHTML = '⚡ Plano Semanal — 4.000 Kz';
     document.getElementById('upgradeBox').style.display = 'none';
-    document.getElementById('setPlanName').textContent = 'Semanal';
-    document.getElementById('setPlanInfo').textContent = 'Tem acesso a todas as funcionalidades durante 7 dias.';
-    document.getElementById('setPlanBtn').textContent = '★ Upgrade para Premium';
+    document.getElementById('setPlanName').textContent = 'Semanal (4.000 Kz / 7 dias)';
+    document.getElementById('setPlanInfo').textContent = 'Tens acesso a todas as funcionalidades durante 7 dias.';
+    document.getElementById('setPlanBtn').style.display = 'none';
     document.getElementById('statPlan').textContent = 'Semanal';
+  } else if (userPlan === 'mensal' || userPlan === 'month') {
+    tag.className = 'plan-tag tag-prem';
+    tag.innerHTML = '👑 Plano Mensal — 10.000 Kz';
+    document.getElementById('upgradeBox').style.display = 'none';
+    document.getElementById('setPlanName').textContent = 'Mensal (10.000 Kz / 30 dias)';
+    document.getElementById('setPlanInfo').textContent = 'Tens acesso a todas as funcionalidades durante 30 dias.';
+    document.getElementById('setPlanBtn').style.display = 'none';
+    document.getElementById('statPlan').textContent = 'Mensal';
+  } else if (userPlan === 'premium') {
+    tag.className = 'plan-tag tag-prem';
+    tag.innerHTML = '★ Plano Premium';
+    document.getElementById('upgradeBox').style.display = 'none';
+    document.getElementById('setPlanName').textContent = 'Premium';
+    document.getElementById('setPlanInfo').textContent = 'Tem acesso a todas as funcionalidades da plataforma.';
+    document.getElementById('setPlanBtn').style.display = 'none';
+    document.getElementById('statPlan').textContent = 'Premium';
   } else if (userPlan === 'pro') {
     tag.className = 'plan-tag tag-pro';
     tag.innerHTML = '⚡ Plano Pro';

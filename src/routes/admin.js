@@ -761,20 +761,33 @@ router.patch('/payment-requests/:id/approve', async (req, res) => {
       .query('SELECT * FROM payment_requests WHERE id=@id')).recordset[0];
     if (!pr) return res.status(404).json({ error: 'Pedido não encontrado' });
 
+    const type = pr.Type || pr.type;
+    const uid  = pr.UserId || pr.user_id;
+
     // Conceder acesso conforme o tipo
-    if (pr.Type === 'cv_single') {
-      await req.db.request().input('uid', sql.Int, pr.UserId)
+    if (type === 'cv_single') {
+      await req.db.request().input('uid', sql.Int, uid)
         .query('UPDATE users SET cv_credits = COALESCE(cv_credits,0)+1 WHERE id=@uid');
-    } else if (pr.Type === 'cover_letter') {
-      await req.db.request().input('uid', sql.Int, pr.UserId)
+    } else if (type === 'cover_letter') {
+      await req.db.request().input('uid', sql.Int, uid)
         .query('UPDATE users SET cover_credits = COALESCE(cover_credits,0)+1 WHERE id=@uid');
-    } else if (pr.Type === 'week') {
-      await req.db.request().input('uid', sql.Int, pr.UserId)
-        .query(`UPDATE users SET plan='premium', access_until=NOW()+INTERVAL '7 days' WHERE id=@uid`);
-    } else if (pr.Type === 'biweek') {
-      await req.db.request().input('uid', sql.Int, pr.UserId)
-        .query(`UPDATE users SET plan='premium', access_until=NOW()+INTERVAL '15 days' WHERE id=@uid`);
+    } else if (type === 'week') {
+      await req.db.request().input('uid', sql.Int, uid)
+        .query(`UPDATE users SET plan='semanal', plan_expiry=NOW()+INTERVAL '7 days', access_until=NOW()+INTERVAL '7 days' WHERE id=@uid`);
+    } else if (type === 'month') {
+      await req.db.request().input('uid', sql.Int, uid)
+        .query(`UPDATE users SET plan='mensal', plan_expiry=NOW()+INTERVAL '30 days', access_until=NOW()+INTERVAL '30 days' WHERE id=@uid`);
+    } else if (type === 'biweek') {
+      await req.db.request().input('uid', sql.Int, uid)
+        .query(`UPDATE users SET plan='semanal', plan_expiry=NOW()+INTERVAL '15 days', access_until=NOW()+INTERVAL '15 days' WHERE id=@uid`);
     }
+
+    // Notificar utilizador via Socket.IO em tempo real
+    try {
+      const { socketConnector } = require('../connectors');
+      const planLabel = { week: 'Semanal', month: 'Mensal', biweek: 'Semanal' }[type] || 'Premium';
+      socketConnector.toUser(uid, 'plan_upgraded', { plan: planLabel, message: `O teu Plano ${planLabel} foi activado!` });
+    } catch (_) {}
 
     await req.db.request()
       .input('id',   sql.Int,      req.params.id)

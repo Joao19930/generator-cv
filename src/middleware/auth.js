@@ -36,15 +36,18 @@ const superadminOnly = (req, res, next) => {
 };
 
 const premiumOnly = async (req, res, next) => {
-  if (req.user.plan === 'premium') return next();
+  const plan = (req.user.plan || '').toLowerCase();
+  if (['premium', 'semanal', 'mensal', 'week', 'month', 'pro', 'enterprise'].includes(plan)) return next();
   // Verificar access_until e cover_credits na BD
   try {
     const { sql } = require('../config/database');
     const r = await req.db.request().input('id', sql.Int, req.user.id)
-      .query('SELECT cover_credits, access_until FROM users WHERE id=@id');
+      .query('SELECT plan, cover_credits, access_until FROM users WHERE id=@id');
     const u = r.recordset[0];
+    const dbPlan       = ((u?.Plan || u?.plan) || '').toLowerCase();
     const coverCredits = u?.CoverCredits ?? u?.cover_credits ?? 0;
     const accessUntil  = u?.AccessUntil  || u?.access_until  || null;
+    if (['premium', 'semanal', 'mensal', 'week', 'month', 'pro', 'enterprise'].includes(dbPlan)) return next();
     if (coverCredits > 0) return next();
     if (accessUntil && new Date(accessUntil) > new Date()) return next();
   } catch(_) {}
