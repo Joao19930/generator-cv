@@ -94,22 +94,23 @@ router.post('/stripe/webhook', async (req, res) => {
 });
 
 // ── POST /api/payment/request — Pedido de pagamento Akz ──────
-const PRICES = { cv_single: 1500, week: 3000, biweek: 5000, cover_letter: 1000 };
+const PRICES = { week: 4000, month: 10000 };
 router.post('/request', auth, async (req, res) => {
-  const { type, cvId } = req.body;
+  const { type, cvId, ref, tel } = req.body;
   if (!PRICES[type]) return res.status(400).json({ error: 'Tipo inválido' });
   try {
+    const note = [ref && `Ref: ${ref}`, tel && `Tel: ${tel}`].filter(Boolean).join(' | ') || null;
     const result = await req.db.request()
       .input('userId', sql.Int,     req.user.id)
       .input('type',   sql.NVarChar, type)
       .input('amount', sql.Int,     PRICES[type])
       .input('cvId',   sql.Int,     cvId || null)
-      .query(`INSERT INTO payment_requests (user_id, type, amount, cv_id, status, created_at)
-              VALUES (@userId, @type, @amount, @cvId, 'pending', NOW())
+      .input('note',   sql.NVarChar, note)
+      .query(`INSERT INTO payment_requests (user_id, type, amount, cv_id, status, admin_note, created_at)
+              VALUES (@userId, @type, @amount, @cvId, 'pending', @note, NOW())
               RETURNING id`);
     const reqId = result.recordset[0]?.id;
-    // Notificar admin via Socket.IO
-    try { socketConnector.emit('admin:payment_request', { id: reqId, type, amount: PRICES[type], userId: req.user.id }); } catch {}
+    try { socketConnector.emit('admin:payment_request', { id: reqId, type, amount: PRICES[type], userId: req.user.id, ref, tel }); } catch {}
     res.json({ success: true, requestId: reqId, amount: PRICES[type] });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
