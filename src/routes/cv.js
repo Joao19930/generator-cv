@@ -121,23 +121,23 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
     const html = buildCVHtml(content, tplName);
     const pdfBuf = await pdfConnector.fromHTML(html);
 
-    const hasS3 = process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY && process.env.AWS_BUCKET;
+    const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
-    if (hasS3) {
-      // Upload para S3 e devolve URL assinada
-      const slug = cv.Slug || cv.slug || `cv-${cv.Id || cv.id}`;
-      const key = await s3Connector.upload(pdfBuf, `${slug}.pdf`, req.user.id);
-      const url = await s3Connector.getUrl(key, 3600);
-      await req.db.request().input('id', sql.Int, cv.Id || cv.id).input('key', sql.NVarChar, key)
+    if (hasCloudinary) {
+      // Upload para Cloudinary e devolve URL permanente
+      const slug = cv.Slug || cv.slug || `cv-${cv.Id || cv.id}-${Date.now()}`;
+      const result = await cloudinaryConnector.uploadPDF(pdfBuf, req.user.id, slug);
+      const url = result.secure_url;
+      await req.db.request().input('id', sql.Int, cv.Id || cv.id).input('key', sql.NVarChar, result.public_id)
         .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1, s3_key=@key WHERE id=@id');
       const user = (await req.db.request().input('id', sql.Int, req.user.id)
         .query('SELECT name, email FROM users WHERE id = @id')).recordset[0];
-      emailConnector.sendCVReady(user.Email, user.Name, url)
-        .catch(() => smtpConnector.send(user.Email, 'O seu CV está pronto!', `<p>Olá ${user.Name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`).catch(() => {}));
+      emailConnector.sendCVReady(user.Email || user.email, user.Name || user.name, url)
+        .catch(() => smtpConnector.send(user.Email || user.email, 'O seu CV está pronto!', `<p>Olá ${user.Name || user.name}, o seu CV está pronto: <a href="${url}">Descarregar</a></p>`).catch(() => {}));
       gaConnector.track(req.user.id, 'cv_downloaded');
-      res.json({ url, expires_in: 3600 });
+      res.json({ url });
     } else {
-      // Sem S3 — enviar PDF directamente para download
+      // Sem Cloudinary — enviar PDF directamente para download
       await req.db.request().input('id', sql.Int, cv.Id || cv.id)
         .query('UPDATE cvs SET downloaded=TRUE, download_count=download_count+1 WHERE id=@id').catch(() => {});
       gaConnector.track(req.user.id, 'cv_downloaded');

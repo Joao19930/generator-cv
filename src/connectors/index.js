@@ -101,7 +101,18 @@ const cloudinaryConnector = {
   uploadPhoto: (filePath, userId) =>
     getCloud().uploader.upload(filePath, { folder: `cv-generator/${userId}`, transformation: [{ width: 300, height: 300, crop: 'fill', gravity: 'face' }] }),
   deletePhoto: (publicId) => getCloud().uploader.destroy(publicId),
-  optimizedUrl: (publicId) => getCloud().url(publicId, { fetch_format: 'auto', quality: 'auto' })
+  optimizedUrl: (publicId) => getCloud().url(publicId, { fetch_format: 'auto', quality: 'auto' }),
+  uploadPDF: async (buffer, userId, filename) => {
+    const streamifier = require('streamifier');
+    return new Promise((resolve, reject) => {
+      const stream = getCloud().uploader.upload_stream(
+        { folder: `cv-pdfs/${userId}`, public_id: filename, resource_type: 'raw', format: 'pdf' },
+        (error, result) => error ? reject(error) : resolve(result)
+      );
+      streamifier.createReadStream(buffer).pipe(stream);
+    });
+  },
+  getPDFUrl: (publicId) => getCloud().url(publicId, { resource_type: 'raw', secure: true }),
 };
 
 // ═══════════════════════════════════════════════════════
@@ -228,12 +239,27 @@ Agora faz o mesmo para "${jobTitle}". Devolve apenas as linhas, sem introdução
 const pdfConnector = {
   fromHTML: async (htmlContent) => {
     const puppeteer = require('puppeteer');
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });
-    await browser.close();
-    return pdf; // Buffer pronto para upload ao S3
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+      ]
+    });
+    try {
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });
+      return pdf;
+    } finally {
+      await browser.close();
+    }
   }
 };
 
