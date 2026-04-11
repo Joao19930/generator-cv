@@ -4004,6 +4004,7 @@ async function dlCV(e, id) {
 let _payType = 'cv', _payCvId = null, _paySelected = null;
 function showPaymentModal(type, cvId) {
   _payType = type; _payCvId = cvId || null; _paySelected = null;
+  const _ref = 'CVP-' + Math.floor(100000 + Math.random() * 900000);
   const isCover = type === 'cover';
   const opts = isCover
     ? [{ type:'week',  price:'4.000 Akz',  title:'Semanal — 7 Dias',  desc:'Acesso total a todas as funcionalidades', badge:'Popular', badgeColor:'#2563eb' },
@@ -4024,12 +4025,12 @@ function showPaymentModal(type, cvId) {
           </div>
         </div>`).join('')}
       <div class="pay-instructions">
-        🏦 <strong>Dados bancários:</strong> Banco BCI · IBAN <strong>AO0600000351704310115</strong> · João Faustino Manuel<br>
-        Após escolher o plano, faz a transferência e indica a referência abaixo.
+        🏦 <strong>BCI · AO0600000351704310115 · João Faustino Manuel</strong><br>
+        Referência a incluir na transferência: <strong id="payRefGerada" style="font-family:monospace;color:#2563eb;"></strong>
       </div>
       <div style="margin:12px 0;display:flex;flex-direction:column;gap:8px;">
-        <input id="payRef" type="text" placeholder="Referência / comprovativo da transferência" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
-        <input id="payTel" type="tel" placeholder="Telefone para contacto (ex: +244 9XX XXX XXX)" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
+        <input id="payRef" type="text" placeholder="Referência do pagamento (ex: CVP-123456)" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
+        <input id="payWa" type="tel" placeholder="WhatsApp (ex: +244 9XX XXX XXX)" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
       </div>
       <div class="pay-actions">
         <button class="btn-out" style="flex:1" onclick="closePayModal()">Cancelar</button>
@@ -4040,6 +4041,10 @@ function showPaymentModal(type, cvId) {
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
+  const rg = document.getElementById('payRefGerada');
+  if (rg) rg.textContent = _ref;
+  const pr = document.getElementById('payRef');
+  if (pr) pr.value = _ref;
 }
 function selectPayOption(type) {
   _paySelected = type;
@@ -4058,8 +4063,9 @@ async function pagarWhatsApp() {
 async function pagarBanco() {
   if (!_paySelected) return;
   const ref = document.getElementById('payRef')?.value.trim();
-  const tel = document.getElementById('payTel')?.value.trim();
-  if (!ref) { alert('Por favor indica a referência ou comprovativo da transferência.'); return; }
+  const tel = document.getElementById('payWa')?.value.trim();
+  if (!ref) { alert('Por favor indica a referência do pagamento.'); return; }
+  if (!tel) { alert('Por favor indica o teu número de WhatsApp.'); return; }
   const btn = document.getElementById('paySubmitBtn');
   btn.disabled = true; btn.textContent = 'A enviar...';
   const token = localStorage.getItem('cv_token');

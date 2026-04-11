@@ -838,35 +838,62 @@
     <div id="modal-step1">
       <div style="font-size:28px;margin-bottom:8px;">🏦</div>
       <h2 style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:4px;" id="modal-titulo">Activar Plano Semanal</h2>
-      <p style="font-size:13px;color:#64748b;margin-bottom:24px;">Faz a transferência bancária e confirma o pagamento abaixo.</p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px;">Escolhe o método de pagamento e efectua a transferência.</p>
 
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Dados Bancários</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:13px;color:#64748b;">Banco</span>
-            <span style="font-size:13px;font-weight:700;color:#0f172a;">BCI</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:13px;color:#64748b;">Titular</span>
-            <span style="font-size:13px;font-weight:700;color:#0f172a;">João Faustino Manuel</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-            <span style="font-size:13px;color:#64748b;white-space:nowrap;">IBAN</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:12px;font-weight:700;color:#0f172a;font-family:monospace;" id="iban-text">AO0600000351704310115</span>
-              <button onclick="copiarIBAN()" style="background:#eff6ff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;" id="btn-copiar">Copiar</button>
+      <!-- Referência automática -->
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:10px;font-weight:800;color:#1d4ed8;text-transform:uppercase;letter-spacing:.5px;">A tua referência de pagamento</div>
+          <div style="font-size:18px;font-weight:800;color:#1e40af;font-family:monospace;margin-top:2px;" id="ref-gerada">CVP-000000</div>
+          <div style="font-size:11px;color:#3b82f6;margin-top:2px;">Inclui esta referência na descrição da transferência</div>
+        </div>
+        <button onclick="copiarRef()" id="btn-copiar-ref" style="background:#2563eb;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;">Copiar</button>
+      </div>
+
+      <!-- Tabs método pagamento -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button onclick="setMetodo('iban',this)" id="tab-iban" style="flex:1;padding:10px;border:2px solid #2563eb;border-radius:10px;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;cursor:pointer;">🏦 Transferência IBAN</button>
+        <button onclick="setMetodo('ref',this)" id="tab-ref" style="flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">📱 Multicaixa / Referência</button>
+      </div>
+
+      <!-- Dados IBAN -->
+      <div id="dados-iban" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#64748b;">Banco</span><span style="font-size:12px;font-weight:700;">BCI</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#64748b;">Titular</span><span style="font-size:12px;font-weight:700;">João Faustino Manuel</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#64748b;">IBAN</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;font-weight:700;font-family:monospace;">AO0600000351704310115</span>
+              <button onclick="copiarIBAN()" id="btn-copiar" style="background:#eff6ff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;">Copiar</button>
             </div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:2px;">
-            <span style="font-size:13px;color:#64748b;">Valor a pagar</span>
-            <span style="font-size:18px;font-weight:800;color:#2563eb;" id="modal-valor">4.000 Kz</span>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;">
+            <span style="font-size:12px;color:#64748b;">Valor</span>
+            <span style="font-size:16px;font-weight:800;color:#2563eb;" id="modal-valor">4.000 Kz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados Multicaixa/Referência -->
+      <div id="dados-ref" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#64748b;">Entidade</span><span style="font-size:12px;font-weight:700;">BCI</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#64748b;">Conta</span><span style="font-size:12px;font-weight:700;">351704310115</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#64748b;">Titular</span><span style="font-size:12px;font-weight:700;">João Faustino Manuel</span></div>
+          <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:4px;">
+            <div style="font-size:10px;font-weight:700;color:#92400e;">IMPORTANTE — Inclui na descrição:</div>
+            <div style="font-size:13px;font-weight:800;font-family:monospace;color:#78350f;margin-top:2px;" id="ref-gerada-2">CVP-000000</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;">
+            <span style="font-size:12px;color:#64748b;">Valor</span>
+            <span style="font-size:16px;font-weight:800;color:#2563eb;" id="modal-valor-2">4.000 Kz</span>
           </div>
         </div>
       </div>
 
       <button onclick="mostrarStep2()" style="width:100%;padding:14px;background:linear-gradient(135deg,#2563eb,#6366f1);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">
-        Já fiz a transferência →
+        Já paguei — Confirmar →
       </button>
       <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:12px;">A activação é feita em minutos após confirmação.</p>
     </div>
@@ -878,12 +905,13 @@
 
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
         <div>
-          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Referência / Comprovativo</label>
-          <input id="input-ref" type="text" placeholder="Ex: REF123456 ou nome do remetente" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Referência / Comprovativo <span style="color:#dc2626;">*</span></label>
+          <input id="input-ref" type="text" placeholder="Ex: CVP-123456 ou referência da transferência" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Telefone (para contacto)</label>
-          <input id="input-tel" type="tel" placeholder="Ex: +244 9XX XXX XXX" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">WhatsApp <span style="color:#dc2626;">*</span></label>
+          <input id="input-wa" type="tel" placeholder="Ex: +244 9XX XXX XXX" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;outline:none;">
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Usaremos este número para confirmar o pagamento</div>
         </div>
       </div>
 
@@ -914,12 +942,39 @@
   };
 
   let planoActivo = null;
+  let refGerada = '';
+
+  function gerarRef() {
+    const n = Math.floor(100000 + Math.random() * 900000);
+    return 'CVP-' + n;
+  }
+
+  function setMetodo(metodo, btn) {
+    document.getElementById('dados-iban').style.display = metodo === 'iban' ? 'block' : 'none';
+    document.getElementById('dados-ref').style.display  = metodo === 'ref'  ? 'block' : 'none';
+    document.getElementById('tab-iban').style.cssText = metodo === 'iban'
+      ? 'flex:1;padding:10px;border:2px solid #2563eb;border-radius:10px;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;cursor:pointer;'
+      : 'flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;';
+    document.getElementById('tab-ref').style.cssText = metodo === 'ref'
+      ? 'flex:1;padding:10px;border:2px solid #2563eb;border-radius:10px;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;cursor:pointer;'
+      : 'flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;';
+  }
 
   function abrirModal(tipo) {
     planoActivo = tipo;
+    refGerada = gerarRef();
     const p = PLANOS[tipo];
     document.getElementById('modal-titulo').textContent = 'Activar ' + p.nome;
     document.getElementById('modal-valor').textContent = p.valor;
+    document.getElementById('modal-valor-2').textContent = p.valor;
+    document.getElementById('ref-gerada').textContent = refGerada;
+    document.getElementById('ref-gerada-2').textContent = refGerada;
+    // Pré-preencher campo referência no step2
+    setTimeout(() => {
+      const inp = document.getElementById('input-ref');
+      if (inp) inp.value = refGerada;
+    }, 100);
+    setMetodo('iban', null);
     mostrarStep1();
     const m = document.getElementById('modal-pagamento');
     m.style.display = 'flex';
@@ -941,25 +996,37 @@
     document.getElementById('modal-step1').style.display = 'none';
     document.getElementById('modal-step2').style.display = 'block';
     document.getElementById('modal-step3').style.display = 'none';
+    // Pré-preencher referência
+    const inp = document.getElementById('input-ref');
+    if (inp && !inp.value) inp.value = refGerada;
   }
 
   function copiarIBAN() {
     navigator.clipboard.writeText('AO0600000351704310115').then(() => {
       const btn = document.getElementById('btn-copiar');
       btn.textContent = 'Copiado!';
-      btn.style.background = '#dcfce7';
-      btn.style.color = '#16a34a';
+      btn.style.background = '#dcfce7'; btn.style.color = '#16a34a';
       setTimeout(() => { btn.textContent = 'Copiar'; btn.style.background = '#eff6ff'; btn.style.color = '#2563eb'; }, 2000);
+    });
+  }
+
+  function copiarRef() {
+    navigator.clipboard.writeText(refGerada).then(() => {
+      const btn = document.getElementById('btn-copiar-ref');
+      btn.textContent = 'Copiado!';
+      btn.style.background = '#16a34a';
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.style.background = '#2563eb'; }, 2000);
     });
   }
 
   async function submeterPagamento() {
     const ref = document.getElementById('input-ref').value.trim();
-    const tel = document.getElementById('input-tel').value.trim();
+    const wa  = document.getElementById('input-wa').value.trim();
     const erro = document.getElementById('msg-erro');
     erro.style.display = 'none';
 
-    if (!ref) { erro.textContent = 'Por favor indica a referência ou comprovativo.'; erro.style.display = 'block'; return; }
+    if (!ref) { erro.textContent = 'Por favor indica a referência do pagamento.'; erro.style.display = 'block'; return; }
+    if (!wa)  { erro.textContent = 'Por favor indica o teu número de WhatsApp.'; erro.style.display = 'block'; return; }
 
     const token = localStorage.getItem('cv_token') || localStorage.getItem('token');
     const btn = document.getElementById('btn-submeter');
@@ -967,7 +1034,7 @@
     btn.disabled = true;
 
     try {
-      const body = { type: planoActivo, ref, tel };
+      const body = { type: planoActivo, ref, tel: wa };
       let res;
       if (token) {
         res = await fetch('/api/payment/request', {
