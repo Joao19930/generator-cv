@@ -352,6 +352,18 @@ async function seedDemoJobs(db) {
 }
 
 // ── Função principal (chamada pelo cron e no arranque) ────────
+async function cleanOldInternational(db) {
+  const r = await db.request()
+    .query(`DELETE FROM jobs
+            WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')
+              AND job_date < NOW() - INTERVAL '20 days'
+            RETURNING id`)
+    .catch(() => ({ recordset: [] }));
+  const n = r.recordset?.length || 0;
+  if (n) console.log(`[empregos] ${n} vagas internacionais com >20 dias removidas`);
+  return n;
+}
+
 async function importJobs(db) {
   try {
     await migrateTable(db);
@@ -373,6 +385,9 @@ async function importJobs(db) {
       console.log('[empregos] Todas as APIs falharam — a usar vagas demo');
       await seedDemoJobs(db);
     }
+
+    // Remover vagas internacionais com mais de 20 dias
+    await cleanOldInternational(db);
   } catch (e) {
     console.error('[empregos] importJobs:', e.message);
   }
@@ -519,6 +534,16 @@ router.post('/importar', async (req, res) => {
       }
       log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
     } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
+
+    // Remover vagas internacionais com mais de 20 dias
+    const oldDel = await req.db.request()
+      .query(`DELETE FROM jobs
+              WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')
+                AND job_date < NOW() - INTERVAL '20 days'
+              RETURNING id`)
+      .catch(() => ({ recordset: [] }));
+    const oldN = oldDel.recordset?.length || 0;
+    if (oldN) log.push(`✓ ${oldN} vagas internacionais com >20 dias removidas`);
 
     // Contagem final de vagas importadas de APIs externas
     const cnt = await req.db.request().query(
