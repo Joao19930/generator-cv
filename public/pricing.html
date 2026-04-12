@@ -311,10 +311,13 @@
     color: var(--t2);
     line-height: 1.4;
   }
-  .feat-check { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .feat-check { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 11px; font-weight: 700; }
   .feat-check.yes { background: #DCFCE7; color: var(--green); }
-  .feat-check.no  { background: #F1F5F9; color: var(--t4); }
+  .feat-check.no  { background: transparent; color: var(--t4); font-size: 17px; font-weight: 400; width: auto; height: auto; }
   .feat-check.star{ background: #EEF2FF; color: var(--indigo); }
+  /* Urgency banner */
+  .urgency-bar { background: linear-gradient(135deg, #1d4ed8, #7c3aed); padding: 12px 24px; text-align: center; font-size: 13px; color: #fff; font-weight: 600; letter-spacing: .2px; }
+  .urgency-bar span { background: rgba(255,255,255,.2); border-radius: 4px; padding: 2px 8px; margin: 0 4px; font-weight: 800; }
 
   /* ── WhatsApp note ── */
   .wa-note {
@@ -482,6 +485,10 @@
 <body>
 
 <!-- Navbar -->
+<div class="urgency-bar">
+  Preço de lançamento — Plano Mensal a <span>10.000 Kz</span> · Activação em menos de 24h · Sem cartão de crédito
+</div>
+
 <nav class="nav">
   <a href="/" class="nav-logo">CV Premium</a>
   <div class="nav-links">
@@ -495,10 +502,10 @@
 <section class="hero">
   <div class="hero-badge">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-    Mais de 1.000 profissionais angolanos confiam em nós
+    Mais de 500 profissionais angolanos confiam em nós
   </div>
   <h1>Planos simples.<br><span>Resultados profissionais.</span></h1>
-  <p>Cria um CV que se destaca, passa os filtros ATS e abre portas para a tua próxima oportunidade.</p>
+  <p>Cria um CV que se destaca, passa os filtros ATS e abre portas para a tua próxima oportunidade em Angola e no mundo.</p>
   <div class="hero-trust">
     <div class="trust-item">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -506,7 +513,7 @@
     </div>
     <div class="trust-item">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      Activação via WhatsApp
+      Pagamento por transferência BCI
     </div>
     <div class="trust-item">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -544,15 +551,15 @@
           Acesso ao dashboard
         </li>
         <li>
-          <span class="feat-check no">✕</span>
+          <span class="feat-check no">—</span>
           <span style="color:var(--t4)">Criar ou editar CVs</span>
         </li>
         <li>
-          <span class="feat-check no">✕</span>
+          <span class="feat-check no">—</span>
           <span style="color:var(--t4)">Download PDF</span>
         </li>
         <li>
-          <span class="feat-check no">✕</span>
+          <span class="feat-check no">—</span>
           <span style="color:var(--t4)">IA para melhorar textos</span>
         </li>
       </ul>
@@ -597,23 +604,24 @@
           IA para melhorar textos
         </li>
         <li>
-          <span class="feat-check no">✕</span>
+          <span class="feat-check no">—</span>
           <span style="color:var(--t4)">Carta de apresentação IA</span>
         </li>
       </ul>
     </div>
 
     <!-- Plano Mensal -->
-    <div class="plan-card">
+    <div class="plan-card" style="border:2px solid var(--indigo);box-shadow:0 12px 40px rgba(99,102,241,.18);position:relative;">
+      <div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;font-size:11px;font-weight:800;padding:4px 18px;border-radius:20px;white-space:nowrap;letter-spacing:.3px;">👑 MELHOR VALOR</div>
       <div class="plan-icon premium">👑</div>
-      <div class="plan-name">Mensal</div>
-      <div class="plan-desc">Acesso completo a todas as funcionalidades por um mês inteiro.</div>
+      <div class="plan-name" style="color:var(--indigo);">Mensal</div>
+      <div class="plan-desc">O melhor custo-benefício — 30 dias de acesso completo a tudo.</div>
       <div class="plan-price-wrap">
         <div class="plan-price">
           <span class="plan-currency">Kz</span> 10.000
         </div>
-        <div class="plan-period">por mês</div>
-        <div class="plan-savings">30 dias completos</div>
+        <div class="plan-period">por 30 dias <span style="color:var(--green);font-weight:700;">· Equivale a 333 Kz/dia</span></div>
+        <div class="plan-savings">Poupa vs. 4 semanas separadas</div>
       </div>
       <a href="#" class="plan-cta cta-premium" onclick="abrirModal('month'); return false;">
         👑 Activar Mensal
@@ -724,44 +732,44 @@
         </tr>
         <tr>
           <td>Criar e editar CVs</td>
-          <td><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
           <td class="col-popular"><span class="chk-yes">✓</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>Download PDF</td>
-          <td><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
           <td class="col-popular"><span class="chk-yes">✓</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>Todos os templates</td>
-          <td><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
           <td class="col-popular"><span class="chk-yes">✓</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>IA para textos</td>
-          <td><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
           <td class="col-popular"><span class="chk-yes">✓</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>Carta de apresentação IA</td>
-          <td><span class="chk-no">✕</span></td>
-          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
+          <td class="col-popular"><span class="chk-no">—</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>Templates exclusivos</td>
-          <td><span class="chk-no">✕</span></td>
-          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
+          <td class="col-popular"><span class="chk-no">—</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>
           <td>Suporte prioritário</td>
-          <td><span class="chk-no">✕</span></td>
-          <td class="col-popular"><span class="chk-no">✕</span></td>
+          <td><span class="chk-no">—</span></td>
+          <td class="col-popular"><span class="chk-no">—</span></td>
           <td><span class="chk-yes">✓</span></td>
         </tr>
         <tr>

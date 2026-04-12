@@ -7,7 +7,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 // ═══════════════════════════════════════════════════════
-// 1. SENDGRID — E-mails transacionais
+// 1. SENDGRID — E-mails transacionais (HTML inline)
 // ═══════════════════════════════════════════════════════
 let _sg;
 const getSG = () => {
@@ -15,21 +15,87 @@ const getSG = () => {
   return _sg;
 };
 
+const _emailBase = (content) => `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif}
+  .wrap{max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+  .header{background:linear-gradient(135deg,#2563eb,#7c3aed);padding:32px 40px;text-align:center}
+  .header h1{color:#fff;margin:0;font-size:22px;letter-spacing:.5px}
+  .header p{color:rgba(255,255,255,.8);margin:6px 0 0;font-size:13px}
+  .body{padding:32px 40px}
+  .body p{color:#374151;line-height:1.7;margin:0 0 16px;font-size:15px}
+  .btn{display:inline-block;margin:8px 0 24px;padding:14px 32px;background:#2563eb;color:#fff!important;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px}
+  .footer{background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb}
+  .footer p{color:#9ca3af;font-size:12px;margin:0}
+  .highlight{background:#eff6ff;border-left:4px solid #2563eb;padding:12px 16px;border-radius:4px;margin:16px 0}
+  .highlight strong{color:#1d4ed8}
+</style></head>
+<body><div class="wrap">
+  <div class="header">
+    <h1>CV Premium</h1>
+    <p>cvpremium.net</p>
+  </div>
+  <div class="body">${content}</div>
+  <div class="footer">
+    <p>© ${new Date().getFullYear()} CV Premium — Luanda, Angola</p>
+    <p style="margin-top:4px">Este e-mail foi enviado automaticamente. Não responda a esta mensagem.</p>
+  </div>
+</div></body></html>`;
+
+const _send = (to, subject, content) =>
+  getSG().send({ to, from: { email: process.env.EMAIL_FROM || 'noreply@cvpremium.net', name: 'CV Premium' }, subject, html: _emailBase(content) });
+
 const emailConnector = {
   sendWelcome: (toEmail, name) =>
-    getSG().send({ to: toEmail, from: process.env.EMAIL_FROM,
-      templateId: process.env.SENDGRID_WELCOME_TEMPLATE,
-      dynamicTemplateData: { name, link: process.env.APP_URL } }),
+    _send(toEmail, `Bem-vindo ao CV Premium, ${name.split(' ')[0]}!`, `
+      <p>Olá <strong>${name.split(' ')[0]}</strong>,</p>
+      <p>A sua conta foi criada com sucesso. Agora podes criar o teu CV profissional em minutos, com templates modernos e suporte de Inteligência Artificial.</p>
+      <div class="highlight">
+        <strong>O que podes fazer gratuitamente:</strong><br>
+        ✅ Criar e editar CVs ilimitados<br>
+        ✅ Usar IA para melhorar o teu perfil<br>
+        ✅ Calcular o teu score ATS<br>
+        ✅ Gerar carta de apresentação
+      </div>
+      <p>Para descarregar o teu CV em PDF, activa um plano a partir de <strong>4.000 Kz</strong>.</p>
+      <a href="${process.env.APP_URL}/app" class="btn">Criar o Meu CV Agora</a>
+      <p style="font-size:13px;color:#6b7280">Qualquer dúvida, fala connosco pelo WhatsApp ou pelo site.</p>
+    `),
+
+  sendPlanActivated: (toEmail, name, planType) => {
+    const labels = { week: 'Semanal (7 dias)', month: 'Mensal (30 dias)', semanal: 'Semanal (7 dias)', mensal: 'Mensal (30 dias)' };
+    const label  = labels[planType] || planType;
+    return _send(toEmail, `Plano ${label} activado — CV Premium`, `
+      <p>Olá <strong>${name.split(' ')[0]}</strong>,</p>
+      <p>O teu pagamento foi verificado e o teu plano foi activado com sucesso! 🎉</p>
+      <div class="highlight">
+        <strong>Plano activo:</strong> ${label}<br>
+        <strong>Acesso a:</strong> Download de PDF em todos os templates, incluindo templates premium
+      </div>
+      <p>Já podes descarregar o teu CV em PDF directamente na tua conta.</p>
+      <a href="${process.env.APP_URL}/app" class="btn">Descarregar o Meu CV</a>
+      <p style="font-size:13px;color:#6b7280">Se tiveres algum problema, entra em contacto pelo WhatsApp.</p>
+    `);
+  },
 
   sendCVReady: (toEmail, name, downloadLink) =>
-    getSG().send({ to: toEmail, from: process.env.EMAIL_FROM,
-      templateId: process.env.SENDGRID_CV_TEMPLATE,
-      dynamicTemplateData: { name, downloadLink } }),
+    _send(toEmail, 'O teu CV está pronto para descarregar!', `
+      <p>Olá <strong>${name.split(' ')[0]}</strong>,</p>
+      <p>O teu CV foi gerado com sucesso e está pronto para descarregar em PDF.</p>
+      <a href="${downloadLink}" class="btn">Descarregar CV em PDF</a>
+      <p style="font-size:13px;color:#6b7280">O link é válido por 7 dias. Se expirar, podes gerar um novo CV na tua conta.</p>
+    `),
 
   sendPasswordReset: (toEmail, token) =>
-    getSG().send({ to: toEmail, from: process.env.EMAIL_FROM,
-      subject: 'Redefinição de senha — CV Premium',
-      html: `<p>Clique <a href="${process.env.APP_URL}/reset?token=${token}">aqui</a> para redefinir a sua senha. Válido 1 hora.</p>` })
+    _send(toEmail, 'Redefinição de senha — CV Premium', `
+      <p>Recebemos um pedido para redefinir a senha da tua conta.</p>
+      <p>Clica no botão abaixo para criar uma nova senha. O link é válido durante <strong>1 hora</strong>.</p>
+      <a href="${process.env.APP_URL}/reset?token=${token}" class="btn">Redefinir Senha</a>
+      <p style="font-size:13px;color:#6b7280">Se não pediste a redefinição da senha, ignora este e-mail. A tua senha não será alterada.</p>
+    `),
 };
 
 // ═══════════════════════════════════════════════════════

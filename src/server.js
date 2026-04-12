@@ -9,6 +9,7 @@ const express = require('express');
 const http    = require('http');
 const cors    = require('cors');
 const path    = require('path');
+const helmet  = require('helmet');
 
 // Config & utils
 const { getPool, sql } = require('./config/database');
@@ -43,6 +44,12 @@ app.use('/api/payment/stripe/webhook',
   express.raw({ type: 'application/json' }),
   (req, res, next) => { req.rawBody = req.body; next(); }
 );
+
+// ── Segurança — cabeçalhos HTTP ─────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // CSP inline nos HTMLs — desactivar para não quebrar
+  crossOriginEmbedderPolicy: false
+}));
 
 // ── Middlewares globais ─────────────────────────────────────
 app.use(cors({
@@ -429,6 +436,23 @@ app.get('/admin-panel', (req, res) => {
 // ── Rotas públicas ───────────────────────────────────────────
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', version: '2.0.0', ts: new Date().toISOString() }));
+
+// ── Estatísticas públicas (landing page) ────────────────────
+app.get('/api/stats/public', async (req, res) => {
+  try {
+    const pool = await getPool();
+    const r = await pool.request().query(
+      `SELECT (SELECT COUNT(*) FROM cvs) AS total_cvs,
+              (SELECT COUNT(*) FROM users) AS total_users`
+    );
+    const row = r.recordset[0] || {};
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.json({
+      totalCvs:   row.total_cvs   || row.TotalCvs   || 296,
+      totalUsers: row.total_users || row.TotalUsers  || 206
+    });
+  } catch { res.json({ totalCvs: 296, totalUsers: 206 }); }
+});
 
 
 // Robots.txt explícito

@@ -10,7 +10,7 @@ const fs       = require('fs');
 const bcrypt   = require('bcryptjs');
 const multer   = require('multer');
 const { sql }  = require('../config/database');
-const { redisConnector, zapierConnector } = require('../connectors');
+const { redisConnector, zapierConnector, emailConnector, smtpConnector } = require('../connectors');
 
 // ── Upload de PDFs para documentos legais ────────────────────
 const DOCS_DIR = path.join(__dirname, '..', '..', 'public', 'legal-docs');
@@ -787,6 +787,20 @@ router.patch('/payment-requests/:id/approve', async (req, res) => {
       const { socketConnector } = require('../connectors');
       const planLabel = { week: 'Semanal', month: 'Mensal', biweek: 'Semanal' }[type] || 'Premium';
       socketConnector.toUser(uid, 'plan_upgraded', { plan: planLabel, message: `O teu Plano ${planLabel} foi activado!` });
+    } catch (_) {}
+
+    // Enviar e-mail de confirmação ao utilizador
+    try {
+      const userRow = (await req.db.request().input('uid', sql.Int, uid)
+        .query('SELECT name, email FROM users WHERE id=@uid')).recordset[0];
+      if (userRow?.email) {
+        const uName  = userRow.Name || userRow.name || 'Utilizador';
+        const uEmail = userRow.Email || userRow.email;
+        emailConnector.sendPlanActivated(uEmail, uName, type).catch(() =>
+          smtpConnector.send(uEmail, 'Plano activado — CV Premium',
+            `<p>Olá ${uName}, o teu plano foi activado com sucesso! Acede a ${process.env.APP_URL}/app para descarregar o teu CV.</p>`)
+        );
+      }
     } catch (_) {}
 
     await req.db.request()
