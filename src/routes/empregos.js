@@ -320,6 +320,38 @@ async function importTheMuse(db) {
   }
 }
 
+// ── Importar via Working Nomads (sem chave) ───────────────────
+async function importWorkingNomads(db) {
+  try {
+    const { data } = await axios.get(
+      'https://www.workingnomads.com/api/exposed_jobs/',
+      { timeout: 15000 }
+    );
+    const jobs = Array.isArray(data) ? data : [];
+    if (!jobs.length) { console.warn('[empregos] WorkingNomads: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs.slice(0, 50)) {
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company_name || j.company || '',
+        city:        j.location || 'Remoto',
+        description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.url || '',
+        salary:      j.salary ? String(j.salary).substring(0, 100) : null,
+        source:      'workingnomads',
+        category:    j.category || '',
+        job_date:    j.pub_date || null,
+        deadline:    null
+      }).then(() => ok++).catch(e => console.warn('[empregos] workingnomads insert:', e.message));
+    }
+    console.log(`[empregos] WorkingNomads: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] WorkingNomads:', e.message);
+    return 0;
+  }
+}
+
 // ── Importar via Jooble ───────────────────────────────────────
 async function importJooble(db) {
   const key = process.env.JOOBLE_API_KEY;
@@ -419,7 +451,7 @@ async function seedDemoJobs(db) {
 }
 
 // ── Função principal (chamada pelo cron e no arranque) ────────
-const ALL_EXTERNAL_SOURCES = `'adzuna','jooble','arbeitnow','remotive','jobicy','himalayas','themuse'`;
+const ALL_EXTERNAL_SOURCES = `'adzuna','jooble','arbeitnow','remotive','jobicy','himalayas','themuse','workingnomads'`;
 
 async function cleanOldInternational(db) {
   const r = await db.request()
@@ -451,6 +483,7 @@ async function importJobs(db) {
     total += await importJobicy(db);
     total += await importHimalayas(db);
     total += await importTheMuse(db);
+    total += await importWorkingNomads(db);
 
     if (!total) {
       console.log('[empregos] Todas as APIs falharam — a usar vagas demo');
@@ -655,6 +688,29 @@ router.post('/importar', async (req, res) => {
       }
       log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
     } catch (e) { log.push(`✗ The Muse erro: ${e.message.substring(0, 100)}`); }
+
+    // ── Working Nomads (sem chave) ──────────────────────────────
+    try {
+      const { data } = await axios.get('https://www.workingnomads.com/api/exposed_jobs/', { timeout: 15000 });
+      const jobs = Array.isArray(data) ? data : [];
+      log.push(`✓ WorkingNomads: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs.slice(0, 50)) {
+        try {
+          await insertJob(req.db, {
+            title: j.title, company: j.company_name || j.company || '',
+            city: j.location || 'Remoto',
+            description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.url || '',
+            salary: j.salary ? String(j.salary).substring(0, 100) : null,
+            source: 'workingnomads', category: j.category || '',
+            job_date: j.pub_date || null, deadline: null
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ WorkingNomads erro: ${e.message.substring(0, 100)}`); }
 
     // Remover vagas internacionais com mais de 20 dias
     const oldDel = await req.db.request()
