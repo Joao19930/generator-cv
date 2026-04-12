@@ -546,6 +546,37 @@ router.post('/importar', async (req, res) => {
       .catch(() => ({ recordset: [] }));
     log.push(`✓ ${del.recordset?.length || 0} vagas antigas apagadas`);
 
+    // ── Jooble ──────────────────────────────────────────────────
+    const joobleKey = process.env.JOOBLE_API_KEY;
+    if (joobleKey) {
+      try {
+        const { data } = await axios.post(
+          `https://jooble.org/api/${joobleKey}`,
+          { keywords: '', location: 'Angola', resultsOnPage: 50 },
+          { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
+        );
+        const jobs = data.jobs || [];
+        log.push(`✓ Jooble: ${jobs.length} vagas recebidas`);
+        let ok = 0, err = 0;
+        for (const j of jobs) {
+          try {
+            await insertJob(req.db, {
+              title: j.title, company: j.company,
+              city: j.location,
+              description: (j.snippet || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+              url: j.link, salary: j.salary ? String(j.salary).substring(0, 100) : null,
+              source: 'jooble', category: '',
+              job_date: j.updated || null, deadline: null
+            });
+            ok++;
+          } catch (e) { err++; }
+        }
+        log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+      } catch (e) { log.push(`✗ Jooble erro: ${e.message.substring(0, 100)}`); }
+    } else {
+      log.push('⚠ Jooble: JOOBLE_API_KEY não configurada');
+    }
+
     // ── Adzuna ──────────────────────────────────────────────────
     const appId  = process.env.ADZUNA_APP_ID;
     const appKey = process.env.ADZUNA_APP_KEY;
