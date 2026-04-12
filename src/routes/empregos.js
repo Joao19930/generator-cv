@@ -228,24 +228,31 @@ async function importJobicy(db) {
     const jobs = data.jobs || [];
     if (!jobs.length) { console.warn('[empregos] Jobicy: 0 resultados'); return 0; }
     let ok = 0;
+    let firstErr = null;
     for (const j of jobs) {
       const salary = j.annualSalaryMin
         ? `${j.annualSalaryMin}–${j.annualSalaryMax || j.annualSalaryMin} ${j.salaryCurrency || 'USD'}/ano`
         : null;
+      const jobUrl = j.url || j.applyUrl || (j.id ? `https://jobicy.com/jobs/${j.id}` : '');
+      // pubDate pode ser Unix timestamp (número) ou string ISO
+      const jobDate = typeof j.pubDate === 'number'
+        ? new Date(j.pubDate * 1000).toISOString()
+        : (j.pubDate || null);
       await insertJob(db, {
         title:       j.jobTitle,
         company:     j.companyName,
         city:        j.jobGeo || 'Remoto',
-        description: (j.jobDescription || '').replace(/<[^>]+>/g, '').substring(0, 2000),
-        url:         j.url,
-        salary:      salary,
+        description: (j.jobDescription || j.jobExcerpt || '').replace(/<[^>]+>/g, '').replace(/\u0000/g, '').substring(0, 2000),
+        url:         jobUrl,
+        salary,
         source:      'jobicy',
         category:    j.jobIndustry || '',
-        job_date:    j.pubDate || null,
+        job_date:    jobDate,
         deadline:    null
-      }).then(() => ok++).catch(e => console.warn('[empregos] jobicy insert:', e.message));
+      }).then(() => ok++).catch(e => { if (!firstErr) firstErr = e.message; });
     }
-    console.log(`[empregos] Jobicy: ${ok} vagas importadas`);
+    if (firstErr) console.warn('[empregos] Jobicy primeiro erro:', firstErr);
+    console.log(`[empregos] Jobicy: ${ok}/${jobs.length} vagas importadas`);
     return ok;
   } catch (e) {
     console.error('[empregos] Jobicy:', e.message);
@@ -619,24 +626,28 @@ router.post('/importar', async (req, res) => {
       const { data } = await axios.get('https://jobicy.com/api/v2/remote-jobs', { params: { count: 50 }, timeout: 15000 });
       const jobs = data.jobs || [];
       log.push(`✓ Jobicy: ${jobs.length} vagas recebidas`);
-      let ok = 0, err = 0;
+      let ok = 0, err = 0, firstErr = null;
       for (const j of jobs) {
         try {
           const salary = j.annualSalaryMin
             ? `${j.annualSalaryMin}–${j.annualSalaryMax || j.annualSalaryMin} ${j.salaryCurrency || 'USD'}/ano`
             : null;
+          const jobUrl = j.url || j.applyUrl || (j.id ? `https://jobicy.com/jobs/${j.id}` : '');
+          const jobDate = typeof j.pubDate === 'number'
+            ? new Date(j.pubDate * 1000).toISOString()
+            : (j.pubDate || null);
           await insertJob(req.db, {
             title: j.jobTitle, company: j.companyName,
             city: j.jobGeo || 'Remoto',
-            description: (j.jobDescription || '').replace(/<[^>]+>/g, '').substring(0, 2000),
-            url: j.url, salary,
+            description: (j.jobDescription || j.jobExcerpt || '').replace(/<[^>]+>/g, '').replace(/\u0000/g, '').substring(0, 2000),
+            url: jobUrl, salary,
             source: 'jobicy', category: j.jobIndustry || '',
-            job_date: j.pubDate || null, deadline: null
+            job_date: jobDate, deadline: null
           });
           ok++;
-        } catch (e) { err++; }
+        } catch (e) { err++; if (!firstErr) firstErr = e.message; }
       }
-      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}${firstErr ? ` — 1º erro: ${firstErr.substring(0, 120)}` : ''}`);
     } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
 
     // ── Himalayas (sem chave) ───────────────────────────────────
