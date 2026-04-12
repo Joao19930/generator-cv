@@ -1333,8 +1333,21 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
         <div style="font-size:12px;color:var(--t3);margin-bottom:16px;">Cola o texto do teu CV e a descrição da vaga para obteres o score ATS</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
           <div>
-            <label class="form-lbl">Texto do teu CV</label>
-            <textarea class="form-input" id="atsCvText" rows="9" placeholder="Cola aqui todo o texto do teu CV (sem formatação especial)..."></textarea>
+            <label class="form-lbl">O teu CV</label>
+            <!-- Zona de upload -->
+            <label id="atsUploadZone"
+              style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed var(--border);border-radius:10px;padding:16px 12px;margin-bottom:10px;cursor:pointer;transition:border-color .2s;background:#fafafa;text-align:center;"
+              onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"
+              ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+              ondragleave="this.style.borderColor='var(--border)'"
+              ondrop="handleAtsDrop(event)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span style="font-size:12px;font-weight:600;color:var(--t2);">Carregar PDF ou Word</span>
+              <span style="font-size:10px;color:var(--t4);">Arrasta aqui ou clica para seleccionar</span>
+              <input type="file" accept=".pdf,.docx" style="display:none" onchange="handleAtsFileUpload(this)">
+            </label>
+            <div style="font-size:10px;color:var(--t4);margin-bottom:6px;text-align:center;">— ou cola o texto directamente —</div>
+            <textarea class="form-input" id="atsCvText" rows="6" placeholder="Cola aqui todo o texto do teu CV..."></textarea>
           </div>
           <div>
             <label class="form-lbl">Descrição da vaga</label>
@@ -4732,6 +4745,57 @@ async function sendSupportMsg() {
 </div>
 <script>function showLimitModal(){ document.getElementById('limitModal').style.display='flex'; }</script>
 
+<!-- PDF.js + Mammoth para extracção de texto no ATS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+async function extractTextFromFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(s => s.str).join(' ') + '\n';
+    }
+    return text.trim();
+  } else if (ext === 'docx') {
+    const buf = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buf });
+    return result.value.trim();
+  }
+  throw new Error('Formato não suportado. Use PDF ou DOCX.');
+}
+
+async function handleAtsFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const zone = document.getElementById('atsUploadZone');
+  const textarea = document.getElementById('atsCvText');
+  zone.innerHTML = '<div style="color:var(--blue);font-size:12px;font-weight:600;">A extrair texto...</div>';
+  try {
+    const text = await extractTextFromFile(file);
+    textarea.value = text;
+    zone.innerHTML = `<div style="color:var(--green);font-size:12px;font-weight:600;">✓ ${file.name} — ${text.length} caracteres extraídos</div><label style="font-size:11px;color:var(--t3);cursor:pointer;text-decoration:underline;">Trocar ficheiro<input type="file" accept=".pdf,.docx" style="display:none" onchange="handleAtsFileUpload(this)"></label>`;
+  } catch (e) {
+    zone.innerHTML = `<div style="color:var(--red);font-size:12px;">✗ ${e.message}</div><label style="font-size:11px;color:var(--t3);cursor:pointer;text-decoration:underline;">Tentar novamente<input type="file" accept=".pdf,.docx" style="display:none" onchange="handleAtsFileUpload(this)"></label>`;
+  }
+}
+
+function handleAtsDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const fakeInput = { files: [file] };
+    handleAtsFileUpload(fakeInput);
+  }
+}
+</script>
 <script src="/track.js"></script>
 <script src="/upgrade-modal.js"></script>
 <script src="/chat-widget.js"></script>
