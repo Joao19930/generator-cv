@@ -253,6 +253,109 @@ async function importJobicy(db) {
   }
 }
 
+// ── Importar via RemoteOK (sem chave) ────────────────────────
+async function importRemoteOK(db) {
+  try {
+    const { data } = await axios.get(
+      'https://remoteok.com/api',
+      { headers: { 'User-Agent': 'CVPremium/1.0 (cvpremium.net)' }, timeout: 15000 }
+    );
+    // Primeiro elemento é metadata — ignorar
+    const jobs = Array.isArray(data) ? data.filter(j => j.id && j.title) : [];
+    if (!jobs.length) { console.warn('[empregos] RemoteOK: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs.slice(0, 50)) {
+      const salary = j.salary_min
+        ? `${j.salary_min}–${j.salary_max || j.salary_min} ${j.salary_currency || 'USD'}/ano`
+        : null;
+      await insertJob(db, {
+        title:       j.position || j.title,
+        company:     j.company,
+        city:        'Remoto',
+        description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.apply_url || j.url || `https://remoteok.com/remote-jobs/${j.id}`,
+        salary,
+        source:      'remoteok',
+        category:    (j.tags && j.tags[0]) || '',
+        job_date:    j.date ? new Date(j.date * 1000).toISOString() : null,
+        deadline:    null
+      }).then(() => ok++).catch(e => console.warn('[empregos] remoteok insert:', e.message));
+    }
+    console.log(`[empregos] RemoteOK: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] RemoteOK:', e.message);
+    return 0;
+  }
+}
+
+// ── Importar via Himalayas (sem chave) ────────────────────────
+async function importHimalayas(db) {
+  try {
+    const { data } = await axios.get(
+      'https://himalayas.app/jobs/api',
+      { params: { limit: 50 }, timeout: 15000 }
+    );
+    const jobs = data.jobs || [];
+    if (!jobs.length) { console.warn('[empregos] Himalayas: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs) {
+      const loc = Array.isArray(j.locations) && j.locations.length ? j.locations[0] : 'Remoto';
+      await insertJob(db, {
+        title:       j.title,
+        company:     j.company?.name || j.companyName || '',
+        city:        typeof loc === 'string' ? loc : (loc.name || 'Remoto'),
+        description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.applyUrl || j.url || '',
+        salary:      j.salary ? String(j.salary).substring(0, 100) : null,
+        source:      'himalayas',
+        category:    (j.tags && j.tags[0]) || '',
+        job_date:    j.publishedAt || null,
+        deadline:    null
+      }).then(() => ok++).catch(e => console.warn('[empregos] himalayas insert:', e.message));
+    }
+    console.log(`[empregos] Himalayas: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] Himalayas:', e.message);
+    return 0;
+  }
+}
+
+// ── Importar via The Muse (sem chave) ─────────────────────────
+async function importTheMuse(db) {
+  try {
+    const { data } = await axios.get(
+      'https://www.themuse.com/api/public/jobs',
+      { params: { page: 0, descending: true }, timeout: 15000 }
+    );
+    const jobs = data.results || [];
+    if (!jobs.length) { console.warn('[empregos] The Muse: 0 resultados'); return 0; }
+    let ok = 0;
+    for (const j of jobs) {
+      const loc = j.locations && j.locations[0] ? j.locations[0].name : 'Internacional';
+      const cat = j.categories && j.categories[0] ? j.categories[0].name : '';
+      await insertJob(db, {
+        title:       j.name,
+        company:     j.company?.name || '',
+        city:        loc,
+        description: (j.contents || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+        url:         j.refs?.landing_page || '',
+        salary:      null,
+        source:      'themuse',
+        category:    cat,
+        job_date:    j.publication_date || null,
+        deadline:    null
+      }).then(() => ok++).catch(e => console.warn('[empregos] themuse insert:', e.message));
+    }
+    console.log(`[empregos] The Muse: ${ok} vagas importadas`);
+    return ok;
+  } catch (e) {
+    console.error('[empregos] The Muse:', e.message);
+    return 0;
+  }
+}
+
 // ── Importar via Jooble ───────────────────────────────────────
 async function importJooble(db) {
   const key = process.env.JOOBLE_API_KEY;
@@ -352,10 +455,12 @@ async function seedDemoJobs(db) {
 }
 
 // ── Função principal (chamada pelo cron e no arranque) ────────
+const ALL_EXTERNAL_SOURCES = `'adzuna','jooble','arbeitnow','remotive','jobicy','remoteok','himalayas','themuse'`;
+
 async function cleanOldInternational(db) {
   const r = await db.request()
     .query(`DELETE FROM jobs
-            WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')
+            WHERE source IN (${ALL_EXTERNAL_SOURCES})
               AND job_date < NOW() - INTERVAL '20 days'
             RETURNING id`)
     .catch(() => ({ recordset: [] }));
@@ -369,7 +474,7 @@ async function importJobs(db) {
     await migrateTable(db);
     // Apagar vagas antigas antes de re-importar (evita duplicados)
     await db.request()
-      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')`)
+      .query(`DELETE FROM jobs WHERE source IN (${ALL_EXTERNAL_SOURCES})`)
       .catch(() => {});
 
     let total = 0;
@@ -380,6 +485,9 @@ async function importJobs(db) {
     total += await importArbeitnow(db);
     total += await importRemotive(db);
     total += await importJobicy(db);
+    total += await importRemoteOK(db);
+    total += await importHimalayas(db);
+    total += await importTheMuse(db);
 
     if (!total) {
       console.log('[empregos] Todas as APIs falharam — a usar vagas demo');
@@ -431,7 +539,7 @@ router.post('/importar', async (req, res) => {
 
     // Apagar vagas importadas anteriores
     const del = await req.db.request()
-      .query(`DELETE FROM jobs WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy') RETURNING id`)
+      .query(`DELETE FROM jobs WHERE source IN (${ALL_EXTERNAL_SOURCES}) RETURNING id`)
       .catch(() => ({ recordset: [] }));
     log.push(`✓ ${del.recordset?.length || 0} vagas antigas apagadas`);
 
@@ -535,10 +643,85 @@ router.post('/importar', async (req, res) => {
       log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
     } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
 
+    // ── RemoteOK (sem chave) ────────────────────────────────────
+    try {
+      const { data } = await axios.get('https://remoteok.com/api',
+        { headers: { 'User-Agent': 'CVPremium/1.0 (cvpremium.net)' }, timeout: 15000 });
+      const jobs = Array.isArray(data) ? data.filter(j => j.id && j.title) : [];
+      log.push(`✓ RemoteOK: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs.slice(0, 50)) {
+        try {
+          const salary = j.salary_min
+            ? `${j.salary_min}–${j.salary_max || j.salary_min} ${j.salary_currency || 'USD'}/ano`
+            : null;
+          await insertJob(req.db, {
+            title: j.position || j.title, company: j.company, city: 'Remoto',
+            description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.apply_url || j.url || `https://remoteok.com/remote-jobs/${j.id}`, salary,
+            source: 'remoteok', category: (j.tags && j.tags[0]) || '',
+            job_date: j.date ? new Date(j.date * 1000).toISOString() : null, deadline: null
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ RemoteOK erro: ${e.message.substring(0, 100)}`); }
+
+    // ── Himalayas (sem chave) ───────────────────────────────────
+    try {
+      const { data } = await axios.get('https://himalayas.app/jobs/api',
+        { params: { limit: 50 }, timeout: 15000 });
+      const jobs = data.jobs || [];
+      log.push(`✓ Himalayas: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs) {
+        try {
+          const loc = Array.isArray(j.locations) && j.locations.length ? j.locations[0] : 'Remoto';
+          await insertJob(req.db, {
+            title: j.title, company: j.company?.name || j.companyName || '',
+            city: typeof loc === 'string' ? loc : (loc.name || 'Remoto'),
+            description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.applyUrl || j.url || '',
+            salary: j.salary ? String(j.salary).substring(0, 100) : null,
+            source: 'himalayas', category: (j.tags && j.tags[0]) || '',
+            job_date: j.publishedAt || null, deadline: null
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ Himalayas erro: ${e.message.substring(0, 100)}`); }
+
+    // ── The Muse (sem chave) ────────────────────────────────────
+    try {
+      const { data } = await axios.get('https://www.themuse.com/api/public/jobs',
+        { params: { page: 0, descending: true }, timeout: 15000 });
+      const jobs = data.results || [];
+      log.push(`✓ The Muse: ${jobs.length} vagas recebidas`);
+      let ok = 0, err = 0;
+      for (const j of jobs) {
+        try {
+          const loc = j.locations && j.locations[0] ? j.locations[0].name : 'Internacional';
+          const cat = j.categories && j.categories[0] ? j.categories[0].name : '';
+          await insertJob(req.db, {
+            title: j.name, company: j.company?.name || '',
+            city: loc,
+            description: (j.contents || '').replace(/<[^>]+>/g, '').substring(0, 2000),
+            url: j.refs?.landing_page || '',
+            salary: null, source: 'themuse', category: cat,
+            job_date: j.publication_date || null, deadline: null
+          });
+          ok++;
+        } catch (e) { err++; }
+      }
+      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
+    } catch (e) { log.push(`✗ The Muse erro: ${e.message.substring(0, 100)}`); }
+
     // Remover vagas internacionais com mais de 20 dias
     const oldDel = await req.db.request()
       .query(`DELETE FROM jobs
-              WHERE source IN ('adzuna','jooble','arbeitnow','remotive','jobicy')
+              WHERE source IN (${ALL_EXTERNAL_SOURCES})
                 AND job_date < NOW() - INTERVAL '20 days'
               RETURNING id`)
       .catch(() => ({ recordset: [] }));
@@ -548,7 +731,7 @@ router.post('/importar', async (req, res) => {
     // Contagem final de vagas importadas de APIs externas
     const cnt = await req.db.request().query(
       `SELECT source, COUNT(*) AS n FROM jobs
-       WHERE source IN ('adzuna','arbeitnow','remotive','jobicy') GROUP BY source`
+       WHERE source IN (${ALL_EXTERNAL_SOURCES}) GROUP BY source`
     ).catch(() => ({ recordset: [] }));
     const totals = cnt.recordset.map(r => `${r.source}:${r.n}`).join(', ');
     const totalImported = cnt.recordset.reduce((s, r) => s + parseInt(r.n || 0), 0);
