@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a3a6b">
     <title>Editor de CV - CV Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -261,14 +264,30 @@
             .sidebar-col { position: static; }
         }
         @media (max-width: 600px) {
-            nav { padding: 0 16px; }
-            .container { padding: 76px 14px 40px; }
-            .form-section { padding: 20px 16px; }
+            nav { padding: 0 12px; height: 54px; }
+            nav .logo { font-size: 17px; }
+            nav .nav-right { gap: 6px; }
+            nav .nav-right a { padding: 7px 10px; font-size: 12px; }
+            #btnPreviewToggle { padding: 7px 10px; font-size: 12px; min-height: 36px; }
+            .container { padding: 70px 12px 40px; }
+            .form-section { padding: 18px 14px; }
             .form-row { grid-template-columns: 1fr; }
             .form-row.three { grid-template-columns: 1fr 1fr; }
             .templates-scroll { grid-template-columns: repeat(2, 1fr); }
-            .page-title { font-size: 20px; }
+            .page-title { font-size: 19px; }
+            .page-sub { font-size: 13px; }
             .editor-layout { grid-template-columns: 1fr; }
+            /* 16px prevents iOS auto-zoom on input focus */
+            input, select, textarea { font-size: 16px !important; }
+            .form-input, .form-select, .form-textarea { font-size: 16px; padding: 12px 14px; }
+            /* Larger tap targets for buttons */
+            .btn-add, .btn-remove, .btn-move { min-height: 40px; min-width: 40px; }
+            .section-nav-btn { min-height: 44px; padding: 10px 16px; }
+        }
+        @media (max-width: 400px) {
+            .page-title { font-size: 17px; }
+            .form-row.three { grid-template-columns: 1fr; }
+            .templates-scroll { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>

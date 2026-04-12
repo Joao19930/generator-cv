@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a0a">
     <title>Preview CV - CV Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -439,6 +442,20 @@
         .tmpl-13 .lang-sep { color: #666; }
         .tmpl-13 .ats-note { background: #f0fff0; border: 1px solid #22c55e; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 11px; color: #166534; display: flex; gap: 8px; align-items: center; }
 
+        @media(max-width:768px){
+            nav { padding: 12px 16px; }
+            .logo { font-size: 18px; }
+            .nav-right { gap: 8px; }
+            .btn-download { padding: 9px 14px; font-size: 13px; min-height: 44px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+            .preview-wrapper { padding: 70px 8px 40px; }
+            .preview-frame { width: 100%; max-width: 210mm; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+        @media(max-width:480px){
+            nav { padding: 10px 12px; }
+            .logo { font-size: 16px; }
+            .btn-download { font-size: 12px; padding: 8px 12px; }
+            .preview-wrapper { padding: 62px 4px 32px; }
+        }
         @media print {
             nav, .payment-overlay, .ats-note { display: none !important; }
             body { background: white; }

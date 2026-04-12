@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2563EB">
 <title>CV Premium — Painel</title>
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-27FLX4R868"></script>
@@ -489,7 +493,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 .bnav-more-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 2px;cursor:pointer;color:var(--t3);font-size:9px;font-weight:600;border:none;background:none;font-family:'Sora',sans-serif;}
 
 @media(max-width:768px){
-  body{overflow:auto;font-size:15px;}
+  body{overflow:auto;font-size:15px;-webkit-text-size-adjust:100%;}
   /* Minimum readable font size on mobile for Angolan users */
   .cv-name{font-size:13px!important;}
   .cv-meta{font-size:12px!important;}
@@ -551,6 +555,39 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
   .dist-hero{padding:20px 16px;}
   .dist-hero h2{font-size:17px;}
   .dist-form{padding:16px;}
+  /* iOS smooth scroll */
+  .sb-nav,.content,.cat-tabs{-webkit-overflow-scrolling:touch;}
+  /* Prevent tap highlight */
+  .sb-item,.sb-sub,.sb-group-hdr,.btn-primary,.btn-ghost,.tb-ico{-webkit-tap-highlight-color:transparent;}
+  /* Minimum tap target size */
+  .btn-primary,.btn-ghost{min-height:44px;padding:10px 16px;}
+  .tb-ico{min-width:44px;min-height:44px;}
+  /* Inputs must be 16px to prevent iOS zoom */
+  input,select,textarea{font-size:16px!important;}
+  /* CV grid minimum touch-friendly */
+  .cvs-grid{grid-template-columns:repeat(2,1fr);}
+  /* Bottom nav tap areas */
+  .bnav-item{min-height:56px;padding:8px 4px;}
+}
+@media(max-width:480px){
+  .topbar{height:50px;}
+  .tb-title{font-size:13px;}
+  .stats-row{grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-card{padding:10px 12px;}
+  .stat-v{font-size:16px;}
+  .tpl-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .cvs-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .content{padding:12px 10px 80px;}
+  .modal-box{max-height:96vh;border-radius:16px 16px 0 0;}
+  .modal-tpl-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:360px){
+  .content{padding:10px 8px 76px;}
+  .stats-row{gap:6px;}
+  .tpl-grid{gap:6px;}
+  .cvs-grid{gap:6px;}
+  .stat-v{font-size:15px;}
+  .stat-l{font-size:10px;}
 }
 
 /* ── ONBOARDING ──────────────────────────────────── */

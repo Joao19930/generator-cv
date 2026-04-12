@@ -7,6 +7,9 @@
 <meta name="description" content="Descobre os planos da CV Premium. Plano gratuito disponível. Plano Semanal por 4.000 Akz e Plano Mensal por 10.000 Akz.">
 <meta name="keywords" content="cv premium preço, planos cv angola, currículo profissional preço, cv premium angola">
 <meta name="robots" content="index, follow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2563EB">
 <link rel="canonical" href="https://cvpremium.net/pricing">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cvpremium.net/pricing">
@@ -479,6 +482,22 @@
     .hero { padding: 48px 16px 40px; }
     .plans-section { padding: 0 16px 48px; }
     .features-section, .compare-section, .faq-section { padding: 48px 16px; }
+    input, select, textarea { font-size: 16px !important; }
+  }
+  @media (max-width: 480px) {
+    .urgency-bar { font-size: 12px; padding: 8px 12px; }
+    .hero h1 { font-size: clamp(24px, 7vw, 36px); }
+    .hero p { font-size: 14px; }
+    .plans-grid { grid-template-columns: 1fr; }
+    .plan-card { padding: 24px 20px; }
+    .plan-cta { min-height: 50px; font-size: 16px; padding: 14px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .compare-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .faq-q { padding: 14px 16px; min-height: 50px; }
+    .nav-btn { min-height: 40px; padding: 9px 16px; }
+  }
+  @media (max-width: 360px) {
+    .hero h1 { font-size: 22px; }
+    .hero-trust { flex-direction: column; gap: 6px; align-items: flex-start; }
   }
 </style>
 </head>
