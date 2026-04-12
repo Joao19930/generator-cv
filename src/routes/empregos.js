@@ -253,42 +253,6 @@ async function importJobicy(db) {
   }
 }
 
-// ── Importar via RemoteOK (sem chave) ────────────────────────
-async function importRemoteOK(db) {
-  try {
-    const { data } = await axios.get(
-      'https://remoteok.com/api',
-      { headers: { 'User-Agent': 'CVPremium/1.0 (cvpremium.net)' }, timeout: 15000 }
-    );
-    // Primeiro elemento é metadata — ignorar
-    const jobs = Array.isArray(data) ? data.filter(j => j.id && j.title) : [];
-    if (!jobs.length) { console.warn('[empregos] RemoteOK: 0 resultados'); return 0; }
-    let ok = 0;
-    for (const j of jobs.slice(0, 50)) {
-      const salary = j.salary_min
-        ? `${j.salary_min}–${j.salary_max || j.salary_min} ${j.salary_currency || 'USD'}/ano`
-        : null;
-      await insertJob(db, {
-        title:       j.position || j.title,
-        company:     j.company,
-        city:        'Remoto',
-        description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
-        url:         j.apply_url || j.url || `https://remoteok.com/remote-jobs/${j.id}`,
-        salary,
-        source:      'remoteok',
-        category:    (j.tags && j.tags[0]) || '',
-        job_date:    j.date ? new Date(j.date * 1000).toISOString() : null,
-        deadline:    null
-      }).then(() => ok++).catch(e => console.warn('[empregos] remoteok insert:', e.message));
-    }
-    console.log(`[empregos] RemoteOK: ${ok} vagas importadas`);
-    return ok;
-  } catch (e) {
-    console.error('[empregos] RemoteOK:', e.message);
-    return 0;
-  }
-}
-
 // ── Importar via Himalayas (sem chave) ────────────────────────
 async function importHimalayas(db) {
   try {
@@ -455,7 +419,7 @@ async function seedDemoJobs(db) {
 }
 
 // ── Função principal (chamada pelo cron e no arranque) ────────
-const ALL_EXTERNAL_SOURCES = `'adzuna','jooble','arbeitnow','remotive','jobicy','remoteok','himalayas','themuse'`;
+const ALL_EXTERNAL_SOURCES = `'adzuna','jooble','arbeitnow','remotive','jobicy','himalayas','themuse'`;
 
 async function cleanOldInternational(db) {
   const r = await db.request()
@@ -485,7 +449,6 @@ async function importJobs(db) {
     total += await importArbeitnow(db);
     total += await importRemotive(db);
     total += await importJobicy(db);
-    total += await importRemoteOK(db);
     total += await importHimalayas(db);
     total += await importTheMuse(db);
 
@@ -642,31 +605,6 @@ router.post('/importar', async (req, res) => {
       }
       log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
     } catch (e) { log.push(`✗ Jobicy erro: ${e.message.substring(0, 100)}`); }
-
-    // ── RemoteOK (sem chave) ────────────────────────────────────
-    try {
-      const { data } = await axios.get('https://remoteok.com/api',
-        { headers: { 'User-Agent': 'CVPremium/1.0 (cvpremium.net)' }, timeout: 15000 });
-      const jobs = Array.isArray(data) ? data.filter(j => j.id && j.title) : [];
-      log.push(`✓ RemoteOK: ${jobs.length} vagas recebidas`);
-      let ok = 0, err = 0;
-      for (const j of jobs.slice(0, 50)) {
-        try {
-          const salary = j.salary_min
-            ? `${j.salary_min}–${j.salary_max || j.salary_min} ${j.salary_currency || 'USD'}/ano`
-            : null;
-          await insertJob(req.db, {
-            title: j.position || j.title, company: j.company, city: 'Remoto',
-            description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
-            url: j.apply_url || j.url || `https://remoteok.com/remote-jobs/${j.id}`, salary,
-            source: 'remoteok', category: (j.tags && j.tags[0]) || '',
-            job_date: j.date ? new Date(j.date * 1000).toISOString() : null, deadline: null
-          });
-          ok++;
-        } catch (e) { err++; }
-      }
-      log.push(`  → Inseridas: ${ok} | Erros: ${err}`);
-    } catch (e) { log.push(`✗ RemoteOK erro: ${e.message.substring(0, 100)}`); }
 
     // ── Himalayas (sem chave) ───────────────────────────────────
     try {
