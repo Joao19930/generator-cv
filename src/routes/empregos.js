@@ -367,7 +367,7 @@ async function importJooble(db) {
   try {
     const { data } = await axios.post(
       `https://jooble.org/api/${key}`,
-      { keywords: '', location: 'Angola', resultsOnPage: 50 },
+      { keywords: 'remote', location: '', resultsOnPage: 50 },
       { timeout: 15000 }
     );
     const jobs = data.jobs || [];
@@ -552,7 +552,7 @@ router.post('/importar', async (req, res) => {
       try {
         const { data } = await axios.post(
           `https://jooble.org/api/${joobleKey}`,
-          { keywords: '', location: 'Angola', resultsOnPage: 50 },
+          { keywords: 'remote', location: '', resultsOnPage: 50 },
           { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
         );
         const jobs = data.jobs || [];
