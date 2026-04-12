@@ -4053,10 +4053,20 @@ async function loadPaymentRequests() {
     setEl('payRevTotal',          (revConfirmed + revPending).toLocaleString('pt-AO') + ' Kz');
     setEl('payRevTotalCount',     (approved.length + pending.length) + ' pedidos totais');
 
-    // Display filtered list
-    const r = await fetch(API + '/api/admin/payment-requests?status='+status, { headers: { Authorization: 'Bearer ' + TOKEN } });
-    const d = await r.json();
-    let requests = (d.requests || []).filter(req => _payPeriodFilter(req, period));
+    // Display filtered list — reutilizar dados já carregados
+    let allLoaded;
+    if (status === 'pending')  allLoaded = pending;
+    else if (status === 'approved') allLoaded = approved;
+    else {
+      // rejected ou vazio: fetch separado
+      try {
+        const rF = await fetch(API + '/api/admin/payment-requests?status=' + (status||'rejected'), { headers: { Authorization: 'Bearer ' + TOKEN } });
+        if (!rF.ok) throw new Error('Erro ' + rF.status);
+        const dF = await rF.json();
+        allLoaded = (dF.requests || []).filter(req => _payPeriodFilter(req, period));
+      } catch(_) { allLoaded = []; }
+    }
+    let requests = allLoaded;
     if (!requests.length) { el.innerHTML = `<div style="color:var(--t4);font-size:13px;padding:24px;text-align:center;">Nenhum pedido ${status||'encontrado'}${period?' neste período':''}.</div>`; return; }
     el.innerHTML = requests.map(req => {
       const note = req.AdminNote || req.admin_note || '';
