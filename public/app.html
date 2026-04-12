@@ -1782,6 +1782,26 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
 const API = '/api';
 let userPlan = 'free', userInfo = {}, allCVs = [], allTpls = [], allJobs = [], allCourses = [], allCoaches = [], allTestis = [], selTpl = null;
 
+// Interceptar fetch global — redirecionar para login se token expirado
+const _origFetch = window.fetch.bind(window);
+window.fetch = async function(...args) {
+  const res = await _origFetch(...args);
+  if (res.status === 401) {
+    // Clonar para poder ler sem consumir o stream
+    const clone = res.clone();
+    try {
+      const d = await clone.json();
+      if (d.error === 'Token inválido' || d.error === 'Acesso negado') {
+        localStorage.removeItem('cv_token');
+        localStorage.removeItem('cv_user');
+        window.location.href = '/login?session=expired';
+        return res;
+      }
+    } catch(_) {}
+  }
+  return res;
+};
+
 const CURATED_TPLS = [
   {id:'cf1',name:'Clássico Azul',slug:'cf-classico-azul',tplType:'com_foto',cat:'Com Foto',color:'blue',premium:false},
   {id:'cf2',name:'Executivo Escuro',slug:'cf-executivo-escuro',tplType:'com_foto',cat:'Com Foto',color:'navy',premium:true},

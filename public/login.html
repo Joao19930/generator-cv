@@ -244,6 +244,15 @@ if (params.get('redirect') === 'editor') {
   document.getElementById('redirectNote').style.display = 'flex';
 }
 
+// Sessão expirada (token inválido no mobile)
+if (params.get('session') === 'expired') {
+  const el = document.getElementById('alertBox');
+  if (el) {
+    el.textContent = 'A tua sessão expirou. Faz login novamente para continuar.';
+    el.className = 'alert alert-error show';
+  }
+}
+
 // Mostrar erro de OAuth (Google/LinkedIn)
 const oauthErr = params.get('error');
 const oauthDetail = params.get('detail');

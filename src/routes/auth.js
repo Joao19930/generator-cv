@@ -22,7 +22,7 @@ const oauth2Client = new OAuth2Client(
 
 const signToken = (user) =>
   jwt.sign({ id: user.Id, email: user.Email, role: user.Role, plan: user.Plan || user.plan },
-    process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+    process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '30d' });
 
 // ── POST /api/auth/register ──────────────────────────────────
 router.post('/register', authLimiter, async (req, res) => {
