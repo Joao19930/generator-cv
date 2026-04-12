@@ -14,6 +14,9 @@ const { sql } = require('../config/database');
 async function migrateTable(db) {
   await db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS salary VARCHAR(100)`).catch(() => {});
   await db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS source VARCHAR(100)`).catch(() => {});
+  await db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS job_date DATE`).catch(() => {});
+  await db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS end_date DATE`).catch(() => {});
+  await db.request().query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS imported_at TIMESTAMP`).catch(() => {});
 }
 
 // ── Construir WHERE dinamicamente (parâmetros seguros) ────────
@@ -57,7 +60,7 @@ router.get('/', async (req, res) => {
 
     const [rows, cnt] = await Promise.all([
       r1.query(`SELECT id, title, company, city, country, category, description,
-                       salary, url, source, job_date, created_at, image_url, vacancies
+                       salary, url, source, job_date, end_date, imported_at, created_at, image_url, vacancies
                 FROM jobs ${where}
                 ORDER BY created_at DESC
                 LIMIT @lim OFFSET @off`),
@@ -91,18 +94,28 @@ router.get('/destacadas', async (req, res) => {
 });
 
 // ── Inserir uma vaga (INSERT simples sem @param duplicado) ────
-async function insertJob(db, { title, company, city, description, url, salary, source, category }) {
+async function insertJob(db, { title, company, city, description, url, salary, source, category, job_date, deadline }) {
+  // Normalizar datas recebidas da API
+  const parseDate = v => {
+    if (!v) return null;
+    try { const d = new Date(v); return isNaN(d.getTime()) ? null : d; } catch { return null; }
+  };
+  const jd = parseDate(job_date);
+  const dl = parseDate(deadline);
+
   await db.request()
-    .input('t',   sql.VarChar, (title   || '').substring(0, 255))
-    .input('c',   sql.VarChar, (company || 'Empresa').substring(0, 255))
-    .input('l',   sql.VarChar, (city    || '').substring(0, 100))
-    .input('cat', sql.VarChar, (category|| '').substring(0, 100))
-    .input('d',   sql.VarChar, (description || '').substring(0, 2000))
-    .input('u',   sql.VarChar, (url     || '').substring(0, 500))
-    .input('s',   sql.VarChar, salary ? String(salary).substring(0, 100) : null)
-    .input('src', sql.VarChar, source || 'manual')
-    .query(`INSERT INTO jobs (title,company,city,category,description,url,salary,source,active,created_at)
-            VALUES (@t,@c,@l,@cat,@d,@u,@s,@src,TRUE,NOW())`);
+    .input('t',    sql.VarChar,   (title   || '').substring(0, 255))
+    .input('c',    sql.VarChar,   (company || 'Empresa').substring(0, 255))
+    .input('l',    sql.VarChar,   (city    || '').substring(0, 100))
+    .input('cat',  sql.VarChar,   (category|| '').substring(0, 100))
+    .input('d',    sql.VarChar,   (description || '').substring(0, 2000))
+    .input('u',    sql.VarChar,   (url     || '').substring(0, 500))
+    .input('s',    sql.VarChar,   salary ? String(salary).substring(0, 100) : null)
+    .input('src',  sql.VarChar,   source || 'manual')
+    .input('jd',   sql.Date,      jd)
+    .input('dl',   sql.Date,      dl)
+    .query(`INSERT INTO jobs (title,company,city,category,description,url,salary,source,job_date,end_date,imported_at,active,created_at)
+            VALUES (@t,@c,@l,@cat,@d,@u,@s,@src,@jd,@dl,NOW(),TRUE,NOW())`);
 }
 
 // ── Importar via Adzuna ───────────────────────────────────────
@@ -128,7 +141,9 @@ async function importAdzuna(db) {
         url:         j.redirect_url,
         salary:      j.salary_min ? `${Math.round(j.salary_min).toLocaleString('pt-AO')} Kz` : null,
         source:      'adzuna',
-        category:    j.category?.tag || ''
+        category:    j.category?.tag || '',
+        job_date:    j.created || null,
+        deadline:    null
       }).catch(e => console.warn('[empregos] insert err:', e.message));
     }
     console.log(`[empregos] Adzuna: ${results.length} vagas importadas`);
@@ -158,7 +173,9 @@ async function importArbeitnow(db) {
         url:         j.url,
         salary:      null,
         source:      'arbeitnow',
-        category:    (j.tags && j.tags[0]) || ''
+        category:    (j.tags && j.tags[0]) || '',
+        job_date:    j.created_at || null,
+        deadline:    null
       }).then(() => ok++).catch(e => console.warn('[empregos] arbeitnow insert:', e.message));
     }
     console.log(`[empregos] Arbeitnow: ${ok} vagas importadas`);
@@ -188,7 +205,9 @@ async function importRemotive(db) {
         url:         j.url,
         salary:      j.salary ? String(j.salary).substring(0, 100) : null,
         source:      'remotive',
-        category:    j.category || ''
+        category:    j.category || '',
+        job_date:    j.publication_date || null,
+        deadline:    null
       }).then(() => ok++).catch(e => console.warn('[empregos] remotive insert:', e.message));
     }
     console.log(`[empregos] Remotive: ${ok} vagas importadas`);
@@ -221,7 +240,9 @@ async function importJobicy(db) {
         url:         j.url,
         salary:      salary,
         source:      'jobicy',
-        category:    j.jobIndustry || ''
+        category:    j.jobIndustry || '',
+        job_date:    j.pubDate || null,
+        deadline:    null
       }).then(() => ok++).catch(e => console.warn('[empregos] jobicy insert:', e.message));
     }
     console.log(`[empregos] Jobicy: ${ok} vagas importadas`);
@@ -253,7 +274,9 @@ async function importJooble(db) {
         description: j.snippet,
         url:         j.link,
         salary:      j.salary,
-        source:      'jooble'
+        source:      'jooble',
+        job_date:    j.updated || null,
+        deadline:    null
       }).catch(e => console.warn('[empregos] insert err:', e.message));
     }
     console.log(`[empregos] Jooble: ${jobs.length} vagas importadas`);
@@ -416,7 +439,8 @@ router.post('/importar', async (req, res) => {
               title: j.title, company: j.company?.display_name, city: j.location?.display_name,
               description: j.description, url: j.redirect_url,
               salary: j.salary_min ? `${Math.round(j.salary_min).toLocaleString('pt-AO')} Kz` : null,
-              source: 'adzuna', category: j.category?.tag || ''
+              source: 'adzuna', category: j.category?.tag || '',
+              job_date: j.created || null, deadline: null
             });
             ok++;
           } catch (e) { err++; }
@@ -440,7 +464,8 @@ router.post('/importar', async (req, res) => {
             city: j.remote ? 'Remoto' : (j.location || ''),
             description: (j.description || '').substring(0, 2000),
             url: j.url, salary: null,
-            source: 'arbeitnow', category: (j.tags && j.tags[0]) || ''
+            source: 'arbeitnow', category: (j.tags && j.tags[0]) || '',
+            job_date: j.created_at || null, deadline: null
           });
           ok++;
         } catch (e) { err++; }
@@ -461,7 +486,8 @@ router.post('/importar', async (req, res) => {
             city: j.candidate_required_location || 'Remoto',
             description: (j.description || '').replace(/<[^>]+>/g, '').substring(0, 2000),
             url: j.url, salary: j.salary ? String(j.salary).substring(0, 100) : null,
-            source: 'remotive', category: j.category || ''
+            source: 'remotive', category: j.category || '',
+            job_date: j.publication_date || null, deadline: null
           });
           ok++;
         } catch (e) { err++; }
@@ -485,7 +511,8 @@ router.post('/importar', async (req, res) => {
             city: j.jobGeo || 'Remoto',
             description: (j.jobDescription || '').replace(/<[^>]+>/g, '').substring(0, 2000),
             url: j.url, salary,
-            source: 'jobicy', category: j.jobIndustry || ''
+            source: 'jobicy', category: j.jobIndustry || '',
+            job_date: j.pubDate || null, deadline: null
           });
           ok++;
         } catch (e) { err++; }

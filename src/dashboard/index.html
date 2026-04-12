@@ -557,7 +557,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="table-toolbar">
       <div class="table-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Pesquisar vagas..." oninput="filterJobs(this.value)"></div>
     </div>
-    <table><thead><tr><th>Imagem</th><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Estado</th><th>Publicado</th><th style="width:160px;">Acções</th></tr></thead>
+    <table><thead><tr><th>Imagem</th><th>Cargo</th><th>Empresa</th><th>Localização</th><th>Categoria</th><th>Data da Vaga</th><th>Prazo</th><th>Importado</th><th style="width:160px;">Acções</th></tr></thead>
     <tbody id="jobsTable"></tbody></table>
     <div class="pagination"><span id="jobsPagInfo">0 vagas</span></div>
   </div>
@@ -2267,31 +2267,58 @@ function filterCVs(v) {
 }
 
 // ── RENDER JOBS ──────────────────────────────────────────────
+function _fmtDate(v) {
+  if (!v) return '—';
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch { return '—'; }
+}
+function _deadlineBadge(v) {
+  if (!v) return '<span style="color:var(--t4);font-size:11px;">—</span>';
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return '<span style="color:var(--t4);font-size:11px;">—</span>';
+    const now = new Date();
+    const diff = Math.ceil((d - now) / 86400000);
+    const label = d.toLocaleDateString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (diff < 0)  return `<span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;" title="Prazo expirado">${label} ⚠️</span>`;
+    if (diff <= 7) return `<span style="background:#fef3c7;color:#d97706;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;" title="${diff}d restantes">${label} (${diff}d)</span>`;
+    return `<span style="background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;">${label}</span>`;
+  } catch { return '—'; }
+}
 function renderJobs() {
   document.getElementById('jobsPagInfo').textContent = state.jobs.length + ' vagas';
   const tbody = document.getElementById('jobsTable');
   if (!state.jobs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px;">Nenhuma vaga.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--t4);padding:24px;">Nenhuma vaga.</td></tr>';
     return;
   }
   tbody.innerHTML = state.jobs.map(j => {
-    const id      = j.Id       || j.id;
-    const title   = j.Title    || j.title   || '—';
-    const company = j.Company  || j.company || '—';
-    const city    = j.City     || j.city    || '';
-    const country = j.Country  || j.country || '';
-    const cat     = j.Category || j.category|| '—';
-    const date    = j.JobDate  || j.date    || '—';
-    const img     = j.ImageUrl || j.image_url || '';
-    const pinned  = j.Pinned   || j.pinned  || false;
+    const id         = j.Id          || j.id;
+    const title      = j.Title       || j.title      || '—';
+    const company    = j.Company     || j.company    || '—';
+    const city       = j.City        || j.city       || '';
+    const country    = j.Country     || j.country    || '';
+    const cat        = j.Category    || j.category   || '—';
+    const img        = j.ImageUrl    || j.image_url  || '';
+    const pinned     = j.Pinned      || j.pinned     || false;
+    const jobDate    = j.JobDate     || j.job_date   || null;
+    const endDate    = j.EndDate     || j.end_date   || null;
+    const importedAt = j.ImportedAt  || j.imported_at|| j.CreatedAt || j.created_at || null;
+    const source     = j.Source      || j.source     || '';
+    const srcBadge   = source && source !== 'manual' && source !== 'demo'
+      ? `<span style="background:#eff6ff;color:#1d4ed8;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px;">${source}</span>` : '';
     return `<tr style="${pinned ? 'background:#fffbeb;' : ''}">
       <td>${img ? `<img src="${img}" style="width:60px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" onerror="this.style.display='none'">` : '<span style="font-size:10px;color:var(--t4);">—</span>'}</td>
-      <td><div style="display:flex;align-items:center;gap:6px;">${pinned ? '<span title="Afixada" style="font-size:14px;">📌</span>' : ''}<span style="font-weight:600;">${title}</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">${pinned ? '<span title="Afixada" style="font-size:13px;">📌</span>' : ''}<span style="font-weight:600;">${title}</span>${srcBadge}</div></td>
       <td>${company}</td>
       <td>${city}${city && country ? ', ' : ''}${country}</td>
       <td><span class="badge badge-blue">${cat}</span></td>
-      <td><span class="badge badge-green">Activo</span></td>
-      <td>${date && date !== '—' ? String(date).substring(0,10) : '—'}</td>
+      <td style="font-size:11px;color:var(--t2);">${_fmtDate(jobDate)}</td>
+      <td>${_deadlineBadge(endDate)}</td>
+      <td style="font-size:11px;color:var(--t3);">${_fmtDate(importedAt)}</td>
       <td><div class="action-btns">
         <button class="btn btn-xs" onclick="togglePinJob(${id})" style="background:${pinned?'#f59e0b':'#f3f4f6'};color:${pinned?'#fff':'var(--t2)'};border:none;" title="${pinned?'Desafixar':'Afixar'}">${pinned?'📌 Afixada':'📌 Afixar'}</button>
         <button class="btn btn-ghost btn-xs" onclick="editJob(${id})">Editar</button>
@@ -2315,8 +2342,22 @@ async function togglePinJob(id) {
 }
 
 function filterJobs(v) {
-  const f = state.jobs.filter(j => ((j.Title||j.title||'')+(j.Company||j.company||'')).toLowerCase().includes(v.toLowerCase()));
+  const q = v.toLowerCase();
+  const tbody = document.getElementById('jobsTable');
+  const f = state.jobs.filter(j =>
+    ((j.Title||j.title||'')+(j.Company||j.company||'')+(j.Category||j.category||'')+(j.Source||j.source||''))
+    .toLowerCase().includes(q)
+  );
   document.getElementById('jobsPagInfo').textContent = f.length + ' vagas';
+  // Re-render apenas as filtradas
+  if (!f.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--t4);padding:24px;">Sem resultados.</td></tr>';
+    return;
+  }
+  const saved = state.jobs;
+  state.jobs = f;
+  renderJobs();
+  state.jobs = saved;
 }
 
 async function importarVagasAdzuna() {
@@ -2332,8 +2373,12 @@ async function importarVagasAdzuna() {
     const log = data.log || [];
     const hasError = log.some(l => l.startsWith('✗'));
     const last = log[log.length - 1] || '';
+    const now = new Date().toLocaleString('pt-AO', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
     alert.innerHTML = `<div style="background:${hasError?'#fef2f2':'#f0fdf4'};border:1px solid ${hasError?'#fecaca':'#86efac'};border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;">
-      <strong>${hasError ? '⚠️ Importação com erros' : '✓ Importação concluída'}</strong><br>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <strong>${hasError ? '⚠️ Importação com erros' : '✅ Importação concluída'}</strong>
+        <span style="font-size:11px;color:var(--t3);">📅 ${now}</span>
+      </div>
       ${log.map(l => `<div style="margin-top:4px;color:${l.startsWith('✗')?'#dc2626':'#166534'}">${l}</div>`).join('')}
     </div>`;
     // Recarregar lista de vagas
