@@ -771,21 +771,24 @@ router.patch('/payment-requests/:id/approve', async (req, res) => {
     } else if (type === 'cover_letter') {
       await req.db.request().input('uid', sql.Int, uid)
         .query('UPDATE users SET cover_credits = COALESCE(cover_credits,0)+1 WHERE id=@uid');
-    } else if (type === 'week') {
-      await req.db.request().input('uid', sql.Int, uid)
-        .query(`UPDATE users SET plan='semanal', plan_expiry=NOW()+INTERVAL '7 days', access_until=NOW()+INTERVAL '7 days' WHERE id=@uid`);
-    } else if (type === 'month') {
-      await req.db.request().input('uid', sql.Int, uid)
-        .query(`UPDATE users SET plan='mensal', plan_expiry=NOW()+INTERVAL '30 days', access_until=NOW()+INTERVAL '30 days' WHERE id=@uid`);
+    } else if (type === 'week' || type === 'semanal') {
+      const exp7 = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+      await req.db.request().input('uid', sql.Int, uid).input('exp', sql.DateTime, exp7)
+        .query(`UPDATE users SET plan='semanal', plan_expiry=@exp, access_until=@exp WHERE id=@uid`);
+    } else if (type === 'month' || type === 'mensal') {
+      const exp30 = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+      await req.db.request().input('uid', sql.Int, uid).input('exp', sql.DateTime, exp30)
+        .query(`UPDATE users SET plan='mensal', plan_expiry=@exp, access_until=@exp WHERE id=@uid`);
     } else if (type === 'biweek') {
-      await req.db.request().input('uid', sql.Int, uid)
-        .query(`UPDATE users SET plan='semanal', plan_expiry=NOW()+INTERVAL '15 days', access_until=NOW()+INTERVAL '15 days' WHERE id=@uid`);
+      const exp15 = new Date(Date.now() + 15*24*60*60*1000).toISOString();
+      await req.db.request().input('uid', sql.Int, uid).input('exp', sql.DateTime, exp15)
+        .query(`UPDATE users SET plan='semanal', plan_expiry=@exp, access_until=@exp WHERE id=@uid`);
     }
 
     // Notificar utilizador via Socket.IO em tempo real
     try {
       const { socketConnector } = require('../connectors');
-      const planLabel = { week: 'Semanal', month: 'Mensal', biweek: 'Semanal' }[type] || 'Premium';
+      const planLabel = { week:'Semanal', semanal:'Semanal', month:'Mensal', mensal:'Mensal', biweek:'Semanal' }[type] || 'Premium';
       socketConnector.toUser(uid, 'plan_upgraded', { plan: planLabel, message: `O teu Plano ${planLabel} foi activado!` });
     } catch (_) {}
 

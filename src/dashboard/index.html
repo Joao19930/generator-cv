@@ -4123,22 +4123,39 @@ function pedirComprovativo(id, email) {
 async function approvePayReq(id) {
   if (!confirm('Aprovar este pedido e conceder acesso ao utilizador?')) return;
   try {
-    const r = await fetch(API+'/api/admin/payment-requests/'+id+'/approve', { method:'PATCH', headers:{ Authorization:'Bearer '+TOKEN, 'Content-Type':'application/json' }, body: JSON.stringify({}) });
+    const r = await fetch(API+'/api/admin/payment-requests/'+id+'/approve', {
+      method:'PATCH',
+      headers:{ Authorization:'Bearer '+TOKEN, 'Content-Type':'application/json' },
+      body: JSON.stringify({})
+    });
     if (r.ok) {
-      _logAction('Aprovou pagamento', `Pedido #${id} aprovado — plano activado`);
-      loadPaymentRequests(); checkPendingPayments();
-    } else alert('Erro ao aprovar.');
-  } catch(e) { alert('Erro: '+e.message); }
+      try { _logAction('Aprovou pagamento', `Pedido #${id} aprovado — plano activado`); } catch(_) {}
+      loadPaymentRequests();
+      checkPendingPayments();
+    } else {
+      let msg = 'Erro ao aprovar.';
+      try { const d = await r.json(); msg = d.error || msg; } catch(_) {}
+      alert(msg);
+    }
+  } catch(e) { alert('Erro de ligação: ' + e.message); }
 }
 async function rejectPayReq(id) {
   const note = prompt('Motivo da rejeição (opcional):') || '';
   try {
-    const r = await fetch(API+'/api/admin/payment-requests/'+id+'/reject', { method:'PATCH', headers:{ Authorization:'Bearer '+TOKEN, 'Content-Type':'application/json' }, body: JSON.stringify({ note }) });
+    const r = await fetch(API+'/api/admin/payment-requests/'+id+'/reject', {
+      method:'PATCH',
+      headers:{ Authorization:'Bearer '+TOKEN, 'Content-Type':'application/json' },
+      body: JSON.stringify({ note })
+    });
     if (r.ok) {
-      _logAction('Rejeitou pagamento', `Pedido #${id}${note ? ' — ' + note : ''}`);
+      try { _logAction('Rejeitou pagamento', `Pedido #${id}${note ? ' — ' + note : ''}`); } catch(_) {}
       loadPaymentRequests();
-    } else alert('Erro ao rejeitar.');
-  } catch(e) { alert('Erro: '+e.message); }
+    } else {
+      let msg = 'Erro ao rejeitar.';
+      try { const d = await r.json(); msg = d.error || msg; } catch(_) {}
+      alert(msg);
+    }
+  } catch(e) { alert('Erro de ligação: ' + e.message); }
 }
 async function checkPendingPayments() {
   try {
@@ -4213,17 +4230,21 @@ function logout() {
 // ── ACTION LOG ────────────────────────────────────────────────
 const ACTION_LOG_KEY = 'adm_action_log';
 function _logAction(action, detail) {
-  const logs = JSON.parse(localStorage.getItem(ACTION_LOG_KEY) || '[]');
+  let logs = [];
+  try { logs = JSON.parse(localStorage.getItem(ACTION_LOG_KEY) || '[]'); } catch(_) {}
+  if (!Array.isArray(logs)) logs = [];
   const adminLabel = (_currentUser?.name || _currentUser?.email || 'Admin').split('@')[0];
   logs.unshift({ action, detail, ts: new Date().toISOString(), admin: adminLabel });
   if (logs.length > 200) logs.splice(200);
-  localStorage.setItem(ACTION_LOG_KEY, JSON.stringify(logs));
+  try { localStorage.setItem(ACTION_LOG_KEY, JSON.stringify(logs)); } catch(_) {}
   _renderActionLog();
 }
 function _renderActionLog() {
   const el = document.getElementById('actionLogList');
   if (!el) return;
-  const logs = JSON.parse(localStorage.getItem(ACTION_LOG_KEY) || '[]');
+  let logs = [];
+  try { logs = JSON.parse(localStorage.getItem(ACTION_LOG_KEY) || '[]'); } catch(_) {}
+  if (!Array.isArray(logs)) logs = [];
   if (!logs.length) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t4);font-size:13px;">Nenhuma acção registada ainda.</div>';
     return;
