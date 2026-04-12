@@ -1354,6 +1354,35 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);displa
             <textarea class="form-input" id="atsJobDesc" rows="9" placeholder="Cola aqui a descrição completa da vaga a que te candidatas..."></textarea>
           </div>
         </div>
+        <!-- Validação de palavras-chave por função -->
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;">Palavras-chave por função:</div>
+            <select id="atsRoleSelect" class="form-input" style="flex:1;min-width:180px;max-width:280px;padding:7px 10px;font-size:12px;" onchange="renderAtsKeywords()">
+              <option value="">— Seleccione a função —</option>
+              <option value="tecnologia">Tecnologia / IT</option>
+              <option value="financas">Finanças / Banca</option>
+              <option value="contabilidade">Contabilidade</option>
+              <option value="comercial">Comercial / Vendas</option>
+              <option value="marketing">Marketing / Digital</option>
+              <option value="gestao">Gestão / Administração</option>
+              <option value="rh">Recursos Humanos</option>
+              <option value="engenharia">Engenharia Civil</option>
+              <option value="oil">Petróleo / Oil & Gás</option>
+              <option value="logistica">Logística / Supply Chain</option>
+              <option value="saude">Saúde / Medicina</option>
+              <option value="juridico">Jurídico / Direito</option>
+              <option value="seguros">Seguros</option>
+              <option value="educacao">Educação / Formação</option>
+            </select>
+            <button class="btn-ghost" style="font-size:11px;padding:7px 14px;white-space:nowrap;" onclick="validateAtsKeywords()">🔍 Verificar no CV</button>
+          </div>
+          <div id="atsKeywordCloud" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;">
+            <span style="font-size:11px;color:var(--t4);font-style:italic;">Seleccione uma função para ver as palavras-chave.</span>
+          </div>
+          <div id="atsKeywordSummary" style="display:none;margin-top:10px;font-size:11px;color:var(--t3);"></div>
+        </div>
+
         <button class="btn-primary" id="atsAnalyzeBtn" onclick="runATSScore()">⚡ Analisar Score ATS</button>
         <div id="atsResult" style="display:none;margin-top:18px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:18px;">
           <div style="display:flex;align-items:flex-end;gap:14px;">
@@ -4006,6 +4035,71 @@ function closeATSModal() { document.getElementById('atsModal').style.display = '
 function copyATSCV() {
   navigator.clipboard.writeText(document.getElementById('atsModalBody').textContent);
   const b = event.target; const t = b.textContent; b.textContent = '✓ Copiado!'; setTimeout(()=>b.textContent=t,1500);
+}
+
+const ATS_KEYWORDS = {
+  tecnologia: ['JavaScript','Python','Java','SQL','Node.js','React','REST API','Git','Docker','Cloud','AWS','Azure','Linux','Agile','Scrum','CI/CD','TypeScript','MongoDB','PostgreSQL','DevOps','Kubernetes','Segurança','API','Backend','Frontend','Full-Stack','Machine Learning','Base de Dados','Redes','Suporte Técnico'],
+  financas: ['Análise Financeira','Relatórios Financeiros','Excel','Power BI','Orçamento','Fluxo de Caixa','Crédito','Risco','Auditoria','Reconciliação','IFRS','Tesouraria','Investimento','KPIs','Balanço','Demonstração de Resultados','Compliance','Regulação','Gestão de Carteira','Due Diligence','Forecasting','SAP','Bloomberg'],
+  contabilidade: ['Contabilidade Geral','PGCA','IFRS','Balanço','Demonstração Financeira','Impostos','IVA','Declaração Fiscal','Lançamentos Contabilísticos','Reconciliação Bancária','Folha de Salários','Amortizações','Activo Fixo','Excel','SAP','Auditoria','Provisões','Relatórios','AGT','BNA'],
+  comercial: ['Vendas','Prospeção','CRM','Negociação','Carteira de Clientes','Metas','KPIs','B2B','B2C','Pipeline','Conversão','Retenção','Fidelização','Proposta Comercial','Pós-venda','Quota','Revenue','Up-sell','Cross-sell','Salesforce','Account Management','Key Account'],
+  marketing: ['SEO','SEM','Google Ads','Meta Ads','Redes Sociais','Conteúdo','Copywriting','Email Marketing','Funil de Vendas','Leads','Conversão','Analytics','Google Analytics','KPIs','Branding','Campanha','ROI','Engagement','LinkedIn','Instagram','Facebook','WordPress','Mailchimp','Growth Hacking','A/B Testing'],
+  gestao: ['Gestão de Projectos','PMI','PMP','Agile','Scrum','KPIs','OKRs','Liderança','Estratégia','Orçamento','Relatórios','Stakeholders','Riscos','Equipa','MS Project','Tomada de Decisão','Processos','Optimização','Change Management','Governance','Excel','PowerPoint'],
+  rh: ['Recrutamento','Selecção','Avaliação de Desempenho','Formação','Desenvolvimento','Gestão de Talento','Folha de Salários','Legislação Laboral','Onboarding','Cultura Organizacional','Engagement','Competências','Job Description','Entrevistas','Assessment','People Analytics','HRIS','Plano de Carreira','Retenção','Compensação e Benefícios'],
+  engenharia: ['AutoCAD','Gestão de Obra','Betão Armado','Estruturas','Fiscalização','Orçamentação','MS Project','Normas ASTM','ISO','Segurança na Obra','Topografia','BIM','Revit','Saneamento','Infra-estruturas','Hidráulica','Geotecnia','Fundações','Controlo de Qualidade','Pavimentação'],
+  oil: ['Upstream','Downstream','Exploração','Produção','Drilling','Well Completion','HSE','SIMOPS','OCTG','Reservoir','Petroleum Engineering','Offshore','Onshore','Pipeline','Refinaria','LNG','FPSO','Contrato PSA','Petrofísica','Geologia','Sísmica','Well Intervention','Blowout Preventer','QHSE'],
+  logistica: ['Supply Chain','Gestão de Stock','Armazém','Inventário','Logística','Transporte','Distribuição','ERP','SAP','WMS','Importação','Exportação','Incoterms','Aduanas','Procurement','Compras','Fornecedores','KPIs','Lead Time','Just-in-Time','Optimização de Rotas','Cross-Docking'],
+  saude: ['Clínica','Diagnóstico','Prescrição','Triagem','Urgência','Medicina Geral','Cirurgia','Farmacologia','Anatomia','Fisioterapia','Enfermagem','Saúde Pública','Epidemiologia','Bioquímica','ECG','Imagiologia','Pediatria','Ginecologia','Medicina Interna','Gestão Hospitalar','ISO 9001'],
+  juridico: ['Direito Comercial','Contratos','Litígio','Arbitragem','Direito Laboral','Direito Petrolífero','Compliance','Due Diligence','M&A','Propriedade Intelectual','Direito Fiscal','Regulação','Tribunal','Pareceres Jurídicos','Negociação','CNUDCI','OHADA','Direito Internacional','Gestão de Risco Legal'],
+  seguros: ['Apólices','Sinistros','Subscrição','Resseguro','Actuariado','Prémios','Risco','Peritos','Cobertura','Vida','Não-vida','Saúde Empresarial','Auto','Habitação','Responsabilidade Civil','ARSEG','Mediação','Carteira','Renovações','Indemnizações','Reservas Técnicas'],
+  educacao: ['Curriculum','Pedagogia','Avaliação','Plano de Aulas','Formação','E-learning','LMS','Moodle','Didáctica','Gestão de Turma','Investigação','Publicações','Tese','Orientação','Tutoria','Competências','Gamificação','Educação Inclusiva','Psicologia Educacional']
+};
+
+const ATS_KW_STATE = { role: '', validated: false };
+
+function renderAtsKeywords() {
+  const role = document.getElementById('atsRoleSelect').value;
+  const cloud = document.getElementById('atsKeywordCloud');
+  const summary = document.getElementById('atsKeywordSummary');
+  ATS_KW_STATE.role = role;
+  ATS_KW_STATE.validated = false;
+  summary.style.display = 'none';
+  if (!role) {
+    cloud.innerHTML = '<span style="font-size:11px;color:var(--t4);font-style:italic;">Seleccione uma função para ver as palavras-chave.</span>';
+    return;
+  }
+  const kws = ATS_KEYWORDS[role] || [];
+  cloud.innerHTML = kws.map(kw =>
+    `<span id="kw-${kw.replace(/[^a-zA-Z0-9]/g,'_')}" style="display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;color:var(--t2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;transition:all .2s;">${kw}</span>`
+  ).join('');
+}
+
+function validateAtsKeywords() {
+  const role = document.getElementById('atsRoleSelect').value;
+  if (!role) { alert('Seleccione primeiro uma função.'); return; }
+  const cvText = (document.getElementById('atsCvText').value || '').toLowerCase();
+  if (!cvText) { alert('Cola ou carrega o teu CV primeiro.'); return; }
+  const kws = ATS_KEYWORDS[role] || [];
+  let found = 0;
+  kws.forEach(kw => {
+    const id = 'kw-' + kw.replace(/[^a-zA-Z0-9]/g, '_');
+    const el = document.getElementById(id);
+    if (!el) return;
+    const present = cvText.includes(kw.toLowerCase());
+    if (present) {
+      found++;
+      el.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#16a34a;border:1px solid #86efac;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;transition:all .2s;';
+      el.innerHTML = '✓ ' + kw;
+    } else {
+      el.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;transition:all .2s;';
+      el.innerHTML = '✗ ' + kw;
+    }
+  });
+  const pct = Math.round((found / kws.length) * 100);
+  const summary = document.getElementById('atsKeywordSummary');
+  const col = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
+  summary.style.display = 'block';
+  summary.innerHTML = `<strong style="color:${col};">${found} de ${kws.length} palavras-chave presentes (${pct}%)</strong> — <span style="color:var(--t3);">As palavras a vermelho estão em falta no teu CV.</span>`;
+  ATS_KW_STATE.validated = true;
 }
 
 async function runATSScore() {
