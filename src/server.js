@@ -738,6 +738,45 @@ async function autoMigrate(pool) {
       created_at   TIMESTAMP DEFAULT NOW()
     )`,
     `ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS image_url TEXT`,
+    // ── Pagamentos (Stripe/PayPal/BCI) ──────────────────────────
+    `CREATE TABLE IF NOT EXISTS payments (
+      id                SERIAL PRIMARY KEY,
+      user_id           INTEGER       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      amount            NUMERIC(10,2) NOT NULL,
+      currency          VARCHAR(10)   DEFAULT 'USD',
+      status            VARCHAR(20)   NOT NULL DEFAULT 'pending',
+      method            VARCHAR(30),
+      stripe_session_id VARCHAR(255),
+      paypal_order_id   VARCHAR(255),
+      created_at        TIMESTAMP     DEFAULT NOW()
+    )`,
+    // ── Pedidos de pagamento manual (BCI/Akz) ───────────────────
+    `CREATE TABLE IF NOT EXISTS payment_requests (
+      id           SERIAL PRIMARY KEY,
+      user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type         VARCHAR(20) NOT NULL,
+      amount       INTEGER NOT NULL,
+      cv_id        INTEGER REFERENCES cvs(id) ON DELETE SET NULL,
+      status       VARCHAR(20) DEFAULT 'pending',
+      admin_note   VARCHAR(255),
+      created_at   TIMESTAMP DEFAULT NOW(),
+      approved_at  TIMESTAMP
+    )`,
+    // ── Colunas users que podem faltar em BDs antigas ─────────────
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login    TIMESTAMP`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_id   VARCHAR(100)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id     VARCHAR(100)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active     BOOLEAN DEFAULT TRUE`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone         VARCHAR(30)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url    VARCHAR(500)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_public_id VARCHAR(255)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_at     TIMESTAMP`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_by     INTEGER`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_expiry   TIMESTAMP`,
+    // ── Índices de performance ───────────────────────────────────
+    `CREATE INDEX IF NOT EXISTS ix_payments_user_id    ON payments(user_id)`,
+    `CREATE INDEX IF NOT EXISTS ix_payments_status     ON payments(status, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS ix_pay_req_status      ON payment_requests(status, created_at DESC)`,
   ];
   for (const sql of stmts) {
     try { await pool.request().query(sql); }

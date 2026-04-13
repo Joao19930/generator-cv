@@ -41,28 +41,37 @@ router.get('/overview', async (req, res) => {
     const cached = await redisConnector.get('admin:overview');
     if (cached) return res.json(cached);
 
-    // Garantir que a tabela page_views existe
+    // Garantir tabelas auxiliares
     await req.db.request().query(`CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, page VARCHAR(100) NOT NULL, user_id INTEGER, session_id VARCHAR(64), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
+    await req.db.request().query(`CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, amount NUMERIC(10,2) NOT NULL, currency VARCHAR(10) DEFAULT 'USD', status VARCHAR(20) NOT NULL DEFAULT 'pending', method VARCHAR(30), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
 
-    const r = await req.db.request().query(`
-      SELECT
+    const safeQ = async (q) => {
+      try { return (await req.db.request().query(q)).recordset[0]; }
+      catch(_) { return {}; }
+    };
+
+    const [base, revenue, pageviews] = await Promise.all([
+      safeQ(`SELECT
         (SELECT COUNT(*) FROM users) AS total_users,
         (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days') AS new_users_30d,
         (SELECT COUNT(*) FROM users WHERE plan = 'premium') AS premium_users,
         (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '1 day') AS new_today,
         (SELECT COUNT(*) FROM cvs) AS total_cvs,
         (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '1 day') AS cvs_today,
-        (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d,
-        (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid') AS total_revenue,
-        (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS revenue_30d,
-        (SELECT COUNT(*) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS paid_30d,
-        (SELECT COUNT(*)::float / NULLIF((SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days'),0)*100
-         FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days') AS conversion_rate,
-        (SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day') AS visitors_today,
-        (SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days') AS visitors_7d,
-        (SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day') AS pageviews_today
-    `);
-    const data = r.recordset[0];
+        (SELECT COUNT(*) FROM cvs WHERE created_at >= NOW() - INTERVAL '7 days') AS cvs_7d`),
+      safeQ(`SELECT
+        COALESCE((SELECT SUM(amount) FROM payments WHERE status='paid'),0) AS total_revenue,
+        COALESCE((SELECT SUM(amount) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days'),0) AS revenue_30d,
+        COALESCE((SELECT COUNT(*) FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days'),0) AS paid_30d,
+        COALESCE((SELECT COUNT(*)::float / NULLIF((SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days'),0)*100
+         FROM payments WHERE status='paid' AND created_at >= NOW() - INTERVAL '30 days'),0) AS conversion_rate`),
+      safeQ(`SELECT
+        COALESCE((SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day'),0) AS visitors_today,
+        COALESCE((SELECT COUNT(DISTINCT session_id) FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days'),0) AS visitors_7d,
+        COALESCE((SELECT COUNT(*) FROM page_views WHERE created_at >= NOW() - INTERVAL '1 day'),0) AS pageviews_today`),
+    ]);
+
+    const data = { ...base, ...revenue, ...pageviews };
     await redisConnector.set('admin:overview', data, 300);
     res.json(data);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -73,13 +82,18 @@ router.get('/users', async (req, res) => {
   const { page = 1, limit = 20, search = '', plan = '' } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
   try {
+    // Garantir tabela payments (pode não existir em BDs migradas)
+    await req.db.request().query(`CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, amount NUMERIC(10,2) NOT NULL, currency VARCHAR(10) DEFAULT 'USD', status VARCHAR(20) NOT NULL DEFAULT 'pending', method VARCHAR(30), created_at TIMESTAMP DEFAULT NOW())`).catch(()=>{});
+
     const r = await req.db.request()
       .input('s',      sql.NVarChar, `%${search}%`)
       .input('plan',   sql.NVarChar, plan)
       .input('offset', sql.Int, offset)
       .input('limit',  sql.Int, Number(limit))
       .query(`
-        SELECT u.id, u.name, u.email, u.plan, u.role, u.is_active, u.created_at, u.last_login,
+        SELECT u.id, u.name, u.email, u.plan, u.role,
+               COALESCE(u.is_active, TRUE) AS is_active,
+               u.created_at, u.last_login,
                CASE WHEN u.linkedin_id IS NOT NULL THEN 'linkedin'
                     WHEN u.google_id   IS NOT NULL THEN 'google'
                     ELSE 'email' END AS auth_source,

@@ -1791,41 +1791,49 @@ async function loadPanelData(id) {
   if (_loaded.has(id) || !TOKEN) return;
   _loaded.add(id); // marcar imediatamente para evitar duplos pedidos
   const h = { headers: { Authorization: 'Bearer ' + TOKEN } };
+  let ok = false;
   try {
     if (id === 'users') {
       const r = await fetch(API + '/api/admin/users?limit=500', h);
-      if (r.ok) { const d = await r.json(); state.users = d.users || []; renderUsers(); updatePlanCounts(); }
+      if (r.ok) { const d = await r.json(); state.users = d.users || []; renderUsers(); updatePlanCounts(); ok = true; }
+      else {
+        const err = await r.json().catch(()=>({error:'Erro desconhecido'}));
+        document.getElementById('usersTable').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Erro ao carregar: ${err.error||r.status}</td></tr>`;
+      }
     } else if (id === 'cvs') {
       const r = await fetch(API + '/api/cv', h);
-      if (r.ok) { const d = await r.json(); state.cvs = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); }
+      if (r.ok) { const d = await r.json(); state.cvs = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); ok = true; }
     } else if (id === 'templates') {
       const r = await fetch(API + '/api/admin/template-items', h);
-      if (r.ok) { const d = await r.json(); state.templates = d.templates || []; renderTemplates(); }
+      if (r.ok) { const d = await r.json(); state.templates = d.templates || []; renderTemplates(); ok = true; }
     } else if (id === 'jobs') {
       const r = await fetch(API + '/api/admin/jobs', h);
-      if (r.ok) { state.jobs = await r.json(); renderJobs(); }
+      if (r.ok) { state.jobs = await r.json(); renderJobs(); ok = true; }
     } else if (id === 'courses') {
       const r = await fetch(API + '/api/admin/courses', h);
-      if (r.ok) { state.courses = await r.json(); renderCourses(); }
+      if (r.ok) { state.courses = await r.json(); renderCourses(); ok = true; }
     } else if (id === 'coaches') {
       const r = await fetch(API + '/api/admin/coaches', h);
-      if (r.ok) { state.coaches = await r.json(); renderCoaches(); }
+      if (r.ok) { state.coaches = await r.json(); renderCoaches(); ok = true; }
     } else if (id === 'testimonials') {
       const r = await fetch(API + '/api/admin/testimonials', h);
-      if (r.ok) { state.testis = await r.json(); renderTestis(); }
+      if (r.ok) { state.testis = await r.json(); renderTestis(); ok = true; }
     } else if (id === 'analytics') {
-      loadAnalytics().catch(()=>{});
+      loadAnalytics().catch(()=>{}); ok = true;
     } else if (id === 'support') {
-      loadSupport().catch(()=>{});
+      loadSupport().catch(()=>{}); ok = true;
     } else if (id === 'staff') {
-      loadStaff().catch(()=>{});
+      loadStaff().catch(()=>{}); ok = true;
     } else if (id === 'legal-docs') {
-      loadLegalDocs().catch(()=>{});
+      loadLegalDocs().catch(()=>{}); ok = true;
+    } else {
+      ok = true;
     }
   } catch(e) {
-    _loaded.delete(id); // permitir retry se falhar
     console.error('panel load error:', id, e);
   }
+  // Se falhou, remover do _loaded para permitir retry ao clicar de novo
+  if (!ok) _loaded.delete(id);
 }
 
 /* ── Sparkline renderer ─────────────────────────────── */
