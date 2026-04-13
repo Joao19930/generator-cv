@@ -200,7 +200,11 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
     try {
       await exportPDF('cv-preview-paper', store.title || 'cv')
       toast.success('PDF exportado com sucesso!')
-    } catch { toast.error('Erro ao exportar PDF') }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[CVEditor] exportPDF error:', msg)
+      toast.error('Erro ao exportar PDF: ' + msg)
+    }
     finally { setExporting(false) }
   }
 
