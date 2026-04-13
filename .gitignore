@@ -2,7 +2,7 @@ node_modules/
 .env
 .env.*
 *.env
-package-lock.json
+# package-lock.json removido do gitignore — necessário para deploy seguro no Render
 mnt/
 vercel.json/
 *.log
