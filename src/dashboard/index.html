@@ -336,6 +336,7 @@ tbody tr:hover{background:#fafafa;}
     <div class="sb-section">Plataforma</div>
     <div class="si" onclick="showPanel('plans',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Planos & Preços</div>
     <div class="si" onclick="showPanel('analytics',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics<span class="si-badge" id="analyticsBadge" style="display:none">!</span></div>
+    <div class="si" onclick="showPanel('marketing',this)" id="si-marketing"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Marketing Auto.<span class="si-badge green" id="mktBadge" style="display:none">NOVO</span></div>
     <div class="si" onclick="showPanel('support',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Suporte<span class="si-badge" id="supportBadge" style="display:none">!</span></div>
     <div class="si" onclick="showPanel('distribution',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Partilha de CV</div>
     <div class="si" onclick="showPanel('settings',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Definições</div>
@@ -963,9 +964,208 @@ tbody tr:hover{background:#fafafa;}
   </div>
 </div>
 
+<!-- ══ MARKETING AUTOMATION PANEL ══════════════════════════ -->
+<div id="panel-marketing" class="panel">
+  <div class="panel-hdr">
+    <div>
+      <div class="panel-title">Marketing Automation</div>
+      <div class="panel-sub">Campanhas, automações comportamentais, segmentos e leads</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="loadMarketing()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Actualizar
+      </button>
+      <button class="btn btn-blue btn-sm" onclick="openCampaignModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova Campanha
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;" id="mktKpis">
+    <div class="stat-card"><div class="stat-icon" style="background:#eff6ff;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="stat-val" id="mktEventsToday">—</div><div class="stat-lbl">Eventos Hoje</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#dcfce7;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="stat-val" id="mktEmailsSent">—</div><div class="stat-lbl">Emails Enviados</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#faf5ff;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-val" id="mktOpenRate">—%</div><div class="stat-lbl">Taxa de Abertura</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fff7ed;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-val" id="mktLeads">—</div><div class="stat-lbl">Leads Capturados</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="mktTabs">
+    <div class="tab active" onclick="mktTab('funnel',this)">Funil de Conversão</div>
+    <div class="tab" onclick="mktTab('campaigns',this)">Campanhas</div>
+    <div class="tab" onclick="mktTab('rules',this)">Automação</div>
+    <div class="tab" onclick="mktTab('segments',this)">Segmentos</div>
+    <div class="tab" onclick="mktTab('leads',this)">Leads ATS</div>
+    <div class="tab" onclick="mktTab('events',this)">Top Eventos</div>
+  </div>
+
+  <!-- TAB: FUNIL -->
+  <div id="mkt-funnel" class="mkt-pane">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div class="funnel-step" style="padding:24px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Visitas</div>
+        <div style="font-size:28px;font-weight:800;color:var(--blue);" id="funnelVisits">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;">sessões únicas</div>
+      </div>
+      <div class="funnel-step" style="padding:24px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Registos</div>
+        <div style="font-size:28px;font-weight:800;color:#7c3aed;" id="funnelRegisters">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;" id="funnelRegPct">—% das visitas</div>
+      </div>
+      <div class="funnel-step" style="padding:24px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">CV Criado</div>
+        <div style="font-size:28px;font-weight:800;color:#f97316;" id="funnelCvCreated">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;" id="funnelCvPct">—% dos registos</div>
+      </div>
+      <div class="funnel-step" style="padding:24px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Viu Preços</div>
+        <div style="font-size:28px;font-weight:800;color:#f59e0b;" id="funnelPricing">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;" id="funnelPricingPct">—% dos CVs</div>
+      </div>
+      <div class="funnel-step" style="padding:24px 16px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Pagou</div>
+        <div style="font-size:28px;font-weight:800;color:#16a34a;" id="funnelPaid">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;" id="funnelPaidPct">—% dos que viram</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:14px;">Eventos mais frequentes (últimos 7 dias)</div>
+      <div id="mktTopEvents" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: CAMPANHAS -->
+  <div id="mkt-campaigns" class="mkt-pane" style="display:none;">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div style="font-size:13px;font-weight:700;">Campanhas</div>
+        <button class="btn btn-blue btn-sm" onclick="openCampaignModal()">+ Nova Campanha</button>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>Canal</th><th>Segmento</th><th>Estado</th><th>Enviados</th><th>Abertos</th><th>Criada</th><th>Acções</th>
+        </tr></thead>
+        <tbody id="mktCampaignsTbody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--t4);">A carregar...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: AUTOMAÇÃO -->
+  <div id="mkt-rules" class="mkt-pane" style="display:none;">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div>
+          <div style="font-size:13px;font-weight:700;">Regras de Automação Comportamental</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">Correm automaticamente a cada hora com base em eventos dos utilizadores</div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Regra</th><th>Gatilho</th><th>Delay</th><th>Canal</th><th>Estado</th><th>Activar</th></tr></thead>
+        <tbody id="mktRulesTbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t4);">A carregar...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: SEGMENTOS -->
+  <div id="mkt-segments" class="mkt-pane" style="display:none;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="mktSegmentsGrid">
+      <div style="padding:24px;text-align:center;color:var(--t4);">A carregar...</div>
+    </div>
+  </div>
+
+  <!-- TAB: LEADS -->
+  <div id="mkt-leads" class="mkt-pane" style="display:none;">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div style="font-size:13px;font-weight:700;">Leads — Ferramenta ATS Pública</div>
+        <div style="font-size:11px;color:var(--t3);">Utilizadores que usaram o Score ATS sem conta</div>
+      </div>
+      <table>
+        <thead><tr><th>Email</th><th>Score ATS</th><th>Fonte</th><th>Convertido</th><th>Data</th><th>Acção</th></tr></thead>
+        <tbody id="mktLeadsTbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t4);">A carregar...</td></tr></tbody>
+      </table>
+      <div class="pagination" id="mktLeadsPag" style="display:none;">
+        <span id="mktLeadsInfo"></span>
+        <div class="pg-btns" id="mktLeadsBtns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: TOP EVENTOS -->
+  <div id="mkt-events" class="mkt-pane" style="display:none;">
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:14px;">Volume de eventos por dia (últimos 14 dias)</div>
+      <div class="chart-area" id="mktDailyChart" style="height:200px;"></div>
+    </div>
+  </div>
+</div><!-- /panel-marketing -->
+
 </main>
 
 <!-- ══ MODALS ══════════════════════════════════════════════ -->
+
+<!-- CAMPAIGN MODAL -->
+<div class="modal-overlay" id="campaignModal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-hdr">
+      <div class="modal-title">Nova Campanha</div>
+      <button class="modal-close" onclick="closeModal('campaignModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-field">
+          <label>Nome da Campanha *</label>
+          <input type="text" id="campName" placeholder="Ex: Black Friday Angola 2026">
+        </div>
+        <div class="f-field">
+          <label>Canal</label>
+          <select id="campChannel">
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="sms">SMS</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-field">
+          <label>Segmento de Destino</label>
+          <select id="campSegment"><option value="">Todos os utilizadores</option></select>
+        </div>
+        <div class="f-field">
+          <label>Assunto (email)</label>
+          <input type="text" id="campSubject" placeholder="Ex: Oferta exclusiva para ti 🎯">
+        </div>
+      </div>
+      <div class="f-field">
+        <label>Corpo HTML (email) — suporta {{name}}, {{APP_URL}}</label>
+        <textarea id="campHtml" rows="5" placeholder="<h2>Olá {{name}}!</h2><p>Temos uma novidade para ti.</p><a href='{{APP_URL}}/pricing' class='btn'>Ver Oferta</a>"></textarea>
+      </div>
+      <div class="f-field">
+        <label>Texto simples (WhatsApp / SMS)</label>
+        <textarea id="campText" rows="3" placeholder="Olá {{name}}! Temos uma oferta em {{APP_URL}}/pricing"></textarea>
+        <div class="f-hint">Usado para WhatsApp e SMS. Variáveis disponíveis: {{name}}, {{APP_URL}}</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('campaignModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="saveCampaign('draft')">Guardar como Rascunho</button>
+      <button class="btn btn-blue" onclick="saveCampaign('send')">Criar e Enviar Agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAMPAIGN STATS MODAL -->
+<div class="modal-overlay" id="campStatsModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-hdr">
+      <div class="modal-title" id="campStatsTitle">Estatísticas da Campanha</div>
+      <button class="modal-close" onclick="closeModal('campStatsModal')">✕</button>
+    </div>
+    <div class="modal-body" id="campStatsBody">A carregar...</div>
+  </div>
+</div>
 
 <!-- EMAIL BROADCAST MODAL -->
 <div class="modal-overlay" id="emailBroadcastModal">
@@ -1444,6 +1644,30 @@ tbody tr:hover{background:#fafafa;}
 <script>
 const API = '';
 let TOKEN = localStorage.getItem('cv_token');
+
+// ── HELPERS GLOBAIS ──────────────────────────────────────────
+const fmt = (n) => (Number(n)||0).toLocaleString('pt-AO');
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('pt-AO', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+const apiFetch = async (url, method='GET', body=null) => {
+  const opts = { method, headers: { Authorization: 'Bearer ' + TOKEN } };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(API + url, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+};
+const showToast = (msg, type='success') => {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'24px', right:'24px', zIndex:'9999',
+    background: type==='error' ? '#dc2626' : '#16a34a',
+    color:'#fff', padding:'12px 20px', borderRadius:'8px',
+    fontSize:'13px', fontWeight:'700', boxShadow:'0 4px 12px rgba(0,0,0,.2)',
+    transition:'opacity .3s', opacity:'1'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
+};
 
 // ── ROLE DETECTION ──────────────────────────────────────────
 const OWNER_EMAIL = 'candidofaustinojoao@gmail.com';
@@ -4336,6 +4560,299 @@ function toggleDarkMode() {
     const s = document.getElementById('iconSun');  if (s) s.style.display = '';
   }
 })();
+
+// ══════════════════════════════════════════════════════════════
+// MARKETING AUTOMATION
+// ══════════════════════════════════════════════════════════════
+let _mktLoaded = false;
+let _mktSegments = [];
+let _mktLeadsPage = 1;
+
+// Activar tab do painel marketing
+function mktTab(name, el) {
+  document.querySelectorAll('.mkt-pane').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('#mktTabs .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('mkt-' + name).style.display = 'block';
+  el.classList.add('active');
+  if (name === 'campaigns')  loadMktCampaigns();
+  if (name === 'rules')      loadMktRules();
+  if (name === 'segments')   loadMktSegments();
+  if (name === 'leads')      loadMktLeads(1);
+  if (name === 'events')     loadMktEvents();
+}
+
+// Carregar tudo no painel marketing
+async function loadMarketing() {
+  if (!_mktLoaded) {
+    document.getElementById('mktBadge').style.display = '';
+    setTimeout(() => {
+      const b = document.getElementById('mktBadge');
+      if (b) b.style.display = 'none';
+    }, 4000);
+  }
+  _mktLoaded = true;
+  try {
+    const d = await apiFetch('/api/marketing/admin/dashboard');
+    document.getElementById('mktEventsToday').textContent = fmt(d.events_today);
+    document.getElementById('mktEmailsSent').textContent  = fmt(d.total_emails_sent);
+    document.getElementById('mktOpenRate').textContent    = d.open_rate + '%';
+    document.getElementById('mktLeads').textContent       = fmt(d.total_leads);
+
+    // Top eventos (funil tab)
+    if (d.top_events) {
+      const max = d.top_events[0]?.cnt || 1;
+      document.getElementById('mktTopEvents').innerHTML = d.top_events.map(e => `
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.event||e.Event}</div>
+          <div style="flex:1;background:var(--bg);border-radius:4px;height:8px;">
+            <div style="height:100%;background:var(--blue);border-radius:4px;width:${Math.round(((e.cnt||e.Cnt)/max)*100)}%"></div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);min-width:30px;text-align:right;">${e.cnt||e.Cnt}</div>
+        </div>`).join('');
+    }
+
+    // Diário para gráfico
+    if (d.daily_events) {
+      window._mktDailyData = d.daily_events;
+    }
+  } catch(e) { console.error('[mkt] dashboard', e); }
+
+  // Funil
+  try {
+    const f = await apiFetch('/api/marketing/admin/funnel');
+    document.getElementById('funnelVisits').textContent    = fmt(f.step_visits);
+    document.getElementById('funnelRegisters').textContent = fmt(f.step_registers);
+    document.getElementById('funnelCvCreated').textContent = fmt(f.step_cv_created);
+    document.getElementById('funnelPricing').textContent   = fmt(f.step_pricing);
+    document.getElementById('funnelPaid').textContent      = fmt(f.step_paid);
+    const pct = (a, b) => b > 0 ? ((a/b)*100).toFixed(1)+'%' : '—%';
+    document.getElementById('funnelRegPct').textContent     = pct(f.step_registers, f.step_visits) + ' das visitas';
+    document.getElementById('funnelCvPct').textContent      = pct(f.step_cv_created, f.step_registers) + ' dos registos';
+    document.getElementById('funnelPricingPct').textContent = pct(f.step_pricing, f.step_cv_created) + ' dos CVs';
+    document.getElementById('funnelPaidPct').textContent    = pct(f.step_paid, f.step_pricing) + ' dos que viram';
+  } catch(e) {}
+
+  // Pré-carregar segmentos para o modal
+  try {
+    _mktSegments = await apiFetch('/api/marketing/admin/segments');
+    const sel = document.getElementById('campSegment');
+    if (sel) {
+      sel.innerHTML = '<option value="">Todos os utilizadores</option>' +
+        _mktSegments.map(s => `<option value="${s.id||s.Id}">${s.name||s.Name} (${s.user_count||s.UserCount||'?'} users)</option>`).join('');
+    }
+  } catch(e) {}
+}
+
+async function loadMktCampaigns() {
+  try {
+    const camps = await apiFetch('/api/marketing/admin/campaigns');
+    const tbody = document.getElementById('mktCampaignsTbody');
+    if (!camps.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--t4);">Sem campanhas criadas</td></tr>'; return; }
+    const channelIcon = { email:'📧', whatsapp:'💬', sms:'📱' };
+    const statusBadge = { draft:'<span class="badge badge-gray">Rascunho</span>', sending:'<span class="badge badge-blue">A enviar</span>', sent:'<span class="badge badge-green">Enviada</span>', paused:'<span class="badge badge-orange">Pausada</span>' };
+    tbody.innerHTML = camps.map(c => {
+      const st = c.status||c.Status||'draft';
+      const sent = c.total_sent||c.TotalSent||0;
+      const opened = c.total_opened||c.TotalOpened||0;
+      const openRate = sent > 0 ? ((opened/sent)*100).toFixed(0)+'%' : '—';
+      return `<tr>
+        <td><div style="font-weight:600;font-size:13px;">${c.name||c.Name}</div><div style="font-size:11px;color:var(--t3);">${c.subject||c.Subject||''}</div></td>
+        <td>${channelIcon[c.channel||c.Channel]||'📧'} ${c.channel||c.Channel||'email'}</td>
+        <td style="font-size:12px;color:var(--t3);">${c.segment_name||c.SegmentName||'Todos'}</td>
+        <td>${statusBadge[st]||statusBadge.draft}</td>
+        <td style="font-weight:700;">${fmt(sent)}</td>
+        <td style="font-size:12px;">${fmt(opened)} <span style="color:var(--t4);">(${openRate})</span></td>
+        <td style="font-size:11px;color:var(--t3);">${fmtDate(c.created_at||c.CreatedAt)}</td>
+        <td><div style="display:flex;gap:4px;">
+          ${st !== 'sent' ? `<button class="btn btn-blue btn-xs" onclick="sendCampaign(${c.id||c.Id},'${c.name||c.Name}')">Enviar</button>` : ''}
+          <button class="btn btn-ghost btn-xs" onclick="viewCampStats(${c.id||c.Id},'${(c.name||c.Name).replace(/'/g,'\\\'\')}')">Stats</button>
+          ${st === 'draft' ? `<button class="btn btn-red btn-xs" onclick="deleteCampaign(${c.id||c.Id})">✕</button>` : ''}
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { document.getElementById('mktCampaignsTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--red);">Erro ao carregar campanhas</td></tr>'; }
+}
+
+async function loadMktRules() {
+  try {
+    const rules = await apiFetch('/api/marketing/admin/rules');
+    const tbody = document.getElementById('mktRulesTbody');
+    const chIcon = { email:'📧', whatsapp:'💬', sms:'📱' };
+    tbody.innerHTML = rules.map(r => {
+      const active = r.active||r.Active;
+      const delay  = r.delay_hours||r.DelayHours||0;
+      return `<tr>
+        <td><div style="font-weight:600;">${r.name||r.Name}</div><div style="font-size:11px;color:var(--t3);">${(r.subject||r.Subject||'').slice(0,50)}</div></td>
+        <td><span class="badge badge-blue" style="font-size:10px;">${r.trigger_event||r.TriggerEvent}</span></td>
+        <td style="font-size:12px;">${delay ? delay+'h depois' : 'Imediato'}</td>
+        <td>${chIcon[r.channel||r.Channel]||'📧'} ${r.channel||r.Channel||'email'}</td>
+        <td>${active ? '<span class="badge badge-green">Activa</span>' : '<span class="badge badge-gray">Inactiva</span>'}</td>
+        <td>
+          <button class="toggle ${active?'on':''}" onclick="toggleRule(${r.id||r.Id},${!active},this)" title="${active?'Desactivar':'Activar'}"></button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { document.getElementById('mktRulesTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Erro ao carregar regras</td></tr>'; }
+}
+
+async function loadMktSegments() {
+  try {
+    const segs = _mktSegments.length ? _mktSegments : await apiFetch('/api/marketing/admin/segments');
+    if (!_mktSegments.length) _mktSegments = segs;
+    document.getElementById('mktSegmentsGrid').innerHTML = segs.map(s => {
+      const color = s.color||s.Color||'#6366f1';
+      return `<div class="stat-card" style="cursor:default;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--t2);">${s.name||s.Name}</div>
+          <div style="width:10px;height:10px;border-radius:50%;background:${color};"></div>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:${color};">${fmt(s.user_count||s.UserCount||0)}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4;">${s.description||s.Description||''}</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;" onclick="openCampaignModal(${s.id||s.Id})">Enviar campanha →</button>
+      </div>`;
+    }).join('');
+  } catch(e) { document.getElementById('mktSegmentsGrid').innerHTML = '<div style="color:var(--red);padding:20px;">Erro ao carregar segmentos</div>'; }
+}
+
+async function loadMktLeads(page) {
+  _mktLeadsPage = page;
+  try {
+    const d = await apiFetch(`/api/marketing/admin/leads?page=${page}&limit=20`);
+    const tbody = document.getElementById('mktLeadsTbody');
+    if (!d.leads.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t4);">Sem leads</td></tr>'; return; }
+    tbody.innerHTML = d.leads.map(l => `<tr>
+      <td style="font-weight:600;">${l.email||l.Email}</td>
+      <td><span class="badge ${(l.ats_score||l.AtsScore||0)>=70?'badge-green':(l.ats_score||l.AtsScore||0)>=40?'badge-orange':'badge-red'}">${l.ats_score||l.AtsScore||'—'}</span></td>
+      <td style="font-size:12px;color:var(--t3);">${l.source||l.Source||'ats_public'}</td>
+      <td>${(l.converted||l.Converted)?'<span class="badge badge-green">✓ Sim</span>':'<span class="badge badge-gray">Não</span>'}</td>
+      <td style="font-size:11px;color:var(--t3);">${fmtDate(l.created_at||l.CreatedAt)}</td>
+      <td>${!(l.converted||l.Converted)?`<button class="btn btn-ghost btn-xs" onclick="convertLead(${l.id||l.Id},this)">Marcar convertido</button>`:'—'}</td>
+    </tr>`).join('');
+    // Paginação
+    const total = d.total||0; const limit = d.limit||20;
+    const pages = Math.ceil(total/limit);
+    const pag = document.getElementById('mktLeadsPag');
+    pag.style.display = pages > 1 ? '' : 'none';
+    document.getElementById('mktLeadsInfo').textContent = `${(page-1)*limit+1}–${Math.min(page*limit,total)} de ${total}`;
+    document.getElementById('mktLeadsBtns').innerHTML = Array.from({length:Math.min(pages,7)},(_,i)=>i+1)
+      .map(p=>`<button class="pg-btn ${p===page?'active':''}" onclick="loadMktLeads(${p})">${p}</button>`).join('');
+  } catch(e) { document.getElementById('mktLeadsTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Erro</td></tr>'; }
+}
+
+async function loadMktEvents() {
+  const data = window._mktDailyData || [];
+  if (!data.length) { document.getElementById('mktDailyChart').innerHTML = '<div style="width:100%;text-align:center;color:var(--t4);font-size:13px;">Sem dados de eventos ainda</div>'; return; }
+  const max = Math.max(...data.map(d => parseInt(d.cnt||d.Cnt)||0)) || 1;
+  document.getElementById('mktDailyChart').innerHTML = data.map(d => {
+    const cnt = parseInt(d.cnt||d.Cnt)||0;
+    const day = (d.day||d.Day||'').toString().slice(5); // MM-DD
+    return `<div class="chart-bar-wrap"><div class="chart-bar" style="height:${Math.round((cnt/max)*160)+20}px;" title="${cnt} eventos"></div><div class="chart-lbl">${day}</div></div>`;
+  }).join('');
+}
+
+// Acções
+function openCampaignModal(segmentId) {
+  const sel = document.getElementById('campSegment');
+  if (sel && segmentId) sel.value = segmentId;
+  openModal('campaignModal');
+}
+
+async function saveCampaign(mode) {
+  const name    = document.getElementById('campName').value.trim();
+  if (!name) { alert('O nome da campanha é obrigatório'); return; }
+  const payload = {
+    name,
+    channel:    document.getElementById('campChannel').value,
+    segment_id: document.getElementById('campSegment').value || null,
+    subject:    document.getElementById('campSubject').value,
+    body_html:  document.getElementById('campHtml').value,
+    body_text:  document.getElementById('campText').value,
+  };
+  try {
+    const r = await apiFetch('/api/marketing/admin/campaigns', 'POST', payload);
+    closeModal('campaignModal');
+    if (mode === 'send' && r.id) {
+      if (!confirm(`Enviar campanha "${name}" agora?\nIsto enviará emails/mensagens para o segmento seleccionado.`)) return;
+      await sendCampaign(r.id, name);
+    } else {
+      showToast('Campanha guardada como rascunho');
+      loadMktCampaigns();
+    }
+    // Limpar form
+    ['campName','campSubject','campHtml','campText'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  } catch(e) { alert('Erro ao guardar campanha: ' + e.message); }
+}
+
+async function sendCampaign(id, name) {
+  if (!confirm(`Enviar campanha "${name||id}" agora?`)) return;
+  try {
+    showToast('A enviar campanha em segundo plano...');
+    const r = await apiFetch(`/api/marketing/admin/campaigns/${id}/send`, 'POST');
+    showToast(r.message || `${r.queued||0} mensagens em fila`);
+    setTimeout(loadMktCampaigns, 2000);
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function deleteCampaign(id) {
+  if (!confirm('Apagar este rascunho?')) return;
+  await apiFetch(`/api/marketing/admin/campaigns/${id}`, 'DELETE');
+  loadMktCampaigns();
+}
+
+async function viewCampStats(id, name) {
+  document.getElementById('campStatsTitle').textContent = 'Stats — ' + name;
+  document.getElementById('campStatsBody').innerHTML = 'A carregar...';
+  openModal('campStatsModal');
+  try {
+    const d = await apiFetch(`/api/marketing/admin/campaigns/${id}/stats`);
+    const c = d.campaign;
+    const sent = c.total_sent||c.TotalSent||0;
+    const opened = c.total_opened||c.TotalOpened||0;
+    document.getElementById('campStatsBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <div class="an-kpi"><div class="an-kpi-val">${fmt(sent)}</div><div class="an-kpi-lbl">Enviados</div></div>
+        <div class="an-kpi"><div class="an-kpi-val">${fmt(opened)}</div><div class="an-kpi-lbl">Abertos</div></div>
+        <div class="an-kpi"><div class="an-kpi-val">${sent>0?((opened/sent)*100).toFixed(1):0}%</div><div class="an-kpi-lbl">Taxa Abertura</div></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;">Últimos 100 envios</div>
+      <div style="max-height:300px;overflow-y:auto;">
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <thead><tr style="text-align:left;"><th style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--t4);">Email</th><th style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--t4);">Enviado</th><th style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--t4);">Aberto</th></tr></thead>
+          <tbody>${d.sends.map(s=>`<tr><td style="padding:6px 8px;border-bottom:1px solid #f9fafb;">${s.email||s.Email}</td><td style="padding:6px 8px;border-bottom:1px solid #f9fafb;color:var(--t3);">${fmtDate(s.sent_at||s.SentAt)}</td><td style="padding:6px 8px;border-bottom:1px solid #f9fafb;">${(s.opened_at||s.OpenedAt)?'✓':'—'}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  } catch(e) { document.getElementById('campStatsBody').innerHTML = 'Erro ao carregar estatísticas'; }
+}
+
+async function toggleRule(id, newActive, btn) {
+  try {
+    await apiFetch(`/api/marketing/admin/rules/${id}`, 'PUT', { active: newActive });
+    btn.classList.toggle('on', newActive);
+    showToast(newActive ? 'Regra activada' : 'Regra desactivada');
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function convertLead(id, btn) {
+  try {
+    await apiFetch(`/api/marketing/admin/leads/${id}/convert`, 'POST');
+    btn.closest('tr').querySelector('td:nth-child(4)').innerHTML = '<span class="badge badge-green">✓ Sim</span>';
+    btn.remove();
+    showToast('Lead marcado como convertido');
+  } catch(e) {}
+}
+
+// Hook: carregar marketing quando o painel é activado
+const _origShowPanel = window.showPanel;
+window.showPanel = function(name, el) {
+  _origShowPanel && _origShowPanel(name, el);
+  if (name === 'marketing') {
+    setTimeout(loadMarketing, 50);
+    // Mostrar o funil por defeito
+    document.querySelectorAll('.mkt-pane').forEach(p => p.style.display = 'none');
+    const f = document.getElementById('mkt-funnel');
+    if (f) f.style.display = 'block';
+  }
+};
 
 // ── MOBILE SIDEBAR ────────────────────────────────────────────
 function admOpenSidebar() {
