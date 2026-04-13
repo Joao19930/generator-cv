@@ -1,8 +1,16 @@
 // src/config/database.js — PostgreSQL via pg
 const { Pool } = require('pg');
 
+// Retirar ?sslmode=... da URL para evitar conflito com a opção ssl do Pool.
+// O pg v8.x emite um aviso de segurança quando a URL tem sslmode e o Pool
+// também tem ssl configurado — deixamos apenas a opção ssl ser a fonte de verdade.
+const rawUrl = process.env.DATABASE_URL || '';
+const connectionString = rawUrl
+  .replace(/([?&])sslmode=[^&]*/g, '$1')  // remover sslmode=...
+  .replace(/[?&]$/, '');                   // limpar ? ou & no fim
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
