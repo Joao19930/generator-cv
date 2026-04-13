@@ -4686,7 +4686,7 @@ async function loadMktCampaigns() {
         <td style="font-size:11px;color:var(--t3);">${fmtDate(c.created_at||c.CreatedAt)}</td>
         <td><div style="display:flex;gap:4px;">
           ${st !== 'sent' ? `<button class="btn btn-blue btn-xs" onclick="sendCampaign(${c.id||c.Id},'${c.name||c.Name}')">Enviar</button>` : ''}
-          <button class="btn btn-ghost btn-xs" onclick="viewCampStats(${c.id||c.Id},'${(c.name||c.Name).replace(/'/g,'\\\'\')}')">Stats</button>
+          <button class="btn btn-ghost btn-xs" onclick="viewCampStats(${c.id||c.Id},this.dataset.name)" data-name="${(c.name||c.Name).replace(/"/g,'&quot;')}">Stats</button>
           ${st === 'draft' ? `<button class="btn btn-red btn-xs" onclick="deleteCampaign(${c.id||c.Id})">✕</button>` : ''}
         </div></td>
       </tr>`;
