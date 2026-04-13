@@ -617,6 +617,22 @@ const PORT = process.env.PORT || 3000;
 
 async function autoMigrate(pool) {
   const stmts = [
+    // ── user_events (criada aqui e também inline na rota de tracking) ──
+    `CREATE TABLE IF NOT EXISTS user_events (
+      id         SERIAL PRIMARY KEY,
+      event_type VARCHAR(100),
+      event      VARCHAR(80),
+      page       VARCHAR(100),
+      data       VARCHAR(500),
+      properties TEXT,
+      user_id    INTEGER,
+      session_id VARCHAR(64),
+      source     VARCHAR(80),
+      medium     VARCHAR(80),
+      campaign   VARCHAR(80),
+      ip         VARCHAR(45),
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
     // Criar tabelas de conteúdo se não existirem
     `CREATE TABLE IF NOT EXISTS jobs (
       id           SERIAL PRIMARY KEY,

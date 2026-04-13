@@ -1787,6 +1787,12 @@ async function loadOverview() {
 }
 
 // ── LAZY LOAD POR PAINEL ─────────────────────────────────────
+// Mostra erro genérico num contentor de tabela
+function _panelErr(tableId, cols, msg) {
+  const el = document.getElementById(tableId);
+  if (el) el.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:var(--red);padding:24px;font-size:13px;">⚠️ ${msg} <button onclick="_loaded.delete('${tableId.replace('Table','')||''}');loadPanelData('${tableId.replace('Table','')||''}');" style="margin-left:8px;padding:3px 10px;border:1px solid var(--red);border-radius:6px;background:none;color:var(--red);cursor:pointer;font-size:12px;">↻ Tentar de novo</button></td></tr>`;
+}
+
 async function loadPanelData(id) {
   if (_loaded.has(id) || !TOKEN) return;
   _loaded.add(id); // marcar imediatamente para evitar duplos pedidos
@@ -1798,26 +1804,32 @@ async function loadPanelData(id) {
       if (r.ok) { const d = await r.json(); state.users = d.users || []; renderUsers(); updatePlanCounts(); ok = true; }
       else {
         const err = await r.json().catch(()=>({error:'Erro desconhecido'}));
-        document.getElementById('usersTable').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">Erro ao carregar: ${err.error||r.status}</td></tr>`;
+        document.getElementById('usersTable').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;">⚠️ Erro ao carregar utilizadores: ${err.error||r.status} <button onclick="_loaded.delete('users');loadPanelData('users');" style="margin-left:8px;padding:3px 10px;border:1px solid var(--red);border-radius:6px;background:none;color:var(--red);cursor:pointer;font-size:12px;">↻ Tentar de novo</button></td></tr>`;
       }
     } else if (id === 'cvs') {
       const r = await fetch(API + '/api/cv', h);
       if (r.ok) { const d = await r.json(); state.cvs = Array.isArray(d) ? d : (d.cvs || []); renderCVs(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('cvsTable', 6, 'Erro ao carregar CVs: ' + (e.error||r.status)); }
     } else if (id === 'templates') {
       const r = await fetch(API + '/api/admin/template-items', h);
       if (r.ok) { const d = await r.json(); state.templates = d.templates || []; renderTemplates(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('templatesTable', 5, 'Erro ao carregar templates: ' + (e.error||r.status)); }
     } else if (id === 'jobs') {
       const r = await fetch(API + '/api/admin/jobs', h);
       if (r.ok) { state.jobs = await r.json(); renderJobs(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('jobsTable', 7, 'Erro ao carregar vagas: ' + (e.error||r.status)); }
     } else if (id === 'courses') {
       const r = await fetch(API + '/api/admin/courses', h);
       if (r.ok) { state.courses = await r.json(); renderCourses(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('coursesTable', 5, 'Erro ao carregar cursos: ' + (e.error||r.status)); }
     } else if (id === 'coaches') {
       const r = await fetch(API + '/api/admin/coaches', h);
       if (r.ok) { state.coaches = await r.json(); renderCoaches(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('coachesTable', 5, 'Erro ao carregar coaches: ' + (e.error||r.status)); }
     } else if (id === 'testimonials') {
       const r = await fetch(API + '/api/admin/testimonials', h);
       if (r.ok) { state.testis = await r.json(); renderTestis(); ok = true; }
+      else { const e = await r.json().catch(()=>({error:r.status})); _panelErr('testimonialsTable', 5, 'Erro ao carregar testemunhos: ' + (e.error||r.status)); }
     } else if (id === 'analytics') {
       loadAnalytics().catch(()=>{}); ok = true;
     } else if (id === 'support') {
@@ -1831,6 +1843,7 @@ async function loadPanelData(id) {
     }
   } catch(e) {
     console.error('panel load error:', id, e);
+    showToast('Erro ao carregar painel "' + id + '": ' + e.message, 'error');
   }
   // Se falhou, remover do _loaded para permitir retry ao clicar de novo
   if (!ok) _loaded.delete(id);
