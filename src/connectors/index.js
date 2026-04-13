@@ -412,12 +412,30 @@ const linkedinConnector = {
 };
 
 // ═══════════════════════════════════════════════════════
-// 12. TWILIO — SMS OTP e notificações
+// 12. TWILIO — SMS OTP, notificações e WhatsApp Business
 // ═══════════════════════════════════════════════════════
 const twilioConnector = {
+  // SMS: código OTP
   sendOTP: (phone, otp) => {
     const t = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     return t.messages.create({ body: `CV Premium — código: ${otp}. Válido 10 min.`, from: process.env.TWILIO_PHONE, to: phone });
+  },
+
+  // WhatsApp Business via Twilio (prefixo whatsapp:)
+  // Requer número aprovado no Twilio WhatsApp Sandbox ou Business Profile
+  // TWILIO_WHATSAPP_FROM=whatsapp:+14155238886  (sandbox)
+  // ou número aprovado: whatsapp:+244XXXXXXXXX
+  sendWhatsApp: (toPhone, message) => {
+    const t = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+    const to   = toPhone.startsWith('whatsapp:') ? toPhone : `whatsapp:${toPhone}`;
+    return t.messages.create({ body: message, from, to });
+  },
+
+  // SMS genérico (marketing, não OTP)
+  sendSMS: (toPhone, message) => {
+    const t = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    return t.messages.create({ body: message.slice(0, 160), from: process.env.TWILIO_PHONE, to: toPhone });
   }
 };
 

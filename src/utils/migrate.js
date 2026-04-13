@@ -23,8 +23,15 @@ const pool = new Pool({
   try {
     client = await pool.connect();
 
-    const sqlFile = path.join(__dirname, '..', '..', 'migrations.sql');
-    const script  = fs.readFileSync(sqlFile, 'utf8');
+    // Correr todos os ficheiros migrations*.sql em ordem alfabética
+    const rootDir  = path.join(__dirname, '..', '..');
+    const sqlFiles = fs.readdirSync(rootDir)
+      .filter(f => f.match(/^migrations.*\.sql$/i))
+      .sort();
+
+    const script = sqlFiles
+      .map(f => fs.readFileSync(path.join(rootDir, f), 'utf8'))
+      .join('\n');
 
     // Remover comentários de linha e dividir por ; (PostgreSQL não usa GO)
     const statements = script

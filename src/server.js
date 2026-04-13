@@ -31,6 +31,7 @@ const contentRoutes   = require('./routes/content');
 const { router: chatRoutes } = require('./routes/chat');
 const { router: empregosRoutes, importJobs } = require('./routes/empregos');
 const aiRoutes        = require('./routes/ai');
+const marketingRoutes = require('./routes/marketing');
 
 // ── Criar app e servidor HTTP ────────────────────────────────
 const app    = express();
@@ -588,6 +589,18 @@ app.get('/api/legal-docs', auth, async (req, res) => {
 
 // ── Rotas Admin (JWT + role=admin) ──────────────────────────
 app.use('/api/admin',   auth, adminOnly, adminRoutes);
+
+// ── Marketing Automation ─────────────────────────────────────
+// Rotas públicas + user: /api/marketing/track, /unsubscribe, /preferences
+// Rotas admin: /api/marketing/admin/* (auth + adminOnly injectados internamente)
+app.use('/api/marketing', (req, res, next) => {
+  // Rotas /admin/* requerem autenticação + adminOnly
+  if (req.path.startsWith('/admin')) {
+    return auth(req, res, () => adminOnly(req, res, next));
+  }
+  next();
+}, marketingRoutes);
+// Injectar req.db nas rotas de marketing (o middleware de injecção DB já está activo acima)
 
 // ── 404 ──────────────────────────────────────────────────────
 app.use((req, res) =>
