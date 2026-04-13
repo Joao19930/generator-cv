@@ -306,44 +306,42 @@ const pdfConnector = {
   fromHTML: async (htmlContent) => {
     const puppeteer = require('puppeteer');
 
-    // Remover Google Fonts e preconnects — causam substituições de métricas de
-    // fonte durante o carregamento assíncrono que fazem palavras colarem umas
-    // nas outras no PDF gerado pelo Puppeteer/Chrome.
-    // Substituir pela mesma stack de fontes seguras disponíveis no sistema.
+    // Remover Google Fonts — causam substituições de métricas durante o
+    // carregamento assíncrono que fazem palavras colarem no PDF.
     const safeHtml = htmlContent
-      .replace(/<link[^>]*fonts\.googleapis\.com[^>]*>/gi, '')
-      .replace(/<link[^>]*fonts\.gstatic\.com[^>]*>/gi, '')
-      .replace(/<link[^>]*rel=["']preconnect["'][^>]*>/gi, '')
-      .replace(/font-family\s*:\s*['"]?Poppins['"]?\s*,/gi, "font-family: 'Arial',");
+      .replace(/<link[^>]+fonts\.googleapis\.com[^>]*>/gi, '')
+      .replace(/<link[^>]+fonts\.gstatic\.com[^>]*>/gi, '')
+      .replace(/<link[^>]+rel=["']preconnect["'][^>]*>/gi, '');
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--font-render-hinting=none',
-      ]
-    });
+    let browser;
     try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+        ]
+      });
       const page = await browser.newPage();
-      // domcontentloaded é suficiente — sem fontes externas não há pedidos de rede pendentes
       await page.setContent(safeHtml, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      // Pequena pausa para garantir que o layout é calculado antes do PDF
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 200));
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
       });
       return pdf;
+    } catch (err) {
+      console.error('[PDF] Puppeteer error:', err.message);
+      throw err;
     } finally {
-      await browser.close();
+      if (browser) await browser.close().catch(() => {});
     }
   }
 };

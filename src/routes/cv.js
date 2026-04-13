@@ -148,8 +148,8 @@ router.post('/:id/generate-pdf', auth, async (req, res) => {
       res.send(pdfBuf);
     }
   } catch (err) {
-    console.error('generate-pdf:', err.message);
-    res.status(500).json({ error: 'Erro ao gerar PDF' });
+    console.error('generate-pdf error:', err.message, err.stack?.split('\n')[1]);
+    res.status(500).json({ error: 'Erro ao gerar PDF: ' + err.message });
   }
 });
 
