@@ -777,6 +777,94 @@ async function autoMigrate(pool) {
     `CREATE INDEX IF NOT EXISTS ix_payments_user_id    ON payments(user_id)`,
     `CREATE INDEX IF NOT EXISTS ix_payments_status     ON payments(status, created_at DESC)`,
     `CREATE INDEX IF NOT EXISTS ix_pay_req_status      ON payment_requests(status, created_at DESC)`,
+    // ── Marketing Automation (tabelas) ───────────────────────────
+    `CREATE TABLE IF NOT EXISTS marketing_segments (
+      id          SERIAL PRIMARY KEY,
+      name        VARCHAR(100) NOT NULL UNIQUE,
+      description TEXT,
+      sql_filter  TEXT NOT NULL DEFAULT 'TRUE',
+      color       VARCHAR(20) DEFAULT '#6366f1',
+      created_at  TIMESTAMP DEFAULT NOW(),
+      updated_at  TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS campaigns (
+      id            SERIAL PRIMARY KEY,
+      name          VARCHAR(200) NOT NULL,
+      subject       VARCHAR(300),
+      channel       VARCHAR(20) DEFAULT 'email',
+      template_key  VARCHAR(80),
+      body_html     TEXT,
+      body_text     TEXT,
+      segment_id    INTEGER REFERENCES marketing_segments(id),
+      status        VARCHAR(20) DEFAULT 'draft',
+      scheduled_at  TIMESTAMP,
+      sent_at       TIMESTAMP,
+      total_sent    INTEGER DEFAULT 0,
+      total_opened  INTEGER DEFAULT 0,
+      total_clicked INTEGER DEFAULT 0,
+      created_by    INTEGER REFERENCES users(id),
+      created_at    TIMESTAMP DEFAULT NOW(),
+      updated_at    TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS campaign_sends (
+      id           SERIAL PRIMARY KEY,
+      campaign_id  INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+      user_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      email        VARCHAR(200),
+      channel      VARCHAR(20) DEFAULT 'email',
+      sent_at      TIMESTAMP DEFAULT NOW(),
+      opened_at    TIMESTAMP,
+      clicked_at   TIMESTAMP,
+      bounce       BOOLEAN DEFAULT FALSE,
+      UNIQUE(campaign_id, email)
+    )`,
+    `CREATE TABLE IF NOT EXISTS automation_rules (
+      id            SERIAL PRIMARY KEY,
+      name          VARCHAR(200) NOT NULL,
+      trigger_event VARCHAR(80) NOT NULL,
+      delay_hours   INTEGER DEFAULT 0,
+      channel       VARCHAR(20) DEFAULT 'email',
+      subject       VARCHAR(300),
+      body_html     TEXT,
+      body_text     TEXT,
+      condition_sql TEXT,
+      active        BOOLEAN DEFAULT TRUE,
+      created_at    TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS automation_sends (
+      id           SERIAL PRIMARY KEY,
+      rule_id      INTEGER NOT NULL REFERENCES automation_rules(id) ON DELETE CASCADE,
+      user_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      email        VARCHAR(200),
+      triggered_at TIMESTAMP DEFAULT NOW(),
+      sent_at      TIMESTAMP,
+      UNIQUE(rule_id, email)
+    )`,
+    `CREATE TABLE IF NOT EXISTS leads (
+      id         SERIAL PRIMARY KEY,
+      email      VARCHAR(200) UNIQUE NOT NULL,
+      name       VARCHAR(200),
+      phone      VARCHAR(30),
+      ats_score  INTEGER,
+      source     VARCHAR(80),
+      converted  BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`,
+    // ── Colunas Marketing em users ────────────────────────────────
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_email     BOOLEAN DEFAULT TRUE`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_whatsapp  BOOLEAN DEFAULT TRUE`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_sms       BOOLEAN DEFAULT FALSE`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS unsubscribe_token   VARCHAR(64)`,
+    // ── user_events: adicionar colunas marketing SE faltarem ──────
+    // (o autoMigrate criou com event_type; marketing usa event)
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS event      VARCHAR(80)`,
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS properties TEXT`,
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS source     VARCHAR(80)`,
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS medium     VARCHAR(80)`,
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS campaign   VARCHAR(80)`,
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS ip         VARCHAR(45)`,
+    // ── user_events: adicionar event_type SE foi criado pelo marketing ─
+    `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS event_type VARCHAR(100)`,
   ];
   for (const sql of stmts) {
     try { await pool.request().query(sql); }
