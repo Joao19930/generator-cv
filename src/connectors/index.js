@@ -305,6 +305,17 @@ Agora faz o mesmo para "${jobTitle}". Devolve apenas as linhas, sem introdução
 const pdfConnector = {
   fromHTML: async (htmlContent) => {
     const puppeteer = require('puppeteer');
+
+    // Remover Google Fonts e preconnects — causam substituições de métricas de
+    // fonte durante o carregamento assíncrono que fazem palavras colarem umas
+    // nas outras no PDF gerado pelo Puppeteer/Chrome.
+    // Substituir pela mesma stack de fontes seguras disponíveis no sistema.
+    const safeHtml = htmlContent
+      .replace(/<link[^>]*fonts\.googleapis\.com[^>]*>/gi, '')
+      .replace(/<link[^>]*fonts\.gstatic\.com[^>]*>/gi, '')
+      .replace(/<link[^>]*rel=["']preconnect["'][^>]*>/gi, '')
+      .replace(/font-family\s*:\s*['"]?Poppins['"]?\s*,/gi, "font-family: 'Arial',");
+
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -316,12 +327,20 @@ const pdfConnector = {
         '--no-first-run',
         '--no-zygote',
         '--single-process',
+        '--font-render-hinting=none',
       ]
     });
     try {
       const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
-      const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });
+      // domcontentloaded é suficiente — sem fontes externas não há pedidos de rede pendentes
+      await page.setContent(safeHtml, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      // Pequena pausa para garantir que o layout é calculado antes do PDF
+      await new Promise(r => setTimeout(r, 150));
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+      });
       return pdf;
     } finally {
       await browser.close();
