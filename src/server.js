@@ -162,6 +162,7 @@ app.get('/ats',          (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'ats.html')));
 app.get('/pricing',      (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public', 'pricing.html')));
+app.get('/sobre',           (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'sobre.html')));
 app.get('/empregos',        (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'empregos.html')));
 app.get('/linkedin-import', (req, res) => { noCache(res); res.sendFile(path.join(__dirname, '..', 'public', 'linkedin-import.html')); });
 

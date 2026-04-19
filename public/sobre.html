@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobre Nós — Caos Criativo · CV Premium</title>
+<meta name="description" content="Conheça a Caos Criativo, a equipa por trás do CV Premium. Consultoria de Pessoas & Cultura Organizacional com mais de 8 anos de experiência nos sectores bancário, tecnológico e corporativo em Angola.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://cvpremium.net/sobre">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cvpremium.net/sobre">
+<meta property="og:title" content="Sobre Nós — Caos Criativo · CV Premium">
+<meta property="og:description" content="Conheça a equipa por trás do CV Premium. Consultoria de Pessoas & Cultura Organizacional em Angola.">
+<meta property="og:image" content="https://cvpremium.net/og-image.png">
+<meta name="theme-color" content="#2563EB">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #e2e8f0;
+    --bg: #f8fafc;
+  }
+  body { font-family: 'Sora', sans-serif; color: var(--text); background: #fff; line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand { font-size: 17px; font-weight: 800; color: var(--blue); text-decoration: none; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--blue); color: #fff; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; transition: background .2s; }
+  .nav-cta:hover { background: #1d4ed8; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+    padding: 72px 24px 64px;
+    text-align: center;
+    color: #fff;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 100px;
+    padding: 5px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 { font-size: clamp(28px,5vw,42px); font-weight: 800; margin-bottom: 14px; }
+  .hero p { font-size: 16px; color: rgba(255,255,255,.8); max-width: 520px; margin: 0 auto; }
+
+  /* CONTENT */
+  .container { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+  .section { padding: 56px 0; }
+  .section + .section { border-top: 1px solid var(--border); }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--blue);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .section h2 { font-size: 22px; font-weight: 800; margin-bottom: 18px; }
+  .section p { font-size: 15px; color: #334155; line-height: 1.8; margin-bottom: 14px; }
+  .section p:last-child { margin-bottom: 0; }
+
+  .highlight-box {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    line-height: 1.75; padding: 20px 24px;
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    border-radius: 14px; border-left: 4px solid var(--blue);
+    margin-top: 20px;
+  }
+
+  /* CARDS GRID */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 8px; }
+  .card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+  }
+  .card-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .card h3 { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.65; margin: 0; }
+
+  /* VALUES */
+  .values { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 8px; }
+  .value-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px; border-radius: 12px;
+  }
+  .value-item span:first-child { font-size: 20px; flex-shrink: 0; }
+  .value-item span:last-child { font-size: 13px; font-weight: 700; }
+
+  /* CTA */
+  .cta-section {
+    background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+    padding: 60px 24px; text-align: center; color: #fff;
+  }
+  .cta-section h2 { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+  .cta-section p { font-size: 15px; color: rgba(255,255,255,.8); margin-bottom: 28px; }
+  .btn-white {
+    display: inline-block;
+    background: #fff; color: var(--blue);
+    padding: 14px 32px; border-radius: 12px;
+    font-size: 15px; font-weight: 800;
+    text-decoration: none;
+    transition: transform .2s;
+  }
+  .btn-white:hover { transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer { background: #0f172a; color: rgba(255,255,255,.6); padding: 48px 24px 24px; }
+  .ft { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 32px; max-width: 1100px; margin: 0 auto 32px; }
+  .ft-brand { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+  .ft-desc { font-size: 13px; line-height: 1.7; }
+  .ft-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.4); margin-bottom: 12px; }
+  .ft-col a { display: block; font-size: 13px; color: rgba(255,255,255,.55); text-decoration: none; margin-bottom: 8px; }
+  .ft-col a:hover { color: #fff; }
+  .ft-bot { border-top: 1px solid rgba(255,255,255,.08); padding-top: 20px; max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; font-size: 12px; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 640px) {
+    .ft { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">CV Premium</a>
+  <div class="nav-links">
+    <a href="/empregos">Empregos</a>
+    <a href="/blog">Blog</a>
+    <a href="/pricing">Preços</a>
+    <a href="/ats">ATS Scorer</a>
+  </div>
+  <a href="/register" class="nav-cta">Criar CV Grátis</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">Caos Criativo</div>
+  <h1>Sobre Nós</h1>
+  <p>Consultoria de Pessoas &amp; Cultura Organizacional — há mais de 8 anos a transformar equipas em motores de crescimento.</p>
+</div>
+
+<div class="container">
+
+  <!-- Sobre Nós -->
+  <div class="section">
+    <div class="section-label">Sobre Nós</div>
+    <h2>Quem somos</h2>
+    <p>
+      A <strong>Caos Criativo</strong> nasce da visão de profissionais com mais de 8 anos de experiência nos sectores bancário, tecnológico e corporativo, que acreditam que o verdadeiro crescimento das empresas começa nas pessoas.
+    </p>
+    <p>
+      Trabalhamos lado a lado com Pequenas e Médias Empresas (PME) que enfrentam diariamente o desafio de estruturar equipas, tomar decisões estratégicas e crescer de forma sustentável. Compreendemos a realidade de quem constrói negócios com ambição, mas também com recursos limitados — e é exactamente aí que fazemos a diferença.
+    </p>
+    <p>
+      Apoiamos empresas desde a aquisição e gestão de talentos até à implementação de políticas remuneratórias, avaliação de desempenho e cultura organizacional, sempre com uma abordagem prática, humana e orientada para resultados.
+    </p>
+    <div class="highlight-box">
+      Mais do que consultoria, entregamos confiança, estrutura e direção.<br>
+      Porque quando as pessoas certas estão no lugar certo, as empresas deixam de apenas sobreviver — e passam a crescer com consistência.
+    </div>
+  </div>
+
+  <!-- Missão, Visão, Objectivo -->
+  <div class="section">
+    <div class="section-label">Identidade</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon" style="background: linear-gradient(135deg,#dbeafe,#eff6ff);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Missão</h3>
+        <p>Capacitar PMEs angolanas com as ferramentas, estruturas e talentos necessários para crescerem de forma sustentável e competitiva.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background: linear-gradient(135deg,#ede9fe,#faf5ff);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Visão</h3>
+        <p>Ser a referência em consultoria de pessoas e cultura organizacional em Angola, reconhecidos pela excelência, impacto real e transformação humana.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background: linear-gradient(135deg,#dcfce7,#f0fdf4);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Objectivo</h3>
+        <p>Conectar talentos às empresas certas, alinhar estratégia com cultura e transformar equipas em motores de crescimento organizacional.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Valores -->
+  <div class="section">
+    <div class="section-label">Os Nossos Valores</div>
+    <div class="values">
+      <div class="value-item" style="background:#eff6ff;">
+        <span>🤝</span><span style="color:#1d4ed8;">Confiança</span>
+      </div>
+      <div class="value-item" style="background:#f5f3ff;">
+        <span>💡</span><span style="color:#6d28d9;">Inovação</span>
+      </div>
+      <div class="value-item" style="background:#fef3c7;">
+        <span>⚡</span><span style="color:#b45309;">Impacto</span>
+      </div>
+      <div class="value-item" style="background:#dcfce7;">
+        <span>🌱</span><span style="color:#15803d;">Crescimento</span>
+      </div>
+      <div class="value-item" style="background:#fce7f3;">
+        <span>❤️</span><span style="color:#be185d;">Humanidade</span>
+      </div>
+      <div class="value-item" style="background:#f0fdf4;">
+        <span>🎯</span><span style="color:#166534;">Resultados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CV Premium -->
+  <div class="section">
+    <div class="section-label">CV Premium</div>
+    <h2>A nossa plataforma</h2>
+    <p>
+      O <strong>CV Premium</strong> é a plataforma de criação de CVs profissionais da Caos Criativo, desenvolvida especialmente para o mercado angolano. Com mais de 200 templates modernos, pontuação ATS automática e sugestões de IA, ajudamos centenas de profissionais a conseguir entrevistas e avançar nas suas carreiras.
+    </p>
+    <p>
+      Acreditamos que um bom currículo não é apenas um documento — é o primeiro passo para transformar ambição em oportunidade.
+    </p>
+  </div>
+
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Pronto para dar o próximo passo?</h2>
+  <p>Cria o teu CV profissional em minutos e aumenta as hipóteses de ser chamado para entrevista.</p>
+  <a href="/register" class="btn-white">Criar o meu CV — Grátis</a>
+</div>
+
+<footer>
+  <div class="ft">
+    <div>
+      <div class="ft-brand">CV Premium</div>
+      <div class="ft-desc">O currículo que consegue vagas. Feito para profissionais em Angola e em todo o mundo.<br><br>📞 <a href="tel:+244944524292" style="color:rgba(255,255,255,.6);text-decoration:none;">+244 944 524 292</a></div>
+    </div>
+    <div class="ft-col">
+      <div class="ft-title">CV</div>
+      <a href="/">Início</a>
+      <a href="/ats">ATS Scorer</a>
+      <a href="/pricing">Preços</a>
+    </div>
+    <div class="ft-col">
+      <div class="ft-title">Carreira</div>
+      <a href="/empregos">Empregos</a>
+      <a href="/blog">Blog</a>
+    </div>
+    <div class="ft-col">
+      <div class="ft-title">Empresa</div>
+      <a href="/sobre">Sobre Nós</a>
+      <a href="/contacto">Contacto</a>
+      <a href="/termos">Termos</a>
+      <a href="/privacidade">Privacidade</a>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <span>© 2025 CV Premium · Todos os direitos reservados</span>
+    <span>📞 +244 944 524 292</span>
+  </div>
+</footer>
+
+</body>
+</html>
