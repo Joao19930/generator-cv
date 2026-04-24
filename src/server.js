@@ -882,6 +882,8 @@ async function autoMigrate(pool) {
     `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS ip         VARCHAR(45)`,
     // ── user_events: adicionar event_type SE foi criado pelo marketing ─
     `ALTER TABLE user_events ADD COLUMN IF NOT EXISTS event_type VARCHAR(100)`,
+    // ── cvs: estado rascunho/concluído ───────────────────────────────
+    `ALTER TABLE cvs ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'draft'`,
   ];
   for (const sql of stmts) {
     try { await pool.request().query(sql); }

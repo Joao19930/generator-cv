@@ -18,7 +18,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 router.get('/', auth, async (req, res) => {
   try {
     const result = await req.db.request().input('userId', sql.Int, req.user.id)
-      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, downloaded, download_count, is_public, slug, ats_score
+      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, downloaded, download_count, is_public, slug, ats_score, status
               FROM cvs WHERE user_id = @userId ORDER BY updated_at DESC`);
     res.json({ cvs: result.recordset });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -30,7 +30,7 @@ router.get('/:id', auth, async (req, res) => {
     const result = await req.db.request()
       .input('id',     sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.id)
-      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, is_public, slug
+      .query(`SELECT id, title, template_name, template_id, content_json, created_at, updated_at, is_public, slug, status
               FROM cvs WHERE id = @id AND user_id = @userId`);
     if (!result.recordset.length) return res.status(404).json({ error: 'CV não encontrado' });
     const cv = result.recordset[0];
@@ -68,8 +68,9 @@ router.post('/', auth, async (req, res) => {
 
 // ── PUT /api/cv/:id — Actualizar CV ─────────────────────────
 router.put('/:id', auth, async (req, res) => {
-  const { title, contentJson, content, templateName, templateId } = req.body;
+  const { title, contentJson, content, templateName, templateId, status } = req.body;
   const dataToSave = contentJson || content;
+  const validStatus = ['draft', 'complete'].includes(status) ? status : null;
   try {
     await req.db.request()
       .input('id',           sql.Int,      req.params.id)
@@ -78,11 +79,13 @@ router.put('/:id', auth, async (req, res) => {
       .input('content',      sql.NVarChar, dataToSave ? JSON.stringify(dataToSave) : null)
       .input('templateName', sql.NVarChar, templateName || null)
       .input('templateId',   sql.Int,      templateId   || null)
+      .input('status',       sql.NVarChar, validStatus)
       .query(`UPDATE cvs SET
               title         = COALESCE(@title,        title),
               content_json  = COALESCE(@content,      content_json),
               template_name = COALESCE(@templateName, template_name),
               template_id   = COALESCE(@templateId,   template_id),
+              status        = COALESCE(@status,       status),
               updated_at    = NOW()
               WHERE id = @id AND user_id = @userId`);
     res.json({ updated: true });
