@@ -164,8 +164,11 @@ function calcProgress(store: ReturnType<typeof useCVStore.getState>): number {
   return Math.min(100, Math.round((score / 10) * 100))
 }
 
+const STORAGE_KEY = 'cv_editor_data'
+
 export default function CVEditor({ cvId = null, token = null, isPremium = false }: CVEditorProps) {
   const store = useCVStore()
+  const [currentCvId, setCurrentCvId] = useState<string | null>(cvId)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
@@ -173,7 +176,7 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
   const [showMobilePreview, setShowMobilePreview] = useState(false)
 
   const handleSaved = useCallback(() => setSavedAt(new Date()), [])
-  useAutosave(cvId, token, handleSaved)
+  useAutosave(currentCvId, token, handleSaved)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768)
@@ -183,14 +186,63 @@ export default function CVEditor({ cvId = null, token = null, isPremium = false 
 
   useEffect(() => {
     const controller = new AbortController()
+
     if (cvId && token) {
+      // Editar CV existente — carrega da API
       fetch(`/api/cv/${cvId}`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (!controller.signal.aborted && data) store.loadFromData(data) })
         .catch(err => { if (err.name !== 'AbortError') store.loadFromStorage() })
+    } else if (token) {
+      // Sem cvId na URL: verificar se há rascunho em progresso no localStorage
+      let savedId: string | null = null
+      let savedTitle = 'O meu CV'
+      let savedTemplate = 'executive'
+      let savedContentJson: Record<string, unknown> = {}
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY)
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          savedId       = parsed.id     ? String(parsed.id) : null
+          savedTitle    = parsed.title    || savedTitle
+          savedTemplate = parsed.template || savedTemplate
+          savedContentJson = parsed
+        }
+      } catch {}
+
+      if (savedId) {
+        // Retomar rascunho no mesmo dispositivo — localStorage é sempre mais recente que a API
+        store.loadFromStorage()
+        setCurrentCvId(savedId)
+        window.history.replaceState(null, '', `/editor?cv=${savedId}`)
+        // Não faz fetch da API: localStorage já tem o estado mais actual
+      } else {
+        // Criar novo rascunho com o conteúdo de localStorage (se existir)
+        store.loadFromStorage()
+        fetch('/api/cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            title: savedTitle,
+            templateName: savedTemplate,
+            contentJson: savedContentJson,
+            status: 'draft',
+          }),
+          signal: controller.signal,
+        })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (controller.signal.aborted || !data?.id) return
+            const newId = String(data.id)
+            setCurrentCvId(newId)
+            window.history.replaceState(null, '', `/editor?cv=${newId}`)
+          })
+          .catch(() => {})
+      }
     } else {
       store.loadFromStorage()
     }
+
     return () => controller.abort()
   }, [cvId, token])
 

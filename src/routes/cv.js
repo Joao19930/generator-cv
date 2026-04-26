@@ -43,21 +43,52 @@ router.get('/:id', auth, async (req, res) => {
 
 // ── POST /api/cv — Criar novo CV ─────────────────────────────
 router.post('/', auth, async (req, res) => {
-  const { title, templateId, templateName, contentJson } = req.body;
+  const { title, templateId, templateName, contentJson, status } = req.body;
   if (!title) return res.status(400).json({ error: 'Título é obrigatório' });
+  const validStatus = ['draft', 'complete'].includes(status) ? status : 'draft';
+  const contentStr  = typeof contentJson === 'string' ? contentJson : JSON.stringify(contentJson || {});
 
   try {
+    // Se o pedido vem do editor automático (título padrão), reutilizar rascunho vazio
+    // do próprio dia em vez de criar um duplicado
+    if (validStatus === 'draft') {
+      const existing = await req.db.request()
+        .input('userId', sql.Int, req.user.id)
+        .query(`SELECT id, title, slug, status FROM cvs
+                WHERE user_id = @userId
+                  AND status  = 'draft'
+                  AND (content_json IS NULL OR content_json = '{}' OR content_json = '')
+                  AND created_at >= NOW() - INTERVAL '24 hours'
+                ORDER BY created_at DESC
+                LIMIT 1`);
+      if (existing.recordset.length) {
+        const cv = existing.recordset[0];
+        // Actualizar o rascunho existente com o conteúdo novo (se tiver)
+        if (contentStr && contentStr !== '{}') {
+          await req.db.request()
+            .input('id',      sql.Int,      cv.Id || cv.id)
+            .input('userId',  sql.Int,      req.user.id)
+            .input('content', sql.NVarChar, contentStr)
+            .input('title',   sql.NVarChar, title)
+            .query(`UPDATE cvs SET content_json = @content, title = @title, updated_at = NOW()
+                    WHERE id = @id AND user_id = @userId`);
+        }
+        return res.status(200).json({ id: cv.Id || cv.id, title: cv.Title || cv.title, slug: cv.Slug || cv.slug, status: 'draft' });
+      }
+    }
+
     const slug   = `${title.toLowerCase().replace(/[^a-z0-9]/g,'-')}-${Date.now()}`;
     const result = await req.db.request()
       .input('userId',       sql.Int,      req.user.id)
       .input('title',        sql.NVarChar, title)
       .input('templateId',   sql.Int,      templateId || 1)
       .input('templateName', sql.NVarChar, templateName || 'Clássico')
-      .input('content',      sql.NVarChar, JSON.stringify(contentJson || {}))
+      .input('content',      sql.NVarChar, contentStr)
       .input('slug',         sql.NVarChar, slug)
-      .query(`INSERT INTO cvs (user_id, title, template_id, template_name, content_json, slug, created_at, updated_at)
-              VALUES (@userId, @title, @templateId, @templateName, @content, @slug, NOW(), NOW())
-              RETURNING id, title, slug`);
+      .input('status',       sql.NVarChar, validStatus)
+      .query(`INSERT INTO cvs (user_id, title, template_id, template_name, content_json, slug, status, created_at, updated_at)
+              VALUES (@userId, @title, @templateId, @templateName, @content, @slug, @status, NOW(), NOW())
+              RETURNING id, title, slug, status`);
 
     const cv = result.recordset[0];
     gaConnector.cvCreated(req.user.id).catch(() => {});
@@ -70,13 +101,17 @@ router.post('/', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   const { title, contentJson, content, templateName, templateId, status } = req.body;
   const dataToSave = contentJson || content;
+  // Se dataToSave já é string (legado), usar directamente; se é objecto, serializar
+  const contentStr = dataToSave == null
+    ? null
+    : typeof dataToSave === 'string' ? dataToSave : JSON.stringify(dataToSave);
   const validStatus = ['draft', 'complete'].includes(status) ? status : null;
   try {
     await req.db.request()
       .input('id',           sql.Int,      req.params.id)
       .input('userId',       sql.Int,      req.user.id)
       .input('title',        sql.NVarChar, title || null)
-      .input('content',      sql.NVarChar, dataToSave ? JSON.stringify(dataToSave) : null)
+      .input('content',      sql.NVarChar, contentStr)
       .input('templateName', sql.NVarChar, templateName || null)
       .input('templateId',   sql.Int,      templateId   || null)
       .input('status',       sql.NVarChar, validStatus)
@@ -89,6 +124,21 @@ router.put('/:id', auth, async (req, res) => {
               updated_at    = NOW()
               WHERE id = @id AND user_id = @userId`);
     res.json({ updated: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── DELETE /api/cv/bulk/empty-drafts — Apagar rascunhos vazios ──
+// IMPORTANTE: registado ANTES de /:id para não ser capturado como ID
+router.delete('/bulk/empty-drafts', auth, async (req, res) => {
+  try {
+    const result = await req.db.request()
+      .input('userId', sql.Int, req.user.id)
+      .query(`DELETE FROM cvs
+              WHERE user_id = @userId
+                AND status  = 'draft'
+                AND (content_json IS NULL OR content_json = '{}' OR content_json = '')
+              RETURNING id`);
+    res.json({ deleted: result.rowsAffected[0] || 0 });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

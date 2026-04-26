@@ -2926,12 +2926,14 @@ function paper(color, small, tpl) {
 function _cvCompleteness(cv) {
   try {
     const c = typeof cv.ContentJson === 'string' ? JSON.parse(cv.ContentJson || '{}') : (cv.ContentJson || {});
+    // Suporta schema novo (personal.fullName) e legado (c.name / c.fullName no topo)
+    const p = c.personal || {};
     let score = 0, total = 6;
-    if ((c.name || c.fullName || '').trim()) score++;
-    if ((c.jobTitle || c.title || '').trim()) score++;
-    if ((c.email || '').trim()) score++;
-    if ((c.phone || '').trim()) score++;
-    if (c.experience && (Array.isArray(c.experience) ? c.experience.length > 0 : true)) score++;
+    if ((p.fullName || p.name || c.fullName || c.name || '').trim()) score++;
+    if ((p.jobTitle || c.jobTitle || c.title || '').trim()) score++;
+    if ((p.email || c.email || '').trim()) score++;
+    if ((p.phone || c.phone || '').trim()) score++;
+    if ((c.experience || []).length > 0) score++;
     if ((c.summary || c.about || '').trim()) score++;
     return Math.round((score / total) * 100);
   } catch { return cv.AtsScore ? Math.min(cv.AtsScore, 90) : 35; }
@@ -3008,17 +3010,31 @@ function renderFullCVs(list) {
   const drafts   = list.filter(cv => !cv.Status || cv.Status === 'draft');
   const complete = list.filter(cv => cv.Status === 'complete');
 
-  const sectionLabel = (txt, count) =>
+  const emptyDrafts = drafts.filter(cv => {
+    try {
+      const c = typeof cv.ContentJson === 'string' ? JSON.parse(cv.ContentJson || '{}') : (cv.ContentJson || {});
+      const p = c.personal || {};
+      return !(p.fullName || p.name || c.fullName || c.name || c.email || p.email || '').trim();
+    } catch { return false; }
+  });
+
+  const sectionLabel = (txt, count, extra = '') =>
     `<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:8px 0 4px;">
        <span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;">${txt}</span>
        <span style="font-size:11px;font-weight:700;color:var(--t4);background:var(--bg2);border-radius:20px;padding:1px 7px;">${count}</span>
        <div style="flex:1;height:1px;background:var(--border);"></div>
+       ${extra}
      </div>`;
 
   let html = '';
 
   if (drafts.length) {
-    html += sectionLabel('Rascunhos', drafts.length);
+    const cleanBtn = emptyDrafts.length > 0
+      ? `<button onclick="cleanEmptyDrafts()" style="font-size:10px;font-weight:600;color:#ef4444;background:none;border:1px solid #fecaca;border-radius:6px;padding:2px 8px;cursor:pointer;white-space:nowrap;" title="Apagar ${emptyDrafts.length} rascunho(s) vazio(s)">
+           🗑 Limpar vazios (${emptyDrafts.length})
+         </button>`
+      : '';
+    html += sectionLabel('Rascunhos', drafts.length, cleanBtn);
     html += newCVCard();
     html += drafts.map(cvCard).join('');
   } else {
@@ -4290,6 +4306,24 @@ document.getElementById('modal').addEventListener('click', e => { if (e.target =
 async function goToEditor() {
   if (!selTpl) return;
   await startCV(selTpl);
+}
+
+async function cleanEmptyDrafts() {
+  if (!confirm('Apagar todos os rascunhos sem conteúdo?\nEsta acção não pode ser desfeita.')) return;
+  const token = localStorage.getItem('cv_token');
+  try {
+    const res = await fetch(`${API}/cv/bulk/empty-drafts`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const d = await res.json();
+    if (res.ok) {
+      showToast(`🗑 ${d.deleted} rascunho(s) vazio(s) apagado(s)`);
+      await loadCVs();
+    } else {
+      showToast('Erro ao limpar rascunhos');
+    }
+  } catch { showToast('Erro ao limpar rascunhos'); }
 }
 
 async function createNewCV() {
