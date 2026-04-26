@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useCVStore } from '../../../store/cvStore'
+import { langLabel } from '../../../utils/languageLevel'
 
 const POPPINS_INJECTED_KEY = '__poppins_injected__'
 
@@ -328,7 +329,7 @@ export default function ExecutiveTemplate() {
             {languages.map(lang => (
               <div key={lang.id} style={{ fontSize: smallFs, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
                 <strong style={{ color: '#111827' }}>{lang.name}</strong>
-                {lang.level ? ` — ${lang.level}` : ''}
+                {lang.level ? ` — ${langLabel(lang.level)}` : ''}
               </div>
             ))}
           </div>

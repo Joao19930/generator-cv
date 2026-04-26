@@ -1,5 +1,6 @@
 import React from 'react' // eslint-disable-line @typescript-eslint/no-unused-vars
 import { useCVStore } from '../../../store/cvStore'
+import { langLabel } from '../../../utils/languageLevel'
 
 function firstLast(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -106,7 +107,7 @@ export default function CreativeTemplate() {
                   borderRadius: 10,
                   fontWeight: 600,
                 }}>
-                  {lang.level}
+                  {langLabel(lang.level)}
                 </span>
               </div>
             ))}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useCVStore } from '../../../store/cvStore'
+import { langLabel } from '../../../utils/languageLevel'
 
 function firstLast(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -141,7 +142,7 @@ export default function ClassicTemplate() {
             <div key="languages" style={{ marginBottom: 16 }}>
               <h2 style={secTitle}>Idiomas</h2>
               <p style={{ margin: 0, fontSize: smallFs, color: '#374151' }}>
-                {languages.map(l => `${l.name} (${l.level})`).join(' · ')}
+                {languages.map(l => `${l.name} (${langLabel(l.level)})`).join(' · ')}
               </p>
             </div>
           )
