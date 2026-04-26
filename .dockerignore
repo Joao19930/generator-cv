@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+client/node_modules
+client/.vite
+*.md
+*.jpg
+*.jpeg
+*.png
+*.gif

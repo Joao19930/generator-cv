@@ -317,6 +317,10 @@ const pdfConnector = {
     try {
       browser = await puppeteer.launch({
         headless: true,
+        // Em produção (Fly.io/Docker) usa o Chromium do sistema via PUPPETEER_EXECUTABLE_PATH
+        ...(process.env.PUPPETEER_EXECUTABLE_PATH
+          ? { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH }
+          : {}),
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
