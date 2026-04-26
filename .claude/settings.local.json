@@ -2,7 +2,41 @@
   "permissions": {
     "allow": [
       "Bash(npm run:*)",
-      "Bash(ls \"c:\\\\Users\\\\User\\\\Desktop\\\\cv-generator\\\\public\\\\admin\"*)"
+      "Bash(ls \"c:\\\\Users\\\\User\\\\Desktop\\\\cv-generator\\\\public\\\\admin\"*)",
+      "Bash(grep -rn \"Cabinda\\\\|exclusivamente\\\\|candidatos locais\" /c/Users/User/Desktop/cv-generator/ --include=*.html --include=*.js)",
+      "Bash(head -20 grep -n \"contact_type\\\\|contactType\\\\|wa.me\\\\|whatsapp\" \"/c/Users/User/Desktop/cv-generator/public/app.html\")",
+      "Bash(pm2 list:*)",
+      "Bash(ls -la /c/Users/User/Desktop/cv-generator/public/editor-app/assets/*.js)",
+      "Read(//c/Users/User/Desktop/cv-generator/**)",
+      "Bash(ls /c/Users/User/Desktop/cv-generator/*.sh /c/Users/User/Desktop/cv-generator/deploy*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:cvpremium.net)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator diff --stat HEAD)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator status --short)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator log --oneline -3)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator push origin main)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator add src/dashboard/index.html src/routes/admin.js)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator commit -m \"feat: alterar password de admin/analista no painel Equipa\")",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator add src/routes/admin.js src/dashboard/index.html public/app.html)",
+      "Bash(git -C c:/Users/User/Desktop/cv-generator commit -m \"feat: imagem opcional nas vagas de emprego \\(upload + URL, card + modal\\)\")",
+      "Bash(find /c/Users/User/Desktop/cv-generator/src -name \"*.js\" -exec grep -l \"og\\\\|ogImage\\\\|OG\\\\|structuredData\\\\|json-ld\" {})",
+      "Bash(grep -E \"\\\\.\\(txt|xml|json\\)$|google|sitemap\")",
+      "Bash(ls c:UsersUserDesktopcv-generatorpublic/*.html)",
+      "Bash(node -e \"const d=require\\(''''./src/data/jobTemplates.json''''\\); console.log\\(''''keys:'''', Object.keys\\(d\\)\\); console.log\\(''''_customAreas:'''', d._customAreas\\); console.log\\(''''_removedFixed:'''', d._removedFixed\\); console.log\\(''''_areaOverrides:'''', d._areaOverrides\\);\")",
+      "Bash(xargs grep:*)",
+      "Bash(find c:/Users/User/Desktop/cv-generator -name *.jsx -o -name *.tsx -o -name *.vue)",
+      "Bash(grep -n \"personal\\\\.email\\\\|personal\\\\.phone\\\\|personal\\\\.linkedin\\\\|personal\\\\.address\\\\|personal\\\\.website\" src/components/CVEditor/templates/*.tsx)",
+      "Bash(grep -n \"fmtLinkedin\" src/components/CVEditor/templates/*.tsx)",
+      "Bash(ls public/admin*.html)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep -l \"POST.*job\\\\|job.*form\\\\|form.*vaga\" /c/Users/User/Desktop/cv-generator/public/*.html)",
+      "Bash(grep -rn \"imageUrl\\\\|image_url\" /c/Users/User/Desktop/cv-generator/public/*.html)",
+      "Bash(ls -la /c/Users/User/Desktop/cv-generator/public/*.html)",
+      "Bash(grep -n \"\\\\\\\\d+\" \"c:/Users/User/Desktop/cv-generator/src/server.js\")",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_1ZqH4QlCMhGI@ep-twilight-tooth-ala36hfx.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" NODE_ENV=production node src/utils/migrate.js)",
+      "Bash(node -e ':*)",
+      "Bash(pg_dump --version)"
     ]
   }
 }

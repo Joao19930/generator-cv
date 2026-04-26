@@ -2,7 +2,15 @@ import React from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { useCVStore, Language } from '../../../store/cvStore'
 
-const LEVELS = ['Nativo', 'C2', 'C1', 'B2', 'B1', 'A2', 'A1']
+const LEVELS = [
+  { value: 'Nativo',  label: 'Nativo / Língua Materna' },
+  { value: 'C2',      label: 'C2 — Fluente' },
+  { value: 'C1',      label: 'C1 — Avançado' },
+  { value: 'B2',      label: 'B2 — Intermédio Superior' },
+  { value: 'B1',      label: 'B1 — Intermédio' },
+  { value: 'A2',      label: 'A2 — Elementar' },
+  { value: 'A1',      label: 'A1 — Iniciante' },
+]
 
 const inputStyle: React.CSSProperties = {
   background: '#FFFFFF',
@@ -52,7 +60,7 @@ function LanguageRow({ item }: { item: Language }) {
         onFocus={e => { e.target.style.borderColor = '#1E40AF' }}
         onBlur={e => { e.target.style.borderColor = '#E2E8F0' }}
       >
-        {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+        {LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
       </select>
       <button
         type="button"
